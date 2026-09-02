@@ -245,10 +245,10 @@ img,svg{display:block;max-width:100%;}
 /* ============ Sidebar navigation list ============ */
 .side-nav{display:flex;flex-direction:column;gap:2px;}
 .side-nav a{
-  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;
-  font-size:.9rem;font-weight:700;color:var(--text-secondary);transition:background .15s ease,color .15s ease;
+  display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:9px;white-space:nowrap;
+  font-size:.82rem;font-weight:700;color:var(--text-secondary);transition:background .15s ease,color .15s ease;
 }
-.side-nav a svg{color:var(--text-tertiary);flex-shrink:0;transition:color .15s ease;}
+.side-nav a svg{color:var(--text-tertiary);flex-shrink:0;transition:color .15s ease;width:16px;height:16px;}
 .side-nav a:hover{background:var(--bg-soft);color:var(--text);}
 .side-nav a.active{background:var(--accent-soft);color:var(--accent);}
 .side-nav a.active svg{color:var(--accent);}
