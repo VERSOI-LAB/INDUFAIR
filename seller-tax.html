@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 판매자 센터 | 세금계산서 관리</title>
+<meta name="description" content="매출 세금계산서 발행 현황과 유형별, 상태별 통계를 확인하는 VERSOI 판매자 센터 세금계산서 관리">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+
+  .donut-30{background:conic-gradient(var(--accent) 0% 74%, var(--good) 74% 100%, var(--border) 100% 100%);}
+  .count-list .row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+  .count-list .row:last-child{border-bottom:none;font-weight:800;}
+  .count-list .row span:first-child{display:flex;align-items:center;gap:8px;color:var(--text-secondary);}
+  .count-list .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="seller-dashboard.html" aria-label="판매자 센터 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>SELLER CENTER</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="seller-dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품 관리</p>
+    <a href="seller-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>상품 목록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>상품 등록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>대량 등록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>카테고리 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">주문 관리</p>
+    <a href="seller-orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>주문 목록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>배송 관리</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>취소/반품 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">문의 관리</p>
+    <a href="seller-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>상품 문의</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 9.5a3.5 3.5 0 1 1 3.9 3.48c-.62.08-1.4.55-1.4 1.52" /><line x1="12" y1="17.5" x2="12" y2="17.51"/></svg>1:1 문의</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">정산 관리</p>
+    <a href="seller-settlement.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>정산 내역</a>
+    <a href="seller-tax.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>세금계산서 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">계정 관리</p>
+    <a href="seller-account.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>회사 정보</a>
+    <a href="seller-account.html#contacts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>담당자 관리</a>
+    <a href="seller-account.html#settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>계정 설정</a>
+    </div>
+    </nav>
+    <div class="admin-sidebar-card">
+      <p>궁금한 점이 있으신가요?<br>판매자 가이드와 자주 묻는 질문을 확인해 보세요.</p>
+      <button class="btn btn-outline btn-sm" style="background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.18);">가이드 보기</button>
+    </div>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>판매자 센터<span class="sub">정산 관리 · 세금계산서 관리</span></div>
+      <div class="admin-top-actions">
+        <button class="btn btn-ghost btn-sm"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>판매자 가이드</button>
+        <button class="icon-btn" aria-label="문의"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="icon-count">2</span></button>
+        <button class="icon-btn" aria-label="알림"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="icon-count">12</span></button>
+        <div class="admin-user">
+          <span class="avatar">한</span>
+          <span class="lbl"><b>한국브라스트(주) <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></b><span>seller@kblast.co.kr</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-head-row">
+        <div class="admin-page-head" style="margin-bottom:0;">
+          <h1>세금계산서 관리</h1>
+        </div>
+        <div class="right-group">
+          <button class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>세금계산서 직접 발행</button>
+        </div>
+      </div>
+
+      <div class="stat-card-row" style="grid-template-columns:repeat(5,1fr);">
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>전체 발행 금액</span><div class="val">₩128,760,000</div><div class="delta">총 42건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>이번 달 발행 금액</span><div class="val">₩30,330,000</div><div class="delta">총 12건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>발행 완료</span><div class="val">₩118,230,000</div><div class="delta">총 38건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>발행 대기</span><div class="val">₩5,200,000</div><div class="delta">총 2건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>취소/작성 중</span><div class="val">₩1,330,000</div><div class="delta">총 2건</div></div>
+      </div>
+
+      <div class="admin-grid-2" style="margin-top:16px;">
+        <div class="admin-card">
+          <div class="admin-head-row" style="margin-bottom:0;">
+            <h2 style="font-size:1rem;font-weight:800;">세금계산서 목록 (총 42건)</h2>
+            <button class="btn btn-ghost btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>엑셀 다운로드</button>
+          </div>
+          <div class="admin-filter-bar">
+            <input type="date" value="2025-05-01" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;color:var(--text-secondary);font-family:inherit;">
+            <span style="color:var(--text-tertiary);">~</span>
+            <input type="date" value="2025-06-15" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;color:var(--text-secondary);font-family:inherit;">
+            <select><option>전체 유형</option><option>과세</option><option>영세율</option><option>면세</option></select>
+            <select><option>전체 상태</option><option>발행 완료</option><option>발행 대기</option><option>작성 중</option><option>취소</option></select>
+            <div class="search-field" style="max-width:220px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="공급받는자, 사업자번호 검색"></div>
+            <button class="reset-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>상세 검색</button>
+          </div>
+          <div class="data-table-scroll">
+          <table class="data-table">
+            <thead><tr><th><input type="checkbox"></th><th>번호</th><th>공급받는자</th><th class="num">사업자번호</th><th class="num">공급가액</th><th class="num">세액</th><th class="num">합계금액</th><th class="num">발행일</th><th>상태</th><th>유형</th><th>관리</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="num cell-strong">2025-0608-00042</td>
+                <td>한빛ENG</td>
+                <td class="num">123-45-67890</td>
+                <td class="num">₩18,000,000</td>
+                <td class="num">₩1,800,000</td>
+                <td class="num cell-strong">₩19,800,000</td>
+                <td class="num">2025.06.08</td>
+                <td><span class="badge badge-good">발행 완료</span></td>
+                <td style="white-space:nowrap;">영세율</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="num cell-strong">2025-0607-00041</td>
+                <td>로봇솔루션</td>
+                <td class="num">234-56-78901</td>
+                <td class="num">₩12,000,000</td>
+                <td class="num">₩1,200,000</td>
+                <td class="num cell-strong">₩13,200,000</td>
+                <td class="num">2025.06.07</td>
+                <td><span class="badge badge-good">발행 완료</span></td>
+                <td style="white-space:nowrap;">과세</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="num cell-strong">2025-0606-00040</td>
+                <td>대한자동화</td>
+                <td class="num">345-67-89012</td>
+                <td class="num">₩8,500,000</td>
+                <td class="num">₩850,000</td>
+                <td class="num cell-strong">₩9,350,000</td>
+                <td class="num">2025.06.06</td>
+                <td><span class="badge badge-good">발행 완료</span></td>
+                <td style="white-space:nowrap;">과세</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="num cell-strong">2025-0605-00039</td>
+                <td>테크라인</td>
+                <td class="num">456-78-90123</td>
+                <td class="num">₩6,000,000</td>
+                <td class="num">₩600,000</td>
+                <td class="num cell-strong">₩6,600,000</td>
+                <td class="num">2025.06.05</td>
+                <td><span class="badge badge-warn">발행 대기</span></td>
+                <td style="white-space:nowrap;">과세</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">발행<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="num cell-strong">2025-0604-00038</td>
+                <td>스마트팩토리(주)</td>
+                <td class="num">567-89-01234</td>
+                <td class="num">₩15,000,000</td>
+                <td class="num">₩1,500,000</td>
+                <td class="num cell-strong">₩16,500,000</td>
+                <td class="num">2025.06.04</td>
+                <td><span class="badge badge-good">발행 완료</span></td>
+                <td style="white-space:nowrap;">과세</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="num cell-strong">2025-0603-00037</td>
+                <td>한빛ENG</td>
+                <td class="num">123-45-67890</td>
+                <td class="num">₩9,000,000</td>
+                <td class="num">₩900,000</td>
+                <td class="num cell-strong">₩9,900,000</td>
+                <td class="num">2025.06.03</td>
+                <td><span class="badge badge-good">발행 완료</span></td>
+                <td style="white-space:nowrap;">영세율</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="num cell-strong">2025-0602-00036</td>
+                <td>로봇솔루션</td>
+                <td class="num">234-56-78901</td>
+                <td class="num">₩7,200,000</td>
+                <td class="num">₩720,000</td>
+                <td class="num cell-strong">₩7,920,000</td>
+                <td class="num">2025.06.02</td>
+                <td><span class="badge badge-up">취소</span></td>
+                <td style="white-space:nowrap;">과세</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="num cell-strong">2025-0601-00035</td>
+                <td>대한자동화</td>
+                <td class="num">345-67-89012</td>
+                <td class="num">₩4,800,000</td>
+                <td class="num">₩480,000</td>
+                <td class="num cell-strong">₩5,280,000</td>
+                <td class="num">2025.06.01</td>
+                <td><span class="badge badge-muted">작성 중</span></td>
+                <td style="white-space:nowrap;">과세</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">수정<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:center;margin-top:18px;">
+            <div class="pagination">
+              <button disabled>‹</button>
+              <button class="active">1</button><button>2</button><button>3</button><button>4</button><button>5</button>
+              <button>›</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-stack">
+          <div class="admin-card">
+            <div class="admin-card-head"><h2>유형별 발행 금액 (이번 달)</h2></div>
+            <div class="donut-wrap" style="justify-content:center;">
+              <div class="donut donut-30"><div class="donut-center"><b>₩30,330,000</b><span>합계</span></div></div>
+            </div>
+            <div class="donut-legend" style="margin-top:14px;">
+              <div class="item"><span class="dot" style="background:var(--accent);"></span>과세<b>₩22,430,000 (74%)</b></div>
+              <div class="item"><span class="dot" style="background:var(--good);"></span>영세율<b>₩7,900,000 (26%)</b></div>
+              <div class="item"><span class="dot" style="background:var(--border);"></span>면세<b>₩0 (0%)</b></div>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-head"><h2>상태별 건수 (이번 달)</h2></div>
+            <div class="count-list">
+              <div class="row"><span><span class="dot" style="background:var(--good);"></span>발행 완료</span><span class="tabular">10건</span></div>
+              <div class="row"><span><span class="dot" style="background:var(--warn);"></span>발행 대기</span><span class="tabular">1건</span></div>
+              <div class="row"><span><span class="dot" style="background:var(--accent);"></span>작성 중</span><span class="tabular">1건</span></div>
+              <div class="row"><span><span class="dot" style="background:var(--up);"></span>취소</span><span class="tabular">0건</span></div>
+              <div class="row"><span>합계</span><span class="tabular">12건</span></div>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="admin-card-head"><h2>안내사항</h2></div>
+            <ul style="display:flex;flex-direction:column;gap:9px;">
+              <li style="font-size:.8rem;color:var(--text-tertiary);line-height:1.55;">· 세금계산서는 주문 완료일 기준으로 자동 발행됩니다.</li>
+              <li style="font-size:.8rem;color:var(--text-tertiary);line-height:1.55;">· 발행 대기 상태는 세금계산서 발행 버튼을 클릭하여 발행할 수 있습니다.</li>
+              <li style="font-size:.8rem;color:var(--text-tertiary);line-height:1.55;">· 세금계산서 수정/취소는 국세청 규정에 따라 제한될 수 있습니다.</li>
+            </ul>
+            <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:14px;">자주 묻는 질문</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div>
+</div>
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){
+    sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); });
+  }
+  var tabButtons = document.querySelectorAll('[data-tab-target]');
+  tabButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var group = btn.closest('[data-tab-group]');
+      if(!group) return;
+      group.querySelectorAll('[data-tab-target]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var targetSel = btn.getAttribute('data-tab-target');
+      group.querySelectorAll('[data-tab-panel]').forEach(function(p){ p.classList.remove('active'); });
+      var panel = group.querySelector('[data-tab-panel="' + targetSel + '"]');
+      if(panel) panel.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

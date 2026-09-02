@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 판매자 센터 | 대시보드</title>
+<meta name="description" content="오늘의 판매 현황과 주문, 문의, 정산을 한눈에 확인하는 VERSOI 판매자 센터 대시보드">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+
+  .donut-32{background:conic-gradient(var(--good) 0% 68.8%, var(--accent) 68.8% 84.4%, var(--warn) 84.4% 93.8%, var(--up) 93.8% 100%);}
+  .notice-list{display:flex;flex-direction:column;}
+  .notice-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+  .notice-row:last-child{border-bottom:none;}
+  .notice-row span:first-child{color:var(--text-secondary);}
+  .notice-row span:last-child{color:var(--text-tertiary);font-family:var(--font-en);font-size:.78rem;flex-shrink:0;}
+  .inquiry-mini{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
+  .inquiry-mini:last-child{border-bottom:none;}
+  .inquiry-mini .thumb{width:38px;height:38px;border-radius:8px;background:var(--bg-soft);color:var(--text-tertiary);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .inquiry-mini .body{flex:1;min-width:0;}
+  .inquiry-mini .body b{display:block;font-size:.83rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .inquiry-mini .body span{font-size:.74rem;color:var(--text-tertiary);}
+
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="seller-dashboard.html" aria-label="판매자 센터 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>SELLER CENTER</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="seller-dashboard.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품 관리</p>
+    <a href="seller-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>상품 목록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>상품 등록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>대량 등록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>카테고리 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">주문 관리</p>
+    <a href="seller-orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>주문 목록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>배송 관리</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>취소/반품 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">문의 관리</p>
+    <a href="seller-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>상품 문의</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 9.5a3.5 3.5 0 1 1 3.9 3.48c-.62.08-1.4.55-1.4 1.52" /><line x1="12" y1="17.5" x2="12" y2="17.51"/></svg>1:1 문의</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">정산 관리</p>
+    <a href="seller-settlement.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>정산 내역</a>
+    <a href="seller-tax.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>세금계산서 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">계정 관리</p>
+    <a href="seller-account.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>회사 정보</a>
+    <a href="seller-account.html#contacts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>담당자 관리</a>
+    <a href="seller-account.html#settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>계정 설정</a>
+    </div>
+    </nav>
+    <div class="admin-sidebar-card">
+      <p>궁금한 점이 있으신가요?<br>판매자 가이드와 자주 묻는 질문을 확인해 보세요.</p>
+      <button class="btn btn-outline btn-sm" style="background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.18);">가이드 보기</button>
+    </div>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>판매자 센터<span class="sub">대시보드</span></div>
+      <div class="admin-top-actions">
+        <button class="btn btn-ghost btn-sm"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>판매자 가이드</button>
+        <button class="icon-btn" aria-label="문의"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="icon-count">2</span></button>
+        <button class="icon-btn" aria-label="알림"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="icon-count">12</span></button>
+        <div class="admin-user">
+          <span class="avatar">한</span>
+          <span class="lbl"><b>한국브라스트(주) <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></b><span>seller@kblast.co.kr</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-head-row">
+        <div class="admin-page-head" style="margin-bottom:0;">
+          <h1>대시보드</h1>
+          <p>안녕하세요, 한국브라스트(주)님! 오늘도 좋은 하루 되세요.</p>
+        </div>
+        <div class="right-group">
+          <button class="btn btn-primary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>상품 등록</button>
+        </div>
+      </div>
+
+      <div class="stat-card-row">
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>판매 중 상품</span><div class="val tabular">32</div><div class="delta up">전일 대비 ▲ 2</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>신규 주문</span><div class="val tabular">8</div><div class="delta up">전일 대비 ▲ 3</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>문의/채팅</span><div class="val tabular">5</div><div class="delta up">전일 대비 ▲ 1</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>판매 완료</span><div class="val tabular">128</div><div class="delta up">전일 대비 ▲ 7</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>이번 달 매출</span><div class="val">₩48,560,000</div><div class="delta up">전월 대비 ▲ 14.5%</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>정산 예정금액</span><div class="val">₩18,230,000</div><div class="delta">정산일 2025.06.15</div></div>
+      </div>
+
+      <div class="admin-grid-2" style="margin-top:16px;">
+        <div class="admin-card">
+          <div class="admin-card-head"><h2>최근 주문 내역</h2><a href="seller-orders.html" class="more-link">전체 주문 보기 ›</a></div>
+          <div class="data-table-scroll">
+          <table class="data-table">
+            <thead><tr><th>주문번호</th><th>상품명</th><th>구매자</th><th class="num">주문금액</th><th>주문일</th><th>상태</th></tr></thead>
+            <tbody>
+              <tr><td class="num">20250608-0008</td><td class="cell-strong">MITSUBISHI Q03UDVCPU</td><td>스마트팩토리(주)</td><td class="num">₩950,000</td><td class="num">2025.06.08 14:32</td><td><span class="badge badge-accent">배송준비</span></td></tr>
+              <tr><td class="num">20250608-0007</td><td class="cell-strong">LS산전 SV075iG5A 인버터</td><td>한빛ENG</td><td class="num">₩230,000</td><td class="num">2025.06.08 11:20</td><td><span class="badge badge-good">결제완료</span></td></tr>
+              <tr><td class="num">20250607-0006</td><td class="cell-strong">SMC CDQ2B32-50DMZ 실린더</td><td>테크라인</td><td class="num">₩45,000</td><td class="num">2025.06.07 16:45</td><td><span class="badge badge-accent">배송중</span></td></tr>
+              <tr><td class="num">20250607-0005</td><td class="cell-strong">MITSUBISHI HG-KR73 서보모터</td><td>로봇솔루션</td><td class="num">₩680,000</td><td class="num">2025.06.07 10:15</td><td><span class="badge badge-good">배송완료</span></td></tr>
+              <tr><td class="num">20250606-0004</td><td class="cell-strong">KEYENCE LV-N11N 센서</td><td>대한자동화</td><td class="num">₩120,000</td><td class="num">2025.06.06 09:50</td><td><span class="badge badge-up">취소</span></td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-head"><h2>상품 현황</h2><a href="seller-products.html" class="more-link">전체 상품 보기 ›</a></div>
+          <div class="donut-wrap">
+            <div class="donut donut-32"><div class="donut-center"><b>32</b><span>총 32개</span></div></div>
+            <div class="donut-legend">
+              <div class="item"><span class="dot" style="background:var(--good);"></span>판매 중<b>22개 (68.8%)</b></div>
+              <div class="item"><span class="dot" style="background:var(--accent);"></span>판매 중지<b>5개 (15.6%)</b></div>
+              <div class="item"><span class="dot" style="background:var(--warn);"></span>품절<b>3개 (9.4%)</b></div>
+              <div class="item"><span class="dot" style="background:var(--up);"></span>삭제<b>2개 (6.2%)</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-grid-3" style="margin-top:16px;">
+        <div class="admin-card" data-tab-group>
+          <div class="admin-card-head"><h2>문의/채팅 현황</h2><a href="seller-inquiries.html" class="more-link">전체 문의 보기 ›</a></div>
+          <div class="count-tabs" style="margin-bottom:6px;">
+            <button class="active" data-tab-target="pq">상품 문의 <b>3</b></button>
+            <button data-tab-target="dm">1:1 문의 <b>2</b></button>
+          </div>
+          <div data-tab-panel="pq" class="active">
+            <div class="inquiry-mini"><span class="thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div class="body"><b>MITSUBISHI Q03UDVCPU 문의드립니다.</b><span>스마트팩토리(주) · 2025.06.08 13:20</span></div><span class="badge badge-warn">답변대기</span></div>
+            <div class="inquiry-mini"><span class="thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div class="body"><b>HG-KR73 서보모터 재고 수량 문의</b><span>로봇솔루션 · 2025.06.08 11:05</span></div><span class="badge badge-warn">답변대기</span></div>
+            <div class="inquiry-mini"><span class="thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div class="body"><b>SV075iG5A 인버터 호환 모델 문의</b><span>한빛ENG · 2025.06.07 17:42</span></div><span class="badge badge-good">답변완료</span></div>
+          </div>
+          <div data-tab-panel="dm">
+            <div class="inquiry-mini"><span class="thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 9.5a3.5 3.5 0 1 1 3.9 3.48c-.62.08-1.4.55-1.4 1.52" /><line x1="12" y1="17.5" x2="12" y2="17.51"/></svg></span><div class="body"><b>정산 주기 변경 문의</b><span>한국브라스트(주) · 2025.06.06 09:12</span></div><span class="badge badge-warn">답변대기</span></div>
+            <div class="inquiry-mini"><span class="thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 9.5a3.5 3.5 0 1 1 3.9 3.48c-.62.08-1.4.55-1.4 1.52" /><line x1="12" y1="17.5" x2="12" y2="17.51"/></svg></span><div class="body"><b>세금계산서 재발행 요청</b><span>한국브라스트(주) · 2025.06.03 15:30</span></div><span class="badge badge-good">답변완료</span></div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-head"><h2>정산 현황</h2><a href="seller-settlement.html" class="more-link">전체 정산 내역 ›</a></div>
+          <p style="font-size:.8rem;color:var(--text-tertiary);font-weight:700;">이번 달 정산 예정금액</p>
+          <p style="font-family:var(--font-en);font-weight:900;font-size:1.5rem;margin-top:4px;">₩18,230,000</p>
+          <p style="font-size:.78rem;color:var(--text-tertiary);margin-top:2px;">정산일 2025.06.15 (7일 남음)</p>
+          <div class="kv-row" style="margin-top:14px;"><span>상품 판매액</span><span>₩20,300,000</span></div>
+          <div class="kv-row"><span>수수료 (-)</span><span>₩1,420,000</span></div>
+          <div class="kv-row"><span>배송비 정산</span><span>₩1,350,000</span></div>
+          <a href="seller-settlement.html" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:14px;">정산 내역 보기</a>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-head"><h2>공지사항</h2><a href="#" class="more-link">전체 공지 보기 ›</a></div>
+          <div class="notice-list">
+            <div class="notice-row"><span>VERSOI 판매자센터 시스템 점검 안내</span><span>2025.06.08</span></div>
+            <div class="notice-row"><span>여름철 배송 지연 예상 지역 안내</span><span>2025.06.05</span></div>
+            <div class="notice-row"><span>[이벤트] 6월 판매 수수료 할인 이벤트</span><span>2025.06.01</span></div>
+            <div class="notice-row"><span>판매자 가이드 업데이트 안내</span><span>2025.05.30</span></div>
+            <div class="notice-row"><span>개인정보 처리방침 개정 안내</span><span>2025.05.28</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div>
+</div>
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){
+    sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); });
+  }
+  var tabButtons = document.querySelectorAll('[data-tab-target]');
+  tabButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var group = btn.closest('[data-tab-group]');
+      if(!group) return;
+      group.querySelectorAll('[data-tab-target]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var targetSel = btn.getAttribute('data-tab-target');
+      group.querySelectorAll('[data-tab-panel]').forEach(function(p){ p.classList.remove('active'); });
+      var panel = group.querySelector('[data-tab-panel="' + targetSel + '"]');
+      if(panel) panel.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>

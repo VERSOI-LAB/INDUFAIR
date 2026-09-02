@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 판매자 센터 | 계정 관리</title>
+<meta name="description" content="회사 정보, 담당자, 로그인/보안, 알림 설정을 관리하는 VERSOI 판매자 센터 계정 관리">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+
+  .file-row{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg-soft);border-radius:9px;padding:11px 14px;}
+  .file-row .who{display:flex;align-items:center;gap:10px;}
+  .file-row .who span{display:flex;flex-direction:column;line-height:1.4;}
+  .file-row .who span b{font-size:.83rem;font-weight:700;}
+  .file-row .who span small{font-size:.72rem;color:var(--text-tertiary);}
+  .grade-bar-wrap{margin-top:14px;}
+  .grade-bar-wrap .progress-track{height:9px;}
+  .grade-bar-nums{display:flex;justify-content:flex-end;font-size:.78rem;color:var(--text-tertiary);margin-top:6px;font-family:var(--font-en);}
+  .checklist-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:.85rem;}
+  .checklist-row:last-child{border-bottom:none;}
+  .checklist-row .who{display:flex;align-items:center;gap:9px;color:var(--text-secondary);}
+  .checklist-row .tick{width:18px;height:18px;border-radius:5px;background:var(--good-soft);color:var(--good);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="seller-dashboard.html" aria-label="판매자 센터 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>SELLER CENTER</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="seller-dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품 관리</p>
+    <a href="seller-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>상품 목록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>상품 등록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>대량 등록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>카테고리 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">주문 관리</p>
+    <a href="seller-orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>주문 목록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>배송 관리</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>취소/반품 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">문의 관리</p>
+    <a href="seller-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>상품 문의</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 9.5a3.5 3.5 0 1 1 3.9 3.48c-.62.08-1.4.55-1.4 1.52" /><line x1="12" y1="17.5" x2="12" y2="17.51"/></svg>1:1 문의</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">정산 관리</p>
+    <a href="seller-settlement.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>정산 내역</a>
+    <a href="seller-tax.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>세금계산서 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">계정 관리</p>
+    <a href="seller-account.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>회사 정보</a>
+    <a href="seller-account.html#contacts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>담당자 관리</a>
+    <a href="seller-account.html#settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>계정 설정</a>
+    </div>
+    </nav>
+    <div class="admin-sidebar-card">
+      <p>궁금한 점이 있으신가요?<br>판매자 가이드와 자주 묻는 질문을 확인해 보세요.</p>
+      <button class="btn btn-outline btn-sm" style="background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.18);">가이드 보기</button>
+    </div>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>판매자 센터<span class="sub">계정 관리</span></div>
+      <div class="admin-top-actions">
+        <button class="btn btn-ghost btn-sm"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>판매자 가이드</button>
+        <button class="icon-btn" aria-label="문의"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="icon-count">2</span></button>
+        <button class="icon-btn" aria-label="알림"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="icon-count">12</span></button>
+        <div class="admin-user">
+          <span class="avatar">한</span>
+          <span class="lbl"><b>한국브라스트(주) <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></b><span>seller@kblast.co.kr</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-page-head">
+        <h1>계정 관리</h1>
+        <p>계정 정보 및 보안 설정을 관리할 수 있습니다.</p>
+      </div>
+
+      <div data-tab-group>
+        <div class="settings-tabs">
+          <button class="active" data-tab-target="t-company">회사 정보</button>
+          <button data-tab-target="t-contacts">담당자 관리</button>
+          <button data-tab-target="t-settings">계정 설정</button>
+          <button data-tab-target="t-security">보안 설정</button>
+          <button data-tab-target="t-notify">알림 설정</button>
+        </div>
+        <div class="settings-panel active" data-tab-panel="t-company">
+        <div class="admin-grid-2">
+          <div class="admin-stack">
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>회사 기본 정보</h2><span class="badge badge-good">인증 완료</span></div>
+              <div class="info-list">
+                <div class="info-row"><span class="lbl">회사명</span><span class="val">한국브라스트(주)</span><button class="btn btn-ghost btn-sm">수정</button></div>
+                <div class="info-row"><span class="lbl">사업자등록번호</span><span class="val tabular">123-45-67890</span></div>
+                <div class="info-row"><span class="lbl">대표자명</span><span class="val">이성욱</span></div>
+                <div class="info-row"><span class="lbl">업태</span><span class="val">도매 및 소매업</span></div>
+                <div class="info-row"><span class="lbl">종목</span><span class="val">산업용 기계 및 장비</span></div>
+                <div class="info-row"><span class="lbl">사업장 주소</span><span class="val">경기도 화성시 동탄대로 123, 8층 (영천동, 브라스트빌딩)</span></div>
+                <div class="info-row"><span class="lbl">대표 전화번호</span><span class="val tabular">031-123-4567</span></div>
+                <div class="info-row"><span class="lbl">팩스번호</span><span class="val tabular">031-123-4568</span></div>
+                <div class="info-row"><span class="lbl">이메일</span><span class="val">info@kblast.co.kr</span></div>
+                <div class="info-row">
+                  <span class="lbl">사업자등록증</span>
+                  <div class="val file-row">
+                    <div class="who"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg><span><b>사업자등록증_한국브라스트(주).pdf</b><small>2024.05.10 등록</small></span></div>
+                  </div>
+                  <button class="btn btn-ghost btn-sm">재업로드</button>
+                </div>
+                <div class="info-row"><span class="lbl">회사 소개</span><span class="val">한국브라스트(주)는 산업 현장의 유휴 자재, 설비, 중고 장비의 가치를 연결하여 자원 순환을 실현하는 기업입니다.</span><button class="btn btn-ghost btn-sm">수정</button></div>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>사업자 인증 정보</h2></div>
+              <div class="admin-grid-3">
+                <div class="verify-tile"><span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span><div><b>사업자등록증 인증</b><span class="badge badge-good">인증 완료</span><span class="date">인증일: 2024.05.08</span></div></div>
+                <div class="verify-tile"><span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><div><b>대표자 본인 인증</b><span class="badge badge-good">인증 완료</span><span class="date">인증일: 2024.05.08</span></div></div>
+                <div class="verify-tile" style="background:var(--warn-soft);"><span class="ic" style="background:var(--surface);color:var(--warn);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span><div><b>통신판매업 신고</b><span class="badge badge-warn">선택 사항</span><button class="btn btn-ghost btn-sm" style="margin-top:6px;padding:4px 0;">신고 정보 등록</button></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-stack">
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>계좌 정보</h2><span class="badge badge-good">본인 계좌 인증 완료</span></div>
+              <div class="kv-row"><span>은행명</span><span>신한은행</span></div>
+              <div class="kv-row"><span>계좌번호</span><span>110-123-456789</span></div>
+              <div class="kv-row"><span>예금주</span><span>한국브라스트(주)</span></div>
+              <div class="kv-row"><span>계좌 인증일</span><span>2024.05.10</span></div>
+              <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:12px;">계좌 변경</button>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>판매자 등급</h2></div>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span class="verify-tile" style="padding:12px;background:var(--accent-soft);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);"><path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span>
+                <div><b style="font-size:.94rem;font-weight:800;display:block;">일반 판매자</b><span style="font-size:.78rem;color:var(--text-tertiary);">다음 등급까지 150,000원 남았습니다.</span></div>
+              </div>
+              <div class="grade-bar-wrap">
+                <div class="progress-track"><div class="progress-fill" style="width:70%;"></div></div>
+                <div class="grade-bar-nums">350,000원 / 500,000원</div>
+              </div>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>가입 정보</h2></div>
+              <div class="kv-row"><span>가입일</span><span>2024.05.08</span></div>
+              <div class="kv-row"><span>최종 로그인</span><span>2025.06.08 14:32</span></div>
+              <div class="kv-row"><span>가입 경로</span><span>사업자 등록 후 자동 가입</span></div>
+              <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:12px;color:var(--up);">회원 탈퇴</button>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>계정 보안 상태</h2></div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="tick" style="width:34px;height:34px;border-radius:10px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+                <div><b style="font-size:.86rem;font-weight:800;display:block;">계정 보안이 안전합니다.</b><span style="font-size:.76rem;color:var(--text-tertiary);">최근 30일 동안 보안 관련 이상 활동이 감지되지 않았습니다.</span></div>
+              </div>
+              <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:14px;">보안 설정 관리</button>
+            </div>
+          </div>
+        </div>
+</div>
+        <div class="settings-panel" data-tab-panel="t-contacts">
+        <div class="admin-grid-2">
+          <div class="admin-card">
+            <div class="admin-card-head"><h2>담당자 목록 (총 5명)</h2><button class="btn btn-primary btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>담당자 추가</button></div>
+            <div class="data-table-scroll">
+            <table class="data-table">
+              <thead><tr><th>이름</th><th>부서/직책</th><th>이메일</th><th class="num">연락처</th><th>권한</th><th>상태</th><th>관리</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">이성욱 <span class="badge badge-accent" style="margin-left:6px;">대표</span></div></div></div></td>
+                  <td>대표이사</td>
+                  <td>slee@kblast.co.kr</td>
+                  <td class="num">010-1234-5678</td>
+                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>관리자</option></select></td>
+                  <td><span class="badge badge-good">활성</span></td>
+                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">김태형</div></div></div></td>
+                  <td>영업팀 / 팀장</td>
+                  <td>kimth@kblast.co.kr</td>
+                  <td class="num">010-3456-7890</td>
+                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>주문/정산 관리자</option></select></td>
+                  <td><span class="badge badge-good">활성</span></td>
+                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">박지현</div></div></div></td>
+                  <td>마케팅팀 / 과장</td>
+                  <td>parkjh@kblast.co.kr</td>
+                  <td class="num">010-2345-6789</td>
+                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>상품/문의 관리자</option></select></td>
+                  <td><span class="badge badge-good">활성</span></td>
+                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">이민수</div></div></div></td>
+                  <td>경영지원팀 / 대리</td>
+                  <td>lee.ms@kblast.co.kr</td>
+                  <td class="num">010-5678-9012</td>
+                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>정산 담당자</option></select></td>
+                  <td><span class="badge badge-muted">정지</span></td>
+                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
+                </tr>
+                <tr>
+                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">최유진</div></div></div></td>
+                  <td>CS팀 / 사원</td>
+                  <td>choi.yj@kblast.co.kr</td>
+                  <td class="num">010-9012-3456</td>
+                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>문의 담당자</option></select></td>
+                  <td><span class="badge badge-good">활성</span></td>
+                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
+                </tr>
+              </tbody>
+            </table>
+            </div>
+            <div style="display:flex;justify-content:center;margin-top:16px;"><div class="pagination"><button disabled>‹</button><button class="active">1</button><button>2</button><button>›</button></div></div>
+          </div>
+
+          <div class="admin-stack">
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>권한 안내</h2></div>
+              <div class="kv-row" style="align-items:flex-start;"><span>관리자</span><span style="font-weight:400;color:var(--text-secondary);text-align:right;">모든 메뉴 접근 및 관리 가능</span></div>
+              <div class="kv-row" style="align-items:flex-start;"><span>주문/정산 관리자</span><span style="font-weight:400;color:var(--text-secondary);text-align:right;">주문, 배송, 정산 관리 권한 접근</span></div>
+              <div class="kv-row" style="align-items:flex-start;"><span>상품/문의 관리자</span><span style="font-weight:400;color:var(--text-secondary);text-align:right;">상품 등록/관리, 문의 관리 접근</span></div>
+              <div class="kv-row" style="align-items:flex-start;"><span>정산 담당자</span><span style="font-weight:400;color:var(--text-secondary);text-align:right;">정산 내역 확인 및 세금계산서 발행</span></div>
+              <div class="kv-row" style="align-items:flex-start;"><span>문의 담당자</span><span style="font-weight:400;color:var(--text-secondary);text-align:right;">문의 답변 및 고객 응대</span></div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>담당자 초대 방법</h2></div>
+              <ul class="step-list">
+                <li><span class="step-num">1</span>'담당자 추가' 버튼 클릭</li>
+                <li><span class="step-num">2</span>기본 정보 및 권한 설정</li>
+                <li><span class="step-num">3</span>초대 이메일 발송 완료</li>
+              </ul>
+              <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:16px;">자세히 보기</button>
+            </div>
+          </div>
+        </div>
+</div>
+        <div class="settings-panel" data-tab-panel="t-settings">
+        <div class="admin-grid-2">
+          <div class="admin-stack">
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>로그인 및 인증 설정</h2></div>
+              <div class="info-row"><span class="lbl">로그인 이메일</span><span class="val">seller@kblast.co.kr</span><button class="btn btn-ghost btn-sm">변경</button></div>
+              <div class="info-row"><span class="lbl">비밀번호</span><span class="val">••••••••</span><button class="btn btn-ghost btn-sm">변경</button></div>
+              <div class="info-row"><span class="lbl">2단계 인증</span><span class="val badge badge-good" style="align-self:flex-start;">사용 중</span><button class="btn btn-ghost btn-sm">설정</button></div>
+              <p style="font-size:.76rem;color:var(--text-tertiary);margin-top:8px;">로그인 시 추가 인증을 요구합니다.</p>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>언어 및 시간 설정</h2></div>
+              <div class="form-grid">
+                <div class="field"><label>언어</label><select><option>한국어</option><option>English</option></select></div>
+                <div class="field"><label>시간대</label><select><option>(GMT+09:00) 서울</option></select></div>
+                <div class="field full"><label>날짜/시간 형식</label><select><option>YYYY-MM-DD (예: 2025-06-15)</option><option>YYYY.MM.DD</option></select></div>
+              </div>
+              <button class="btn btn-primary" style="margin-top:16px;">저장</button>
+            </div>
+          </div>
+          <div class="admin-stack">
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>기본 설정</h2></div>
+              <div class="toggle-row"><span>주문 알림 받기<br><small style="color:var(--text-tertiary);font-weight:400;">새로운 주문 발생 시 알림을 받습니다.</small></span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+              <div class="toggle-row"><span>문의 알림 받기<br><small style="color:var(--text-tertiary);font-weight:400;">고객 문의 등록 시 알림을 받습니다.</small></span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+              <div class="toggle-row"><span>정산 안내 알림<br><small style="color:var(--text-tertiary);font-weight:400;">정산 완료 시 안내 메일을 받습니다.</small></span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+              <div class="toggle-row"><span>이메일 수신 동의<br><small style="color:var(--text-tertiary);font-weight:400;">이벤트 및 마케팅 메일을 받습니다.</small></span><label class="toggle"><input type="checkbox"><span class="track"></span><span class="thumb"></span></label></div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>세금계산서 발행 설정</h2></div>
+              <div class="radio-row" style="padding-top:0;">
+                <label class="radio-pill"><input type="radio" name="taxauto" checked>자동 발행 (권장)</label>
+                <label class="radio-pill"><input type="radio" name="taxauto">수동 발행</label>
+              </div>
+              <div class="form-grid" style="margin-top:16px;">
+                <div class="field"><label>발행 주기</label><select><option>주 단위</option><option>월 단위</option></select></div>
+                <div class="field"><label>기본 이메일</label><input type="email" value="account@kblast.co.kr"></div>
+              </div>
+              <button class="btn btn-primary" style="margin-top:16px;">저장</button>
+            </div>
+          </div>
+        </div>
+</div>
+        <div class="settings-panel" data-tab-panel="t-security">
+        <div class="admin-grid-2">
+          <div class="admin-stack">
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>계정 보안 상태</h2><span class="badge badge-good">안전</span></div>
+              <div class="checklist-row"><span class="who"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>비밀번호 강도</span><span class="badge badge-good">강함</span></div>
+              <div class="checklist-row"><span class="who"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>2단계 인증</span><span class="badge badge-good">사용 중</span></div>
+              <div class="checklist-row"><span class="who"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>로그인 기록 확인</span><span class="badge badge-good">정상</span></div>
+              <div class="checklist-row"><span class="who"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>이상 로그인 감지</span><span class="badge badge-good">없음</span></div>
+              <div class="checklist-row"><span class="who"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>계정 공유 관리</span><span class="badge badge-good">정상</span></div>
+              <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:14px;">보안 점검하기</button>
+            </div>
+
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>로그인 기록</h2><button class="btn btn-ghost btn-sm">전체 보기</button></div>
+              <div class="data-table-scroll">
+              <table class="data-table">
+                <thead><tr><th class="num">로그인 일시</th><th class="num">접속 IP</th><th>접속 지역</th><th>접속 기기</th><th>결과</th></tr></thead>
+                <tbody>
+                <tr><td class="num">2025.06.15 14:32:10</td><td class="num">211.***.***.123</td><td>대한민국 (서울)</td><td>Chrome / Windows</td><td><span class="badge badge-good">정상</span></td></tr>
+                <tr><td class="num">2025.06.14 09:15:22</td><td class="num">211.***.***.123</td><td>대한민국 (서울)</td><td>Chrome / Windows</td><td><span class="badge badge-good">정상</span></td></tr>
+                <tr><td class="num">2025.06.13 16:08:45</td><td class="num">211.***.***.201</td><td>대한민국 (경기)</td><td>Edge / Windows</td><td><span class="badge badge-good">정상</span></td></tr>
+                <tr><td class="num">2025.06.12 11:23:18</td><td class="num">211.***.***.123</td><td>대한민국 (서울)</td><td>Chrome / Windows</td><td><span class="badge badge-good">정상</span></td></tr>
+                <tr><td class="num">2025.06.11 08:55:03</td><td class="num">211.***.***.201</td><td>대한민국 (경기)</td><td>Mobile / iOS</td><td><span class="badge badge-good">정상</span></td></tr>
+                </tbody>
+              </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-stack">
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>비밀번호 변경</h2></div>
+              <div class="field" style="margin-bottom:14px;"><label>현재 비밀번호</label><input type="text" placeholder="현재 비밀번호를 입력하세요"></div>
+              <div class="field" style="margin-bottom:14px;"><label>새 비밀번호</label><input type="text" placeholder="새 비밀번호를 입력하세요"></div>
+              <div class="field"><label>새 비밀번호 확인</label><input type="text" placeholder="새 비밀번호를 다시 입력하세요"></div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;">변경하기</button>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-head"><h2>기타 보안 관리</h2></div>
+              <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;padding-block:12px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>로그아웃 된 기기 관리</button>
+              <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;padding-block:12px;color:var(--up);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>계정 탈퇴 신청</button>
+            </div>
+          </div>
+        </div>
+</div>
+        <div class="settings-panel" data-tab-panel="t-notify">
+        <div class="admin-grid-2">
+          <div class="admin-card">
+            <div class="admin-card-head"><h2>주문 알림</h2></div>
+            <div class="toggle-row"><span>신규 주문 접수</span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+            <div class="toggle-row"><span>배송 상태 변경</span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+            <div class="toggle-row"><span>취소/반품 접수</span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-head"><h2>문의 알림</h2></div>
+            <div class="toggle-row"><span>신규 상품 문의</span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+            <div class="toggle-row"><span>1:1 문의 답변 요청</span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-head"><h2>정산 알림</h2></div>
+            <div class="toggle-row"><span>정산 완료 안내</span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+            <div class="toggle-row"><span>세금계산서 발행 안내</span><label class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-head"><h2>마케팅 알림</h2></div>
+            <div class="toggle-row"><span>이벤트 및 공지 안내</span><label class="toggle"><input type="checkbox"><span class="track"></span><span class="thumb"></span></label></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:16px;">알림 설정 저장</button>
+</div>
+      </div>
+
+    </div>
+    </div>
+</div>
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){
+    sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); });
+  }
+  var tabButtons = document.querySelectorAll('[data-tab-target]');
+  tabButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var group = btn.closest('[data-tab-group]');
+      if(!group) return;
+      group.querySelectorAll('[data-tab-target]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var targetSel = btn.getAttribute('data-tab-target');
+      group.querySelectorAll('[data-tab-panel]').forEach(function(p){ p.classList.remove('active'); });
+      var panel = group.querySelector('[data-tab-panel="' + targetSel + '"]');
+      if(panel) panel.classList.add('active');
+    });
+  });
+</script>
+<script>
+  (function(){
+    var hash = window.location.hash.replace('#','');
+    var map = {contacts:'t-contacts', settings:'t-settings', security:'t-security', notify:'t-notify'};
+    if(map[hash]){
+      var btn = document.querySelector('[data-tab-target="'+map[hash]+'"]');
+      if(btn) btn.click();
+    }
+  })();
+</script>
+</body>
+</html>

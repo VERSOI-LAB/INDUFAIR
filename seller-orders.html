@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 판매자 센터 | 주문 목록</title>
+<meta name="description" content="결제, 배송, 취소/반품 상태별로 주문을 확인하고 처리하는 VERSOI 판매자 센터 주문 목록">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+
+  .order-id{font-weight:800;color:var(--text);}
+  .order-buyer{font-size:.78rem;color:var(--text-tertiary);margin-top:3px;}
+
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="seller-dashboard.html" aria-label="판매자 센터 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>SELLER CENTER</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="seller-dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품 관리</p>
+    <a href="seller-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>상품 목록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>상품 등록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>대량 등록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>카테고리 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">주문 관리</p>
+    <a href="seller-orders.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>주문 목록</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>배송 관리</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>취소/반품 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">문의 관리</p>
+    <a href="seller-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>상품 문의</a>
+    <a href="#"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 9.5a3.5 3.5 0 1 1 3.9 3.48c-.62.08-1.4.55-1.4 1.52" /><line x1="12" y1="17.5" x2="12" y2="17.51"/></svg>1:1 문의</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">정산 관리</p>
+    <a href="seller-settlement.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>정산 내역</a>
+    <a href="seller-tax.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>세금계산서 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">계정 관리</p>
+    <a href="seller-account.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>회사 정보</a>
+    <a href="seller-account.html#contacts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>담당자 관리</a>
+    <a href="seller-account.html#settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>계정 설정</a>
+    </div>
+    </nav>
+    <div class="admin-sidebar-card">
+      <p>궁금한 점이 있으신가요?<br>판매자 가이드와 자주 묻는 질문을 확인해 보세요.</p>
+      <button class="btn btn-outline btn-sm" style="background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.18);">가이드 보기</button>
+    </div>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>판매자 센터<span class="sub">주문 관리 · 주문 목록</span></div>
+      <div class="admin-top-actions">
+        <button class="btn btn-ghost btn-sm"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>판매자 가이드</button>
+        <button class="icon-btn" aria-label="문의"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="icon-count">2</span></button>
+        <button class="icon-btn" aria-label="알림"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="icon-count">12</span></button>
+        <div class="admin-user">
+          <span class="avatar">한</span>
+          <span class="lbl"><b>한국브라스트(주) <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></b><span>seller@kblast.co.kr</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-page-head">
+        <h1>주문 관리</h1>
+        <p style="color:var(--text-tertiary);font-size:.82rem;">주문 관리 <span style="color:var(--border-strong);margin:0 6px;">/</span> 주문 목록</p>
+      </div>
+
+      <div class="admin-card">
+        <div class="admin-head-row" style="margin-bottom:0;">
+          <div class="count-tabs">
+            <button class="active">전체 <b>128</b></button>
+            <button>결제 완료 <b>36</b></button>
+            <button>배송 준비 <b>18</b></button>
+            <button>배송 중 <b>45</b></button>
+            <button>배송 완료 <b>24</b></button>
+            <button>취소/반품 <b>5</b></button>
+          </div>
+          <div class="right-group">
+            <button class="btn btn-ghost btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>엑셀 다운로드</button>
+          </div>
+        </div>
+
+        <div class="admin-filter-bar">
+          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="주문번호, 상품명, 구매자명 검색"></div>
+          <input type="date" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;color:var(--text-secondary);font-family:inherit;">
+          <span style="color:var(--text-tertiary);">~</span>
+          <input type="date" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;color:var(--text-secondary);font-family:inherit;">
+          <select><option>주문 상태 전체</option><option>결제완료</option><option>배송준비</option><option>배송중</option><option>배송완료</option><option>취소/반품</option></select>
+          <select><option>결제 방법 전체</option><option>신용카드</option><option>계좌이체</option></select>
+          <button class="reset-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
+        </div>
+
+        <div class="data-table-scroll">
+        <table class="data-table">
+          <thead><tr><th>주문 정보</th><th>상품 정보</th><th class="num">주문 금액</th><th>주문 상태</th><th>결제 상태</th><th class="num">주문일</th><th>관리</th></tr></thead>
+          <tbody>
+              <tr>
+                <td><div class="order-id">20250608-0008</div><div class="order-buyer">구매자 스마트팩토리(주)<br>010-1234-5678</div></td>
+                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">MITSUBISHI Q03UDVCPU</div><div class="sub">PLC CPU 모듈 · 수량 1개</div></div></div></td>
+                <td class="num cell-strong">₩950,000</td>
+                <td><span class="badge badge-accent">배송준비</span></td>
+                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
+                <td class="num">2025.06.08 14:32</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">배송 처리</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="order-id">20250608-0007</div><div class="order-buyer">구매자 한빛ENG<br>010-9876-5432</div></td>
+                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">LS산전 SV075iG5A 인버터</div><div class="sub">0.75kW / 200V · 수량 1개</div></div></div></td>
+                <td class="num cell-strong">₩230,000</td>
+                <td><span class="badge badge-accent">배송중</span></td>
+                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">계좌이체</div></td>
+                <td class="num">2025.06.08 11:20</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">배송 조회</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="order-id">20250607-0006</div><div class="order-buyer">구매자 테크라인<br>010-6543-2109</div></td>
+                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">MITSUBISHI HG-KR73 서보모터</div><div class="sub">750W / 감속기 포함 · 수량 1개</div></div></div></td>
+                <td class="num cell-strong">₩680,000</td>
+                <td><span class="badge badge-good">배송완료</span></td>
+                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
+                <td class="num">2025.06.07 10:15</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">구매확정 확인</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="order-id">20250607-0005</div><div class="order-buyer">구매자 로봇솔루션<br>010-1122-3344</div></td>
+                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">KEYENCE LV-N11N 센서</div><div class="sub">디지털 레이저 센서 · 수량 2개</div></div></div></td>
+                <td class="num cell-strong">₩240,000</td>
+                <td><span class="badge badge-accent">배송중</span></td>
+                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
+                <td class="num">2025.06.07 10:15</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">배송 조회</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="order-id">20250606-0004</div><div class="order-buyer">구매자 대한자동화<br>010-2222-3333</div></td>
+                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">SMC CDQ2B32-50DMZ 실린더</div><div class="sub">Ø32 / 스트로크 50 · 수량 3개</div></div></div></td>
+                <td class="num cell-strong">₩135,000</td>
+                <td><span class="badge badge-good">배송완료</span></td>
+                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">계좌이체</div></td>
+                <td class="num">2025.06.06 09:50</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">구매확정 확인</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="order-id">20250606-0003</div><div class="order-buyer">구매자 스마트팩토리(주)<br>010-1234-5678</div></td>
+                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">YASKAWA SGDH-04AE 서보드라이브</div><div class="sub">400W · 수량 1개</div></div></div></td>
+                <td class="num cell-strong">₩150,000</td>
+                <td><span class="badge badge-muted">취소완료</span></td>
+                <td><span class="badge badge-good">환불완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
+                <td class="num">2025.06.06 14:22</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">상세 보기</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="order-id">20250605-0002</div><div class="order-buyer">구매자 한빛ENG<br>010-9876-5432</div></td>
+                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">송풍기 터보팬 2.2kW</div><div class="sub">220V / 삼상 · 수량 1개</div></div></div></td>
+                <td class="num cell-strong">₩320,000</td>
+                <td><span class="badge badge-accent">배송중</span></td>
+                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
+                <td class="num">2025.06.05 16:30</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">배송 조회</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="order-id">20250605-0001</div><div class="order-buyer">구매자 자동화메카<br>010-3333-4444</div></td>
+                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">MCCB 3P 150A</div><div class="sub">LS ABS 103c · 수량 1개</div></div></div></td>
+                <td class="num cell-strong">₩35,000</td>
+                <td><span class="badge badge-good">배송완료</span></td>
+                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
+                <td class="num">2025.06.05 11:05</td>
+                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">구매확정 확인</button></div></td>
+              </tr>
+          </tbody>
+        </table>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;flex-wrap:wrap;gap:12px;">
+          <span style="font-size:.82rem;color:var(--text-tertiary);">총 128건</span>
+          <div class="pagination">
+            <button disabled>‹</button>
+            <button class="active">1</button><button>2</button><button>3</button><button>4</button><button>5</button>
+            <span class="ellipsis">…</span><button>16</button>
+            <button>›</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--text-tertiary);">
+            보기 <select style="border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-family:inherit;"><option>10개씩</option><option>30개씩</option><option>50개씩</option></select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div>
+</div>
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){
+    sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); });
+  }
+  var tabButtons = document.querySelectorAll('[data-tab-target]');
+  tabButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var group = btn.closest('[data-tab-group]');
+      if(!group) return;
+      group.querySelectorAll('[data-tab-target]').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var targetSel = btn.getAttribute('data-tab-target');
+      group.querySelectorAll('[data-tab-panel]').forEach(function(p){ p.classList.remove('active'); });
+      var panel = group.querySelector('[data-tab-panel="' + targetSel + '"]');
+      if(panel) panel.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
