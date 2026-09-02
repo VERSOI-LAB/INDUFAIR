@@ -1,0 +1,758 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 산업용품</title>
+<meta name="description" content="신품 산업용품을 브랜드·가격·재고별로 검색하고 AI 이미지 검색으로 빠르게 찾는 VERSOI 산업용품관">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ============ Breadcrumb ============ */
+  .breadcrumb{
+    display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--text-tertiary);
+    padding-block:18px 0;
+  }
+  .breadcrumb a{display:flex;align-items:center;gap:6px;transition:color .15s ease;}
+  .breadcrumb a:hover{color:var(--accent);}
+  .breadcrumb .sep{color:var(--border-strong);}
+  .breadcrumb .current{color:var(--text);font-weight:700;}
+
+  /* ============ Product hero ============ */
+  .goods-hero{position:relative;overflow:hidden;background:var(--navy-900);isolation:isolate;margin-top:18px;}
+  .goods-hero-bg{
+    position:absolute;inset:0;z-index:-1;
+    background:
+      radial-gradient(46% 90% at 88% 30%, color-mix(in srgb, var(--accent) 42%, transparent), transparent 62%),
+      linear-gradient(115deg, var(--navy-900) 38%, var(--navy-800) 68%, var(--navy-700));
+  }
+  .goods-hero-bg::before{
+    content:"";position:absolute;inset:0;opacity:.4;
+    background-image:
+      linear-gradient(color-mix(in srgb, #fff 6%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in srgb, #fff 6%, transparent) 1px, transparent 1px);
+    background-size:40px 40px;
+    mask-image:radial-gradient(65% 100% at 78% 30%, #000, transparent 78%);
+  }
+  .goods-hero-inner{
+    max-width:1280px;margin-inline:auto;padding:52px clamp(16px,4vw,32px) 40px;
+    display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center;
+  }
+  .goods-hero-copy .eyebrow{font-size:.9rem;font-weight:800;color:#8FB0FF;margin-bottom:10px;}
+  .goods-hero-copy h1{font-size:clamp(1.7rem,3.2vw,2.5rem);font-weight:900;color:#fff;line-height:1.32;}
+  .goods-hero-copy p{margin-top:14px;color:#B7C4E0;font-size:.98rem;line-height:1.65;}
+  .goods-badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px;}
+  .goods-badge{
+    display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+    color:#DCE6FA;font-size:.82rem;font-weight:700;padding:8px 14px;border-radius:24px;
+  }
+  .goods-badge svg{color:#8FB0FF;flex-shrink:0;}
+  .goods-hero-visual{position:relative;height:220px;display:flex;align-items:center;justify-content:center;}
+  .rig{position:relative;width:100%;height:100%;}
+  .rig-plate{
+    position:absolute;inset:8% 4%;border-radius:16px;
+    background:linear-gradient(150deg,#1B2C55,#0C1631);
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:inset 0 0 60px rgba(0,0,0,.4);
+  }
+  .rig-arm{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);color:#C9D8F5;width:58%;height:78%;}
+  .rig-dot{position:absolute;width:9px;height:9px;border-radius:50%;background:#5FA6FF;box-shadow:0 0 12px 3px rgba(95,166,255,.7);}
+  .rig-dot.d1{top:18%;left:20%;}
+  .rig-dot.d2{top:30%;right:16%;}
+  .rig-dot.d3{bottom:16%;left:14%;}
+
+  /* ============ Search + AI image search row ============ */
+  .goods-search-row{margin-top:-30px;position:relative;z-index:2;display:grid;grid-template-columns:1fr 320px;gap:20px;}
+  .goods-search-bar{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-2);
+    padding:14px;display:flex;gap:10px;align-items:stretch;
+  }
+  .cat-select{
+    display:flex;align-items:center;gap:8px;padding:0 16px;border-right:1px solid var(--border);
+    font-weight:700;font-size:.92rem;color:var(--text-secondary);flex-shrink:0;white-space:nowrap;
+  }
+  .cat-select svg{color:var(--text-tertiary);flex-shrink:0;}
+  .goods-search-bar input{
+    flex:1;border:none;background:transparent;font-size:.98rem;color:var(--text);font-family:inherit;padding:0 4px;min-width:0;
+  }
+  .goods-search-bar input:focus{outline:none;}
+  .goods-search-bar input::placeholder{color:var(--text-tertiary);}
+  .goods-search-bar .search-submit{width:52px;flex-shrink:0;}
+
+  .ai-image-card{
+    background:linear-gradient(135deg,var(--navy-900),var(--navy-700));border-radius:var(--radius-l);box-shadow:var(--shadow-2);
+    padding:16px 18px;display:flex;align-items:center;gap:14px;color:#fff;position:relative;overflow:hidden;
+  }
+  .ai-image-card::before{
+    content:"";position:absolute;inset:0;opacity:.5;
+    background-image:radial-gradient(color-mix(in srgb,#fff 16%,transparent) 1px, transparent 1px);
+    background-size:20px 20px;mask-image:radial-gradient(70% 100% at 100% 0%, #000, transparent 70%);
+  }
+  .ai-image-icon{
+    width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.12);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#8FB0FF;position:relative;z-index:1;
+  }
+  .ai-image-copy{position:relative;z-index:1;flex:1;min-width:0;}
+  .ai-image-copy strong{display:block;font-size:.96rem;font-weight:800;margin-bottom:2px;}
+  .ai-image-copy span{display:block;font-size:.76rem;color:#AFC0E4;line-height:1.4;}
+
+  /* ============ Popular categories ============ */
+  .goods-categories{padding-block:44px 8px;}
+
+  /* ============ Layout: sidebar + main ============ */
+  .goods-layout{display:grid;grid-template-columns:252px 1fr;gap:24px;align-items:start;padding-block:32px 64px;}
+
+  /* Sidebar filters: shared .filter-panel / .filter-group / .check-row etc. live in styles.css */
+  .filter-panel{position:sticky;top:88px;}
+
+  /* Main column */
+  .goods-title-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
+  .goods-title-row h1{font-size:1.7rem;font-weight:900;}
+  .goods-title-row p{margin-top:6px;font-size:.92rem;color:var(--text-secondary);}
+  .list-controls{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .sort-select{
+    display:flex;align-items:center;gap:6px;border:1px solid var(--border);border-radius:8px;
+    padding:8px 12px;font-size:.85rem;font-weight:700;color:var(--text-secondary);background:var(--surface);
+  }
+  .sort-select svg{color:var(--text-tertiary);}
+  .view-toggle{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .view-toggle button{
+    width:36px;height:36px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);
+    background:var(--surface);transition:background .15s ease,color .15s ease;
+  }
+  .view-toggle button.active{background:var(--accent);color:#fff;}
+  .view-toggle button:first-child{border-right:1px solid var(--border);}
+
+  .product-tabs{
+    display:flex;gap:4px;background:var(--bg-soft);border-radius:var(--radius-m);padding:5px;margin-bottom:22px;
+    overflow-x:auto;
+  }
+  .product-tabs button{
+    padding:10px 18px;border-radius:8px;font-size:.9rem;font-weight:700;color:var(--text-secondary);
+    white-space:nowrap;transition:background .15s ease,color .15s ease;flex-shrink:0;
+  }
+  .product-tabs button.active{background:var(--accent);color:#fff;box-shadow:var(--shadow-1);}
+  .product-tabs button:not(.active):hover{color:var(--text);}
+
+  /* Product grid */
+  .product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .product-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;
+    display:flex;flex-direction:column;transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease;
+  }
+  .product-card:hover{box-shadow:var(--shadow-2);transform:translateY(-3px);border-color:var(--border-strong);}
+  .product-media{
+    aspect-ratio:1/1;position:relative;display:flex;align-items:center;justify-content:center;
+    background:var(--bg-soft);
+  }
+  .product-media svg{width:46%;height:46%;}
+  .product-badges{position:absolute;top:10px;left:10px;display:flex;gap:5px;z-index:1;}
+  .p-badge{
+    font-size:.66rem;font-weight:800;padding:3px 8px;border-radius:20px;color:#fff;letter-spacing:.01em;
+  }
+  .p-badge.new{background:var(--accent);}
+  .p-badge.hot{background:var(--up);}
+  .p-badge.fast{background:var(--good);}
+  .wish-btn{
+    position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:var(--surface);
+    display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);box-shadow:var(--shadow-1);
+    transition:color .15s ease,transform .15s ease;z-index:1;
+  }
+  .wish-btn:hover{color:var(--up);transform:scale(1.08);}
+  .product-body{padding:14px 15px 15px;display:flex;flex-direction:column;gap:6px;flex:1;}
+  .p-brand{display:flex;align-items:center;gap:6px;font-family:var(--font-en);font-weight:800;font-size:.78rem;letter-spacing:.01em;}
+  .p-name{font-size:.94rem;font-weight:700;line-height:1.4;}
+  .p-specs{font-size:.76rem;color:var(--text-tertiary);line-height:1.55;}
+  .p-stock{font-size:.74rem;color:var(--text-tertiary);margin-top:2px;}
+  .p-price{font-family:var(--font-en);font-weight:800;font-size:1.12rem;margin-top:2px;}
+  .p-price .won{font-size:.82rem;font-weight:700;margin-right:1px;font-family:var(--font-kr);}
+  .p-actions{display:flex;gap:8px;margin-top:auto;padding-top:10px;}
+  .p-actions .btn{flex:1;padding:9px 8px;font-size:.8rem;}
+
+  .brand-fanuc{color:#C9A200;}
+  .brand-mitsu{color:#E4002B;}
+  .brand-ls{color:#7B2D8E;}
+  .brand-ntn{color:#00539B;}
+  .brand-smc{color:#0068B4;}
+  .brand-omron{color:#181B4B;}
+
+  /* Bottom AI image-search promo strip */
+  .ai-scan-promo{
+    margin-top:44px;background:linear-gradient(120deg,var(--navy-900),var(--navy-700) 70%);
+    border-radius:var(--radius-l);padding:clamp(24px,3.4vw,36px);position:relative;overflow:hidden;
+    display:grid;grid-template-columns:1fr auto auto auto auto;gap:20px;align-items:center;
+  }
+  .ai-scan-promo::before{
+    content:"";position:absolute;inset:0;opacity:.45;
+    background-image:radial-gradient(color-mix(in srgb,#fff 14%,transparent) 1px, transparent 1px);
+    background-size:24px 24px;mask-image:radial-gradient(70% 140% at 0% 50%, #000, transparent 75%);
+  }
+  .ai-scan-copy{position:relative;z-index:1;}
+  .ai-scan-copy h3{color:#fff;font-size:1.2rem;font-weight:900;line-height:1.4;}
+  .ai-scan-copy p{color:#B7C4E0;font-size:.85rem;margin-top:8px;line-height:1.55;max-width:34ch;}
+  .ai-scan-copy .btn{margin-top:16px;}
+  .scan-step{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
+  .scan-icon{
+    width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+    display:flex;align-items:center;justify-content:center;color:#DCE6FA;
+  }
+  .scan-icon.result{background:var(--surface);color:var(--accent);flex-direction:column;gap:2px;padding:6px;text-align:center;}
+  .scan-icon.result .rb{font-family:var(--font-en);font-size:.56rem;font-weight:800;color:var(--text);}
+  .scan-label{font-size:.72rem;color:#AFC0E4;font-weight:700;text-align:center;}
+  .scan-checklist{display:flex;flex-direction:column;gap:6px;position:relative;z-index:1;}
+  .scan-checklist span{display:flex;align-items:center;gap:6px;font-size:.78rem;color:#DCE6FA;font-weight:600;}
+  .scan-checklist svg{color:#5FE0A6;flex-shrink:0;}
+  .scan-arrow{color:#5A76B8;flex-shrink:0;position:relative;z-index:1;}
+
+  /* ============ Responsive ============ */
+  @media (max-width:1160px){
+    .product-grid{grid-template-columns:repeat(3,1fr);}
+  }
+  @media (max-width:1080px){
+    .goods-hero-inner{grid-template-columns:1fr;}
+    .goods-hero-visual{order:-1;height:160px;}
+    .goods-search-row{grid-template-columns:1fr;}
+    .goods-layout{grid-template-columns:1fr;}
+    .filter-panel{position:static;}
+    .ai-scan-promo{grid-template-columns:1fr;text-align:center;}
+    .ai-scan-copy p{max-width:none;margin-inline:auto;}
+    .scan-checklist{align-items:center;}
+    .scan-arrow{transform:rotate(90deg);margin-inline:auto;}
+  }
+  @media (max-width:720px){
+    .product-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:560px){
+    .product-grid{grid-template-columns:1fr 1fr;gap:12px;}
+    .p-actions{flex-direction:column;}
+    .goods-search-bar{flex-wrap:wrap;}
+    .cat-select{border-right:none;padding-left:2px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html" aria-label="VERSOI 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="logo-text">VERSOI</span>
+      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">홈</a>
+      <a href="goods.html" class="active">산업용품</a>
+      <a href="index.html#used-pick">중고장터</a>
+      <a href="index.html#brand">브랜드관</a>
+      <a href="index.html#rfq">견적요청(RFQ)</a>
+      <a href="index.html#community">커뮤니티</a>
+      <a href="index.html#support">고객센터</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" aria-label="검색">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <a href="cart.html" class="icon-btn" aria-label="장바구니">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      </a>
+      <button class="btn btn-ghost">로그인</button>
+      <button class="btn btn-primary">회원가입</button>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- PRODUCT HERO -->
+  <section class="goods-hero">
+    <div class="goods-hero-bg" aria-hidden="true"></div>
+    <div class="goods-hero-inner">
+      <div class="goods-hero-copy">
+        <p class="eyebrow">신품 산업용품을 한눈에!</p>
+        <h1>산업용품 쇼핑,<br>이제 더 스마트하게</h1>
+        <p>다양한 브랜드의 신품 산업용품을 쉽고 빠르게!<br>AI 검색과 이미지 검색으로 원하는 제품을 찾아보세요.</p>
+        <div class="goods-badges">
+          <span class="goods-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>
+            빠른 배송
+          </span>
+          <span class="goods-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+            정품 보장
+          </span>
+          <span class="goods-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 5.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+            전문 상담
+          </span>
+        </div>
+      </div>
+      <div class="goods-hero-visual" aria-hidden="true">
+        <div class="rig">
+          <div class="rig-plate"></div>
+          <svg class="rig-arm" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="10" y="78" width="26" height="14" rx="2"/>
+            <line x1="23" y1="78" x2="23" y2="58"/>
+            <line x1="23" y1="58" x2="55" y2="42"/>
+            <circle cx="23" cy="58" r="4"/>
+            <line x1="55" y1="42" x2="55" y2="22"/>
+            <circle cx="55" cy="42" r="4"/>
+            <line x1="55" y1="22" x2="80" y2="14"/>
+            <circle cx="55" cy="22" r="3.5"/>
+            <path d="M80 14l7 4M80 14l3 8"/>
+          </svg>
+          <span class="rig-dot d1"></span>
+          <span class="rig-dot d2"></span>
+          <span class="rig-dot d3"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <!-- SEARCH + AI IMAGE SEARCH -->
+    <div class="goods-search-row">
+      <form class="goods-search-bar" id="goodsSearchForm">
+        <label class="cat-select" for="catSelect">
+          <span id="catSelectLabel">전체 카테고리</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </label>
+        <select id="catSelect" class="visually-hidden">
+          <option>전체 카테고리</option>
+          <option>FA 자동화</option>
+          <option>공작기계</option>
+          <option>모터/감속기</option>
+          <option>유공압</option>
+          <option>전기전자</option>
+          <option>물류장비</option>
+          <option>안전용품</option>
+        </select>
+        <input type="text" placeholder="제품명, 브랜드, 모델명, 사양 등을 검색해보세요" aria-label="산업용품 검색">
+        <button type="submit" class="search-submit" aria-label="검색">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+      </form>
+
+      <div class="ai-image-card">
+        <div class="ai-image-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <div class="ai-image-copy">
+          <strong>AI 이미지 검색</strong>
+          <span>사진만 업로드하면 AI가 제품을 찾아드립니다.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- POPULAR CATEGORIES -->
+    <section class="goods-categories">
+      <div class="section-head">
+        <h2 style="font-size:1.05rem">인기 카테고리</h2>
+        <a href="#" class="more-link">전체보기 ›</a>
+      </div>
+      <div class="category-row">
+        <a class="category-item" href="#">
+          <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg></span>
+          <span>FA 자동화</span>
+        </a>
+        <a class="category-item" href="#">
+          <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/><circle cx="18" cy="17" r="3"/><path d="M9 15v3"/></svg></span>
+          <span>공작기계</span>
+        </a>
+        <a class="category-item" href="#">
+          <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.4"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg></span>
+          <span>모터/감속기</span>
+        </a>
+        <a class="category-item" href="#">
+          <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></span>
+          <span>유공압</span>
+        </a>
+        <a class="category-item" href="#">
+          <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4 14 11 14 10 22 20 10 13 10 13 2"/></svg></span>
+          <span>전기전자</span>
+        </a>
+        <a class="category-item" href="#">
+          <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg></span>
+          <span>물류장비</span>
+        </a>
+        <a class="category-item" href="#">
+          <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <span>안전용품</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- SIDEBAR + PRODUCT LIST -->
+    <div class="goods-layout">
+      <!-- FILTERS -->
+      <aside class="filter-panel">
+        <div class="filter-group">
+          <div class="filter-group-head">카테고리</div>
+          <div class="filter-body filter-tree">
+            <a href="#" class="active">FA 자동화 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="#">공작기계 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="#">모터/감속기 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="#">유공압 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="#">전기전자 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="#">물류장비 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="#">안전용품 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+            <a href="#">기타 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-head">브랜드</div>
+          <div class="filter-body">
+            <div class="brand-search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="브랜드명 검색">
+            </div>
+            <label class="check-row"><input type="checkbox"> Mitsubishi</label>
+            <label class="check-row"><input type="checkbox"> Siemens</label>
+            <label class="check-row"><input type="checkbox"> FANUC</label>
+            <label class="check-row"><input type="checkbox"> SMC</label>
+            <label class="check-row"><input type="checkbox"> LS ELECTRIC</label>
+            <label class="check-row"><input type="checkbox"> 기타</label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-head">가격대</div>
+          <div class="filter-body">
+            <label class="check-row"><input type="checkbox"> ~ 50만원</label>
+            <label class="check-row"><input type="checkbox"> 50만원 ~ 100만원</label>
+            <label class="check-row"><input type="checkbox"> 100만원 ~ 300만원</label>
+            <label class="check-row"><input type="checkbox"> 300만원 ~ 500만원</label>
+            <label class="check-row"><input type="checkbox"> 500만원 이상</label>
+            <div class="price-inputs">
+              <input type="text" placeholder="최소금액" class="tabular">
+              <span>~</span>
+              <input type="text" placeholder="최대금액" class="tabular">
+            </div>
+            <button class="btn btn-outline btn-sm filter-apply">적용</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-head">재고 여부</div>
+          <div class="filter-body">
+            <label class="check-row"><input type="checkbox" checked> 전체</label>
+            <label class="check-row"><input type="checkbox"> 재고 있음</label>
+            <label class="check-row"><input type="checkbox"> 재고 없음</label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-head">배송 조건</div>
+          <div class="filter-body">
+            <label class="check-row"><input type="checkbox"> 빠른 배송</label>
+            <label class="check-row"><input type="checkbox"> 일반 배송</label>
+          </div>
+        </div>
+      </aside>
+
+      <!-- PRODUCT MAIN -->
+      <div class="goods-main">
+        <nav class="breadcrumb" aria-label="이동 경로">
+          <a href="index.html">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            홈
+          </a>
+          <span class="sep">›</span>
+          <span class="current">산업용품</span>
+        </nav>
+
+        <div class="goods-title-row">
+          <div>
+            <h1>산업용품</h1>
+            <p>신품 산업용품을 합리적인 가격으로 만나보세요.</p>
+          </div>
+          <div class="list-controls">
+            <button class="sort-select">
+              인기순
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="view-toggle">
+              <button class="active" aria-label="격자 보기">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              </button>
+              <button aria-label="목록 보기">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-tabs" role="tablist">
+          <button class="active" data-ptab="rec">추천상품</button>
+          <button data-ptab="plc">PLC</button>
+          <button data-ptab="inv">인버터</button>
+          <button data-ptab="motor">모터</button>
+          <button data-ptab="bearing">베어링</button>
+          <button data-ptab="cyl">실린더</button>
+        </div>
+
+        <div class="product-grid" id="productGrid">
+          <!-- 1 -->
+          <article class="product-card">
+            <div class="product-media" style="background:linear-gradient(150deg,#1E293F,#0F1830);">
+              <div class="product-badges"><span class="p-badge new">신품</span><span class="p-badge hot">인기</span></div>
+              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/><line x1="4" y1="9" x2="20" y2="9"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="p-brand brand-mitsu">✦ MITSUBISHI</span>
+              <span class="p-name">PLC Q시리즈 (Q06UDVCPU)</span>
+              <span class="p-specs">16K 스텝, 내장 이더넷<br>입출력 모듈 호환</span>
+              <span class="p-stock">재고 50개 이상</span>
+              <span class="p-price"><span class="won">₩</span>1,350,000</span>
+              <div class="p-actions">
+                <button class="btn btn-primary btn-sm">장바구니</button>
+                <button class="btn btn-outline btn-sm">상세보기</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 2 -->
+          <article class="product-card">
+            <div class="product-media" style="background:linear-gradient(150deg,#25313F,#101A22);">
+              <div class="product-badges"><span class="p-badge new">신품</span><span class="p-badge fast">빠른배송</span></div>
+              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/><line x1="8" y1="16" x2="10" y2="16"/><line x1="13" y1="16" x2="16" y2="16"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="p-brand brand-ls">LS ELECTRIC</span>
+              <span class="p-name">인버터 iG5A</span>
+              <span class="p-specs">3상 380V, 22kW<br>벡터제어, 고효율</span>
+              <span class="p-stock">재고 30개 이상</span>
+              <span class="p-price"><span class="won">₩</span>1,100,000</span>
+              <div class="p-actions">
+                <button class="btn btn-primary btn-sm">장바구니</button>
+                <button class="btn btn-outline btn-sm">상세보기</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 3 -->
+          <article class="product-card">
+            <div class="product-media" style="background:linear-gradient(150deg,#2B2417,#151009);">
+              <div class="product-badges"><span class="p-badge new">신품</span><span class="p-badge hot">인기</span></div>
+              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E8D9A6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="p-brand brand-fanuc">FANUC</span>
+              <span class="p-name">서보모터 αiF 750W</span>
+              <span class="p-specs">750W, 3000rpm<br>고정밀 위치 제어</span>
+              <span class="p-stock">재고 20개 이상</span>
+              <span class="p-price"><span class="won">₩</span>980,000</span>
+              <div class="p-actions">
+                <button class="btn btn-primary btn-sm">장바구니</button>
+                <button class="btn btn-outline btn-sm">상세보기</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 4 -->
+          <article class="product-card">
+            <div class="product-media" style="background:linear-gradient(150deg,#232A38,#10141C);">
+              <div class="product-badges"><span class="p-badge new">신품</span></div>
+              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="5.2" r="1"/><circle cx="12" cy="18.8" r="1"/><circle cx="5.2" cy="12" r="1"/><circle cx="18.8" cy="12" r="1"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="p-brand brand-ntn">NTN</span>
+              <span class="p-name">베어링 6206ZZ</span>
+              <span class="p-specs">내경 30mm, 외경 62mm<br>고속 회전용</span>
+              <span class="p-stock">재고 100개 이상</span>
+              <span class="p-price"><span class="won">₩</span>12,500</span>
+              <div class="p-actions">
+                <button class="btn btn-primary btn-sm">장바구니</button>
+                <button class="btn btn-outline btn-sm">상세보기</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 5 -->
+          <article class="product-card">
+            <div class="product-media" style="background:linear-gradient(150deg,#25313F,#101A22);">
+              <div class="product-badges"><span class="p-badge new">신품</span></div>
+              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="12" height="6" rx="1"/><line x1="15" y1="10" x2="15" y2="14"/><rect x="15" y="8.5" width="6" height="7" rx="1"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="p-brand brand-smc">SMC</span>
+              <span class="p-name">실린더 CDQ2B40-50DMZ</span>
+              <span class="p-specs">복동형, 자석내장<br>튜브내경 40mm</span>
+              <span class="p-stock">재고 15개 이상</span>
+              <span class="p-price"><span class="won">₩</span>85,000</span>
+              <div class="p-actions">
+                <button class="btn btn-primary btn-sm">장바구니</button>
+                <button class="btn btn-outline btn-sm">상세보기</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 6 -->
+          <article class="product-card">
+            <div class="product-media" style="background:linear-gradient(150deg,#2B2417,#151009);">
+              <div class="product-badges"><span class="p-badge new">신품</span></div>
+              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E8D9A6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="16" width="8" height="4" rx="1"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="7" y1="10" x2="16" y2="7"/><circle cx="7" cy="10" r="1.4"/><line x1="16" y1="7" x2="16" y2="4"/><circle cx="16" cy="7" r="1.2"/><path d="M16 4l4.5 2.5"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="p-brand brand-fanuc">FANUC</span>
+              <span class="p-name">산업용 로봇 M-10iD/12</span>
+              <span class="p-specs">가반하중 12kg<br>최대작업반경 1,444mm</span>
+              <span class="p-stock">재고 2개 이상</span>
+              <span class="p-price"><span class="won">₩</span>45,000,000</span>
+              <div class="p-actions">
+                <button class="btn btn-primary btn-sm">장바구니</button>
+                <button class="btn btn-outline btn-sm">상세보기</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 7 -->
+          <article class="product-card">
+            <div class="product-media" style="background:linear-gradient(150deg,#232A38,#10141C);">
+              <div class="product-badges"><span class="p-badge new">신품</span></div>
+              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="1.5"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="p-brand brand-omron">OMRON</span>
+              <span class="p-name">파워서플라이 S8VS-06024</span>
+              <span class="p-specs">24V, 2.5A<br>DIN 레일 장착</span>
+              <span class="p-stock">재고 40개 이상</span>
+              <span class="p-price"><span class="won">₩</span>98,000</span>
+              <div class="p-actions">
+                <button class="btn btn-primary btn-sm">장바구니</button>
+                <button class="btn btn-outline btn-sm">상세보기</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- 8 -->
+          <article class="product-card">
+            <div class="product-media" style="background:linear-gradient(150deg,#25313F,#101A22);">
+              <div class="product-badges"><span class="p-badge new">신품</span></div>
+              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="1.5"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg>
+            </div>
+            <div class="product-body">
+              <span class="p-brand brand-smc">SMC</span>
+              <span class="p-name">솔레노이드 밸브 SY5120-5LZ</span>
+              <span class="p-specs">5포트, 2위치<br>공압 제어</span>
+              <span class="p-stock">재고 25개 이상</span>
+              <span class="p-price"><span class="won">₩</span>45,000</span>
+              <div class="p-actions">
+                <button class="btn btn-primary btn-sm">장바구니</button>
+                <button class="btn btn-outline btn-sm">상세보기</button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- BOTTOM AI IMAGE-SEARCH PROMO -->
+        <div class="ai-scan-promo">
+          <div class="ai-scan-copy">
+            <h3>AI 이미지 검색으로<br>원하는 제품을 바로 찾으세요!</h3>
+            <p>제품 사진을 업로드하면 AI가 자동으로 제품을 인식하여 상품을 추천해드립니다.</p>
+            <button class="btn btn-primary">이미지 검색하기 →</button>
+          </div>
+          <div class="scan-step">
+            <div class="scan-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1"/><path d="M9 15V4M9 4l3 3M9 4l-3 3"/></svg>
+            </div>
+            <span class="scan-label">사진 업로드</span>
+          </div>
+          <svg class="scan-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+          <div class="scan-step">
+            <div class="scan-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 15l-4.5-4.5L9 18"/></svg>
+            </div>
+            <span class="scan-label">AI 제품 인식</span>
+          </div>
+          <svg class="scan-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+          <div class="scan-step">
+            <div class="scan-icon result">
+              <span class="rb">MITSUBISHI</span>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>
+              <span class="rb">PLC Q시리즈</span>
+            </div>
+            <span class="scan-label">상품 추천</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
+    <div class="footer-links">
+      <a href="#">이용약관</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">사업자정보확인</a>
+      <a href="#">제휴/입점문의</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav toggle
+  var navToggle = document.getElementById('navToggle');
+  var mainNav = document.getElementById('mainNav');
+  navToggle.addEventListener('click', function(){
+    var open = mainNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  // Category select syncs the pill label
+  var catSelect = document.getElementById('catSelect');
+  var catSelectLabel = document.getElementById('catSelectLabel');
+  catSelect.addEventListener('change', function(){ catSelectLabel.textContent = catSelect.value; });
+
+  document.getElementById('goodsSearchForm').addEventListener('submit', function(e){ e.preventDefault(); });
+
+  // Collapsible filter groups
+  document.querySelectorAll('.filter-group-head').forEach(function(head){
+    head.addEventListener('click', function(){
+      head.parentElement.classList.toggle('collapsed');
+    });
+  });
+
+  // Filter tree active state
+  document.querySelectorAll('.filter-tree a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      document.querySelectorAll('.filter-tree a').forEach(function(x){ x.classList.remove('active'); });
+      a.classList.add('active');
+    });
+  });
+
+  // View toggle
+  document.querySelectorAll('.view-toggle button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.view-toggle button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+
+  // Product tabs (visual state; demo keeps the same product set)
+  document.querySelectorAll('.product-tabs button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.product-tabs button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

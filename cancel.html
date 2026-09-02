@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 취소/환불</title>
+<meta name="description" content="주문 취소, 교환, 환불 진행 상태를 확인하는 VERSOI 취소/환불">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .board-tabs{display:flex;gap:18px;border-bottom:1px solid var(--border);margin-top:20px;overflow-x:auto;}
+  .board-tabs button{padding:4px 2px 12px;font-size:.9rem;font-weight:700;color:var(--text-tertiary);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s ease;white-space:nowrap;}
+  .board-tabs button.active{color:var(--text);border-bottom-color:var(--accent);}
+  .filter-toolbar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .board-search{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;padding:0 12px;background:var(--surface);}
+  .board-search svg{color:var(--text-tertiary);flex-shrink:0;}
+  .board-search input{border:none;background:none;padding:11px 0;font-size:.88rem;color:var(--text);font-family:inherit;width:100%;}
+  .board-search input:focus{outline:none;}
+
+  .order-table{width:100%;border-collapse:collapse;margin-top:8px;}
+  .order-table th{text-align:left;font-size:.78rem;color:var(--text-tertiary);font-weight:700;padding:11px 8px;border-bottom:1px solid var(--border);}
+  .order-table td{font-size:.86rem;padding:14px 8px;border-bottom:1px solid var(--border);color:var(--text-secondary);}
+  .order-table tr:last-child td{border-bottom:none;}
+  .order-table td:first-child{font-family:var(--font-en);color:var(--text-tertiary);}
+  .order-table td.pname{color:var(--text);font-weight:600;}
+  .status-tag3{font-size:.72rem;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+  .status-tag3.refund{background:var(--good-soft);color:var(--good);}
+  .status-tag3.exchange{background:var(--warn-soft);color:var(--warn);}
+  .status-tag3.progress{background:var(--accent-soft);color:var(--accent);}
+
+  .notice-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:20px 22px;margin-top:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .notice-box p{font-size:.92rem;font-weight:800;margin-bottom:10px;}
+  .notice-box ul{display:flex;flex-direction:column;gap:6px;}
+  .notice-box li{font-size:.82rem;color:var(--text-secondary);line-height:1.5;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html" aria-label="VERSOI 홈으로 이동">
+      <span class="logo-mark">V</span><span class="logo-text">VERSOI</span>
+      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">홈</a><a href="goods.html">산업용품</a><a href="used.html">중고장터</a>
+      <a href="brand.html">브랜드관</a><a href="rfq.html">견적요청(RFQ)</a><a href="community.html">커뮤니티</a><a href="support.html" class="active">고객센터</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" aria-label="검색"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="icon-btn" aria-label="알림"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="icon-count">5</span></button>
+      <a href="cart.html" class="icon-btn" aria-label="장바구니"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span class="icon-count">3</span></a>
+      <a href="mypage.html" class="icon-btn" aria-label="마이페이지"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></a>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap page-layout">
+    <aside>
+      <div class="page-title-block" style="padding-top:26px;"><h1>마이페이지</h1></div>
+      <div class="side-panel">
+        <nav class="side-nav">
+          <a href="mypage.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+          <a href="order.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>주문/결제</a>
+          <a href="shipping.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>배송/배송조회</a>
+          <a href="cancel.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>취소/환불</a>
+          <a href="account.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>회원/계정</a>
+          <a href="seller.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>판매자/입점</a>
+          <a href="etc-inquiry.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>기타 문의</a>
+        </nav>
+      </div>
+    </aside>
+
+    <div>
+      <h1 style="font-size:1.5rem;font-weight:900;">취소/환불</h1>
+
+      <div class="board-tabs">
+        <button class="active">취소/교환 신청</button><button>환불 진행중</button><button>환불 완료</button><button>전체</button>
+      </div>
+
+      <div class="filter-toolbar">
+        <div class="select-field">신청기간 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="select-field">최근 6개월 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="board-search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="주문번호, 상품명 검색">
+        </div>
+      </div>
+
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:0 20px;overflow-x:auto;margin-top:16px;">
+        <table class="order-table">
+          <thead><tr><th>신청일</th><th>주문번호</th><th>상품정보</th><th>신청구분</th><th>상태</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="tabular">2024.05.07</td><td class="tabular">202405070001</td><td class="pname">XGB Series PLC CPU 모듈</td><td>취소</td><td><span class="status-tag3 refund">환불완료</span></td><td><button class="btn btn-outline btn-sm">상세보기</button></td></tr>
+            <tr><td class="tabular">2024.05.03</td><td class="tabular">202405030021</td><td class="pname">근접센서 PR30-15AO</td><td>교환</td><td><span class="status-tag3 refund">환불완료</span></td><td><button class="btn btn-outline btn-sm">상세보기</button></td></tr>
+            <tr><td class="tabular">2024.04.29</td><td class="tabular">202404290015</td><td class="pname">에어 필터 레귤레이터 AW40-04D</td><td>반품</td><td><span class="status-tag3 exchange">환불진행중</span></td><td><button class="btn btn-outline btn-sm">상세보기</button></td></tr>
+            <tr><td class="tabular">2024.04.23</td><td class="tabular">202404230042</td><td class="pname">우레탄 튜브 TU0805</td><td>취소</td><td><span class="status-tag3 refund">환불완료</span></td><td><button class="btn btn-outline btn-sm">상세보기</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="notice-box">
+        <div>
+          <p>취소/환불 안내</p>
+          <ul>
+            <li>• 취소는 배송 전에만 가능합니다.</li>
+            <li>• 반품은 수령일로부터 7일 이내에 신청 가능합니다.</li>
+            <li>• 환불은 결제수단에 따라 영업일 기준 3~7일 소요될 수 있습니다.</li>
+          </ul>
+        </div>
+        <button class="btn btn-outline btn-sm" style="flex-shrink:0;">취소/환불 정책 보기</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
+    <div class="footer-links"><a href="#">이용약관</a><a href="#">개인정보처리방침</a><a href="#">사업자정보확인</a><a href="#">제휴/입점문의</a></div>
+  </div>
+</footer>
+
+<script>
+  var navToggle = document.getElementById('navToggle');
+  var mainNav = document.getElementById('mainNav');
+  navToggle.addEventListener('click', function(){
+    var open = mainNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.querySelectorAll('.board-tabs button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.board-tabs button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

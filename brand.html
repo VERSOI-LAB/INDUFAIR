@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 브랜드관</title>
+<meta name="description" content="공식 브랜드 및 대리점만의 신뢰할 수 있는 제품을 만나보는 VERSOI 브랜드관">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .brand-hero{padding:34px clamp(16px,3vw,28px);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;}
+  .brand-hero h1{color:#fff;font-size:1.5rem;font-weight:900;margin-bottom:10px;}
+  .brand-hero p{color:#B7C4E0;font-size:.92rem;line-height:1.6;margin-bottom:16px;}
+  .brand-hero-badges{display:flex;flex-wrap:wrap;gap:10px;}
+  .brand-hero-badges span{
+    display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+    color:#DCE6FA;font-size:.8rem;font-weight:700;padding:7px 13px;border-radius:22px;
+  }
+  .brand-hero-badges svg{color:#8FB0FF;flex-shrink:0;}
+  .brand-hero-visual{width:220px;height:150px;position:relative;color:#7C9AE0;}
+  .brand-perk-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);
+    padding:22px 22px 20px;min-width:270px;
+  }
+  .brand-perk-card p{font-size:1rem;font-weight:800;margin-bottom:14px;}
+  .brand-perk-card ul{display:flex;flex-direction:column;gap:11px;margin-bottom:16px;}
+  .brand-perk-card li{display:flex;align-items:center;gap:9px;font-size:.86rem;color:var(--text-secondary);}
+  .brand-perk-card li svg{color:var(--good);flex-shrink:0;}
+  .brand-perk-card .btn{width:100%;justify-content:center;}
+
+  .brand-logo-row{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:18px;}
+  .brand-logo-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:22px 16px;
+    display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease;
+  }
+  .brand-logo-card:hover{box-shadow:var(--shadow-2);transform:translateY(-3px);border-color:var(--border-strong);}
+  .brand-wordmark{font-family:var(--font-en);font-weight:900;font-size:1.2rem;letter-spacing:-.01em;}
+  .brand-logo-card span.official{font-size:.72rem;color:var(--text-tertiary);font-weight:700;}
+
+  .bp-fanuc{color:#F2C400;-webkit-text-stroke:.6px #8a6a00;}
+  .bp-mitsu{color:#E4002B;}
+  .bp-smc{color:#0068B4;}
+  .bp-ls{color:#7B2D8E;}
+  .bp-hyundai{color:#00458C;}
+  .bp-thk{color:#D71920;}
+
+  .brand-tab-row{display:flex;gap:8px;overflow-x:auto;margin-top:26px;padding-bottom:4px;}
+  .brand-tab{
+    display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:22px;border:1px solid var(--border);
+    font-size:.86rem;font-weight:700;color:var(--text-secondary);flex-shrink:0;background:var(--surface);
+    transition:all .15s ease;
+  }
+  .brand-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .brand-tab .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.5;flex-shrink:0;}
+
+  .rec-carousel{position:relative;display:flex;align-items:center;gap:12px;margin-top:16px;}
+  .rec-track{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;overflow:hidden;}
+  .rec-arrow{
+    width:34px;height:34px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s ease,color .15s ease;box-shadow:var(--shadow-1);
+  }
+  .rec-arrow:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .rec-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;
+    transition:box-shadow .2s ease,transform .2s ease;
+  }
+  .rec-card:hover{box-shadow:var(--shadow-2);transform:translateY(-3px);}
+  .rec-media{aspect-ratio:1/1;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;}
+  .rec-media svg{width:46%;height:46%;color:#C9D8F5;}
+  .rec-body{padding:12px 13px 13px;}
+  .rec-brand{font-family:var(--font-en);font-weight:800;font-size:.7rem;color:var(--text-tertiary);}
+  .rec-name{font-size:.85rem;font-weight:700;margin:3px 0 3px;line-height:1.35;}
+  .rec-model{font-size:.72rem;color:var(--text-tertiary);margin-bottom:8px;}
+  .rec-bottom{display:flex;align-items:center;justify-content:space-between;}
+  .rec-price{font-family:var(--font-en);font-weight:800;font-size:.94rem;}
+  .rec-cart{
+    width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s ease,color .15s ease;
+  }
+  .rec-cart:hover{background:var(--accent);color:#fff;}
+
+  .brand-service-row{
+    margin-top:44px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);
+    box-shadow:var(--shadow-1);padding:26px 28px;
+  }
+  .brand-service-title{font-size:1.02rem;font-weight:800;margin-bottom:20px;}
+  .service-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+  .service-item{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:12px 8px;border-radius:var(--radius-m);transition:background .15s ease;}
+  .service-item:hover{background:var(--bg-soft);}
+  .service-icon{
+    width:46px;height:46px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .service-item b{font-size:.86rem;font-weight:800;}
+  .service-item span{font-size:.74rem;color:var(--text-tertiary);line-height:1.4;}
+
+  .brand-list-item{
+    display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:9px;font-size:.88rem;font-weight:700;
+    color:var(--text-secondary);transition:background .15s ease,color .15s ease;
+  }
+  .brand-list-item:hover{background:var(--bg-soft);color:var(--text);}
+  .brand-list-item.active{background:var(--accent-soft);color:var(--accent);}
+  .brand-list-item .brand-dot{width:22px;height:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-en);font-weight:900;font-size:.72rem;}
+
+  @media (max-width:1160px){
+    .brand-logo-row{grid-template-columns:repeat(3,1fr);}
+    .rec-track{grid-template-columns:repeat(3,1fr);}
+    .service-grid{grid-template-columns:repeat(3,1fr);}
+  }
+  @media (max-width:900px){
+    .brand-hero{grid-template-columns:1fr;}
+    .brand-perk-card{min-width:0;}
+  }
+  @media (max-width:640px){
+    .brand-logo-row{grid-template-columns:repeat(2,1fr);}
+    .rec-track{grid-template-columns:repeat(2,1fr);}
+    .service-grid{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html" aria-label="VERSOI 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="logo-text">VERSOI</span>
+      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">홈</a>
+      <a href="goods.html">산업용품</a>
+      <a href="used.html">중고장터</a>
+      <a href="brand.html" class="active">브랜드관</a>
+      <a href="rfq.html">견적요청(RFQ)</a>
+      <a href="community.html">커뮤니티</a>
+      <a href="support.html">고객센터</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" aria-label="검색">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <a href="cart.html" class="icon-btn" aria-label="장바구니">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="icon-count">3</span>
+      </a>
+      <button class="btn btn-ghost">로그인</button>
+      <button class="btn btn-primary">회원가입</button>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap page-layout">
+
+    <!-- LEFT: brand list -->
+    <aside>
+      <div class="page-title-block" style="padding-top:26px;">
+        <h1>브랜드관</h1>
+        <p>공식 브랜드 및 대리점만의<br>신뢰할 수 있는 제품을 만나보세요.</p>
+      </div>
+
+      <div class="side-panel">
+        <nav class="side-nav" id="brandNav">
+          <a href="#" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>전체 브랜드</a>
+          <a href="#"><span class="brand-dot bp-fanuc">F</span>FANUC</a>
+          <a href="#"><span class="brand-dot bp-mitsu">M</span>Mitsubishi Electric</a>
+          <a href="#"><span class="brand-dot bp-smc">S</span>SMC</a>
+          <a href="#"><span class="brand-dot bp-ls">L</span>LS ELECTRIC</a>
+          <a href="#"><span class="brand-dot bp-hyundai">H</span>Hyundai WIA</a>
+          <a href="#"><span class="brand-dot bp-thk">T</span>THK</a>
+          <a href="#"><span class="brand-dot" style="color:#181B4B;">O</span>OMRON</a>
+          <a href="#"><span class="brand-dot" style="color:#009999;">S</span>SIEMENS</a>
+          <a href="#"><span class="brand-dot" style="color:#A6192E;">K</span>KEYENCE</a>
+          <a href="#"><span class="brand-dot" style="color:#3DCD58;">S</span>Schneider Electric</a>
+        </nav>
+      </div>
+
+      <div class="side-panel" style="margin-top:16px;">
+        <p class="side-panel-title">브랜드 입점 안내</p>
+        <p style="font-size:.82rem;color:var(--text-secondary);line-height:1.6;margin-bottom:14px;">신규 브랜드 입점을 환영합니다.</p>
+        <ul class="guide-list" style="margin-bottom:16px;">
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>브랜드 홍보</li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>제품 판매</li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>기술지원 연계</li>
+          <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>공식 인증 마크 부여</li>
+        </ul>
+        <button class="btn btn-outline" style="width:100%;justify-content:center;">입점 신청하기 ›</button>
+      </div>
+
+      <div class="side-panel" style="margin-top:16px;">
+        <p class="side-panel-title">브랜드 입점 문의</p>
+        <div class="contact-row">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span class="lbl"><b>02-1234-5678</b></span>
+        </div>
+        <div class="contact-row">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22 6 12 13 2 6"/></svg>
+          <span class="lbl"><b style="font-size:.86rem;">partner@versoi.com</b></span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div>
+      <div class="gradient-banner brand-hero">
+        <div>
+          <h1>신뢰할 수 있는 공식 브랜드</h1>
+          <p>검증된 공식 대리점의 제품과 서비스를<br>VERSOI에서 만나보세요.</p>
+          <div class="brand-hero-badges">
+            <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 1 0-7.65 7.65l8.42 8.42 8.42-8.42a5.4 5.4 0 0 0 0-7.65z"/></svg>공식 인증 브랜드</span>
+            <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>정품 보장</span>
+            <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.12 15.88"/><path d="M14.47 14.48L20 20"/><path d="M8.12 8.12L12 12"/></svg>기술지원 &amp; A/S</span>
+          </div>
+        </div>
+        <div class="brand-hero-visual" aria-hidden="true">
+          <svg viewBox="0 0 220 150" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;">
+            <rect x="20" y="120" width="34" height="18" rx="2"/>
+            <line x1="37" y1="120" x2="37" y2="92"/>
+            <line x1="37" y1="92" x2="82" y2="70"/>
+            <circle cx="37" cy="92" r="5"/>
+            <line x1="82" y1="70" x2="82" y2="42"/>
+            <circle cx="82" cy="70" r="5"/>
+            <line x1="82" y1="42" x2="130" y2="28"/>
+            <circle cx="82" cy="42" r="4.5"/>
+            <circle cx="150" cy="34" r="3"/><circle cx="180" cy="52" r="2.4"/><circle cx="196" cy="20" r="2.2"/>
+            <path d="M130 28l20 6M150 34l30 18M150 34l16-24" opacity=".6"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="brand-perk-card" style="margin-top:20px;max-width:none;">
+        <p>브랜드 입점 혜택</p>
+        <ul style="display:grid;grid-template-columns:repeat(2,1fr);gap:11px;">
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>공식 인증 마크 부여</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>브랜드 전용관 제공</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>마케팅 &amp; 홍보 지원</li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>기술지원 &amp; A/S 연계</li>
+        </ul>
+        <button class="btn btn-primary" style="width:auto;margin-top:4px;">입점 신청하기 ›</button>
+      </div>
+
+      <section style="margin-top:36px;">
+        <div class="section-head"><h2 style="font-size:1.1rem;">대표 브랜드</h2></div>
+        <div class="brand-logo-row">
+          <div class="brand-logo-card"><span class="brand-wordmark bp-fanuc">FANUC</span><span class="official">공식 대리점</span></div>
+          <div class="brand-logo-card"><span class="brand-wordmark bp-mitsu">MITSUBISHI<br>ELECTRIC</span><span class="official">공식 대리점</span></div>
+          <div class="brand-logo-card"><span class="brand-wordmark bp-smc">SMC</span><span class="official">공식 대리점</span></div>
+          <div class="brand-logo-card"><span class="brand-wordmark bp-ls">LS ELECTRIC</span><span class="official">공식 대리점</span></div>
+          <div class="brand-logo-card"><span class="brand-wordmark bp-hyundai">HYUNDAI<br>WIA</span><span class="official">공식 대리점</span></div>
+          <div class="brand-logo-card"><span class="brand-wordmark bp-thk">THK</span><span class="official">공식 대리점</span></div>
+        </div>
+      </section>
+
+      <section style="margin-top:36px;">
+        <div class="section-head"><h2 style="font-size:1.1rem;">브랜드별 추천 제품</h2><a href="#" class="more-link">전체 제품 보기 ›</a></div>
+        <div class="brand-tab-row" id="brandTabs">
+          <button class="brand-tab active" data-brand="fanuc"><span class="dot"></span>FANUC</button>
+          <button class="brand-tab" data-brand="mitsu"><span class="dot"></span>Mitsubishi Electric</button>
+          <button class="brand-tab" data-brand="smc"><span class="dot"></span>SMC</button>
+          <button class="brand-tab" data-brand="ls"><span class="dot"></span>LS ELECTRIC</button>
+          <button class="brand-tab" data-brand="hyundai"><span class="dot"></span>Hyundai WIA</button>
+          <button class="brand-tab" data-brand="thk"><span class="dot"></span>THK</button>
+        </div>
+
+        <div class="rec-carousel">
+          <button class="rec-arrow" aria-label="이전"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <div class="rec-track" id="recTrack">
+            <article class="rec-card">
+              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21"/></svg></div>
+              <div class="rec-body">
+                <span class="rec-brand">FANUC</span>
+                <p class="rec-name">서보 모터 αiF series</p>
+                <p class="rec-model">A06B-0115-B203</p>
+                <div class="rec-bottom">
+                  <span class="rec-price">₩1,280,000</span>
+                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+                </div>
+              </div>
+            </article>
+            <article class="rec-card">
+              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/><line x1="8" y1="16" x2="10" y2="16"/><line x1="13" y1="16" x2="16" y2="16"/></svg></div>
+              <div class="rec-body">
+                <span class="rec-brand">FANUC</span>
+                <p class="rec-name">서보 앰프 αiF series</p>
+                <p class="rec-model">A06B-6124-H209</p>
+                <div class="rec-bottom">
+                  <span class="rec-price">₩890,000</span>
+                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+                </div>
+              </div>
+            </article>
+            <article class="rec-card">
+              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></div>
+              <div class="rec-body">
+                <span class="rec-brand">FANUC</span>
+                <p class="rec-name">CNC Series 0i-MF Plus</p>
+                <p class="rec-model">A02B-0336-C231</p>
+                <div class="rec-bottom">
+                  <span class="rec-price">₩7,500,000</span>
+                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+                </div>
+              </div>
+            </article>
+            <article class="rec-card">
+              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="16" width="8" height="4" rx="1"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="7" y1="10" x2="16" y2="7"/><circle cx="7" cy="10" r="1.4"/><line x1="16" y1="7" x2="16" y2="4"/><circle cx="16" cy="7" r="1.2"/><path d="M16 4l4.5 2.5"/></svg></div>
+              <div class="rec-body">
+                <span class="rec-brand">FANUC</span>
+                <p class="rec-name">산업용 로봇 M-20iA</p>
+                <p class="rec-model">R-30iB Mate Plus</p>
+                <div class="rec-bottom">
+                  <span class="rec-price">₩28,500,000</span>
+                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+                </div>
+              </div>
+            </article>
+            <article class="rec-card">
+              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="12" rx="1.5"/><line x1="3" y1="11" x2="21" y2="11"/><circle cx="7" cy="15" r="1"/></svg></div>
+              <div class="rec-body">
+                <span class="rec-brand">FANUC</span>
+                <p class="rec-name">로봇 컨트롤러 R-30iB Plus</p>
+                <p class="rec-model">A05B-2651-B001</p>
+                <div class="rec-bottom">
+                  <span class="rec-price">₩12,800,000</span>
+                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
+                </div>
+              </div>
+            </article>
+          </div>
+          <button class="rec-arrow" aria-label="다음"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </section>
+
+      <div class="brand-service-row">
+        <p class="brand-service-title">브랜드 서비스 바로가기</p>
+        <div class="service-grid">
+          <a class="service-item" href="#">
+            <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+            <b>기술자료실</b>
+            <span>매뉴얼, 카탈로그 다운로드</span>
+          </a>
+          <a class="service-item" href="#">
+            <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+            <b>A/S &amp; 기술지원</b>
+            <span>전국 서비스 네트워크</span>
+          </a>
+          <a class="service-item" href="#">
+            <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+            <b>정품 인증 조회</b>
+            <span>제품 시리얼 인증 확인</span>
+          </a>
+          <a class="service-item" href="#">
+            <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+            <b>문의하기</b>
+            <span>전문 상담원 연결</span>
+          </a>
+          <a class="service-item" href="#">
+            <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <b>교육 &amp; 세미나</b>
+            <span>제품 교육 및 세미나 일정</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
+    <div class="footer-links">
+      <a href="#">이용약관</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">사업자정보확인</a>
+      <a href="#">제휴/입점문의</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  var navToggle = document.getElementById('navToggle');
+  var mainNav = document.getElementById('mainNav');
+  navToggle.addEventListener('click', function(){
+    var open = mainNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  document.querySelectorAll('#brandNav a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      document.querySelectorAll('#brandNav a').forEach(function(x){ x.classList.remove('active'); });
+      a.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('#brandTabs .brand-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('#brandTabs .brand-tab').forEach(function(t){ t.classList.remove('active'); });
+      tab.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

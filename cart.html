@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 장바구니</title>
+<meta name="description" content="선택한 상품을 확인하고 주문 또는 견적을 진행하는 VERSOI 장바구니">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .cart-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .cart-header-row h1{font-size:1.4rem;font-weight:900;}
+  .cart-header-row h1 span{color:var(--accent);}
+  .cart-tools{display:flex;align-items:center;gap:16px;font-size:.84rem;color:var(--text-tertiary);font-weight:700;}
+  .cart-tools button{display:flex;align-items:center;gap:5px;transition:color .15s ease;}
+  .cart-tools button:hover{color:var(--up);}
+
+  .select-all-row{
+    display:flex;align-items:center;justify-content:space-between;padding:14px 4px;border-bottom:2px solid var(--text);
+    font-size:.88rem;font-weight:700;color:var(--text-secondary);
+  }
+  .select-all-row label{display:flex;align-items:center;gap:9px;cursor:pointer;}
+  .select-all-row input{accent-color:var(--accent);width:17px;height:17px;}
+
+  .cart-table-head{
+    display:grid;grid-template-columns:2.6fr .7fr .9fr .8fr .7fr;gap:8px;padding:12px 4px;
+    font-size:.78rem;font-weight:700;color:var(--text-tertiary);border-bottom:1px solid var(--border);
+  }
+  .cart-row{
+    display:grid;grid-template-columns:2.6fr .7fr .9fr .8fr .7fr;gap:8px;align-items:center;
+    padding:20px 4px;border-bottom:1px solid var(--border);
+  }
+  .cart-item-info{display:flex;align-items:flex-start;gap:8px;}
+  .cart-item-info input{accent-color:var(--accent);width:17px;height:17px;margin-top:30px;flex-shrink:0;}
+  .cart-thumb{width:68px;height:68px;border-radius:9px;background:var(--bg-soft);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);}
+  .ci-brand{font-family:var(--font-en);font-weight:800;font-size:.74rem;color:var(--text-tertiary);}
+  .ci-name{font-size:.92rem;font-weight:700;margin:3px 0 3px;}
+  .ci-spec{font-size:.76rem;color:var(--text-tertiary);}
+  .ci-stock{font-size:.74rem;color:var(--text-tertiary);margin-top:3px;}
+  .cart-unit-price{font-family:var(--font-en);font-weight:700;font-size:.92rem;text-align:right;}
+  .qty-col{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .qty-stepper{display:flex;align-items:center;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .qty-stepper button{width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:background .15s ease;}
+  .qty-stepper button:hover{background:var(--bg-soft);}
+  .qty-stepper input{width:40px;text-align:center;border:none;border-left:1px solid var(--border);border-right:1px solid var(--border);font-family:var(--font-en);font-weight:700;font-size:.86rem;padding:6px 0;}
+  .qty-stepper input:focus{outline:none;}
+  .qty-edit-link{font-size:.74rem;color:var(--text-tertiary);border:1px solid var(--border);border-radius:6px;padding:4px 10px;transition:border-color .15s ease,color .15s ease;}
+  .qty-edit-link:hover{border-color:var(--accent);color:var(--accent);}
+  .cart-sum-price{font-family:var(--font-en);font-weight:800;font-size:.96rem;text-align:right;}
+  .cart-ship-col{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+  .ship-tag{font-size:.76rem;font-weight:700;color:var(--good);}
+  .ship-tag.paid{color:var(--text-tertiary);}
+  .cart-remove{color:var(--text-tertiary);transition:color .15s ease;}
+  .cart-remove:hover{color:var(--up);}
+
+  .together-strip{margin-top:32px;}
+  .together-track-wrap{position:relative;display:flex;align-items:center;gap:12px;}
+  .together-track{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .together-arrow{
+    width:32px;height:32px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s ease;box-shadow:var(--shadow-1);
+  }
+  .together-arrow:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .together-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:14px;display:flex;align-items:center;gap:12px;}
+  .together-thumb{width:52px;height:52px;border-radius:8px;background:var(--bg-soft);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);}
+  .together-brand{font-family:var(--font-en);font-weight:800;font-size:.68rem;color:var(--text-tertiary);}
+  .together-name{font-size:.84rem;font-weight:700;margin:2px 0;}
+  .together-spec{font-size:.72rem;color:var(--text-tertiary);}
+  .together-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+  .together-price{font-family:var(--font-en);font-weight:800;font-size:.86rem;}
+  .together-add{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s ease,color .15s ease;}
+  .together-add:hover{background:var(--accent);color:#fff;}
+
+  .feature-strip{
+    margin-top:32px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);
+    padding:20px 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  }
+  .feature-item{display:flex;align-items:center;gap:12px;}
+  .feature-icon{width:38px;height:38px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .feature-item b{display:block;font-size:.86rem;font-weight:800;}
+  .feature-item span{font-size:.74rem;color:var(--text-tertiary);line-height:1.4;}
+
+  .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:22px;}
+  .summary-title{font-size:1.02rem;font-weight:800;margin-bottom:16px;}
+  .summary-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:.88rem;color:var(--text-secondary);}
+  .summary-row b{font-family:var(--font-en);color:var(--text);font-weight:700;}
+  .summary-total{
+    display:flex;flex-direction:column;gap:6px;padding-top:14px;margin-top:8px;border-top:1px solid var(--border);
+  }
+  .summary-total > span:first-child{font-size:.88rem;font-weight:800;color:var(--text-secondary);}
+  .summary-total .amt-row{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;}
+  .summary-total .amt{font-family:var(--font-en);font-weight:900;font-size:1.36rem;color:var(--accent);}
+  .summary-total small{font-size:.7rem;color:var(--text-tertiary);font-weight:600;}
+  .summary-actions{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+  .summary-actions .btn{width:100%;justify-content:center;}
+
+  .coupon-row{display:flex;gap:8px;}
+  .coupon-row input{flex:1;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:.84rem;font-family:inherit;color:var(--text);}
+  .coupon-row input:focus{outline:none;border-color:var(--accent);}
+  .coupon-row button{background:var(--accent);color:#fff;padding:0 16px;border-radius:8px;font-weight:700;font-size:.82rem;transition:background .15s ease;}
+  .coupon-row button:hover{background:var(--accent-hover);}
+
+  @media (max-width:1080px){
+    .cart-table-head{display:none;}
+    .cart-row{grid-template-columns:1fr;gap:14px;}
+    .cart-unit-price{text-align:left;}
+    .qty-col{align-items:flex-start;}
+    .cart-sum-price{text-align:left;}
+    .cart-ship-col{align-items:flex-start;flex-direction:row;justify-content:space-between;width:100%;}
+    .feature-strip{grid-template-columns:repeat(2,1fr);}
+    .together-track{grid-template-columns:1fr;}
+  }
+  @media (max-width:640px){ .feature-strip{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html" aria-label="VERSOI 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="logo-text">VERSOI</span>
+      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">홈</a>
+      <a href="goods.html">산업용품</a>
+      <a href="used.html">중고장터</a>
+      <a href="brand.html">브랜드관</a>
+      <a href="rfq.html">견적요청(RFQ)</a>
+      <a href="community.html">커뮤니티</a>
+      <a href="support.html">고객센터</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" aria-label="검색">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="알림">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="icon-count">5</span>
+      </button>
+      <a href="cart.html" class="icon-btn" aria-label="장바구니" style="color:var(--accent);background:var(--accent-soft);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="icon-count">2</span>
+      </a>
+      <a class="user-chip" href="#">
+        <span class="user-avatar">SF</span>
+        <span class="lbl"><b>(주)스마트팩토리</b><span>구매담당자</span></span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="color:var(--text-tertiary);"><polyline points="6 9 12 15 18 9"/></svg>
+      </a>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap page-layout with-aside">
+
+    <!-- LEFT -->
+    <aside>
+      <div class="page-title-block" style="padding-top:26px;">
+        <h1>장바구니</h1>
+        <p>선택한 상품을 확인하고<br>주문/견적을 진행하세요.</p>
+      </div>
+
+      <div class="side-panel">
+        <nav class="side-nav">
+          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>마이페이지</a>
+          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>주문/배송 조회</a>
+          <a href="cart.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>장바구니<span class="count">3</span></a>
+          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>찜한 상품</a>
+          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>최근 본 상품</a>
+          <a href="rfq.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>견적요청 내역</a>
+          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83V2h1.83l9.58 9.59a2 2 0 0 1 0 2.82z"/><circle cx="6.5" cy="6.5" r="1"/></svg>쿠폰함<span class="count">2</span></a>
+          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>관심 브랜드</a>
+        </nav>
+      </div>
+
+      <div class="side-panel" style="margin-top:16px;">
+        <p class="side-panel-title">대량 구매가 필요하신가요?</p>
+        <p style="font-size:.8rem;color:var(--text-secondary);line-height:1.6;margin-bottom:14px;">대량 구매 견적을 요청하시면<br>전문 상담원이 빠르게 도와드립니다.</p>
+        <a href="rfq-new.html" class="btn btn-primary" style="width:100%;justify-content:center;">견적요청 바로가기</a>
+      </div>
+
+      <div class="side-panel" style="margin-top:16px;">
+        <p class="side-panel-title">배송비 안내</p>
+        <ul class="guide-list" style="margin-bottom:14px;">
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>50,000원 이상 구매 시 무료배송</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>기본 배송비 3,000원<br>(도서/산간 지역은 추가 비용 발생)</li>
+        </ul>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;">자세히 보기</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div>
+      <div class="cart-header-row">
+        <h1>장바구니 (<span>3</span>)</h1>
+      </div>
+
+      <div class="select-all-row">
+        <label><input type="checkbox" checked id="selectAll">전체 선택 (3/3)</label>
+        <div class="cart-tools">
+          <button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>선택 삭제</button>
+          <button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14H6L5 6"/></svg>장바구니 비우기</button>
+        </div>
+      </div>
+
+      <div class="cart-table-head">
+        <span>상품정보</span><span style="text-align:right;">단가</span><span style="text-align:center;">수량</span><span style="text-align:right;">합계</span><span style="text-align:right;">배송비</span>
+      </div>
+
+      <div class="cart-row">
+        <div class="cart-item-info">
+          <input type="checkbox" checked>
+          <span class="cart-thumb"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></span>
+          <div>
+            <div class="ci-brand">LS ELECTRIC</div>
+            <div class="ci-name">XGB Series PLC CPU 모듈</div>
+            <div class="ci-spec">XGB-CPUH</div>
+            <div class="ci-stock">재고 15개</div>
+          </div>
+        </div>
+        <div class="cart-unit-price">₩420,000</div>
+        <div class="qty-col">
+          <div class="qty-stepper"><button aria-label="감소">−</button><input type="text" class="tabular" value="1"><button aria-label="증가">+</button></div>
+          <button class="qty-edit-link">수량변경</button>
+        </div>
+        <div class="cart-sum-price">₩420,000</div>
+        <div class="cart-ship-col"><span class="ship-tag">무료배송</span><button class="cart-remove" aria-label="삭제"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      </div>
+
+      <div class="cart-row">
+        <div class="cart-item-info">
+          <input type="checkbox" checked>
+          <span class="cart-thumb"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="8" rx="2"/><path d="M16 12h4l2 2v3h-6z"/><circle cx="9" cy="19" r="1.4"/><circle cx="18" cy="19" r="1.4"/></svg></span>
+          <div>
+            <div class="ci-brand">Autonics</div>
+            <div class="ci-name">근접센서 PR30-15AO</div>
+            <div class="ci-spec">M30 / AC 2선식 / 비실드형</div>
+            <div class="ci-stock">재고 42개</div>
+          </div>
+        </div>
+        <div class="cart-unit-price">₩18,000</div>
+        <div class="qty-col">
+          <div class="qty-stepper"><button aria-label="감소">−</button><input type="text" class="tabular" value="2"><button aria-label="증가">+</button></div>
+          <button class="qty-edit-link">수량변경</button>
+        </div>
+        <div class="cart-sum-price">₩36,000</div>
+        <div class="cart-ship-col"><span class="ship-tag paid">₩3,000</span><button class="cart-remove" aria-label="삭제"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      </div>
+
+      <div class="cart-row">
+        <div class="cart-item-info">
+          <input type="checkbox" checked>
+          <span class="cart-thumb"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></span>
+          <div>
+            <div class="ci-brand">SMC</div>
+            <div class="ci-name">에어 필터 레귤레이터 AW40-04D</div>
+            <div class="ci-spec">1/2" / AC40 / 드레인 콕 포함</div>
+            <div class="ci-stock">재고 8개</div>
+          </div>
+        </div>
+        <div class="cart-unit-price">₩36,000</div>
+        <div class="qty-col">
+          <div class="qty-stepper"><button aria-label="감소">−</button><input type="text" class="tabular" value="1"><button aria-label="증가">+</button></div>
+          <button class="qty-edit-link">수량변경</button>
+        </div>
+        <div class="cart-sum-price">₩36,000</div>
+        <div class="cart-ship-col"><span class="ship-tag">무료배송</span><button class="cart-remove" aria-label="삭제"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      </div>
+
+      <section class="together-strip">
+        <div class="section-head" style="margin-bottom:14px;"><h2 style="font-size:1rem;">함께 구매하면 좋은 상품</h2></div>
+        <div class="together-track-wrap">
+          <button class="together-arrow" aria-label="이전"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <div class="together-track">
+            <div class="together-card">
+              <span class="together-thumb"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 16 0"/><path d="M4 12v4a2 2 0 0 0 2 2h1v-6H4z"/><path d="M20 12v4a2 2 0 0 1-2 2h-1v-6h3z"/></svg></span>
+              <div style="flex:1;">
+                <div class="together-brand">SMC</div>
+                <div class="together-name">우레탄 튜브 TU0805</div>
+                <div class="together-spec">Ø8 / 5m</div>
+                <div class="together-bottom"><span class="together-price">₩5,800</span><span class="together-add"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></div>
+              </div>
+            </div>
+            <div class="together-card">
+              <span class="together-thumb"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+              <div style="flex:1;">
+                <div class="together-brand">MISUMI</div>
+                <div class="together-name">육각볼트 M8 x 20</div>
+                <div class="together-spec">스테인리스</div>
+                <div class="together-bottom"><span class="together-price">₩120</span><span class="together-add"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></div>
+              </div>
+            </div>
+            <div class="together-card">
+              <span class="together-thumb"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="1.5"/><path d="M9 8l3-2 3 2"/><line x1="12" y1="6" x2="12" y2="14"/></svg></span>
+              <div style="flex:1;">
+                <div class="together-brand">LS ELECTRIC</div>
+                <div class="together-name">서지 보호기 SPD-275</div>
+                <div class="together-spec">&nbsp;</div>
+                <div class="together-bottom"><span class="together-price">₩19,800</span><span class="together-add"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></div>
+              </div>
+            </div>
+          </div>
+          <button class="together-arrow" aria-label="다음"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        </div>
+      </section>
+
+      <div class="feature-strip">
+        <div class="feature-item">
+          <span class="feature-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg></span>
+          <div><b>안전한 결제</b><span>SSL 암호화로 안전하게 보호합니다.</span></div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg></span>
+          <div><b>빠른 배송</b><span>평일 오후 3시 이전 주문 시 당일 출고</span></div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span>
+          <div><b>간편 반품/교환</b><span>제품 수령 후 7일 이내 신청 가능</span></div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+          <div><b>전문 상담 지원</b><span>1688-VERSOI (평일 09:00~18:00)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT ASIDE -->
+    <aside class="page-aside">
+      <div class="summary-card">
+        <p class="summary-title">주문 요약</p>
+        <div class="summary-row"><span>상품금액 (3개)</span><b class="tabular">₩492,000</b></div>
+        <div class="summary-row"><span>배송비</span><b class="tabular">₩3,000</b></div>
+        <div class="summary-row"><span>할인금액</span><b class="tabular" style="color:var(--up);">− ₩0</b></div>
+        <div class="summary-total">
+          <span>총 결제 예상금액</span>
+          <div class="amt-row"><span class="amt tabular">₩495,000</span><small>(VAT 별도)</small></div>
+        </div>
+        <div class="summary-actions">
+          <button class="btn btn-primary btn-lg">주문하기</button>
+          <a href="rfq-new.html" class="btn btn-outline">견적요청하기</a>
+          <a href="goods.html" class="btn btn-ghost">쇼핑 계속하기</a>
+        </div>
+      </div>
+
+      <div class="side-panel" style="margin-top:16px;">
+        <p class="side-panel-title">쿠폰 적용</p>
+        <div class="coupon-row">
+          <input type="text" placeholder="쿠폰 코드를 입력하세요">
+          <button type="button">적용</button>
+        </div>
+        <a href="#" class="more-link" style="margin-top:10px;">보유 쿠폰 2장 ›</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
+    <div class="footer-links">
+      <a href="#">이용약관</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">사업자정보확인</a>
+      <a href="#">제휴/입점문의</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  var navToggle = document.getElementById('navToggle');
+  var mainNav = document.getElementById('mainNav');
+  navToggle.addEventListener('click', function(){
+    var open = mainNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  document.querySelectorAll('.qty-stepper').forEach(function(stepper){
+    var input = stepper.querySelector('input');
+    var buttons = stepper.querySelectorAll('button');
+    buttons[0].addEventListener('click', function(){ input.value = Math.max(1, parseInt(input.value||1,10)-1); });
+    buttons[1].addEventListener('click', function(){ input.value = parseInt(input.value||1,10)+1; });
+  });
+
+  document.getElementById('selectAll').addEventListener('change', function(){
+    document.querySelectorAll('.cart-item-info input[type="checkbox"]').forEach(function(cb){ cb.checked = this.checked; }.bind(this));
+  });
+</script>
+</body>
+</html>
