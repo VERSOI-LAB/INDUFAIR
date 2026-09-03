@@ -230,13 +230,13 @@
         </div>
       </div>
 
-      <div class="filter-chip-row">
-        <button class="filter-chip reset">전체 초기화</button>
-        <button class="filter-chip on">전체</button>
-        <button class="filter-chip">FA 자동화 ✕</button>
-        <button class="filter-chip">PLC ✕</button>
-        <button class="filter-chip">서보모터 ✕</button>
-        <button class="filter-chip">인버터 ✕</button>
+      <div class="filter-chip-row" id="quickFilterChips">
+        <button class="filter-chip reset" data-action="reset">전체 초기화</button>
+        <button class="filter-chip on" data-chip-cat="">전체</button>
+        <button class="filter-chip" data-chip-cat="FA 자동화">FA 자동화 ✕</button>
+        <button class="filter-chip" data-chip-cat="PLC">PLC ✕</button>
+        <button class="filter-chip" data-chip-cat="서보">서보모터 ✕</button>
+        <button class="filter-chip" data-chip-cat="인버터">인버터 ✕</button>
       </div>
 
       <div class="used-grid" id="usedGrid">
@@ -346,8 +346,9 @@
   var GRADE_LABEL = { a:'A급', b:'B급', c:'C급', refurb:'리퍼비시', idle:'유휴재고', new:'신품' };
   var GRADE_CLASS = { a:'grade-a', b:'grade-b', c:'grade-c', refurb:'grade-refurb', idle:'grade-idle', new:'grade-a' };
 
-  var state = { category: '', q: '', grades: new Set() };
+  var state = { category: '', q: '', grades: new Set(), chipCat: '' };
   var favSet = new Set();
+  var allCategories = [];
 
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
   function gradFor(id){ var sum = 0; String(id).split('').forEach(function(c){ sum += c.charCodeAt(0); }); return BG_GRADS[sum % BG_GRADS.length]; }
@@ -355,18 +356,35 @@
 
   async function loadCategories(){
     var res = await sb.from('categories').select('id,name').order('sort_order');
-    var cats = res.data || [];
+    allCategories = res.data || [];
     var icon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
     var nav = document.getElementById('catNav');
     nav.innerHTML = '<a href="#" class="active" data-cat="">'+icon+'전체보기</a>' +
-      cats.map(function(c){ return '<a href="#" data-cat="'+c.id+'">'+icon+escapeHtml(c.name)+'</a>'; }).join('');
+      allCategories.map(function(c){ return '<a href="#" data-cat="'+c.id+'">'+icon+escapeHtml(c.name)+'</a>'; }).join('');
     nav.addEventListener('click', function(e){
       var a = e.target.closest('a'); if (!a) return;
       e.preventDefault();
       state.category = a.dataset.cat || '';
+      state.chipCat = ''; // sidebar nav is the source of truth now; no quick-chip corresponds
       nav.querySelectorAll('a').forEach(function(x){ x.classList.remove('active'); });
       a.classList.add('active');
+      syncChipUI();
       render();
+    });
+  }
+
+  // Quick-filter chips are shorthand for a subset of real categories (matched by name).
+  // "FA 자동화" has no matching row in `categories`, so it behaves like "전체" (clears the filter)
+  // while still visually highlighting as the selected chip.
+  function categoryIdForChip(chipName){
+    if (!chipName) return '';
+    var match = allCategories.find(function(c){ return c.name.indexOf(chipName) !== -1; });
+    return match ? String(match.id) : '';
+  }
+
+  function syncChipUI(){
+    document.querySelectorAll('#quickFilterChips .filter-chip[data-chip-cat]').forEach(function(btn){
+      btn.classList.toggle('on', btn.dataset.chipCat === state.chipCat);
     });
   }
 
@@ -461,6 +479,31 @@
     render();
   });
 
+  document.getElementById('quickFilterChips').addEventListener('click', function(e){
+    var btn = e.target.closest('.filter-chip'); if (!btn) return;
+    e.preventDefault();
+    if (btn.dataset.action === 'reset') {
+      state.chipCat = '';
+      state.category = '';
+      document.querySelectorAll('#catNav a').forEach(function(a){ a.classList.remove('active'); });
+      var allNav = document.querySelector('#catNav a[data-cat=""]');
+      if (allNav) allNav.classList.add('active');
+      syncChipUI();
+      render();
+      return;
+    }
+    var chipCat = btn.dataset.chipCat;
+    if (chipCat === undefined) return;
+    // Clicking the already-active chip (besides "전체") clears the filter, like removing a tag.
+    state.chipCat = (state.chipCat === chipCat && chipCat !== '') ? '' : chipCat;
+    state.category = categoryIdForChip(state.chipCat);
+    document.querySelectorAll('#catNav a').forEach(function(a){ a.classList.remove('active'); });
+    var navLink = document.querySelector('#catNav a[data-cat="'+state.category+'"]') || document.querySelector('#catNav a[data-cat=""]');
+    if (navLink) navLink.classList.add('active');
+    syncChipUI();
+    render();
+  });
+
   document.addEventListener('versoi:ready', async function(e){
     var user = e.detail.user;
     if (user) {
@@ -468,6 +511,7 @@
       (favRes.data || []).forEach(function(f){ favSet.add(f.product_id); });
     }
     await loadCategories();
+    syncChipUI();
     await render();
   });
 })();

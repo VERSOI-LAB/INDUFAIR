@@ -31,7 +31,8 @@
   .edit-form{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;}
   .edit-form input{border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:.86rem;font-family:inherit;color:var(--text);background:var(--surface);min-width:120px;}
   .edit-form.addr-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;}
-  .edit-form.addr-form input{width:100%;}
+  .edit-form.addr-form input{width:100%;min-width:0;}
+  @media (max-width:480px){ .edit-form.addr-form{grid-template-columns:1fr;} }
   .edit-form .edit-actions{display:flex;gap:6px;}
   .field-note{font-size:.78rem;color:var(--text-tertiary);}
   .field-msg{font-size:.78rem;color:var(--accent);font-weight:700;}
@@ -101,8 +102,20 @@
           <label class="toggle"><input type="checkbox" id="toggleEmailOptin"><span class="track"><span class="thumb"></span></span></label>
         </div>
         <div class="toggle-row">
-          <span>SMS 수신 <span class="field-note">(준비 중)</span></span>
-          <label class="toggle"><input type="checkbox" checked disabled><span class="track"><span class="thumb"></span></span></label>
+          <span>SMS 수신</span>
+          <label class="toggle"><input type="checkbox" id="toggleSmsOptin"><span class="track"><span class="thumb"></span></span></label>
+        </div>
+      </div>
+
+      <p class="settings-title">알림 설정</p>
+      <div class="info-panel">
+        <div class="toggle-row">
+          <span>주문/배송 알림</span>
+          <label class="toggle"><input type="checkbox" id="toggleNotifyOrder"><span class="track"><span class="thumb"></span></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>문의 답변 알림</span>
+          <label class="toggle"><input type="checkbox" id="toggleNotifyInquiry"><span class="track"><span class="thumb"></span></span></label>
         </div>
       </div>
 
@@ -170,6 +183,9 @@
     document.getElementById('acctPhone').textContent = profile.phone || '-';
     document.getElementById('acctJoin').textContent = fmtDate(profile.created_at);
     document.getElementById('toggleEmailOptin').checked = !!profile.marketing_opt_in;
+    document.getElementById('toggleSmsOptin').checked = !!profile.notify_sms;
+    document.getElementById('toggleNotifyOrder').checked = profile.notify_order !== false;
+    document.getElementById('toggleNotifyInquiry').checked = profile.notify_inquiry !== false;
 
     var addrRes = await window.sb.from('addresses').select('*').eq('profile_id', user.id).order('is_default', { ascending: false }).limit(1).maybeSingle();
     currentAddress = addrRes.data || null;
@@ -180,13 +196,12 @@
     document.getElementById('acctAddressEditBtn').addEventListener('click', openAddressEdit);
     document.getElementById('acctEmailBtn').addEventListener('click', function (e) {
       e.preventDefault();
-      showEmailNote();
+      openEmailEdit();
     });
-    document.getElementById('toggleEmailOptin').addEventListener('change', async function () {
-      var checked = this.checked;
-      var res = await window.sb.from('profiles').update({ marketing_opt_in: checked }).eq('id', currentUser.id);
-      if (res.error) { console.error('[account] marketing_opt_in update failed', res.error); this.checked = !checked; }
-    });
+    bindNotifyToggle('toggleEmailOptin', 'marketing_opt_in');
+    bindNotifyToggle('toggleSmsOptin', 'notify_sms');
+    bindNotifyToggle('toggleNotifyOrder', 'notify_order');
+    bindNotifyToggle('toggleNotifyInquiry', 'notify_inquiry');
     document.getElementById('withdrawLink').addEventListener('click', function (e) {
       e.preventDefault();
       if (confirm('회원탈퇴를 진행하시겠습니까? 탈퇴 절차는 고객센터를 통해서만 처리됩니다.')) {
@@ -202,14 +217,55 @@
     el.textContent = (a.zipcode ? '(' + a.zipcode + ') ' : '') + (a.addr1 || '') + (a.addr2 ? ', ' + a.addr2 : '');
   }
 
-  function showEmailNote() {
+  function bindNotifyToggle(elId, column) {
+    document.getElementById(elId).addEventListener('change', async function () {
+      var checked = this.checked;
+      var payload = {}; payload[column] = checked;
+      var res = await window.sb.from('profiles').update(payload).eq('id', currentUser.id);
+      if (res.error) { console.error('[account] ' + column + ' update failed', res.error); this.checked = !checked; }
+    });
+  }
+
+  function isValidEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+
+  function openEmailEdit() {
     var wrap = document.getElementById('emailField');
-    if (wrap.querySelector('.field-msg')) return;
-    var note = document.createElement('span');
-    note.className = 'field-note';
-    note.textContent = '이메일 변경은 고객센터 1:1 문의를 통해 처리됩니다.';
-    wrap.appendChild(note);
-    setTimeout(function () { if (note.parentNode) note.parentNode.removeChild(note); }, 4000);
+    var current = document.getElementById('acctEmail').textContent;
+    wrap.innerHTML = '<form class="edit-form" id="emailEditForm">' +
+      '<input type="email" id="emailInput" placeholder="new-email@example.com" value="">' +
+      '<span class="edit-actions"><button type="submit" class="btn btn-primary btn-sm">변경 요청</button> <button type="button" class="btn btn-outline btn-sm" id="emailCancelBtn">취소</button></span>' +
+      '</form><div class="field-msg" id="emailMsg" style="width:100%;margin-top:6px;"></div>';
+    document.getElementById('emailCancelBtn').addEventListener('click', function () { renderEmailField(current); });
+    document.getElementById('emailEditForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var msgEl = document.getElementById('emailMsg');
+      var val = document.getElementById('emailInput').value.trim();
+      if (!isValidEmail(val)) {
+        msgEl.textContent = '올바른 이메일 형식이 아닙니다.';
+        msgEl.className = 'field-msg error';
+        return;
+      }
+      if (val === current) {
+        msgEl.textContent = '현재 이메일과 동일합니다.';
+        msgEl.className = 'field-msg error';
+        return;
+      }
+      var submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      msgEl.textContent = '';
+      var res = await window.sb.auth.updateUser({ email: val });
+      submitBtn.disabled = false;
+      if (res.error) {
+        console.error('[account] email change failed', res.error);
+        msgEl.textContent = '이메일 변경 요청에 실패했습니다: ' + res.error.message;
+        msgEl.className = 'field-msg error';
+        return;
+      }
+      msgEl.textContent = val + ' 주소로 확인 메일을 발송했습니다. 새 이메일 받은편지함에서 링크를 클릭해야 변경이 완료됩니다. (완료 전까지는 기존 이메일로 로그인됩니다.)';
+      msgEl.className = 'field-msg';
+    });
   }
 
   function openNameEdit() {
@@ -260,6 +316,12 @@
     var wrap = document.getElementById('phoneField');
     wrap.innerHTML = '<span class="val" id="acctPhone">' + esc(phone) + '</span><button class="btn btn-outline btn-sm" id="acctPhoneEditBtn">변경</button>';
     document.getElementById('acctPhoneEditBtn').addEventListener('click', openPhoneEdit);
+  }
+
+  function renderEmailField(email) {
+    var wrap = document.getElementById('emailField');
+    wrap.innerHTML = '<span class="val" id="acctEmail">' + esc(email) + '</span><button class="btn btn-outline btn-sm" id="acctEmailBtn">이메일 변경</button>';
+    document.getElementById('acctEmailBtn').addEventListener('click', function (e) { e.preventDefault(); openEmailEdit(); });
   }
 
   function openAddressEdit() {

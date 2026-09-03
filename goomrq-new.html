@@ -193,11 +193,13 @@
           </div>
           <div class="field full" style="margin-top:20px;">
             <label>참고 이미지 (선택)</label>
-            <div class="dropzone">
+            <div class="dropzone" id="goomDropzone">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1"/><path d="M9 15V4M9 4l3 3M9 4l-3 3"/></svg>
               <div class="dz-main">이미지를 드래그하거나 클릭하여 업로드하세요.</div>
               <div class="dz-sub">JPG, PNG 파일 / 최대 5장 / 각 10MB 이하</div>
             </div>
+            <input type="file" id="goomAttachInput" accept="image/*" multiple style="display:none;">
+            <div class="attach-list" id="goomAttachList"></div>
           </div>
         </div>
 
@@ -267,8 +269,10 @@
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
   var goomCategorySelect = document.getElementById('goomCategory');
+  var goomUser = null;
 
-  document.addEventListener('versoi:ready', async function(){
+  document.addEventListener('versoi:ready', async function(e){
+    goomUser = e.detail.user;
     var res = await sb.from('categories').select('id, name').order('sort_order');
     if (!res.error && res.data) {
       res.data.forEach(function(cat){
@@ -277,6 +281,65 @@
         opt.textContent = cat.name;
         goomCategorySelect.appendChild(opt);
       });
+    }
+  });
+
+  // --- Attachments ---
+  var goomPendingAttachments = []; // { name, size, url, uploading }
+  var goomAttachInput = document.getElementById('goomAttachInput');
+  var goomDropzone = document.getElementById('goomDropzone');
+  var goomAttachList = document.getElementById('goomAttachList');
+
+  function goomFmtSize(bytes) {
+    if (bytes < 1024) return bytes + 'B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+  }
+
+  function goomRenderAttachList() {
+    goomAttachList.innerHTML = goomPendingAttachments.map(function (a, i) {
+      return '<div class="attach-item' + (a.uploading ? ' uploading' : '') + '">' +
+        '<span class="attach-name">' + (a.uploading ? '업로드 중… ' : '') + a.name + '</span>' +
+        '<span class="attach-size">' + goomFmtSize(a.size) + '</span>' +
+        '<button type="button" class="attach-remove" data-idx="' + i + '" aria-label="첨부 제거"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+        '</div>';
+    }).join('');
+    goomAttachList.querySelectorAll('.attach-remove').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        goomPendingAttachments.splice(Number(btn.getAttribute('data-idx')), 1);
+        goomRenderAttachList();
+      });
+    });
+  }
+
+  goomDropzone.addEventListener('click', function () { goomAttachInput.click(); });
+
+  goomAttachInput.addEventListener('change', async function () {
+    if (!window.VERSOI.requireAuth()) return;
+    var files = Array.prototype.slice.call(goomAttachInput.files || []);
+    goomAttachInput.value = '';
+    var uid = (goomUser && goomUser.id) || (window.VERSOI.user && window.VERSOI.user.id);
+    if (!uid) return;
+
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var entry = { name: file.name, size: file.size, url: null, uploading: true };
+      goomPendingAttachments.push(entry);
+      goomRenderAttachList();
+      try {
+        var path = uid + '/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+        var up = await window.sb.storage.from('attachments').upload(path, file);
+        if (up.error) throw up.error;
+        var pub = window.sb.storage.from('attachments').getPublicUrl(path);
+        entry.url = pub.data.publicUrl;
+        entry.uploading = false;
+      } catch (err) {
+        console.error('[goomrq-new] attachment upload failed', err);
+        var idx = goomPendingAttachments.indexOf(entry);
+        if (idx > -1) goomPendingAttachments.splice(idx, 1);
+        alert(file.name + ' 업로드에 실패했습니다.');
+      }
+      goomRenderAttachList();
     }
   });
 
@@ -310,6 +373,13 @@
 
     var fullDescription = extraLines.join(' · ') + '\n\n' + desc;
 
+    if (goomPendingAttachments.some(function (a) { return a.uploading; })) {
+      alert('이미지 업로드가 완료될 때까지 기다려주세요.');
+      btn.disabled = false;
+      return;
+    }
+    var attachments = goomPendingAttachments.map(function (a) { return { url: a.url, name: a.name }; });
+
     var res = await sb.from('wanted_posts').insert({
       profile_id: window.VERSOI.user.id,
       title: title,
@@ -317,7 +387,8 @@
       budget: null,
       region: region || null,
       description: fullDescription,
-      status: 'open'
+      status: 'open',
+      attachments: attachments
     });
 
     if (res.error) {

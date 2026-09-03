@@ -405,6 +405,11 @@
           '<div><b>카테고리</b><span>' + esc(cat || '-') + '</span></div>' +
         '</div>' +
         '<div class="rfq-detail-spec">' + (esc(rfq.spec_description) || '상세 설명이 없습니다.').replace(/\n/g,'<br>') + '</div>' +
+        (rfq.attachments && rfq.attachments.length
+          ? '<div class="post-attachments"><div class="attach-title">첨부파일</div>' +
+            rfq.attachments.map(function (a) { return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(a.name || a.url) + '</a>'; }).join('') +
+            '</div>'
+          : '') +
         '<p style="font-weight:800;font-size:.82rem;margin-bottom:8px;">제출된 견적 (' + quoteCount + ')</p>' +
         quoteListHtml +
         quoteFormHtml +
@@ -433,7 +438,12 @@
       .select('*, categories(name), rfq_quotes(id, price, message, created_at)')
       .order('created_at', { ascending: false });
     if (res.error) { console.error('[VERSOI] rfq load error', res.error); rfqTableEl.innerHTML = '<div class="rfq-empty">불러오지 못했습니다.</div>'; return; }
-    allRfqs = res.data || [];
+    allRfqs = (res.data || []).map(function (r) {
+      var att = r.attachments;
+      if (typeof att === 'string') { try { att = JSON.parse(att); } catch (e) { att = []; } }
+      r.attachments = Array.isArray(att) ? att : [];
+      return r;
+    });
     render();
   }
 

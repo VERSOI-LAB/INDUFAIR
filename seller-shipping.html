@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 판매자 센터 | 배송 관리</title>
+<meta name="description" content="주문 배송 상태와 운송장 정보를 관리하는 VERSOI 판매자 센터 배송 관리">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+
+  .carrier-input{border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;width:110px;}
+  .tracking-input{border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;width:140px;}
+
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="seller-dashboard.html" aria-label="판매자 센터 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>SELLER CENTER</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="seller-dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품 관리</p>
+    <a href="seller-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>상품 목록</a>
+    <a href="seller-products.html?new=1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>상품 등록</a>
+    <a href="seller-bulk.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>대량 등록</a>
+    <a href="seller-categories.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>카테고리 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">주문 관리</p>
+    <a href="seller-orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>주문 목록</a>
+    <a href="seller-shipping.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>배송 관리</a>
+    <a href="seller-cancellations.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>취소/반품 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">문의 관리</p>
+    <a href="seller-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>상품 문의</a>
+    <a href="seller-inquiries.html?tab=direct"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 9.5a3.5 3.5 0 1 1 3.9 3.48c-.62.08-1.4.55-1.4 1.52" /><line x1="12" y1="17.5" x2="12" y2="17.51"/></svg>1:1 문의</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">정산 관리</p>
+    <a href="seller-settlement.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>정산 내역</a>
+    <a href="seller-tax.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>세금계산서 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">계정 관리</p>
+    <a href="seller-account.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>회사 정보</a>
+    <a href="seller-account.html#contacts"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>담당자 관리</a>
+    <a href="seller-account.html#settings"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>계정 설정</a>
+    </div>
+    </nav>
+    <div class="admin-sidebar-card">
+      <p>궁금한 점이 있으신가요?<br>판매자 가이드와 자주 묻는 질문을 확인해 보세요.</p>
+      <button class="btn btn-outline btn-sm" style="background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.18);">가이드 보기</button>
+    </div>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>판매자 센터<span class="sub">주문 관리 · 배송 관리</span></div>
+      <div class="admin-top-actions">
+        <button class="btn btn-ghost btn-sm"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>판매자 가이드</button>
+        <button class="icon-btn" aria-label="문의"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="icon-count">2</span></button>
+        <button class="icon-btn" aria-label="알림"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="icon-count">12</span></button>
+        <div class="admin-user">
+          <span class="avatar">한</span>
+          <span class="lbl"><b>한국브라스트(주) <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></b><span>seller@kblast.co.kr</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-page-head">
+        <h1>배송 관리</h1>
+        <p style="color:var(--text-tertiary);font-size:.82rem;">주문 관리 <span style="color:var(--border-strong);margin:0 6px;">/</span> 배송 관리</p>
+      </div>
+
+      <div class="admin-card">
+        <div class="count-tabs" id="shipTabs">
+          <button class="active" data-status="all">전체 <b id="scnt-all">0</b></button>
+          <button data-status="preparing">배송 준비 <b id="scnt-preparing">0</b></button>
+          <button data-status="shipping">배송 중 <b id="scnt-shipping">0</b></button>
+          <button data-status="delivered">배송 완료 <b id="scnt-delivered">0</b></button>
+        </div>
+        <div class="admin-filter-bar">
+          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="shipSearch" placeholder="주문번호, 상품명, 수령인 검색"></div>
+        </div>
+        <div class="data-table-scroll">
+        <table class="data-table">
+          <thead><tr><th>주문 정보</th><th>상품 정보</th><th>수령인/주소</th><th>상태</th><th>택배사</th><th>운송장번호</th><th>관리</th></tr></thead>
+          <tbody id="shipTbody"></tbody>
+        </table>
+        </div>
+      </div>
+
+    </div>
+    </div>
+</div>
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){
+    sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); });
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seller-common.js"></script>
+<script>
+var SHF = { companyId: null, items: [], activeStatus: 'all' };
+
+function shipRowHtml(oi) {
+  var o = oi.orders || {};
+  return '<tr>' +
+    '<td><div class="order-id">' + SC.esc(o.order_no) + '</div><div class="order-buyer">' + SC.dt(oi.created_at, true) + '</div></td>' +
+    '<td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">' + SC.esc(oi.product_title) + '</div><div class="sub">수량 ' + oi.qty + '개</div></div></div></td>' +
+    '<td style="font-size:.82rem;">' + SC.esc(o.recipient) + '<br><span style="color:var(--text-tertiary);">' + SC.esc(o.address || '') + '</span></td>' +
+    '<td><span class="badge ' + SC.badgeCls(oi.status) + '">' + SC.label(oi.status) + '</span></td>' +
+    '<td><input class="carrier-input" value="' + SC.esc(oi.tracking_carrier || '') + '" id="carrier-' + oi.id + '" placeholder="택배사"></td>' +
+    '<td><input class="tracking-input" value="' + SC.esc(oi.tracking_no || '') + '" id="tracking-' + oi.id + '" placeholder="운송장번호"></td>' +
+    '<td><div class="table-actions">' +
+      '<button class="btn btn-outline btn-sm" onclick="saveTracking(' + oi.id + ')">저장</button>' +
+      (oi.status === 'preparing' ? '<button class="btn btn-primary btn-sm" onclick="markShipping(' + oi.id + ')">배송 시작</button>' : '') +
+      (oi.status === 'shipping' ? '<button class="btn btn-primary btn-sm" onclick="markDelivered(' + oi.id + ')">배송 완료</button>' : '') +
+    '</div></td></tr>';
+}
+
+function renderShip() {
+  var q = document.getElementById('shipSearch').value.trim().toLowerCase();
+  var list = SHF.items.filter(function (oi) {
+    if (SHF.activeStatus !== 'all' && oi.status !== SHF.activeStatus) return false;
+    if (q) {
+      var hay = (oi.product_title + ' ' + (oi.orders ? oi.orders.order_no + ' ' + oi.orders.recipient : '')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  document.getElementById('shipTbody').innerHTML = list.map(shipRowHtml).join('') ||
+    '<tr><td colspan="7" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">배송 대상 주문이 없습니다.</td></tr>';
+  ['all','preparing','shipping','delivered'].forEach(function(s){
+    var n = s === 'all' ? SHF.items.length : SHF.items.filter(function(oi){return oi.status===s;}).length;
+    document.getElementById('scnt-'+s).textContent = n;
+  });
+}
+
+async function loadShip() {
+  var res = await sb.from('order_items').select('*, orders(order_no, recipient, address, created_at)').eq('company_id', SHF.companyId).in('status', ['preparing','shipping','delivered']).order('created_at', { ascending: false });
+  SHF.items = res.data || [];
+  renderShip();
+}
+
+window.saveTracking = async function (id) {
+  var carrier = document.getElementById('carrier-' + id).value.trim();
+  var tracking = document.getElementById('tracking-' + id).value.trim();
+  await sb.from('order_items').update({ tracking_carrier: carrier || null, tracking_no: tracking || null }).eq('id', id);
+  alert('운송장 정보가 저장되었습니다.');
+};
+window.markShipping = async function (id) {
+  await sb.from('order_items').update({ status: 'shipping' }).eq('id', id);
+  await loadShip();
+};
+window.markDelivered = async function (id) {
+  await sb.from('order_items').update({ status: 'delivered' }).eq('id', id);
+  await loadShip();
+};
+
+document.getElementById('shipTabs').addEventListener('click', function (e) {
+  var btn = e.target.closest('button[data-status]');
+  if (!btn) return;
+  document.querySelectorAll('#shipTabs button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  SHF.activeStatus = btn.getAttribute('data-status');
+  renderShip();
+});
+document.getElementById('shipSearch').addEventListener('input', renderShip);
+
+SC.ready(async function (user) {
+  SHF.companyId = user.company.id;
+  await loadShip();
+});
+</script>
+</body>
+</html>

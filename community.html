@@ -61,8 +61,16 @@
   .comment-item b{font-size:.82rem;font-weight:700;margin-right:6px;}
   .comment-item span{font-size:.72rem;color:var(--text-tertiary);}
   .comment-item p{font-size:.84rem;color:var(--text);line-height:1.5;margin-top:3px;}
-  .comment-form{display:flex;gap:8px;margin-top:12px;}
-  .comment-form textarea{flex:1;min-height:44px;resize:vertical;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.85rem;font-family:inherit;}
+  /* A <textarea> flex item keeps its intrinsic cols-based width (~20ch) as
+     a floor when an ancestor grid does min-content sizing — min-width:0
+     alone doesn't override that for a replaced form control the way it does
+     for text. That floor was forcing the whole comm-cols column (and every
+     sidebar panel sharing its grid track) wider than the viewport once a
+     post was expanded. flex-wrap lets the browser fall back to sizing this
+     row by its largest single item instead of the sum of both, which fits;
+     in practice the textarea+button still render on one line at real widths. */
+  .comment-form{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .comment-form textarea{flex:1;min-width:0;min-height:44px;resize:vertical;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.85rem;font-family:inherit;}
   .comment-empty{font-size:.82rem;color:var(--text-tertiary);padding:6px 0;}
 
   .qna-item{padding:11px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:9px;}
@@ -388,9 +396,14 @@
 
     async function loadPosts() {
       var res = await sb.from('community_posts')
-        .select('id, profile_id, board_type, title, content, view_count, like_count, created_at, profiles(name)')
+        .select('id, profile_id, board_type, title, content, attachments, view_count, like_count, created_at, profiles(name)')
         .order('created_at', { ascending: false });
-      posts = res.data || [];
+      posts = (res.data || []).map(function (p) {
+        var att = p.attachments;
+        if (typeof att === 'string') { try { att = JSON.parse(att); } catch (e) { att = []; } }
+        p.attachments = Array.isArray(att) ? att : [];
+        return p;
+      });
       commentCounts = {};
       var ids = posts.map(function (p) { return p.id; });
       if (ids.length) {
@@ -413,6 +426,13 @@
     function renderDetail(p) {
       var html = '<div class="post-detail">';
       html += '<div class="post-detail-body">' + escapeHtml(p.content).replace(/\n/g, '<br>') + '</div>';
+      if (p.attachments && p.attachments.length) {
+        html += '<div class="post-attachments"><div class="attach-title">첨부파일</div>';
+        html += p.attachments.map(function (a) {
+          return '<a href="' + escapeHtml(a.url) + '" target="_blank" rel="noopener">' + escapeHtml(a.name || a.url) + '</a>';
+        }).join('');
+        html += '</div>';
+      }
       html += '<div class="post-comments-title">댓글 ' + (commentCounts[p.id] || 0) + '</div>';
       var comments = detailComments[p.id];
       if (!comments) {
@@ -523,7 +543,31 @@
       });
     });
 
-    document.addEventListener('versoi:ready', function () { loadPosts(); });
+    function applyQueryParams() {
+      var params = new URLSearchParams(location.search);
+      var board = params.get('board');
+      if (board && BOARD_LABEL[board]) {
+        currentFilter = board;
+        document.querySelectorAll('#boardFilterRow .filter-chip').forEach(function (b) {
+          b.classList.toggle('on', b.getAttribute('data-board') === board);
+        });
+      }
+      var postId = params.get('post');
+      if (postId) {
+        expandedId = postId;
+      }
+    }
+
+    document.addEventListener('versoi:ready', async function () {
+      applyQueryParams();
+      await loadPosts();
+      if (expandedId) {
+        await loadDetail(expandedId);
+        render();
+        var row = postList.querySelector('.post-row[data-id="' + expandedId + '"]');
+        if (row) row.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
   })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>

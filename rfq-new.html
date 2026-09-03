@@ -183,11 +183,13 @@
 
         <div class="form-card">
           <p class="form-card-title">첨부 파일</p>
-          <div class="dropzone">
+          <div class="dropzone" id="rfqDropzone">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1"/><path d="M9 15V4M9 4l3 3M9 4l-3 3"/></svg>
             <div class="dz-main">파일을 드래그하거나 클릭하여 첨부하세요.</div>
             <div class="dz-sub">도면, 사양서, 참고 이미지 등을 첨부하면 정확한 견적에 도움이 됩니다. (최대 10MB)<br>첨부 가능 파일 : PDF, DWG, DOC, DOCX, XLS, XLSX, JPG, PNG</div>
           </div>
+          <input type="file" id="rfqAttachInput" multiple style="display:none;">
+          <div class="attach-list" id="rfqAttachList"></div>
         </div>
 
         <div class="form-actions">
@@ -269,8 +271,10 @@
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
   var rfqCategorySelect = document.getElementById('rfqCategory');
+  var rfqUser = null;
 
-  document.addEventListener('versoi:ready', async function(){
+  document.addEventListener('versoi:ready', async function(e){
+    rfqUser = e.detail.user;
     var res = await sb.from('categories').select('id, name').order('sort_order');
     if (!res.error && res.data) {
       res.data.forEach(function(cat){
@@ -279,6 +283,65 @@
         opt.textContent = cat.name;
         rfqCategorySelect.appendChild(opt);
       });
+    }
+  });
+
+  // --- Attachments ---
+  var rfqPendingAttachments = []; // { name, size, url, uploading }
+  var rfqAttachInput = document.getElementById('rfqAttachInput');
+  var rfqDropzone = document.getElementById('rfqDropzone');
+  var rfqAttachList = document.getElementById('rfqAttachList');
+
+  function rfqFmtSize(bytes) {
+    if (bytes < 1024) return bytes + 'B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+  }
+
+  function rfqRenderAttachList() {
+    rfqAttachList.innerHTML = rfqPendingAttachments.map(function (a, i) {
+      return '<div class="attach-item' + (a.uploading ? ' uploading' : '') + '">' +
+        '<span class="attach-name">' + (a.uploading ? '업로드 중… ' : '') + a.name + '</span>' +
+        '<span class="attach-size">' + rfqFmtSize(a.size) + '</span>' +
+        '<button type="button" class="attach-remove" data-idx="' + i + '" aria-label="첨부 제거"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+        '</div>';
+    }).join('');
+    rfqAttachList.querySelectorAll('.attach-remove').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        rfqPendingAttachments.splice(Number(btn.getAttribute('data-idx')), 1);
+        rfqRenderAttachList();
+      });
+    });
+  }
+
+  rfqDropzone.addEventListener('click', function () { rfqAttachInput.click(); });
+
+  rfqAttachInput.addEventListener('change', async function () {
+    if (!window.VERSOI.requireAuth()) return;
+    var files = Array.prototype.slice.call(rfqAttachInput.files || []);
+    rfqAttachInput.value = '';
+    var uid = (rfqUser && rfqUser.id) || (window.VERSOI.user && window.VERSOI.user.id);
+    if (!uid) return;
+
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var entry = { name: file.name, size: file.size, url: null, uploading: true };
+      rfqPendingAttachments.push(entry);
+      rfqRenderAttachList();
+      try {
+        var path = uid + '/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+        var up = await window.sb.storage.from('attachments').upload(path, file);
+        if (up.error) throw up.error;
+        var pub = window.sb.storage.from('attachments').getPublicUrl(path);
+        entry.url = pub.data.publicUrl;
+        entry.uploading = false;
+      } catch (err) {
+        console.error('[rfq-new] attachment upload failed', err);
+        var idx = rfqPendingAttachments.indexOf(entry);
+        if (idx > -1) rfqPendingAttachments.splice(idx, 1);
+        alert(file.name + ' 업로드에 실패했습니다.');
+      }
+      rfqRenderAttachList();
     }
   });
 
@@ -308,6 +371,13 @@
     var priceVal = document.getElementById('rfqDesiredPrice').value;
     var deadlineVal = document.getElementById('rfqDeadline').value;
 
+    if (rfqPendingAttachments.some(function (a) { return a.uploading; })) {
+      alert('파일 업로드가 완료될 때까지 기다려주세요.');
+      btn.disabled = false;
+      return;
+    }
+    var attachments = rfqPendingAttachments.map(function (a) { return { url: a.url, name: a.name }; });
+
     var res = await sb.from('rfq_requests').insert({
       profile_id: window.VERSOI.user.id,
       title: title,
@@ -315,7 +385,7 @@
       quantity: quantityVal ? Number(quantityVal) : null,
       desired_price: priceVal ? Number(priceVal) : null,
       spec_description: spec,
-      attachments: '[]',
+      attachments: attachments,
       deadline: deadlineVal || null,
       status: 'open'
     });

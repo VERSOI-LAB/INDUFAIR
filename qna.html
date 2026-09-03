@@ -61,7 +61,7 @@
         <h1>기술 Q&amp;A</h1>
         <p>기술 관련 질문을 등록하면 전문가가<br>답변을 드립니다.</p>
       </div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:16px;">질문 등록</button>
+      <a class="btn btn-primary" href="community-write.html?board=qna" style="width:100%;justify-content:center;margin-bottom:16px;display:flex;">질문 등록</a>
       <div class="side-panel">
         <nav class="side-nav">
           <a href="qna.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>전체 질문</a>
@@ -77,62 +77,20 @@
       <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">궁금한 기술 정보를 질문하고 전문가의 답변을 받아보세요.</p>
 
       <div class="board-toolbar">
-        <div class="board-search">
+        <form class="board-search" id="qnaSearchForm" style="flex:1;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="질문 제목, 키워드를 입력하세요">
-        </div>
-        <div class="select-field">전체 카테고리 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+          <input type="text" id="qnaSearchInput" placeholder="질문 제목, 키워드를 입력하세요">
+        </form>
       </div>
 
-      <div class="board-tabs">
-        <button class="active">최신 답변</button>
-        <button>인기 답변</button>
+      <div class="board-tabs" id="qnaTabs">
+        <button class="active" data-tab="latest">최신 답변</button>
+        <button data-tab="popular">인기 답변</button>
       </div>
 
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:6px 20px;margin-top:16px;">
-        <div class="qna-row">
-          <span class="qna-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/></svg></span>
-          <div class="qna-main">
-            <a href="#" class="q-title">PLC 통신 에러 발생 원인과 해결 방법이 궁금합니다.</a>
-            <div class="q-meta"><span>답변 <b class="tabular">2</b></span><span>조회 <b class="tabular">45</b></span><span class="tabular">2024.05.08</span></div>
-          </div>
-          <span class="status-tag2 done">답변완료</span>
-        </div>
-        <div class="qna-row">
-          <span class="qna-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/></svg></span>
-          <div class="qna-main">
-            <a href="#" class="q-title">인버터 과전류 알람 시 확인해야 할 사항은 무엇인가요?</a>
-            <div class="q-meta"><span>답변 <b class="tabular">1</b></span><span>조회 <b class="tabular">28</b></span><span class="tabular">2024.05.07</span></div>
-          </div>
-          <span class="status-tag2 done">답변완료</span>
-        </div>
-        <div class="qna-row">
-          <span class="qna-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/></svg></span>
-          <div class="qna-main">
-            <a href="#" class="q-title">서보모터 정지 시 진동이 발생하는 이유는 무엇인가요?</a>
-            <div class="q-meta"><span>답변 <b class="tabular">0</b></span><span>조회 <b class="tabular">15</b></span><span class="tabular">2024.05.07</span></div>
-          </div>
-          <span class="status-tag2 wait">답변대기</span>
-        </div>
-        <div class="qna-row">
-          <span class="qna-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/></svg></span>
-          <div class="qna-main">
-            <a href="#" class="q-title">베어링 교체 주기와 소음 진단 방법을 알고 싶습니다.</a>
-            <div class="q-meta"><span>답변 <b class="tabular">3</b></span><span>조회 <b class="tabular">32</b></span><span class="tabular">2024.05.06</span></div>
-          </div>
-          <span class="status-tag2 done">답변완료</span>
-        </div>
-        <div class="qna-row">
-          <span class="qna-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/><circle cx="18" cy="17" r="3"/></svg></span>
-          <div class="qna-main">
-            <a href="#" class="q-title">CNC 공작기계 오일 온도 알람 해결 방법을 공유해주세요.</a>
-            <div class="q-meta"><span>답변 <b class="tabular">0</b></span><span>조회 <b class="tabular">12</b></span><span class="tabular">2024.05.06</span></div>
-          </div>
-          <span class="status-tag2 wait">답변대기</span>
-        </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:6px 20px;margin-top:16px;" id="qnaRows">
+        <p style="padding:24px 0;text-align:center;color:var(--text-tertiary);">불러오는 중...</p>
       </div>
-
-      <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:16px;">더보기</button>
     </div>
   </div>
 </main>
@@ -151,15 +109,84 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.querySelectorAll('.board-tabs button').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.board-tabs button').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-    });
-  });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
+<script>
+(function () {
+  var BOARD_TYPE = 'qna';
+  var ICON = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  var posts = [];
+  var commentCounts = {};
+  var currentTab = 'latest';
+  var searchQ = '';
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    return iso.slice(0, 10).replace(/-/g, '.');
+  }
+
+  async function loadPosts() {
+    var res = await sb.from('community_posts')
+      .select('id,title,view_count,created_at')
+      .eq('board_type', BOARD_TYPE)
+      .order('created_at', { ascending: false });
+    posts = res.data || [];
+    commentCounts = {};
+    var ids = posts.map(function (p) { return p.id; });
+    if (ids.length) {
+      var cRes = await sb.from('community_comments').select('post_id').in('post_id', ids);
+      (cRes.data || []).forEach(function (c) { commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1; });
+    }
+    render();
+  }
+
+  function filtered() {
+    var list = posts.slice();
+    if (currentTab === 'popular') list.sort(function (a, b) { return (b.view_count || 0) - (a.view_count || 0); });
+    if (searchQ) list = list.filter(function (p) { return p.title.toLowerCase().indexOf(searchQ.toLowerCase()) !== -1; });
+    return list;
+  }
+
+  function render() {
+    var wrap = document.getElementById('qnaRows');
+    var list = filtered();
+    if (!list.length) { wrap.innerHTML = '<p style="padding:24px 0;text-align:center;color:var(--text-tertiary);">등록된 질문이 없습니다.</p>'; return; }
+    wrap.innerHTML = list.map(function (p) {
+      var answered = (commentCounts[p.id] || 0) > 0;
+      var statusBadge = answered ? '<span class="status-tag2 done">답변완료</span>' : '<span class="status-tag2 wait">답변대기</span>';
+      return '<div class="qna-row">' +
+        '<span class="qna-icon">' + ICON + '</span>' +
+        '<div class="qna-main">' +
+        '<a href="community.html?board=qna&post=' + p.id + '" class="q-title">' + escapeHtml(p.title) + '</a>' +
+        '<div class="q-meta"><span>답변 <b class="tabular">' + (commentCounts[p.id] || 0) + '</b></span><span>조회 <b class="tabular">' + (p.view_count || 0) + '</b></span><span class="tabular">' + fmtDate(p.created_at) + '</span></div>' +
+        '</div>' + statusBadge +
+        '</div>';
+    }).join('');
+  }
+
+  document.getElementById('qnaTabs').addEventListener('click', function (e) {
+    var btn = e.target.closest('button'); if (!btn) return;
+    document.querySelectorAll('#qnaTabs button').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentTab = btn.getAttribute('data-tab');
+    render();
+  });
+
+  document.getElementById('qnaSearchForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    searchQ = document.getElementById('qnaSearchInput').value.trim();
+    render();
+  });
+
+  document.addEventListener('versoi:ready', function () { loadPosts(); });
+})();
+</script>
 </body>
 </html>

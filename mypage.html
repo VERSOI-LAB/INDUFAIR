@@ -11,7 +11,10 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   .profile-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:26px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
-  .profile-avatar{width:64px;height:64px;border-radius:50%;background:var(--bg-soft);color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .profile-avatar{width:64px;height:64px;border-radius:50%;background:var(--bg-soft);color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:visible;}
+  .profile-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
+  .avatar-edit-btn{position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+  .avatar-edit-btn:hover{opacity:.88;}
   .profile-main{flex:1;min-width:220px;}
   .profile-main h1{font-size:1.2rem;font-weight:900;}
   .profile-main .welcome{font-size:.86rem;color:var(--text-secondary);margin-top:2px;}
@@ -146,7 +149,13 @@
     <!-- MAIN -->
     <div>
       <div class="profile-card">
-        <span class="profile-avatar"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
+        <span class="profile-avatar" id="profileAvatar">
+          <span id="profileAvatarInner"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
+          <button type="button" class="avatar-edit-btn" id="avatarEditBtn" aria-label="프로필 사진 변경">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+        </span>
         <div class="profile-main">
           <h1 id="profileName">-</h1>
           <p class="welcome">환영합니다!</p>
@@ -198,8 +207,13 @@
         <div class="activity-row"><span>구해요 등록 내역</span><b class="tabular" id="actWanted">0건</b></div>
         <div class="activity-row"><span>판매 등록 내역</span><b class="tabular" id="actProducts">0건</b></div>
         <div class="activity-row"><span>문의/상담 내역</span><b class="tabular" id="actInquiries">0건</b></div>
-        <div class="activity-row"><span>받은 쿠폰</span><b class="tabular">2장</b></div>
+        <div class="activity-row"><span>받은 쿠폰</span><b class="tabular" id="actCoupons">0장</b></div>
         <div class="activity-row"><span>관심 상품</span><b class="tabular" id="actFavorites">0개</b></div>
+      </div>
+
+      <div class="side-panel" style="margin-top:16px;">
+        <p class="side-panel-title">보유 쿠폰</p>
+        <div id="couponList"><div class="notif-empty">불러오는 중...</div></div>
       </div>
 
       <div class="side-panel" style="margin-top:16px;">
@@ -255,11 +269,46 @@
   };
   var RECO_ICON = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>';
 
+  var PLACEHOLDER_AVATAR_SVG = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>';
+
+  function renderAvatar(url) {
+    var inner = document.getElementById('profileAvatarInner');
+    if (!inner) return;
+    inner.innerHTML = url ? '<img src="' + url + '" alt="프로필 사진">' : PLACEHOLDER_AVATAR_SVG;
+  }
+
   document.addEventListener('versoi:ready', function (e) {
     var user = e.detail.user;
     if (!user) return;
     loadMypage(user).catch(function (err) { console.error('[mypage]', err); });
+    setupAvatarUpload(user);
   });
+
+  function setupAvatarUpload(user) {
+    var input = document.getElementById('avatarInput');
+    var btn = document.getElementById('avatarEditBtn');
+    if (!input || !btn) return;
+    btn.addEventListener('click', function () { input.click(); });
+    input.addEventListener('change', async function () {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      try {
+        var path = user.id + '/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+        var up = await window.sb.storage.from('avatars').upload(path, file);
+        if (up.error) throw up.error;
+        var pub = window.sb.storage.from('avatars').getPublicUrl(path);
+        var url = pub.data.publicUrl;
+        var updRes = await window.sb.from('profiles').update({ avatar_url: url }).eq('id', user.id);
+        if (updRes.error) throw updRes.error;
+        renderAvatar(url);
+      } catch (err) {
+        console.error('[mypage] avatar upload failed', err);
+        alert('프로필 사진 업로드에 실패했습니다.');
+      } finally {
+        input.value = '';
+      }
+    });
+  }
 
   async function loadMypage(user) {
     var profile = user.profile || {};
@@ -269,6 +318,7 @@
     document.getElementById('profileJoin').textContent = fmtDate(profile.created_at);
     document.getElementById('profileEmail').textContent = profile.email || user.email;
     document.getElementById('profilePhone').textContent = profile.phone || '-';
+    renderAvatar(profile.avatar_url);
 
     var ordersRes = await window.sb.from('orders').select('*').eq('buyer_id', user.id);
     var orders = ordersRes.data || [];
@@ -342,6 +392,24 @@
     document.getElementById('actProducts').textContent = (myProductsRes.count || 0) + '건';
     document.getElementById('actInquiries').textContent = (inquiriesRes.count || 0) + '건';
     document.getElementById('actFavorites').textContent = (favRes.count || 0) + '개';
+
+    // coupons (unused only)
+    var couponRes = await window.sb.from('user_coupons')
+      .select('id,created_at,coupon:coupons(title,discount_type,discount_value)')
+      .eq('profile_id', user.id)
+      .is('used_at', null);
+    var coupons = couponRes.data || [];
+    document.getElementById('actCoupons').textContent = coupons.length + '장';
+    var couponListEl = document.getElementById('couponList');
+    if (!coupons.length) {
+      couponListEl.innerHTML = '<div class="notif-empty">보유한 쿠폰이 없습니다.</div>';
+    } else {
+      couponListEl.innerHTML = coupons.map(function (uc) {
+        var c = uc.coupon || {};
+        var discountLabel = c.discount_type === 'percent' ? (c.discount_value + '% 할인') : (fmtCurrency(c.discount_value) + ' 할인');
+        return '<div class="alert-item"><p>' + (c.title || '') + '</p><span>' + discountLabel + '</span></div>';
+      }).join('');
+    }
 
     // notifications
     var notifRes = await window.sb.from('notifications').select('*').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(5);

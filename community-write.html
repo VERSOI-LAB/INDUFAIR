@@ -38,9 +38,9 @@
   }
   .tag-pill-editable{display:flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:700;padding:5px 10px;border-radius:20px;}
   .tag-pill-editable button{color:var(--accent);display:flex;}
-  .tag-input-wrap input{flex:1;min-width:140px;border:none;font-size:.88rem;font-family:inherit;color:var(--text);}
+  .tag-input-wrap input[type="text"]{flex:1;min-width:140px;border:none;font-size:.88rem;font-family:inherit;color:var(--text);padding-right:44px;}
   .tag-input-wrap input:focus{outline:none;}
-  .tag-count{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.72rem;color:var(--text-tertiary);font-family:var(--font-en);}
+  .tag-count{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.72rem;color:var(--text-tertiary);font-family:var(--font-en);background:var(--surface);}
 
   .side-comm-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:20px;}
   .side-comm-panel + .side-comm-panel{margin-top:16px;}
@@ -183,11 +183,13 @@
 
             <div class="field full" style="margin-top:16px;">
               <label>첨부파일</label>
-              <div class="dropzone">
+              <div class="dropzone" id="attachDropzone">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1"/><path d="M9 15V4M9 4l3 3M9 4l-3 3"/></svg>
                 <div class="dz-main">파일을 드래그하거나 클릭하여 첨부하세요.</div>
                 <div class="dz-sub">최대 10MB / 파일, 최대 5개까지 첨부 가능 (jpg, png, pdf, doc, docx, xls, xlsx, zip)</div>
               </div>
+              <input type="file" id="attachInput" multiple style="display:none;">
+              <div class="attach-list" id="attachList"></div>
             </div>
 
             <div class="field full">
@@ -250,11 +252,80 @@
   var cancelBtn = document.getElementById('writeCancelBtn');
   if (cancelBtn) cancelBtn.addEventListener('click', function () { location.href = 'community.html'; });
 
+  var currentUser = null;
   document.addEventListener('versoi:ready', function (e) {
     var user = e.detail.user;
     if (!user) {
       var next = encodeURIComponent(location.pathname.split('/').pop() + location.search);
       location.href = 'login.html?redirect=' + next;
+      return;
+    }
+    currentUser = user;
+
+    var params = new URLSearchParams(location.search);
+    var board = params.get('board');
+    if (board) {
+      var sel = document.getElementById('boardTypeSelect');
+      if (sel && sel.querySelector('option[value="' + board + '"]')) sel.value = board;
+    }
+  });
+
+  // --- Attachments ---
+  var pendingAttachments = []; // { name, size, url, uploading, el }
+  var attachInput = document.getElementById('attachInput');
+  var attachDropzone = document.getElementById('attachDropzone');
+  var attachList = document.getElementById('attachList');
+
+  function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + 'B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + 'MB';
+  }
+
+  function renderAttachList() {
+    attachList.innerHTML = pendingAttachments.map(function (a, i) {
+      return '<div class="attach-item' + (a.uploading ? ' uploading' : '') + '">' +
+        '<span class="attach-name">' + (a.uploading ? '업로드 중… ' : '') + a.name + '</span>' +
+        '<span class="attach-size">' + fmtSize(a.size) + '</span>' +
+        '<button type="button" class="attach-remove" data-idx="' + i + '" aria-label="첨부 제거"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+        '</div>';
+    }).join('');
+    attachList.querySelectorAll('.attach-remove').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        pendingAttachments.splice(Number(btn.getAttribute('data-idx')), 1);
+        renderAttachList();
+      });
+    });
+  }
+
+  attachDropzone.addEventListener('click', function () { attachInput.click(); });
+
+  attachInput.addEventListener('change', async function () {
+    if (!window.VERSOI.requireAuth()) return;
+    var files = Array.prototype.slice.call(attachInput.files || []);
+    attachInput.value = '';
+    var uid = (currentUser && currentUser.id) || (window.VERSOI.user && window.VERSOI.user.id);
+    if (!uid) return;
+
+    for (var i = 0; i < files.length; i++) {
+      var file = files[i];
+      var entry = { name: file.name, size: file.size, url: null, uploading: true };
+      pendingAttachments.push(entry);
+      renderAttachList();
+      try {
+        var path = uid + '/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+        var up = await window.sb.storage.from('attachments').upload(path, file);
+        if (up.error) throw up.error;
+        var pub = window.sb.storage.from('attachments').getPublicUrl(path);
+        entry.url = pub.data.publicUrl;
+        entry.uploading = false;
+      } catch (err) {
+        console.error('[community-write] attachment upload failed', err);
+        var idx = pendingAttachments.indexOf(entry);
+        if (idx > -1) pendingAttachments.splice(idx, 1);
+        alert(file.name + ' 업로드에 실패했습니다.');
+      }
+      renderAttachList();
     }
   });
 
@@ -269,16 +340,22 @@
     if (!boardType) { alert('게시판을 선택해주세요.'); return; }
     if (!title) { alert('제목을 입력해주세요.'); return; }
     if (!content) { alert('내용을 입력해주세요.'); return; }
+    if (pendingAttachments.some(function (a) { return a.uploading; })) {
+      alert('파일 업로드가 완료될 때까지 기다려주세요.');
+      return;
+    }
 
     var submitBtn = document.getElementById('writeSubmitBtn');
     submitBtn.disabled = true;
 
     var user = window.VERSOI.user;
+    var attachments = pendingAttachments.map(function (a) { return { url: a.url, name: a.name }; });
     var res = await sb.from('community_posts').insert({
       profile_id: user.id,
       board_type: boardType,
       title: title,
-      content: content
+      content: content,
+      attachments: attachments
     });
 
     submitBtn.disabled = false;

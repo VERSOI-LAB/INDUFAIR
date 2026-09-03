@@ -83,48 +83,19 @@
       <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">중소기업의 성장과 혁신을 지원하는 다양한 사업 정보를 제공합니다.</p>
 
       <div class="board-toolbar">
-        <div class="board-search">
+        <form class="board-search" id="govSearchForm" style="flex:1;">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="사업명, 키워드를 입력하세요.">
-        </div>
-        <div class="select-field">전체 분야 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+          <input type="text" id="govSearchInput" placeholder="사업명, 키워드를 입력하세요.">
+        </form>
       </div>
 
-      <div class="board-tabs">
-        <button class="active">신규모집</button><button>접수중</button><button>마감임박</button>
+      <div class="board-tabs" id="govTabs">
+        <button class="active" data-tab="new">신규모집</button><button data-tab="open">접수중</button><button data-tab="urgent">마감임박</button>
       </div>
 
-      <div class="gov-card">
-        <span class="gov-tag new">신규모집</span>
-        <div class="gov-main">
-          <a href="#" class="gov-title" style="display:block;">스마트공장 구축 및 고도화 사업</a>
-          <div class="gov-org">중소벤처기업부</div>
-          <div class="gov-meta"><span>접수기간 <b class="tabular">2024.05.01 ~ 2024.05.31</b></span><span>지원금 <b>최대 2억원</b></span></div>
-        </div>
-        <button class="btn btn-outline btn-sm">지원사업 보기</button>
+      <div id="govCards">
+        <p style="padding:24px 0;text-align:center;color:var(--text-tertiary);">불러오는 중...</p>
       </div>
-
-      <div class="gov-card">
-        <span class="gov-tag urgent">마감임박</span>
-        <div class="gov-main">
-          <a href="#" class="gov-title" style="display:block;">중소기업 기술혁신 개발사업</a>
-          <div class="gov-org">중소기업기술정보진흥원</div>
-          <div class="gov-meta"><span>접수기간 <b class="tabular">2024.05.01 ~ 2024.05.20</b></span><span>지원금 <b>최대 1억원</b></span></div>
-        </div>
-        <button class="btn btn-outline btn-sm">지원사업 보기</button>
-      </div>
-
-      <div class="gov-card">
-        <span class="gov-tag open">접수중</span>
-        <div class="gov-main">
-          <a href="#" class="gov-title" style="display:block;">수출바우처 사업</a>
-          <div class="gov-org">KOTRA</div>
-          <div class="gov-meta"><span>접수기간 <b class="tabular">2024.05.07 ~ 2024.06.07</b></span><span>지원금 <b>최대 1.5억원</b></span></div>
-        </div>
-        <button class="btn btn-outline btn-sm">지원사업 보기</button>
-      </div>
-
-      <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:18px;">더 많은 지원사업 보기 ›</button>
     </div>
   </div>
 </main>
@@ -143,15 +114,86 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.querySelectorAll('.board-tabs button').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.board-tabs button').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-    });
-  });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
+<script>
+(function () {
+  // NOTE: community_posts has no deadline/subsidy-amount columns, so the tabs below are an
+  // approximation over available fields (created_at / author) rather than real 접수기간 data.
+  var BOARD_TYPE = 'gov';
+  var TAG_META = {
+    new: { cls: 'new', label: '신규모집' },
+    open: { cls: 'open', label: '접수중' },
+    urgent: { cls: 'urgent', label: '마감임박' }
+  };
+  var posts = [];
+  var currentTab = 'new';
+  var searchQ = '';
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function fmtDate(iso) {
+    if (!iso) return '';
+    return iso.slice(0, 10).replace(/-/g, '.');
+  }
+
+  async function loadPosts() {
+    var res = await sb.from('community_posts')
+      .select('id,title,content,created_at,profiles(name)')
+      .eq('board_type', BOARD_TYPE)
+      .order('created_at', { ascending: false });
+    posts = res.data || [];
+    render();
+  }
+
+  function filtered() {
+    var list = posts.slice();
+    if (currentTab === 'urgent') list.reverse(); // proxy for "been open longest / closing soon"
+    if (searchQ) list = list.filter(function (p) { return p.title.toLowerCase().indexOf(searchQ.toLowerCase()) !== -1; });
+    return list;
+  }
+
+  function render() {
+    var wrap = document.getElementById('govCards');
+    var list = filtered();
+    if (!list.length) { wrap.innerHTML = '<p style="padding:24px 0;text-align:center;color:var(--text-tertiary);">등록된 지원사업이 없습니다.</p>'; return; }
+    var tag = TAG_META[currentTab];
+    wrap.innerHTML = list.map(function (p) {
+      var org = p.profiles && p.profiles.name ? p.profiles.name : 'VERSOI';
+      var desc = (p.content || '').slice(0, 60);
+      return '<div class="gov-card">' +
+        '<span class="gov-tag ' + tag.cls + '">' + tag.label + '</span>' +
+        '<div class="gov-main">' +
+        '<a href="community.html?board=gov&post=' + p.id + '" class="gov-title" style="display:block;">' + escapeHtml(p.title) + '</a>' +
+        '<div class="gov-org">' + escapeHtml(org) + '</div>' +
+        '<div class="gov-meta"><span>등록일 <b class="tabular">' + fmtDate(p.created_at) + '</b></span><span>' + escapeHtml(desc) + '</span></div>' +
+        '</div>' +
+        '<a href="community.html?board=gov&post=' + p.id + '" class="btn btn-outline btn-sm">지원사업 보기</a>' +
+        '</div>';
+    }).join('');
+  }
+
+  document.getElementById('govTabs').addEventListener('click', function (e) {
+    var btn = e.target.closest('button'); if (!btn) return;
+    document.querySelectorAll('#govTabs button').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentTab = btn.getAttribute('data-tab');
+    render();
+  });
+
+  document.getElementById('govSearchForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    searchQ = document.getElementById('govSearchInput').value.trim();
+    render();
+  });
+
+  document.addEventListener('versoi:ready', function () { loadPosts(); });
+})();
+</script>
 </body>
 </html>

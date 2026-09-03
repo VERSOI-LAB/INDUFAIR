@@ -103,6 +103,12 @@
 
   /* ============ Layout: sidebar + main ============ */
   .goods-layout{display:grid;grid-template-columns:252px 1fr;gap:24px;align-items:start;padding-block:32px 64px;}
+  /* Without this, the grid track auto-sizes to the min-content of its widest
+     child — including the horizontally-scrollable .product-tabs bar, whose
+     nowrap buttons don't actually need the space (they scroll) but still
+     count toward min-content and were blowing the whole layout out sideways
+     on mobile. */
+  .goods-layout > *{min-width:0;}
 
   /* Sidebar filters: shared .filter-panel / .filter-group / .check-row etc. live in styles.css */
   .filter-panel{position:sticky;top:88px;}
@@ -412,11 +418,11 @@
             <label class="check-row"><input type="checkbox"> 300만원 ~ 500만원</label>
             <label class="check-row"><input type="checkbox"> 500만원 이상</label>
             <div class="price-inputs">
-              <input type="text" placeholder="최소금액" class="tabular">
+              <input type="text" placeholder="최소금액" class="tabular" id="priceMinInput">
               <span>~</span>
-              <input type="text" placeholder="최대금액" class="tabular">
+              <input type="text" placeholder="최대금액" class="tabular" id="priceMaxInput">
             </div>
-            <button class="btn btn-outline btn-sm filter-apply">적용</button>
+            <button class="btn btn-outline btn-sm filter-apply" id="priceApplyBtn">적용</button>
           </div>
         </div>
 
@@ -571,7 +577,7 @@
   var PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/><line x1="4" y1="9" x2="20" y2="9"/></svg>';
   var BRAND_CLASS = { MITSUBISHI:'brand-mitsu', FANUC:'brand-fanuc', SMC:'brand-smc', OMRON:'brand-omron', NTN:'brand-ntn' };
 
-  var state = { category: '', q: '', brands: new Set(), stock: 'all' };
+  var state = { category: '', q: '', brands: new Set(), stock: 'all', priceMin: null, priceMax: null };
   var favSet = new Set();
   var allCategories = [];
 
@@ -662,6 +668,8 @@
     if (state.q) q = q.ilike('title', '%'+state.q+'%');
     if (state.stock === 'in') q = q.gt('stock', 0);
     if (state.stock === 'out') q = q.eq('stock', 0);
+    if (state.priceMin != null) q = q.gte('price', state.priceMin);
+    if (state.priceMax != null) q = q.lte('price', state.priceMax);
     var res = await q;
     if (res.error) { console.error(res.error); return []; }
     var rows = res.data || [];
@@ -754,6 +762,14 @@
     document.querySelectorAll('.product-tabs button').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
     state.category = TAB_CAT[btn.dataset.ptab] || '';
+    render();
+  });
+
+  document.getElementById('priceApplyBtn').addEventListener('click', function(){
+    var minVal = document.getElementById('priceMinInput').value.replace(/[^0-9]/g, '');
+    var maxVal = document.getElementById('priceMaxInput').value.replace(/[^0-9]/g, '');
+    state.priceMin = minVal ? parseInt(minVal, 10) : null;
+    state.priceMax = maxVal ? parseInt(maxVal, 10) : null;
     render();
   });
 

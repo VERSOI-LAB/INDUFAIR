@@ -448,6 +448,19 @@ img,svg{display:block;max-width:100%;}
 .dropzone .dz-main{font-size:.88rem;font-weight:700;}
 .dropzone .dz-sub{font-size:.76rem;color:var(--text-tertiary);margin-top:6px;line-height:1.5;}
 
+.attach-list{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+.attach-item{display:flex;align-items:center;gap:8px;background:var(--bg-soft);border-radius:8px;padding:8px 10px;font-size:.82rem;color:var(--text-secondary);}
+.attach-item .attach-name{flex:1;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.attach-item .attach-size{color:var(--text-tertiary);font-size:.76rem;font-family:var(--font-en);flex-shrink:0;}
+.attach-item .attach-remove{color:var(--text-tertiary);flex-shrink:0;display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;}
+.attach-item .attach-remove:hover{background:var(--surface);color:var(--up);}
+.attach-item.uploading .attach-name{color:var(--text-tertiary);}
+
+.post-attachments{margin-bottom:14px;}
+.post-attachments .attach-title{font-size:.78rem;font-weight:800;color:var(--text-tertiary);margin-bottom:6px;}
+.post-attachments a{display:flex;align-items:center;gap:6px;font-size:.83rem;color:var(--accent);font-weight:600;padding:4px 0;}
+.post-attachments a:hover{text-decoration:underline;}
+
 .consent-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;flex-wrap:wrap;}
 .consent-check{display:flex;align-items:center;gap:9px;font-size:.86rem;color:var(--text-secondary);cursor:pointer;}
 .consent-check input{accent-color:var(--accent);width:16px;height:16px;flex-shrink:0;}
@@ -546,6 +559,17 @@ img,svg{display:block;max-width:100%;}
 @media (max-width:560px){
   .logo-tag{display:none;}
   .category-row{grid-template-columns:repeat(3,1fr);}
+
+  /* Header-actions: search + notification-bell + cart + login/user-chip + hamburger
+     no longer fit on one line at phone widths and were pushing the header into
+     horizontal overflow. Drop the least-essential icons (search has its own bar
+     on every listing page; notifications are reachable from 마이페이지) and
+     collapse the logged-in user-chip down to just its avatar. */
+  .header-actions{gap:6px;}
+  .header-actions .icon-btn[aria-label="검색"],
+  .header-actions .icon-btn[aria-label="알림"]{display:none;}
+  .user-chip{gap:0;padding:4px;}
+  .user-chip .lbl, .user-chip > svg{display:none;}
 }
 
 /* ============ Two-column page layout (sidebar + main) shared shell ============ */
@@ -557,10 +581,15 @@ img,svg{display:block;max-width:100%;}
   .page-layout.with-aside .page-aside{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;align-items:start;}
 }
 @media (max-width:1080px){
-  .page-layout{grid-template-columns:1fr;}
+  .page-layout, .page-layout.with-aside{grid-template-columns:1fr;}
   .page-layout.with-aside .page-aside{grid-template-columns:1fr;}
   .filter-panel{position:static;}
 }
+/* Grid items default to min-width:auto, so a wide child (e.g. a table wrapped
+   in its own overflow-x:auto div) still forces the 1fr track — and the whole
+   page — wider than the viewport. Let every direct child of .page-layout
+   shrink below its content's natural min-content width. */
+.page-layout > *{min-width:0;}
 
 /* ============================================================
    Seller Center — admin shell (dashboard/products/orders/...)
@@ -632,7 +661,7 @@ img,svg{display:block;max-width:100%;}
 }
 .stat-card .lbl{display:flex;align-items:center;gap:7px;font-size:.8rem;color:var(--text-tertiary);font-weight:700;white-space:nowrap;}
 .stat-card .lbl svg{color:var(--accent);flex-shrink:0;}
-.stat-card .val{font-family:var(--font-en);font-weight:900;font-size:1.5rem;margin-top:10px;letter-spacing:-.01em;}
+.stat-card .val{font-family:var(--font-en);font-weight:900;font-size:1.5rem;margin-top:10px;letter-spacing:-.01em;overflow-wrap:break-word;}
 .stat-card .delta{margin-top:5px;font-size:.76rem;font-weight:700;color:var(--text-tertiary);display:flex;align-items:center;gap:3px;}
 .stat-card .delta.up{color:var(--good);}
 .stat-card .delta.down{color:var(--up);}
@@ -646,6 +675,11 @@ img,svg{display:block;max-width:100%;}
 .admin-card-head h2{font-size:1rem;font-weight:800;}
 .admin-grid-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start;}
 .admin-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;}
+/* Prevent grid items that hold a wide data-table-scroll (or anything else
+   with its own overflow) from blowing out the grid track to their content's
+   min-content width — the #1 way this shell got a page-level horizontal
+   scrollbar on mobile. */
+.admin-grid-2 > *, .admin-grid-3 > *{min-width:0;}
 .admin-stack{display:flex;flex-direction:column;gap:16px;}
 
 /* Count tabs (전체 128 / 판매중 98 / ...) */
@@ -694,7 +728,7 @@ img,svg{display:block;max-width:100%;}
 .data-table .row-thumb .name{color:var(--text);font-weight:700;}
 .data-table .row-thumb .sub{font-size:.76rem;color:var(--text-tertiary);margin-top:2px;}
 .data-table .cell-strong{color:var(--text);font-weight:700;}
-.data-table-scroll{overflow-x:auto;margin:0 -2px;}
+.data-table-scroll{overflow-x:auto;margin:0 -2px;-webkit-overflow-scrolling:touch;}
 .table-actions{display:flex;gap:6px;flex-wrap:wrap;}
 
 /* Status badges (order/product/settlement states) */
@@ -765,16 +799,57 @@ img,svg{display:block;max-width:100%;}
 .verify-tile .date{display:block;font-size:.72rem;color:var(--text-tertiary);margin-top:5px;}
 
 @media (max-width:1240px){
-  .stat-card-row{grid-template-columns:repeat(3,1fr);}
+  .stat-card-row{grid-template-columns:repeat(3,1fr) !important;}
   .admin-grid-2, .admin-grid-3{grid-template-columns:1fr;}
 }
 @media (max-width:900px){
   .admin-sidebar{position:fixed;left:-240px;top:0;z-index:60;transition:left .2s ease;box-shadow:var(--shadow-3);}
   .admin-sidebar.open{left:0;}
-  .stat-card-row{grid-template-columns:repeat(2,1fr);}
+  .stat-card-row{grid-template-columns:repeat(2,1fr) !important;}
   .admin-user .lbl{display:none;}
+
+  /* Data tables: force cells to keep one line so .data-table-scroll's
+     overflow-x actually produces a horizontal scroll instead of every
+     cell wrapping/crushing its text down to an unreadable column. */
+  .data-table td{white-space:nowrap;}
+  .data-table .row-thumb .name, .data-table .row-thumb .sub{
+    max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  /* Topbar: the "판매자 가이드" text button + crumb + icons + avatar no
+     longer fit side by side under ~640px and were crushing .admin-crumb
+     (and the hamburger button inside it) down to a sliver. Drop the
+     redundant guide button (also present in the sidebar) and let the
+     crumb ellipsize instead of char-wrapping. */
+  .admin-topbar .admin-top-actions > .btn{display:none;}
+  .admin-top-actions{flex-shrink:0;}
+  .admin-crumb{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .admin-crumb .admin-sidebar-toggle{flex-shrink:0;}
 }
 @media (max-width:640px){
-  .stat-card-row{grid-template-columns:1fr 1fr;}
+  .stat-card-row{grid-template-columns:1fr 1fr !important;}
   .admin-crumb{font-size:.94rem;}
+
+  /* Count tabs / settings tabs: 5-6 tabs no longer fit on one line at
+     phone widths; scroll horizontally instead of wrapping/overlapping. */
+  .count-tabs, .settings-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .count-tabs::-webkit-scrollbar, .settings-tabs::-webkit-scrollbar{display:none;}
+  .count-tabs button, .settings-tabs button{flex-shrink:0;}
+
+  /* Filter bar: let the search field take the full row when it wraps
+     onto its own line, and let selects share rows in pairs instead of
+     shrinking to unreadable slivers. */
+  .admin-filter-bar .search-field{flex:1 1 100%;max-width:none;}
+  .admin-filter-bar select{flex:1 1 auto;min-width:130px;}
+
+  /* Info rows (label + value + edit button): stack the label above the
+     value/button so none of the three get squeezed. */
+  .info-row{flex-wrap:wrap;row-gap:8px;}
+  .info-row .lbl{width:100%;}
+}
+@media (max-width:480px){
+  /* At 2 columns, long won-currency stat values ("₩88,550,000") wrap
+     awkwardly inside a ~150px card on phone widths. Full width reads
+     far better for the 5-6 card rows (dashboard/tax/settlement). */
+  .stat-card-row{grid-template-columns:1fr !important;}
 }

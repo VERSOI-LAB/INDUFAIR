@@ -31,6 +31,17 @@
   .gm-table tr.gm-row{cursor:pointer;}
   .gm-detail-row td{background:var(--bg-soft);padding:16px 14px;}
   .gm-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:12px;}
+  @media (max-width:900px){
+    /* The table sits in an overflow-x:auto wrapper, but without nowrap the
+       narrow th/td cells (카테고리/지역/작성일/조회) were wrapping mid-word
+       instead of scrolling — force one line per cell so the wrapper's
+       horizontal scroll actually kicks in. The title column also needs a
+       floor width, otherwise auto table layout starves it down to a
+       vertical sliver once its neighbors stop shrinking. */
+    .gm-table th, .gm-table td{white-space:nowrap;}
+    .gm-table td.title{min-width:180px;white-space:normal;}
+    .gm-detail-grid{grid-template-columns:1fr;}
+  }
   .gm-detail-grid div b{display:block;font-size:.74rem;color:var(--text-tertiary);font-weight:700;margin-bottom:4px;}
   .gm-detail-grid div span{font-size:.86rem;color:var(--text);font-weight:600;}
   .gm-detail-desc{white-space:pre-wrap;line-height:1.6;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);margin-bottom:14px;font-size:.86rem;color:var(--text-secondary);}
@@ -194,6 +205,11 @@
           '<div><b>상태</b><span>' + (p.status === 'closed' ? '완료' : '진행중') + '</span></div>' +
         '</div>' +
         '<div class="gm-detail-desc">' + (esc(p.description) || '상세 설명이 없습니다.').replace(/\n/g,'<br>') + '</div>' +
+        (p.attachments && p.attachments.length
+          ? '<div class="post-attachments"><div class="attach-title">첨부파일</div>' +
+            p.attachments.map(function (a) { return '<a href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(a.name || a.url) + '</a>'; }).join('') +
+            '</div>'
+          : '') +
         '<p style="font-weight:800;font-size:.82rem;margin-bottom:8px;">댓글</p>' +
         '<div class="gm-comments-wrap" data-comments-for="' + p.id + '">' + renderComments(p.id) + '</div>' +
         (canComment
@@ -218,7 +234,12 @@
       .select('*, categories(name)')
       .order('created_at', { ascending: false });
     if (res.error) { console.error('[VERSOI] wanted_posts load error', res.error); gmBody.innerHTML = '<tr><td colspan="6" class="gm-empty">불러오지 못했습니다.</td></tr>'; return; }
-    allPosts = res.data || [];
+    allPosts = (res.data || []).map(function (p) {
+      var att = p.attachments;
+      if (typeof att === 'string') { try { att = JSON.parse(att); } catch (e) { att = []; } }
+      p.attachments = Array.isArray(att) ? att : [];
+      return p;
+    });
     render();
   }
 

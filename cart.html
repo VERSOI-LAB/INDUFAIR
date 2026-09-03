@@ -101,6 +101,8 @@
   .coupon-row input:focus{outline:none;border-color:var(--accent);}
   .coupon-row button{background:var(--accent);color:#fff;padding:0 16px;border-radius:8px;font-weight:700;font-size:.82rem;transition:background .15s ease;}
   .coupon-row button:hover{background:var(--accent-hover);}
+  .field-note{font-size:.78rem;color:var(--text-tertiary);}
+  .field-note.applied{color:var(--good);font-weight:700;}
 
   @media (max-width:1080px){
     .cart-table-head{display:none;}
@@ -113,6 +115,14 @@
     .together-track{grid-template-columns:1fr;}
   }
   @media (max-width:640px){ .feature-strip{grid-template-columns:1fr;} }
+  @media (max-width:480px){
+    /* "선택 삭제" / "장바구니 비우기" were wrapping mid-word against the
+       "전체 선택 (0/0)" label at phone widths. Keep each label on one line
+       and tighten the gaps so both buttons still fit beside the label. */
+    .select-all-row{gap:8px;}
+    .cart-tools{gap:10px;}
+    .cart-tools button{white-space:nowrap;font-size:.78rem;gap:4px;}
+  }
 </style>
 </head>
 <body>
@@ -295,7 +305,7 @@
         <p class="summary-title">주문 요약</p>
         <div class="summary-row"><span>상품금액 (<span id="summaryItemCount">0</span>개)</span><b class="tabular" id="summarySubtotal">₩0</b></div>
         <div class="summary-row"><span>배송비</span><b class="tabular" id="summaryShipping">₩0</b></div>
-        <div class="summary-row"><span>할인금액</span><b class="tabular" style="color:var(--up);">− ₩0</b></div>
+        <div class="summary-row"><span>할인금액</span><b class="tabular" id="summaryDiscount" style="color:var(--up);">− ₩0</b></div>
         <div class="summary-total">
           <span>총 결제 예상금액</span>
           <div class="amt-row"><span class="amt tabular" id="summaryTotal">₩0</span><small>(VAT 별도)</small></div>
@@ -309,11 +319,10 @@
 
       <div class="side-panel" style="margin-top:16px;">
         <p class="side-panel-title">쿠폰 적용</p>
-        <div class="coupon-row">
-          <input type="text" placeholder="쿠폰 코드를 입력하세요">
-          <button type="button">적용</button>
-        </div>
-        <a href="#" class="more-link" style="margin-top:10px;">보유 쿠폰 2장 ›</a>
+        <select id="couponSelect" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:.84rem;font-family:inherit;color:var(--text);background:var(--surface);">
+          <option value="">쿠폰을 선택하세요</option>
+        </select>
+        <p class="field-note" id="couponNote" style="margin-top:8px;"></p>
       </div>
     </aside>
   </div>
@@ -350,6 +359,8 @@
 
   var user = null;
   var items = []; // { id, qty, selected, product:{...} }
+  var coupons = []; // unused user_coupons rows: { id, coupon:{id,title,code,discount_type,discount_value,min_order_amount} }
+  var appliedCouponId = null; // user_coupons.id currently selected
 
   function fmtWon(n){ return '₩' + Number(n||0).toLocaleString('ko-KR'); }
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
@@ -414,6 +425,52 @@
 
   function computeShipping(subtotal, count){ return count === 0 ? 0 : (subtotal >= FREE_SHIP_THRESHOLD ? 0 : FLAT_SHIP_FEE); }
 
+  function findCoupon(userCouponId){
+    return coupons.find(function(c){ return String(c.id) === String(userCouponId); });
+  }
+
+  function computeDiscount(subtotal, uc){
+    if (!uc || !uc.coupon) return 0;
+    var c = uc.coupon;
+    if (subtotal < (c.min_order_amount || 0)) return 0;
+    var d = c.discount_type === 'percent' ? Math.floor(subtotal * (c.discount_value / 100)) : c.discount_value;
+    return Math.min(d, subtotal);
+  }
+
+  async function loadCoupons(){
+    var res = await sb.from('user_coupons')
+      .select('id,coupon:coupons(id,code,title,discount_type,discount_value,min_order_amount)')
+      .eq('profile_id', user.id)
+      .is('used_at', null);
+    coupons = (res.data || []).filter(function(r){ return r.coupon; });
+    renderSummary();
+  }
+
+  function couponLabel(uc, subtotal){
+    var c = uc.coupon;
+    var discountLabel = c.discount_type === 'percent' ? (c.discount_value + '% 할인') : (fmtWon(c.discount_value) + ' 할인');
+    var label = c.title + ' (' + discountLabel + ')';
+    if (subtotal < (c.min_order_amount || 0)) label += ' - ' + fmtWon(c.min_order_amount) + ' 이상 구매 시 사용가능';
+    return label;
+  }
+
+  function renderCouponOptions(subtotal){
+    var sel = document.getElementById('couponSelect');
+    var prevValue = sel.value;
+    sel.innerHTML = '<option value="">쿠폰을 선택하세요</option>' + coupons.map(function(uc){
+      var disabled = subtotal < (uc.coupon.min_order_amount || 0);
+      return '<option value="'+uc.id+'"'+(disabled?' disabled':'')+'>'+escapeHtml(couponLabel(uc, subtotal))+'</option>';
+    }).join('');
+    // If the previously applied coupon no longer qualifies, drop it
+    if (appliedCouponId) {
+      var uc = findCoupon(appliedCouponId);
+      if (!uc || subtotal < (uc.coupon.min_order_amount || 0)) {
+        appliedCouponId = null;
+      }
+    }
+    sel.value = appliedCouponId || '';
+  }
+
   function renderSummary(){
     document.getElementById('cartCount').textContent = items.length;
     var selectedItems = items.filter(function(i){ return i.selected; });
@@ -423,12 +480,25 @@
 
     var subtotal = selectedItems.reduce(function(sum, i){ return sum + i.product.price * i.qty; }, 0);
     var shipping = computeShipping(subtotal, selectedItems.length);
-    var total = subtotal + shipping;
+    renderCouponOptions(subtotal);
+    var appliedCoupon = appliedCouponId ? findCoupon(appliedCouponId) : null;
+    var discount = computeDiscount(subtotal, appliedCoupon);
+    var total = Math.max(0, subtotal + shipping - discount);
 
     document.getElementById('summaryItemCount').textContent = checkedCount;
     document.getElementById('summarySubtotal').textContent = fmtWon(subtotal);
     document.getElementById('summaryShipping').textContent = fmtWon(shipping);
+    document.getElementById('summaryDiscount').textContent = '− ' + fmtWon(discount);
     document.getElementById('summaryTotal').textContent = fmtWon(total);
+
+    var note = document.getElementById('couponNote');
+    if (appliedCoupon) {
+      note.textContent = appliedCoupon.coupon.title + ' 적용됨 (− ' + fmtWon(discount) + ')';
+      note.className = 'field-note applied';
+    } else {
+      note.textContent = '';
+      note.className = 'field-note';
+    }
   }
 
   function updateHeaderBadge(){
@@ -512,6 +582,11 @@
     updateHeaderBadge();
   });
 
+  document.getElementById('couponSelect').addEventListener('change', function(){
+    appliedCouponId = this.value || null;
+    renderSummary();
+  });
+
   document.getElementById('clearCartBtn').addEventListener('click', async function(){
     if (!items.length) return;
     if (!confirm('장바구니를 모두 비우시겠습니까?')) return;
@@ -562,11 +637,21 @@
       var selectedItems = items.filter(function(i){ return i.selected; });
       var subtotal = selectedItems.reduce(function(sum, i){ return sum + i.product.price * i.qty; }, 0);
       var shippingFee = computeShipping(subtotal, selectedItems.length);
+      var appliedCoupon = appliedCouponId ? findCoupon(appliedCouponId) : null;
+      var discount = computeDiscount(subtotal, appliedCoupon);
       var res = await sb.rpc('checkout_cart', {
         p_recipient: recipient, p_phone: phone, p_address: address,
         p_payment_method: 'card', p_shipping_fee: shippingFee
       });
       if (res.error) throw res.error;
+      var orderId = res.data;
+      if (appliedCoupon && discount > 0 && orderId) {
+        var finalTotal = Math.max(0, subtotal + shippingFee - discount);
+        var orderUpdateRes = await sb.from('orders').update({ total_amount: finalTotal }).eq('id', orderId);
+        if (orderUpdateRes.error) console.error('[cart] order total discount update failed', orderUpdateRes.error);
+        var couponUpdateRes = await sb.from('user_coupons').update({ used_at: new Date().toISOString(), order_id: orderId }).eq('id', appliedCoupon.id);
+        if (couponUpdateRes.error) console.error('[cart] coupon mark-used failed', couponUpdateRes.error);
+      }
       location.href = 'order.html';
     } catch (err) {
       console.error(err);
@@ -592,6 +677,7 @@
     if (chipSub) chipSub.textContent = (user.profile && user.profile.member_type === 'business') ? '구매담당자' : '바이어';
     if (avatar) avatar.textContent = displayName.charAt(0);
     loadCart();
+    loadCoupons();
   });
 })();
 </script>
