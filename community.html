@@ -484,7 +484,7 @@
       var post = posts.find(function (p) { return p.id === id; });
       if (post) {
         post.view_count = (post.view_count || 0) + 1;
-        sb.from('community_posts').update({ view_count: post.view_count }).eq('id', id).then(function () {}, function () {});
+        sb.rpc('increment_community_view', { p_post_id: id }).then(function () {}, function () {});
       }
       if (!detailComments[id]) {
         var res = await sb.from('community_comments')

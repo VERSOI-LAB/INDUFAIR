@@ -273,9 +273,8 @@
       return;
     }
     gmOpenId = id;
-    // cosmetic-only view count bump (wanted_posts UPDATE is owner-restricted by RLS,
-    // so we don't persist this — it's a known gap, not synced across visitors)
     gmViewBumped[id] = true;
+    sb.rpc('increment_wanted_view', { p_post_id: id }).then(function () {}, function () {});
     if (!gmComments[id]) await loadComments(id);
     render();
   });

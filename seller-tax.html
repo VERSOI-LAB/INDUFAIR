@@ -97,6 +97,7 @@
         <div class="admin-card">
           <div class="admin-head-row" style="margin-bottom:0;">
             <h2 style="font-size:1rem;font-weight:800;" id="taxListTitle">세금계산서 목록 (총 0건)</h2>
+            <button class="btn btn-ghost btn-sm" id="exportCsvBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>엑셀 다운로드</button>
           </div>
           <div class="admin-filter-bar">
             <select id="taxTypeFilter"><option value="">전체 유형</option><option value="taxable">과세</option><option value="zero_rate">영세율</option><option value="exempt">면세</option></select>
@@ -294,6 +295,14 @@ document.getElementById('directIssueBtn').addEventListener('click', async functi
     status: 'draft', invoice_type: 'taxable'
   });
   await loadTax();
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click', function () {
+  var headers = ['번호', '공급받는자', '사업자번호', '공급가액', '세액', '합계금액', '발행일', '상태', '유형'];
+  var rows = XF.list.map(function (t) {
+    return [t.invoice_no, t.buyer_name, t.buyer_biz_no, t.supply_amount, t.vat_amount, t.total_amount, t.issue_date ? SC.dt(t.issue_date) : '-', SC.label(t.status), TYPE_KO[t.invoice_type] || t.invoice_type];
+  });
+  SC.downloadCsv('세금계산서_' + SC.dt(new Date().toISOString()) + '.csv', headers, rows);
 });
 
 SC.ready(async function (user) {

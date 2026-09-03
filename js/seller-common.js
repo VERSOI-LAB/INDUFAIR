@@ -44,10 +44,43 @@
   };
   SC.badgeCls = function (status) { return STATUS_BADGE[status] || 'badge-muted'; };
 
+  // Builds a CSV string from headers + row arrays and triggers a browser download.
+  SC.downloadCsv = function (filename, headers, rows) {
+    var esc = function (v) {
+      var s = v == null ? '' : String(v);
+      if (/[",\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+    var lines = [headers.map(esc).join(',')].concat(rows.map(function (r) { return r.map(esc).join(','); }));
+    var csv = '﻿' + lines.join('\r\n'); // BOM so Excel opens Korean text correctly
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   // Runs cb(user) once auth.js has resolved the session. On seller-*.html pages
   // user.company is guaranteed present (auth.js redirects otherwise).
   SC.ready = function (cb) {
     if (window.VERSOI && window.VERSOI.user) { cb(window.VERSOI.user); return; }
     document.addEventListener('versoi:ready', function (e) { cb(e.detail.user); });
   };
+
+  // Wire the admin topbar's "문의" bell -> pending inquiry count + link to seller-inquiries.html
+  SC.ready(async function (user) {
+    var inqBtn = document.querySelector('.admin-top-actions [aria-label="문의"]');
+    if (!inqBtn) return;
+    inqBtn.style.cursor = 'pointer';
+    inqBtn.addEventListener('click', function () { location.href = 'seller-inquiries.html'; });
+    try {
+      var res = await sb.from('inquiries').select('id', { count: 'exact', head: true }).eq('company_id', user.company.id).eq('status', 'pending');
+      var badge = inqBtn.querySelector('.icon-count');
+      if (badge && typeof res.count === 'number') badge.textContent = res.count;
+    } catch (e) { /* non-fatal */ }
+  });
 })();

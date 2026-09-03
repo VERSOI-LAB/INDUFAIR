@@ -89,7 +89,7 @@
             <button data-status="cancel">취소/반품 <b id="ocnt-cancel">0</b></button>
           </div>
           <div class="right-group">
-            <button class="btn btn-ghost btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>엑셀 다운로드</button>
+            <button class="btn btn-ghost btn-sm" id="exportCsvBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>엑셀 다운로드</button>
           </div>
         </div>
 
@@ -254,6 +254,15 @@ document.getElementById('orderResetBtn').addEventListener('click', function () {
   OF.activeStatus = 'all';
   document.querySelectorAll('#orderTabs button').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-status') === 'all'); });
   renderOrders();
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click', function () {
+  var headers = ['주문번호', '상품명', '수량', '주문금액', '주문상태', '결제방법', '수령인', '주문일'];
+  var rows = OF.items.map(function (oi) {
+    var o = oi.orders || {};
+    return [o.order_no, oi.product_title, oi.qty, oi.line_amount, SC.label(oi.status), PAY_LABEL[o.payment_method] || o.payment_method, o.recipient, SC.dt(oi.created_at, true)];
+  });
+  SC.downloadCsv('주문내역_' + SC.dt(new Date().toISOString()) + '.csv', headers, rows);
 });
 
 SC.ready(async function (user) {

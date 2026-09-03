@@ -604,6 +604,8 @@
 
   document.getElementById('searchForm').addEventListener('submit', function(e){
     e.preventDefault();
+    var q = input.value.trim();
+    if (q) location.href = 'goods.html?q=' + encodeURIComponent(q);
   });
 
   // Community tabs (demo content swap)

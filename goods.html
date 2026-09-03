@@ -788,6 +788,12 @@
       var favRes = await sb.from('favorites').select('product_id').eq('profile_id', user.id);
       (favRes.data || []).forEach(function(f){ favSet.add(f.product_id); });
     }
+    var qParam = new URLSearchParams(location.search).get('q');
+    if (qParam) {
+      state.q = qParam;
+      var searchInput = document.querySelector('#goodsSearchForm input[type="text"]');
+      if (searchInput) searchInput.value = qParam;
+    }
     await loadCategories();
     await loadBrandFilter();
     await render();
