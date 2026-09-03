@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 회원가입</title>
+<meta name="description" content="VERSOI 회원가입 — 산업용품 구매와 판매를 한 곳에서">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .auth-wrap{max-width:440px;margin:0 auto;padding:56px 16px 80px;}
+  .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:32px 28px;}
+  .auth-card h1{font-size:1.15rem;font-weight:900;text-align:center;margin-bottom:24px;}
+  .auth-field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .auth-field label{font-size:.85rem;font-weight:700;}
+  .auth-field input{border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.9rem;font-family:inherit;width:100%;}
+  .auth-field input:focus{outline:none;border-color:var(--accent);}
+  .auth-error{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:.82rem;font-weight:700;margin-bottom:14px;display:none;}
+  .auth-ok{background:var(--good-soft);color:var(--good);border-radius:8px;padding:14px;font-size:.86rem;font-weight:700;text-align:center;line-height:1.6;display:none;}
+  .auth-links{text-align:center;font-size:.82rem;color:var(--text-tertiary);margin-top:16px;}
+  .auth-links a{color:var(--accent);font-weight:700;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html" aria-label="VERSOI 홈으로 이동">
+      <span class="logo-mark">V</span><span class="logo-text">VERSOI</span>
+      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">홈</a><a href="goods.html">산업용품</a><a href="used.html">중고장터</a>
+      <a href="brand.html">브랜드관</a><a href="rfq.html">견적요청(RFQ)</a><a href="community.html">커뮤니티</a><a href="support.html">고객센터</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-ghost">로그인</button>
+      <button class="btn btn-primary">회원가입</button>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h1>회원가입</h1>
+      <div class="auth-error" id="authError"></div>
+      <div class="auth-ok" id="authOk"></div>
+      <form id="signupForm">
+        <div class="auth-field"><label>이름</label><input type="text" id="name" required placeholder="이름을 입력하세요"></div>
+        <div class="auth-field"><label>이메일</label><input type="email" id="email" required placeholder="example@company.co.kr"></div>
+        <div class="auth-field"><label>휴대폰 번호</label><input type="tel" id="phone" placeholder="010-0000-0000"></div>
+        <div class="auth-field"><label>비밀번호</label><input type="password" id="password" required placeholder="8자 이상 입력하세요" minlength="8"></div>
+        <div class="auth-field"><label>비밀번호 확인</label><input type="password" id="password2" required placeholder="비밀번호를 다시 입력하세요" minlength="8"></div>
+        <label class="consent-check" style="margin-bottom:16px;"><input type="checkbox" id="agree" required><span>[필수] 이용약관 및 개인정보 수집·이용에 동의합니다.</span></label>
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" id="submitBtn">회원가입</button>
+      </form>
+      <p class="auth-links">이미 계정이 있으신가요? <a href="login.html">로그인</a></p>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
+    <div class="footer-links"><a href="#">이용약관</a><a href="#">개인정보처리방침</a><a href="#">사업자정보확인</a><a href="#">제휴/입점문의</a></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script>
+  var navToggle = document.getElementById('navToggle');
+  var mainNav = document.getElementById('mainNav');
+  navToggle.addEventListener('click', function(){
+    var open = mainNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  document.getElementById('signupForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var errEl = document.getElementById('authError');
+    var okEl = document.getElementById('authOk');
+    var btn = document.getElementById('submitBtn');
+    errEl.style.display = 'none';
+    okEl.style.display = 'none';
+
+    var name = document.getElementById('name').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var phone = document.getElementById('phone').value.trim();
+    var password = document.getElementById('password').value;
+    var password2 = document.getElementById('password2').value;
+
+    if (password !== password2) {
+      errEl.textContent = '비밀번호가 일치하지 않습니다.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    btn.textContent = '가입 처리 중...';
+    btn.disabled = true;
+
+    var res = await sb.auth.signUp({
+      email: email,
+      password: password,
+      options: { data: { name: name, phone: phone } }
+    });
+
+    if (res.error) {
+      errEl.textContent = res.error.message.indexOf('already') !== -1 ? '이미 가입된 이메일입니다.' : '가입 중 오류가 발생했습니다: ' + res.error.message;
+      errEl.style.display = 'block';
+      btn.textContent = '회원가입';
+      btn.disabled = false;
+      return;
+    }
+
+    if (res.data.session) {
+      location.href = 'mypage.html';
+      return;
+    }
+
+    okEl.textContent = '가입이 완료되었습니다! 인증 메일을 확인한 뒤 로그인해주세요.';
+    okEl.style.display = 'block';
+    document.getElementById('signupForm').style.display = 'none';
+  });
+</script>
+</body>
+</html>

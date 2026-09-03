@@ -90,6 +90,24 @@
     .rfq-row{grid-template-columns:1fr;gap:10px;}
     .rfq-arrow{display:none;}
   }
+
+  .rfq-row{cursor:pointer;}
+  .rfq-detail{
+    display:none;background:var(--bg-soft);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-m) var(--radius-m);
+    margin-top:-12px;padding:18px 20px;font-size:.86rem;color:var(--text-secondary);
+  }
+  .rfq-detail.open{display:block;}
+  .rfq-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+  .rfq-detail-grid div b{display:block;font-size:.76rem;color:var(--text-tertiary);font-weight:700;margin-bottom:4px;}
+  .rfq-detail-grid div span{font-size:.88rem;color:var(--text);font-weight:600;}
+  .rfq-detail-spec{white-space:pre-wrap;line-height:1.6;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);margin-bottom:14px;}
+  .rfq-quote-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .rfq-quote-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .rfq-quote-item .price{font-weight:800;color:var(--accent);font-family:var(--font-en);}
+  .rfq-quote-item .msg{font-size:.8rem;color:var(--text-tertiary);margin-top:2px;}
+  .rfq-quote-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+  .rfq-quote-form .field{flex:1;min-width:140px;}
+  .rfq-empty{padding:40px 0;text-align:center;color:var(--text-tertiary);font-size:.88rem;}
 </style>
 </head>
 <body>
@@ -210,115 +228,31 @@
         </div>
       </div>
 
-      <div class="rfq-tabs">
-        <button class="active">전체 요청 현황</button>
-        <button>진행 중</button>
-        <button>견적 수신</button>
-        <button>비교 중</button>
-        <button>거래 완료</button>
+      <div class="rfq-tabs" id="rfqTabs">
+        <button class="active" data-status="">전체 요청 현황</button>
+        <button data-status="open">진행 중</button>
+        <button data-status="answered">견적 수신</button>
+        <button data-status="answered">비교 중</button>
+        <button data-status="closed">거래 완료</button>
       </div>
 
       <div class="rfq-toolbar">
         <div class="rfq-search">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="제품명, 모델명, 요청번호 검색">
+          <input type="text" id="rfqSearchInput" placeholder="제품명, 모델명, 요청번호 검색">
         </div>
         <div class="select-field"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>요청일 전체</div>
         <div class="select-field">상태 전체 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
         <div class="select-field"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>상세 필터</div>
       </div>
 
-      <div class="rfq-table">
-        <a class="rfq-row" href="#">
-          <div>
-            <div class="rfq-id">RFQ-2024-00087 <span class="tag-new">NEW</span></div>
-            <div class="rfq-company">(주)스마트팩토리 · 담당자: <b>이성욱 과장</b></div>
-          </div>
-          <div class="rfq-product">
-            <span class="rfq-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></span>
-            <div>
-              <div class="rfq-product-name">PLC 미쓰비시 Q시리즈 Q03UDVCPU</div>
-              <div class="rfq-product-meta">수량: 30개 · 납기: 2주 이내 · 지역: 경기 화성시 · 결제조건: 현금</div>
-            </div>
-          </div>
-          <div class="rfq-quote"><span class="tabular low">5개 업체 견적 제출</span><span>최저가: <b class="tabular" style="color:var(--up);">1,180,000원</b></span></div>
-          <div><span class="status-pill status-received">견적 수신</span></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span class="rfq-date tabular">2024.05.26</span>
-            <svg class="rfq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-        </a>
-
-        <a class="rfq-row" href="#">
-          <div>
-            <div class="rfq-id">RFQ-2024-00086</div>
-            <div class="rfq-company">(주)한빛전자 · 담당자: <b>김현우 대리</b></div>
-          </div>
-          <div class="rfq-product">
-            <span class="rfq-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21"/></svg></span>
-            <div>
-              <div class="rfq-product-name">서보모터 750W HG-KR73</div>
-              <div class="rfq-product-meta">수량: 10개 · 납기: 1주 이내 · 지역: 전국 · 결제조건: 현금</div>
-            </div>
-          </div>
-          <div class="rfq-quote"><span class="tabular low">3개 업체 견적 제출</span><span>최저가: <b class="tabular" style="color:var(--up);">680,000원</b></span></div>
-          <div><span class="status-pill status-progress">진행 중</span></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span class="rfq-date tabular">2024.05.25</span>
-            <svg class="rfq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-        </a>
-
-        <a class="rfq-row" href="#">
-          <div>
-            <div class="rfq-id">RFQ-2024-00085</div>
-            <div class="rfq-company">(주)태성기계 · 담당자: <b>박지민 차장</b></div>
-          </div>
-          <div class="rfq-product">
-            <span class="rfq-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/><line x1="8" y1="16" x2="10" y2="16"/><line x1="13" y1="16" x2="16" y2="16"/></svg></span>
-            <div>
-              <div class="rfq-product-name">인버터 LS SV075iG5A-4</div>
-              <div class="rfq-product-meta">수량: 15개 · 납기: 2주 이내 · 지역: 충청권 · 결제조건: 현금</div>
-            </div>
-          </div>
-          <div class="rfq-quote"><span class="tabular low">2개 업체 견적 제출</span><span>최저가: <b class="tabular" style="color:var(--up);">230,000원</b></span></div>
-          <div><span class="status-pill status-compare">비교 중</span></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span class="rfq-date tabular">2024.05.24</span>
-            <svg class="rfq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-        </a>
-
-        <a class="rfq-row" href="#">
-          <div>
-            <div class="rfq-id">RFQ-2024-00084</div>
-            <div class="rfq-company">(주)등진산업 · 담당자: <b>최민석 사원</b></div>
-          </div>
-          <div class="rfq-product">
-            <span class="rfq-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="5.2" r="1"/><circle cx="12" cy="18.8" r="1"/><circle cx="5.2" cy="12" r="1"/><circle cx="18.8" cy="12" r="1"/></svg></span>
-            <div>
-              <div class="rfq-product-name">베어링 6205-2RS1</div>
-              <div class="rfq-product-meta">수량: 100개 · 납기: 1주 이내 · 지역: 전국 · 결제조건: 현금</div>
-            </div>
-          </div>
-          <div class="rfq-quote"><span class="tabular low">4개 업체 견적 제출</span><span>최저가: <b class="tabular" style="color:var(--up);">3,200원</b></span></div>
-          <div><span class="status-pill status-done">거래 완료</span></div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span class="rfq-date tabular">2024.05.20</span>
-            <svg class="rfq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </div>
-        </a>
+      <div class="rfq-table" id="rfqTable">
+        <div class="rfq-empty">불러오는 중...</div>
       </div>
 
       <nav class="pagination" aria-label="페이지 이동">
         <button disabled aria-label="이전"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
         <button class="active">1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>4</button>
-        <button>5</button>
-        <span class="ellipsis">…</span>
-        <button>20</button>
         <button aria-label="다음"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </nav>
     </div>
@@ -378,19 +312,182 @@
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
-  document.querySelectorAll('.rfq-tabs button').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.rfq-tabs button').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-    });
-  });
-
   document.querySelectorAll('.pagination button:not([disabled])').forEach(function(btn){
     btn.addEventListener('click', function(){
       document.querySelectorAll('.pagination button').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
     });
   });
+
+  // ---- RFQ list wired to Supabase ----
+  var STATUS_LABEL = { open: '진행 중', answered: '견적 수신', closed: '거래 완료' };
+  var STATUS_CLASS = { open: 'status-progress', answered: 'status-received', closed: 'status-done' };
+
+  var rfqTableEl = document.getElementById('rfqTable');
+  var rfqSearchInput = document.getElementById('rfqSearchInput');
+  var rfqTabsEl = document.getElementById('rfqTabs');
+  var allRfqs = [];
+  var currentUser = null;
+  var currentStatus = '';
+  var currentQuery = '';
+  var openId = null;
+
+  function fmtDate(ts){
+    if (!ts) return '';
+    var d = new Date(ts);
+    return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+  }
+  function fmtWon(n){ return n == null ? '' : '₩' + Number(n).toLocaleString('ko-KR'); }
+  function esc(s){ return (s == null ? '' : String(s)).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  function requesterLabel(rfq){
+    if (currentUser && rfq.profile_id === currentUser.id) {
+      var name = (currentUser.profile && currentUser.profile.name) || currentUser.email;
+      return (currentUser.company ? esc(currentUser.company.name) + ' · ' : '') + '담당자: <b>' + esc(name) + '</b>';
+    }
+    return '요청 회원 · 담당자 정보 비공개';
+  }
+
+  function renderRow(rfq){
+    var cat = rfq.categories ? rfq.categories.name : '';
+    var quotes = rfq.rfq_quotes || [];
+    var quoteCount = quotes.length;
+    var minPrice = quotes.length ? Math.min.apply(null, quotes.map(function(q){ return q.price; })) : null;
+    var statusClass = STATUS_CLASS[rfq.status] || 'status-progress';
+    var statusLabel = STATUS_LABEL[rfq.status] || rfq.status;
+    var isOpen = openId === rfq.id;
+
+    var quoteHtml = quoteCount
+      ? '<span class="tabular low">' + quoteCount + '개 업체 견적 제출</span><span>최저가: <b class="tabular" style="color:var(--up);">' + fmtWon(minPrice) + '</b></span>'
+      : '<span class="tabular low">견적 대기 중</span>';
+
+    var rowHtml =
+      '<div class="rfq-row" data-id="' + rfq.id + '">' +
+        '<div>' +
+          '<div class="rfq-id">RFQ-' + rfq.id.slice(0,8).toUpperCase() + '</div>' +
+          '<div class="rfq-company">' + requesterLabel(rfq) + '</div>' +
+        '</div>' +
+        '<div class="rfq-product">' +
+          '<span class="rfq-thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></span>' +
+          '<div>' +
+            '<div class="rfq-product-name">' + esc(rfq.title) + '</div>' +
+            '<div class="rfq-product-meta">수량: ' + (rfq.quantity != null ? rfq.quantity + '개' : '미정') + ' · 납기: ' + (rfq.deadline ? fmtDate(rfq.deadline) : '협의') + (cat ? ' · 카테고리: ' + esc(cat) : '') + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="rfq-quote">' + quoteHtml + '</div>' +
+        '<div><span class="status-pill ' + statusClass + '">' + statusLabel + '</span></div>' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<span class="rfq-date tabular">' + fmtDate(rfq.created_at) + '</span>' +
+          '<svg class="rfq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(' + (isOpen ? '90deg' : '0deg') + ');transition:transform .15s ease;"><polyline points="9 18 15 12 9 6"/></svg>' +
+        '</div>' +
+      '</div>';
+
+    var canQuote = currentUser && currentUser.company && rfq.profile_id !== currentUser.id;
+    var quoteListHtml = quotes.length
+      ? '<div class="rfq-quote-list">' + quotes.map(function(q){
+          return '<div class="rfq-quote-item"><div><div class="price tabular">' + fmtWon(q.price) + '</div>' + (q.message ? '<div class="msg">' + esc(q.message) + '</div>' : '') + '</div><span class="tabular" style="font-size:.76rem;color:var(--text-tertiary);">' + fmtDate(q.created_at) + '</span></div>';
+        }).join('') + '</div>'
+      : '<p style="color:var(--text-tertiary);margin-bottom:14px;">아직 제출된 견적이 없습니다.</p>';
+
+    var quoteFormHtml = canQuote
+      ? '<form class="rfq-quote-form" data-rfq-id="' + rfq.id + '">' +
+          '<div class="field"><label>견적가</label><input type="number" min="0" class="rq-price" placeholder="견적 금액(원)" required></div>' +
+          '<div class="field" style="flex:2;"><label>메시지</label><input type="text" class="rq-msg" placeholder="납기, 조건 등 안내 메시지 (선택)"></div>' +
+          '<button type="submit" class="btn btn-primary">견적 제출</button>' +
+        '</form>'
+      : (currentUser ? '' : '<p style="color:var(--text-tertiary);">로그인 후 판매회원만 견적을 제출할 수 있습니다.</p>');
+
+    var detailHtml =
+      '<div class="rfq-detail' + (isOpen ? ' open' : '') + '" data-detail-id="' + rfq.id + '">' +
+        '<div class="rfq-detail-grid">' +
+          '<div><b>희망 단가</b><span>' + (rfq.desired_price != null ? fmtWon(rfq.desired_price) : '협의') + '</span></div>' +
+          '<div><b>희망 납기일</b><span>' + (rfq.deadline ? fmtDate(rfq.deadline) : '협의') + '</span></div>' +
+          '<div><b>카테고리</b><span>' + esc(cat || '-') + '</span></div>' +
+        '</div>' +
+        '<div class="rfq-detail-spec">' + (esc(rfq.spec_description) || '상세 설명이 없습니다.').replace(/\n/g,'<br>') + '</div>' +
+        '<p style="font-weight:800;font-size:.82rem;margin-bottom:8px;">제출된 견적 (' + quoteCount + ')</p>' +
+        quoteListHtml +
+        quoteFormHtml +
+      '</div>';
+
+    return rowHtml + detailHtml;
+  }
+
+  function passesFilter(rfq){
+    if (currentStatus && rfq.status !== currentStatus) return false;
+    if (currentQuery && rfq.title.toLowerCase().indexOf(currentQuery) === -1) return false;
+    return true;
+  }
+
+  function render(){
+    var filtered = allRfqs.filter(passesFilter);
+    if (!filtered.length) {
+      rfqTableEl.innerHTML = '<div class="rfq-empty">조건에 맞는 견적 요청이 없습니다.</div>';
+      return;
+    }
+    rfqTableEl.innerHTML = filtered.map(renderRow).join('');
+  }
+
+  async function loadRfqs(){
+    var res = await sb.from('rfq_requests')
+      .select('*, categories(name), rfq_quotes(id, price, message, created_at)')
+      .order('created_at', { ascending: false });
+    if (res.error) { console.error('[VERSOI] rfq load error', res.error); rfqTableEl.innerHTML = '<div class="rfq-empty">불러오지 못했습니다.</div>'; return; }
+    allRfqs = res.data || [];
+    render();
+  }
+
+  rfqSearchInput.addEventListener('input', function(){
+    currentQuery = this.value.trim().toLowerCase();
+    render();
+  });
+
+  rfqTabsEl.querySelectorAll('button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      rfqTabsEl.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentStatus = btn.getAttribute('data-status') || '';
+      render();
+    });
+  });
+
+  rfqTableEl.addEventListener('click', function(e){
+    var form = e.target.closest('.rfq-quote-form');
+    if (form) return; // handled by submit handler
+    var row = e.target.closest('.rfq-row');
+    if (!row) return;
+    var id = row.getAttribute('data-id');
+    openId = (openId === id) ? null : id;
+    render();
+  });
+
+  rfqTableEl.addEventListener('submit', async function(e){
+    var form = e.target.closest('.rfq-quote-form');
+    if (!form) return;
+    e.preventDefault();
+    if (!window.VERSOI.requireAuth()) return;
+    var rfqId = form.getAttribute('data-rfq-id');
+    var price = Number(form.querySelector('.rq-price').value);
+    var message = form.querySelector('.rq-msg').value.trim();
+    if (!price) return;
+    var res = await sb.from('rfq_quotes').insert({
+      rfq_id: rfqId,
+      company_id: currentUser.company.id,
+      profile_id: currentUser.id,
+      price: price,
+      message: message || null
+    });
+    if (res.error) { alert('견적 제출에 실패했습니다: ' + res.error.message); return; }
+    await loadRfqs();
+  });
+
+  document.addEventListener('versoi:ready', function(e){
+    currentUser = e.detail.user;
+    loadRfqs();
+  });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>

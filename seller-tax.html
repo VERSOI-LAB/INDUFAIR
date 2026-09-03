@@ -81,141 +81,33 @@
           <h1>세금계산서 관리</h1>
         </div>
         <div class="right-group">
-          <button class="btn btn-primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>세금계산서 직접 발행</button>
+          <button class="btn btn-primary" id="directIssueBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>세금계산서 직접 발행</button>
         </div>
       </div>
 
       <div class="stat-card-row" style="grid-template-columns:repeat(5,1fr);">
-        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>전체 발행 금액</span><div class="val">₩128,760,000</div><div class="delta">총 42건</div></div>
-        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>이번 달 발행 금액</span><div class="val">₩30,330,000</div><div class="delta">총 12건</div></div>
-        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>발행 완료</span><div class="val">₩118,230,000</div><div class="delta">총 38건</div></div>
-        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>발행 대기</span><div class="val">₩5,200,000</div><div class="delta">총 2건</div></div>
-        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>취소/작성 중</span><div class="val">₩1,330,000</div><div class="delta">총 2건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>전체 발행 금액</span><div class="val" id="ts-total-amt">₩0</div><div class="delta" id="ts-total-cnt">총 0건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>이번 달 발행 금액</span><div class="val" id="ts-month-amt">₩0</div><div class="delta" id="ts-month-cnt">총 0건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>발행 완료</span><div class="val" id="ts-issued-amt">₩0</div><div class="delta" id="ts-issued-cnt">총 0건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>발행 대기</span><div class="val" id="ts-pending-amt">₩0</div><div class="delta" id="ts-pending-cnt">총 0건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>취소/작성 중</span><div class="val" id="ts-other-amt">₩0</div><div class="delta" id="ts-other-cnt">총 0건</div></div>
       </div>
 
       <div class="admin-grid-2" style="margin-top:16px;">
         <div class="admin-card">
           <div class="admin-head-row" style="margin-bottom:0;">
-            <h2 style="font-size:1rem;font-weight:800;">세금계산서 목록 (총 42건)</h2>
-            <button class="btn btn-ghost btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>엑셀 다운로드</button>
+            <h2 style="font-size:1rem;font-weight:800;" id="taxListTitle">세금계산서 목록 (총 0건)</h2>
           </div>
           <div class="admin-filter-bar">
-            <input type="date" value="2025-05-01" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;color:var(--text-secondary);font-family:inherit;">
-            <span style="color:var(--text-tertiary);">~</span>
-            <input type="date" value="2025-06-15" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;color:var(--text-secondary);font-family:inherit;">
-            <select><option>전체 유형</option><option>과세</option><option>영세율</option><option>면세</option></select>
-            <select><option>전체 상태</option><option>발행 완료</option><option>발행 대기</option><option>작성 중</option><option>취소</option></select>
-            <div class="search-field" style="max-width:220px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="공급받는자, 사업자번호 검색"></div>
-            <button class="reset-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>상세 검색</button>
+            <select id="taxTypeFilter"><option value="">전체 유형</option><option value="taxable">과세</option><option value="zero_rate">영세율</option><option value="exempt">면세</option></select>
+            <select id="taxStatusFilter"><option value="">전체 상태</option><option value="issued">발행 완료</option><option value="pending">발행 대기</option><option value="draft">작성 중</option><option value="canceled">취소</option></select>
+            <div class="search-field" style="max-width:220px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="taxSearchInput" placeholder="공급받는자, 사업자번호 검색"></div>
+            <button class="reset-btn" id="taxResetBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
           </div>
           <div class="data-table-scroll">
           <table class="data-table">
             <thead><tr><th><input type="checkbox"></th><th>번호</th><th>공급받는자</th><th class="num">사업자번호</th><th class="num">공급가액</th><th class="num">세액</th><th class="num">합계금액</th><th class="num">발행일</th><th>상태</th><th>유형</th><th>관리</th></tr></thead>
-            <tbody>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td class="num cell-strong">2025-0608-00042</td>
-                <td>한빛ENG</td>
-                <td class="num">123-45-67890</td>
-                <td class="num">₩18,000,000</td>
-                <td class="num">₩1,800,000</td>
-                <td class="num cell-strong">₩19,800,000</td>
-                <td class="num">2025.06.08</td>
-                <td><span class="badge badge-good">발행 완료</span></td>
-                <td style="white-space:nowrap;">영세율</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td class="num cell-strong">2025-0607-00041</td>
-                <td>로봇솔루션</td>
-                <td class="num">234-56-78901</td>
-                <td class="num">₩12,000,000</td>
-                <td class="num">₩1,200,000</td>
-                <td class="num cell-strong">₩13,200,000</td>
-                <td class="num">2025.06.07</td>
-                <td><span class="badge badge-good">발행 완료</span></td>
-                <td style="white-space:nowrap;">과세</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td class="num cell-strong">2025-0606-00040</td>
-                <td>대한자동화</td>
-                <td class="num">345-67-89012</td>
-                <td class="num">₩8,500,000</td>
-                <td class="num">₩850,000</td>
-                <td class="num cell-strong">₩9,350,000</td>
-                <td class="num">2025.06.06</td>
-                <td><span class="badge badge-good">발행 완료</span></td>
-                <td style="white-space:nowrap;">과세</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td class="num cell-strong">2025-0605-00039</td>
-                <td>테크라인</td>
-                <td class="num">456-78-90123</td>
-                <td class="num">₩6,000,000</td>
-                <td class="num">₩600,000</td>
-                <td class="num cell-strong">₩6,600,000</td>
-                <td class="num">2025.06.05</td>
-                <td><span class="badge badge-warn">발행 대기</span></td>
-                <td style="white-space:nowrap;">과세</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">발행<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td class="num cell-strong">2025-0604-00038</td>
-                <td>스마트팩토리(주)</td>
-                <td class="num">567-89-01234</td>
-                <td class="num">₩15,000,000</td>
-                <td class="num">₩1,500,000</td>
-                <td class="num cell-strong">₩16,500,000</td>
-                <td class="num">2025.06.04</td>
-                <td><span class="badge badge-good">발행 완료</span></td>
-                <td style="white-space:nowrap;">과세</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td class="num cell-strong">2025-0603-00037</td>
-                <td>한빛ENG</td>
-                <td class="num">123-45-67890</td>
-                <td class="num">₩9,000,000</td>
-                <td class="num">₩900,000</td>
-                <td class="num cell-strong">₩9,900,000</td>
-                <td class="num">2025.06.03</td>
-                <td><span class="badge badge-good">발행 완료</span></td>
-                <td style="white-space:nowrap;">영세율</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td class="num cell-strong">2025-0602-00036</td>
-                <td>로봇솔루션</td>
-                <td class="num">234-56-78901</td>
-                <td class="num">₩7,200,000</td>
-                <td class="num">₩720,000</td>
-                <td class="num cell-strong">₩7,920,000</td>
-                <td class="num">2025.06.02</td>
-                <td><span class="badge badge-up">취소</span></td>
-                <td style="white-space:nowrap;">과세</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">조회<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td class="num cell-strong">2025-0601-00035</td>
-                <td>대한자동화</td>
-                <td class="num">345-67-89012</td>
-                <td class="num">₩4,800,000</td>
-                <td class="num">₩480,000</td>
-                <td class="num cell-strong">₩5,280,000</td>
-                <td class="num">2025.06.01</td>
-                <td><span class="badge badge-muted">작성 중</span></td>
-                <td style="white-space:nowrap;">과세</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn">수정<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
+            <tbody id="taxTbody">
             </tbody>
           </table>
           </div>
@@ -232,23 +124,23 @@
           <div class="admin-card">
             <div class="admin-card-head"><h2>유형별 발행 금액 (이번 달)</h2></div>
             <div class="donut-wrap" style="justify-content:center;">
-              <div class="donut donut-30"><div class="donut-center"><b>₩30,330,000</b><span>합계</span></div></div>
+              <div class="donut donut-30" id="taxDonut"><div class="donut-center"><b id="taxDonutTotal">₩0</b><span>합계</span></div></div>
             </div>
             <div class="donut-legend" style="margin-top:14px;">
-              <div class="item"><span class="dot" style="background:var(--accent);"></span>과세<b>₩22,430,000 (74%)</b></div>
-              <div class="item"><span class="dot" style="background:var(--good);"></span>영세율<b>₩7,900,000 (26%)</b></div>
-              <div class="item"><span class="dot" style="background:var(--border);"></span>면세<b>₩0 (0%)</b></div>
+              <div class="item"><span class="dot" style="background:var(--accent);"></span>과세<b id="tt-taxable">₩0 (0%)</b></div>
+              <div class="item"><span class="dot" style="background:var(--good);"></span>영세율<b id="tt-zero">₩0 (0%)</b></div>
+              <div class="item"><span class="dot" style="background:var(--border);"></span>면세<b id="tt-exempt">₩0 (0%)</b></div>
             </div>
           </div>
 
           <div class="admin-card">
             <div class="admin-card-head"><h2>상태별 건수 (이번 달)</h2></div>
             <div class="count-list">
-              <div class="row"><span><span class="dot" style="background:var(--good);"></span>발행 완료</span><span class="tabular">10건</span></div>
-              <div class="row"><span><span class="dot" style="background:var(--warn);"></span>발행 대기</span><span class="tabular">1건</span></div>
-              <div class="row"><span><span class="dot" style="background:var(--accent);"></span>작성 중</span><span class="tabular">1건</span></div>
-              <div class="row"><span><span class="dot" style="background:var(--up);"></span>취소</span><span class="tabular">0건</span></div>
-              <div class="row"><span>합계</span><span class="tabular">12건</span></div>
+              <div class="row"><span><span class="dot" style="background:var(--good);"></span>발행 완료</span><span class="tabular" id="sc-issued">0건</span></div>
+              <div class="row"><span><span class="dot" style="background:var(--warn);"></span>발행 대기</span><span class="tabular" id="sc-pending">0건</span></div>
+              <div class="row"><span><span class="dot" style="background:var(--accent);"></span>작성 중</span><span class="tabular" id="sc-draft">0건</span></div>
+              <div class="row"><span><span class="dot" style="background:var(--up);"></span>취소</span><span class="tabular" id="sc-canceled">0건</span></div>
+              <div class="row"><span>합계</span><span class="tabular" id="sc-total">0건</span></div>
             </div>
           </div>
 
@@ -259,7 +151,6 @@
               <li style="font-size:.8rem;color:var(--text-tertiary);line-height:1.55;">· 발행 대기 상태는 세금계산서 발행 버튼을 클릭하여 발행할 수 있습니다.</li>
               <li style="font-size:.8rem;color:var(--text-tertiary);line-height:1.55;">· 세금계산서 수정/취소는 국세청 규정에 따라 제한될 수 있습니다.</li>
             </ul>
-            <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:14px;">자주 묻는 질문</button>
           </div>
         </div>
       </div>
@@ -288,5 +179,127 @@
   });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seller-common.js"></script>
+<script>
+var XF = { companyId: null, list: [] };
+var TYPE_KO = { taxable: '과세', zero_rate: '영세율', exempt: '면세' };
+
+function taxRowHtml(t) {
+  var actLabel = t.status === 'pending' ? '발행' : (t.status === 'draft' ? '수정' : '조회');
+  var actFn = t.status === 'pending' ? "issueInvoice('" + t.id + "')" : "alert('세금계산서 상세 조회')";
+  return '<tr>' +
+    '<td><input type="checkbox"></td>' +
+    '<td class="num cell-strong">' + SC.esc(t.invoice_no) + '</td>' +
+    '<td>' + SC.esc(t.buyer_name) + '</td>' +
+    '<td class="num">' + SC.esc(t.buyer_biz_no || '-') + '</td>' +
+    '<td class="num">' + SC.won(t.supply_amount) + '</td>' +
+    '<td class="num">' + SC.won(t.vat_amount) + '</td>' +
+    '<td class="num cell-strong">' + SC.won(t.total_amount) + '</td>' +
+    '<td class="num">' + (t.issue_date ? SC.dt(t.issue_date) : '-') + '</td>' +
+    '<td><span class="badge ' + SC.badgeCls(t.status) + '">' + SC.label(t.status) + '</span></td>' +
+    '<td style="white-space:nowrap;">' + (TYPE_KO[t.invoice_type] || t.invoice_type) + '</td>' +
+    '<td><div class="table-actions"><button class="btn btn-ghost btn-sm chev-btn" onclick="' + actFn + '">' + actLabel + '</button></div></td></tr>';
+}
+
+function renderTax() {
+  var q = document.getElementById('taxSearchInput').value.trim().toLowerCase();
+  var type = document.getElementById('taxTypeFilter').value;
+  var status = document.getElementById('taxStatusFilter').value;
+  var list = XF.list.filter(function (t) {
+    if (type && t.invoice_type !== type) return false;
+    if (status && t.status !== status) return false;
+    if (q && !((t.buyer_name + ' ' + (t.buyer_biz_no || '')).toLowerCase().indexOf(q) !== -1)) return false;
+    return true;
+  });
+  document.getElementById('taxTbody').innerHTML = list.map(taxRowHtml).join('') ||
+    '<tr><td colspan="11" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">세금계산서 내역이 없습니다.</td></tr>';
+  document.getElementById('taxListTitle').textContent = '세금계산서 목록 (총 ' + list.length + '건)';
+}
+
+window.issueInvoice = async function (id) {
+  if (!confirm('이 세금계산서를 발행하시겠습니까?')) return;
+  await sb.from('tax_invoices').update({ status: 'issued', issue_date: new Date().toISOString().slice(0, 10) }).eq('id', id);
+  await loadTax();
+};
+
+async function loadTax() {
+  var res = await sb.from('tax_invoices').select('*').eq('company_id', XF.companyId).order('created_at', { ascending: false });
+  XF.list = res.data || [];
+  renderTax();
+
+  var totalAmt = XF.list.reduce(function (s, t) { return s + t.total_amount; }, 0);
+  document.getElementById('ts-total-amt').textContent = SC.won(totalAmt);
+  document.getElementById('ts-total-cnt').textContent = '총 ' + XF.list.length + '건';
+
+  var now = new Date();
+  var monthList = XF.list.filter(function (t) { var d = new Date(t.created_at); return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth(); });
+  var monthAmt = monthList.reduce(function (s, t) { return s + t.total_amount; }, 0);
+  document.getElementById('ts-month-amt').textContent = SC.won(monthAmt);
+  document.getElementById('ts-month-cnt').textContent = '총 ' + monthList.length + '건';
+
+  var issued = XF.list.filter(function (t) { return t.status === 'issued'; });
+  document.getElementById('ts-issued-amt').textContent = SC.won(issued.reduce(function (s, t) { return s + t.total_amount; }, 0));
+  document.getElementById('ts-issued-cnt').textContent = '총 ' + issued.length + '건';
+
+  var pending = XF.list.filter(function (t) { return t.status === 'pending'; });
+  document.getElementById('ts-pending-amt').textContent = SC.won(pending.reduce(function (s, t) { return s + t.total_amount; }, 0));
+  document.getElementById('ts-pending-cnt').textContent = '총 ' + pending.length + '건';
+
+  var other = XF.list.filter(function (t) { return t.status === 'canceled' || t.status === 'draft'; });
+  document.getElementById('ts-other-amt').textContent = SC.won(other.reduce(function (s, t) { return s + t.total_amount; }, 0));
+  document.getElementById('ts-other-cnt').textContent = '총 ' + other.length + '건';
+
+  // ---- donut: type breakdown for this month ----
+  var byType = { taxable: 0, zero_rate: 0, exempt: 0 };
+  monthList.forEach(function (t) { if (byType[t.invoice_type] !== undefined) byType[t.invoice_type] += t.total_amount; });
+  var sum = byType.taxable + byType.zero_rate + byType.exempt || 1;
+  var p1 = byType.taxable / sum * 100, p2 = p1 + byType.zero_rate / sum * 100;
+  document.getElementById('taxDonut').style.background = 'conic-gradient(var(--accent) 0% ' + p1 + '%, var(--good) ' + p1 + '% ' + p2 + '%, var(--border) ' + p2 + '% 100%)';
+  document.getElementById('taxDonutTotal').textContent = SC.won(monthAmt);
+  document.getElementById('tt-taxable').textContent = SC.won(byType.taxable) + ' (' + Math.round(byType.taxable / sum * 100) + '%)';
+  document.getElementById('tt-zero').textContent = SC.won(byType.zero_rate) + ' (' + Math.round(byType.zero_rate / sum * 100) + '%)';
+  document.getElementById('tt-exempt').textContent = SC.won(byType.exempt) + ' (' + Math.round(byType.exempt / sum * 100) + '%)';
+
+  // ---- status counts for this month ----
+  document.getElementById('sc-issued').textContent = monthList.filter(function (t) { return t.status === 'issued'; }).length + '건';
+  document.getElementById('sc-pending').textContent = monthList.filter(function (t) { return t.status === 'pending'; }).length + '건';
+  document.getElementById('sc-draft').textContent = monthList.filter(function (t) { return t.status === 'draft'; }).length + '건';
+  document.getElementById('sc-canceled').textContent = monthList.filter(function (t) { return t.status === 'canceled'; }).length + '건';
+  document.getElementById('sc-total').textContent = monthList.length + '건';
+}
+
+['taxSearchInput'].forEach(function (id) { document.getElementById(id).addEventListener('input', renderTax); });
+['taxTypeFilter', 'taxStatusFilter'].forEach(function (id) { document.getElementById(id).addEventListener('change', renderTax); });
+document.getElementById('taxResetBtn').addEventListener('click', function () {
+  document.getElementById('taxSearchInput').value = '';
+  document.getElementById('taxTypeFilter').value = '';
+  document.getElementById('taxStatusFilter').value = '';
+  renderTax();
+});
+
+document.getElementById('directIssueBtn').addEventListener('click', async function () {
+  var buyerName = prompt('공급받는자(거래처명)를 입력하세요');
+  if (!buyerName) return;
+  var bizNo = prompt('사업자번호를 입력하세요 (예: 123-45-67890)');
+  if (bizNo === null) return;
+  var supply = Number(prompt('공급가액을 입력하세요 (숫자만)'));
+  if (!supply) return;
+  var vat = Math.round(supply * 0.1);
+  await sb.from('tax_invoices').insert({
+    company_id: XF.companyId, buyer_name: buyerName, buyer_biz_no: bizNo,
+    supply_amount: supply, vat_amount: vat, total_amount: supply + vat,
+    status: 'draft', invoice_type: 'taxable'
+  });
+  await loadTax();
+});
+
+SC.ready(async function (user) {
+  XF.companyId = user.company.id;
+  await loadTax();
+});
+</script>
 </body>
 </html>

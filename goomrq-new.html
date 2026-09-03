@@ -136,25 +136,25 @@
             <div class="field">
               <label>카테고리<span class="req">*</span></label>
               <div class="select-wrap">
-                <select><option>카테고리를 선택하세요</option><option>FA 자동화</option><option>공작기계</option><option>모터/감속기</option><option>유공압</option><option>전기전자</option><option>물류장비</option><option>기타 산업장비</option></select>
+                <select id="goomCategory"><option value="">카테고리를 선택하세요</option></select>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
             </div>
             <div class="field">
               <label>구매 희망 시기<span class="req">*</span></label>
               <div class="select-wrap">
-                <select><option>구매 시기를 선택해주세요</option><option>1주 이내</option><option>2주 이내</option><option>1개월 이내</option><option>미정</option></select>
+                <select id="goomTiming"><option value="">구매 시기를 선택해주세요</option><option>1주 이내</option><option>2주 이내</option><option>1개월 이내</option><option>미정</option></select>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
             </div>
             <div class="field">
               <label>상품명<span class="req">*</span></label>
-              <input type="text" maxlength="100" placeholder="상품명을 입력하세요 (최대 100자)">
+              <input type="text" id="goomTitle" maxlength="100" placeholder="상품명을 입력하세요 (최대 100자)">
             </div>
             <div class="field full" style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;">
               <div class="field" style="margin:0;">
                 <label>거래 희망 지역</label>
-                <input type="text" placeholder="거래 희망 지역을 선택해주세요">
+                <input type="text" id="goomRegion" placeholder="거래 희망 지역을 선택해주세요">
               </div>
               <button type="button" class="btn btn-outline" style="height:44px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -163,21 +163,21 @@
             </div>
             <div class="field">
               <label>모델명</label>
-              <input type="text" placeholder="모델명을 입력하세요">
+              <input type="text" id="goomModel" placeholder="모델명을 입력하세요">
             </div>
             <div class="field">
               <label>제품 상태</label>
               <div class="radio-row" style="padding-top:10px;flex-wrap:wrap;">
-                <label class="radio-pill"><input type="radio" name="pcond" checked> 상관없음</label>
-                <label class="radio-pill"><input type="radio" name="pcond"> 새상품</label>
-                <label class="radio-pill"><input type="radio" name="pcond"> 사용감 적음</label>
-                <label class="radio-pill"><input type="radio" name="pcond"> 사용감 있음</label>
-                <label class="radio-pill"><input type="radio" name="pcond"> 중고품</label>
+                <label class="radio-pill"><input type="radio" name="pcond" value="상관없음" checked> 상관없음</label>
+                <label class="radio-pill"><input type="radio" name="pcond" value="새상품"> 새상품</label>
+                <label class="radio-pill"><input type="radio" name="pcond" value="사용감 적음"> 사용감 적음</label>
+                <label class="radio-pill"><input type="radio" name="pcond" value="사용감 있음"> 사용감 있음</label>
+                <label class="radio-pill"><input type="radio" name="pcond" value="중고품"> 중고품</label>
               </div>
             </div>
             <div class="field">
               <label>희망 수량<span class="req">*</span></label>
-              <div class="field-suffix"><input type="text" class="tabular" value="1"><span>개</span></div>
+              <div class="field-suffix"><input type="number" min="1" id="goomQty" class="tabular" value="1"><span>개</span></div>
             </div>
           </div>
         </div>
@@ -187,7 +187,7 @@
           <div class="field full">
             <label>상품 설명<span class="req">*</span></label>
             <div class="textarea-wrap">
-              <textarea maxlength="2000" placeholder="원하는 제품의 사양, 기능, 상태 등 상세 정보를 입력해주세요.&#10;(예: 사용환경, 필요한 기능, 선호 브랜드, 기타 요청사항 등)" oninput="document.getElementById('goomCount').textContent=this.value.length"></textarea>
+              <textarea id="goomDesc" maxlength="2000" placeholder="원하는 제품의 사양, 기능, 상태 등 상세 정보를 입력해주세요.&#10;(예: 사용환경, 필요한 기능, 선호 브랜드, 기타 요청사항 등)" oninput="document.getElementById('goomCount').textContent=this.value.length"></textarea>
               <span class="char-count"><span id="goomCount">0</span> / 2000</span>
             </div>
           </div>
@@ -204,7 +204,7 @@
         <div class="form-actions">
           <button type="button" class="btn btn-ghost">취소</button>
           <div class="right-group">
-            <button type="submit" class="btn btn-primary btn-wide">다음 단계 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+            <button type="submit" id="goomSubmitBtn" class="btn btn-primary btn-wide">구해요 등록하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
           </div>
         </div>
       </form>
@@ -266,7 +266,71 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.getElementById('goomrqForm').addEventListener('submit', function(e){ e.preventDefault(); });
+  var goomCategorySelect = document.getElementById('goomCategory');
+
+  document.addEventListener('versoi:ready', async function(){
+    var res = await sb.from('categories').select('id, name').order('sort_order');
+    if (!res.error && res.data) {
+      res.data.forEach(function(cat){
+        var opt = document.createElement('option');
+        opt.value = cat.id;
+        opt.textContent = cat.name;
+        goomCategorySelect.appendChild(opt);
+      });
+    }
+  });
+
+  document.getElementById('goomrqForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    if (!window.VERSOI.requireAuth()) return;
+
+    var title = document.getElementById('goomTitle').value.trim();
+    var categoryId = goomCategorySelect.value;
+    var desc = document.getElementById('goomDesc').value.trim();
+    if (!title || !categoryId || !desc) {
+      alert('카테고리, 상품명, 상품 설명은 필수 입력 항목입니다.');
+      return;
+    }
+
+    var btn = document.getElementById('goomSubmitBtn');
+    btn.disabled = true;
+
+    var region = document.getElementById('goomRegion').value.trim();
+    var model = document.getElementById('goomModel').value.trim();
+    var qty = document.getElementById('goomQty').value;
+    var timing = document.getElementById('goomTiming').value;
+    var cond = document.querySelector('input[name="pcond"]:checked').value;
+
+    var extraLines = [];
+    if (timing) extraLines.push('구매 희망 시기: ' + timing);
+    if (model) extraLines.push('모델명: ' + model);
+    extraLines.push('제품 상태: ' + cond);
+    if (qty) extraLines.push('희망 수량: ' + qty + '개');
+
+    var fullDescription = extraLines.join(' · ') + '\n\n' + desc;
+
+    var res = await sb.from('wanted_posts').insert({
+      profile_id: window.VERSOI.user.id,
+      title: title,
+      category_id: categoryId,
+      budget: null,
+      region: region || null,
+      description: fullDescription,
+      status: 'open'
+    });
+
+    if (res.error) {
+      alert('구해요 등록에 실패했습니다: ' + res.error.message);
+      btn.disabled = false;
+      return;
+    }
+
+    location.href = 'goomrq-board.html';
+  });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>

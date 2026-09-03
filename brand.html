@@ -167,17 +167,17 @@
 
       <div class="side-panel">
         <nav class="side-nav" id="brandNav">
-          <a href="#" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>전체 브랜드</a>
-          <a href="#"><span class="brand-dot bp-fanuc">F</span>FANUC</a>
-          <a href="#"><span class="brand-dot bp-mitsu">M</span>Mitsubishi Electric</a>
-          <a href="#"><span class="brand-dot bp-smc">S</span>SMC</a>
-          <a href="#"><span class="brand-dot bp-ls">L</span>LS ELECTRIC</a>
-          <a href="#"><span class="brand-dot bp-hyundai">H</span>Hyundai WIA</a>
-          <a href="#"><span class="brand-dot bp-thk">T</span>THK</a>
-          <a href="#"><span class="brand-dot" style="color:#181B4B;">O</span>OMRON</a>
-          <a href="#"><span class="brand-dot" style="color:#009999;">S</span>SIEMENS</a>
-          <a href="#"><span class="brand-dot" style="color:#A6192E;">K</span>KEYENCE</a>
-          <a href="#"><span class="brand-dot" style="color:#3DCD58;">S</span>Schneider Electric</a>
+          <a href="#" class="active" data-brand=""><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>전체 브랜드</a>
+          <a href="#" data-brand="FANUC"><span class="brand-dot bp-fanuc">F</span>FANUC</a>
+          <a href="#" data-brand="MITSUBISHI"><span class="brand-dot bp-mitsu">M</span>Mitsubishi Electric</a>
+          <a href="#" data-brand="SMC"><span class="brand-dot bp-smc">S</span>SMC</a>
+          <a href="#" data-brand="LS"><span class="brand-dot bp-ls">L</span>LS ELECTRIC</a>
+          <a href="#" data-brand="HYUNDAI"><span class="brand-dot bp-hyundai">H</span>Hyundai WIA</a>
+          <a href="#" data-brand="THK"><span class="brand-dot bp-thk">T</span>THK</a>
+          <a href="#" data-brand="OMRON"><span class="brand-dot" style="color:#181B4B;">O</span>OMRON</a>
+          <a href="#" data-brand="SIEMENS"><span class="brand-dot" style="color:#009999;">S</span>SIEMENS</a>
+          <a href="#" data-brand="KEYENCE"><span class="brand-dot" style="color:#A6192E;">K</span>KEYENCE</a>
+          <a href="#" data-brand="SCHNEIDER"><span class="brand-dot" style="color:#3DCD58;">S</span>Schneider Electric</a>
         </nav>
       </div>
 
@@ -260,77 +260,19 @@
       <section style="margin-top:36px;">
         <div class="section-head"><h2 style="font-size:1.1rem;">브랜드별 추천 제품</h2><a href="#" class="more-link">전체 제품 보기 ›</a></div>
         <div class="brand-tab-row" id="brandTabs">
-          <button class="brand-tab active" data-brand="fanuc"><span class="dot"></span>FANUC</button>
-          <button class="brand-tab" data-brand="mitsu"><span class="dot"></span>Mitsubishi Electric</button>
-          <button class="brand-tab" data-brand="smc"><span class="dot"></span>SMC</button>
-          <button class="brand-tab" data-brand="ls"><span class="dot"></span>LS ELECTRIC</button>
-          <button class="brand-tab" data-brand="hyundai"><span class="dot"></span>Hyundai WIA</button>
-          <button class="brand-tab" data-brand="thk"><span class="dot"></span>THK</button>
+          <button class="brand-tab active" data-brand="">전체</button>
+          <button class="brand-tab" data-brand="FANUC"><span class="dot"></span>FANUC</button>
+          <button class="brand-tab" data-brand="MITSUBISHI"><span class="dot"></span>Mitsubishi Electric</button>
+          <button class="brand-tab" data-brand="SMC"><span class="dot"></span>SMC</button>
+          <button class="brand-tab" data-brand="LS"><span class="dot"></span>LS ELECTRIC</button>
+          <button class="brand-tab" data-brand="HYUNDAI"><span class="dot"></span>Hyundai WIA</button>
+          <button class="brand-tab" data-brand="THK"><span class="dot"></span>THK</button>
         </div>
 
         <div class="rec-carousel">
           <button class="rec-arrow" aria-label="이전"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
           <div class="rec-track" id="recTrack">
-            <article class="rec-card">
-              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21"/></svg></div>
-              <div class="rec-body">
-                <span class="rec-brand">FANUC</span>
-                <p class="rec-name">서보 모터 αiF series</p>
-                <p class="rec-model">A06B-0115-B203</p>
-                <div class="rec-bottom">
-                  <span class="rec-price">₩1,280,000</span>
-                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
-                </div>
-              </div>
-            </article>
-            <article class="rec-card">
-              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/><line x1="8" y1="16" x2="10" y2="16"/><line x1="13" y1="16" x2="16" y2="16"/></svg></div>
-              <div class="rec-body">
-                <span class="rec-brand">FANUC</span>
-                <p class="rec-name">서보 앰프 αiF series</p>
-                <p class="rec-model">A06B-6124-H209</p>
-                <div class="rec-bottom">
-                  <span class="rec-price">₩890,000</span>
-                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
-                </div>
-              </div>
-            </article>
-            <article class="rec-card">
-              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></div>
-              <div class="rec-body">
-                <span class="rec-brand">FANUC</span>
-                <p class="rec-name">CNC Series 0i-MF Plus</p>
-                <p class="rec-model">A02B-0336-C231</p>
-                <div class="rec-bottom">
-                  <span class="rec-price">₩7,500,000</span>
-                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
-                </div>
-              </div>
-            </article>
-            <article class="rec-card">
-              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="16" width="8" height="4" rx="1"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="7" y1="10" x2="16" y2="7"/><circle cx="7" cy="10" r="1.4"/><line x1="16" y1="7" x2="16" y2="4"/><circle cx="16" cy="7" r="1.2"/><path d="M16 4l4.5 2.5"/></svg></div>
-              <div class="rec-body">
-                <span class="rec-brand">FANUC</span>
-                <p class="rec-name">산업용 로봇 M-20iA</p>
-                <p class="rec-model">R-30iB Mate Plus</p>
-                <div class="rec-bottom">
-                  <span class="rec-price">₩28,500,000</span>
-                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
-                </div>
-              </div>
-            </article>
-            <article class="rec-card">
-              <div class="rec-media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="12" rx="1.5"/><line x1="3" y1="11" x2="21" y2="11"/><circle cx="7" cy="15" r="1"/></svg></div>
-              <div class="rec-body">
-                <span class="rec-brand">FANUC</span>
-                <p class="rec-name">로봇 컨트롤러 R-30iB Plus</p>
-                <p class="rec-model">A05B-2651-B001</p>
-                <div class="rec-bottom">
-                  <span class="rec-price">₩12,800,000</span>
-                  <span class="rec-cart"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
-                </div>
-              </div>
-            </article>
+            <p style="padding:40px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">불러오는 중...</p>
           </div>
           <button class="rec-arrow" aria-label="다음"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
@@ -389,21 +331,96 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  var PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>';
+  var state = { brand: '' };
 
-  document.querySelectorAll('#brandNav a').forEach(function(a){
-    a.addEventListener('click', function(e){
-      e.preventDefault();
-      document.querySelectorAll('#brandNav a').forEach(function(x){ x.classList.remove('active'); });
-      a.classList.add('active');
-    });
+  function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+  function cardHTML(p){
+    var img = p.product_images && p.product_images.length ? p.product_images[0].url : null;
+    var media = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : PLACEHOLDER_SVG;
+    return ''
+      + '<article class="rec-card">'
+      +   '<div class="rec-media">'+media+'</div>'
+      +   '<div class="rec-body">'
+      +     '<span class="rec-brand">'+escapeHtml(p.manufacturer||'')+'</span>'
+      +     '<p class="rec-name">'+escapeHtml(p.title)+'</p>'
+      +     '<p class="rec-model">'+escapeHtml(p.model_no||'')+'</p>'
+      +     '<div class="rec-bottom">'
+      +       '<span class="rec-price">₩'+Number(p.price).toLocaleString('ko-KR')+'</span>'
+      +       '<a class="rec-cart" aria-label="장바구니 담기" href="product-detail.html?id='+p.id+'" data-id="'+p.id+'" data-stock="'+p.stock+'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></a>'
+      +     '</div>'
+      +   '</div>'
+      + '</article>';
+  }
+
+  async function render(){
+    var track = document.getElementById('recTrack');
+    track.innerHTML = '<p style="padding:40px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">불러오는 중...</p>';
+    var q = sb.from('products')
+      .select('id,title,model_no,manufacturer,price,stock,product_images(url,sort_order)')
+      .eq('market_type','new').neq('status','deleted')
+      .order('sort_order', { foreignTable: 'product_images', ascending: true })
+      .order('created_at', { ascending: false });
+    var res = await q;
+    var rows = res.data || [];
+    if (state.brand) rows = rows.filter(function(p){ return p.manufacturer && p.manufacturer.toUpperCase().indexOf(state.brand) !== -1; });
+    if (!rows.length) { track.innerHTML = '<p style="padding:40px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">해당 브랜드의 등록 상품이 없습니다.</p>'; return; }
+    track.innerHTML = rows.map(cardHTML).join('');
+  }
+
+  document.getElementById('recTrack').addEventListener('click', function(e){
+    var cartBtn = e.target.closest('.rec-cart');
+    if (!cartBtn) return;
+    e.preventDefault();
+    handleAddToCart(cartBtn.dataset.id, cartBtn);
   });
 
-  document.querySelectorAll('#brandTabs .brand-tab').forEach(function(tab){
-    tab.addEventListener('click', function(){
-      document.querySelectorAll('#brandTabs .brand-tab').forEach(function(t){ t.classList.remove('active'); });
-      tab.classList.add('active');
-    });
+  async function handleAddToCart(productId, btn){
+    if (!window.VERSOI.requireAuth()) return;
+    btn.style.pointerEvents = 'none';
+    try {
+      var uid = window.VERSOI.user.id;
+      var max = parseInt(btn.dataset.stock, 10); if (isNaN(max)) max = Infinity;
+      var existing = await sb.from('cart_items').select('id,qty').eq('profile_id', uid).eq('product_id', productId).maybeSingle();
+      if (existing.data) {
+        await sb.from('cart_items').update({ qty: Math.min(max, existing.data.qty + 1) }).eq('id', existing.data.id);
+      } else {
+        await sb.from('cart_items').insert({ profile_id: uid, product_id: productId, qty: Math.min(max, 1), selected: true });
+      }
+      btn.style.background = 'var(--good)';
+      btn.style.color = '#fff';
+    } catch (err) { console.error(err); }
+    setTimeout(function(){ btn.style.background = ''; btn.style.color = ''; btn.style.pointerEvents = ''; }, 900);
+  }
+
+  document.getElementById('brandNav').addEventListener('click', function(e){
+    var a = e.target.closest('a'); if (!a) return;
+    e.preventDefault();
+    document.querySelectorAll('#brandNav a').forEach(function(x){ x.classList.remove('active'); });
+    a.classList.add('active');
+    state.brand = a.dataset.brand || '';
+    document.querySelectorAll('#brandTabs .brand-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.brand === state.brand); });
+    render();
   });
+
+  document.getElementById('brandTabs').addEventListener('click', function(e){
+    var tab = e.target.closest('.brand-tab'); if (!tab) return;
+    document.querySelectorAll('#brandTabs .brand-tab').forEach(function(t){ t.classList.remove('active'); });
+    tab.classList.add('active');
+    state.brand = tab.dataset.brand || '';
+    document.querySelectorAll('#brandNav a').forEach(function(a){ a.classList.toggle('active', (a.dataset.brand||'') === state.brand); });
+    render();
+  });
+
+  document.addEventListener('versoi:ready', function(){ render(); });
+})();
 </script>
 </body>
 </html>

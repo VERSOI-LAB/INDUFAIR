@@ -26,6 +26,8 @@
   .progress-row b{font-family:var(--font-en);font-weight:800;font-size:.86rem;color:var(--accent);flex-shrink:0;}
   .status-tag2{font-size:.7rem;font-weight:800;padding:4px 10px;border-radius:20px;flex-shrink:0;white-space:nowrap;}
   .status-tag2.wait{background:var(--warn-soft);color:var(--warn);}
+  .status-tag2.done{background:var(--good-soft);color:var(--good);}
+  .status-empty{font-size:.86rem;color:var(--text-tertiary);text-align:center;padding:10px 0;}
 </style>
 </head>
 <body>
@@ -95,20 +97,13 @@
         </div>
       </div>
 
-      <div class="status-panel">
+      <div class="status-panel" id="statusPanel" hidden>
         <p class="seller-panel-title">나의 입점 신청 현황</p>
-        <div class="status-row">
-          <div class="status-cell"><span class="lbl">신청 상태</span><span class="val"><span class="status-tag2 wait">심사중</span></span></div>
-          <div class="status-cell"><span class="lbl">신청일</span><span class="val tabular">2024.05.06</span></div>
-          <div class="status-cell">
-            <span class="lbl">심사 진행률</span>
-            <div class="progress-row"><div class="progress-track"><div class="progress-fill" style="width:60%;"></div></div><b>60%</b></div>
-          </div>
-        </div>
+        <div id="statusPanelBody"></div>
       </div>
 
-      <a href="seller-apply.html" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:20px;">판매자 입점 신청하기</a>
-      <p style="margin-top:14px;font-size:.84rem;color:var(--text-tertiary);text-align:center;">이미 입점하셨나요? <a href="seller-dashboard.html" style="color:var(--accent);font-weight:700;">판매자센터 바로가기 ›</a></p>
+      <a href="seller-apply.html" class="btn btn-primary btn-lg" id="applyCta" style="width:100%;justify-content:center;margin-top:20px;">판매자 입점 신청하기</a>
+      <p style="margin-top:14px;font-size:.84rem;color:var(--text-tertiary);text-align:center;" id="dashboardCtaWrap">이미 입점하셨나요? <a href="seller-dashboard.html" style="color:var(--accent);font-weight:700;">판매자센터 바로가기 ›</a></p>
     </div>
   </div>
 </main>
@@ -126,6 +121,42 @@
   navToggle.addEventListener('click', function(){
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  document.addEventListener('versoi:ready', function (e) {
+    var user = e.detail.user;
+    var panel = document.getElementById('statusPanel');
+    var body = document.getElementById('statusPanelBody');
+    var applyCta = document.getElementById('applyCta');
+    var dashboardCtaWrap = document.getElementById('dashboardCtaWrap');
+
+    if (user && user.company) {
+      // Already a seller — show 입점 완료 status and lead with the seller center link.
+      panel.hidden = false;
+      body.innerHTML =
+        '<div class="status-row">' +
+          '<div class="status-cell"><span class="lbl">신청 상태</span><span class="val"><span class="status-tag2 done">입점 완료</span></span></div>' +
+          '<div class="status-cell"><span class="lbl">회사명</span><span class="val">' + user.company.name + '</span></div>' +
+          '<div class="status-cell"><span class="lbl">심사 진행률</span>' +
+            '<div class="progress-row"><div class="progress-track"><div class="progress-fill" style="width:100%;"></div></div><b>100%</b></div>' +
+          '</div>' +
+        '</div>';
+
+      applyCta.textContent = '판매자센터 바로가기';
+      applyCta.setAttribute('href', 'seller-dashboard.html');
+      dashboardCtaWrap.hidden = true;
+    } else if (user) {
+      // Logged in, no company yet — no real "pending application" concept in this schema.
+      panel.hidden = false;
+      body.innerHTML = '<p class="status-empty">아직 입점하지 않으셨습니다. 아래 버튼으로 입점을 신청해보세요.</p>';
+    } else {
+      // Logged out — nothing to show, keep the panel hidden.
+      panel.hidden = true;
+    }
   });
 </script>
 </body>

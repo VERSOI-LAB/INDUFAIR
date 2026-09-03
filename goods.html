@@ -161,6 +161,8 @@
     transition:color .15s ease,transform .15s ease;z-index:1;
   }
   .wish-btn:hover{color:var(--up);transform:scale(1.08);}
+  .wish-btn.wished{color:var(--up);}
+  .wish-btn.wished svg{fill:currentColor;}
   .product-body{padding:14px 15px 15px;display:flex;flex-direction:column;gap:6px;flex:1;}
   .p-brand{display:flex;align-items:center;gap:6px;font-family:var(--font-en);font-weight:800;font-size:.78rem;letter-spacing:.01em;}
   .p-name{font-size:.94rem;font-weight:700;line-height:1.4;}
@@ -322,14 +324,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </label>
         <select id="catSelect" class="visually-hidden">
-          <option>전체 카테고리</option>
-          <option>FA 자동화</option>
-          <option>공작기계</option>
-          <option>모터/감속기</option>
-          <option>유공압</option>
-          <option>전기전자</option>
-          <option>물류장비</option>
-          <option>안전용품</option>
+          <option value="">전체 카테고리</option>
         </select>
         <input type="text" placeholder="제품명, 브랜드, 모델명, 사양 등을 검색해보세요" aria-label="산업용품 검색">
         <button type="submit" class="search-submit" aria-label="검색">
@@ -392,15 +387,8 @@
       <aside class="filter-panel">
         <div class="filter-group">
           <div class="filter-group-head">카테고리</div>
-          <div class="filter-body filter-tree">
-            <a href="#" class="active">FA 자동화 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <a href="#">공작기계 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <a href="#">모터/감속기 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <a href="#">유공압 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <a href="#">전기전자 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <a href="#">물류장비 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <a href="#">안전용품 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
-            <a href="#">기타 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+          <div class="filter-body filter-tree" id="filterTree">
+            <a href="#" class="active" data-cat="">전체 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
           </div>
         </div>
 
@@ -409,14 +397,9 @@
           <div class="filter-body">
             <div class="brand-search">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" placeholder="브랜드명 검색">
+              <input type="text" placeholder="브랜드명 검색" id="brandSearchInput">
             </div>
-            <label class="check-row"><input type="checkbox"> Mitsubishi</label>
-            <label class="check-row"><input type="checkbox"> Siemens</label>
-            <label class="check-row"><input type="checkbox"> FANUC</label>
-            <label class="check-row"><input type="checkbox"> SMC</label>
-            <label class="check-row"><input type="checkbox"> LS ELECTRIC</label>
-            <label class="check-row"><input type="checkbox"> 기타</label>
+            <div id="brandCheckList"><span style="font-size:.8rem;color:var(--text-tertiary);">불러오는 중...</span></div>
           </div>
         </div>
 
@@ -440,9 +423,9 @@
         <div class="filter-group">
           <div class="filter-group-head">재고 여부</div>
           <div class="filter-body">
-            <label class="check-row"><input type="checkbox" checked> 전체</label>
-            <label class="check-row"><input type="checkbox"> 재고 있음</label>
-            <label class="check-row"><input type="checkbox"> 재고 없음</label>
+            <label class="check-row"><input type="checkbox" id="stockAll" checked> 전체</label>
+            <label class="check-row"><input type="checkbox" id="stockIn"> 재고 있음</label>
+            <label class="check-row"><input type="checkbox" id="stockOut"> 재고 없음</label>
           </div>
         </div>
 
@@ -497,165 +480,7 @@
         </div>
 
         <div class="product-grid" id="productGrid">
-          <!-- 1 -->
-          <article class="product-card">
-            <div class="product-media" style="background:linear-gradient(150deg,#1E293F,#0F1830);">
-              <div class="product-badges"><span class="p-badge new">신품</span><span class="p-badge hot">인기</span></div>
-              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/><line x1="4" y1="9" x2="20" y2="9"/></svg>
-            </div>
-            <div class="product-body">
-              <span class="p-brand brand-mitsu">✦ MITSUBISHI</span>
-              <span class="p-name">PLC Q시리즈 (Q06UDVCPU)</span>
-              <span class="p-specs">16K 스텝, 내장 이더넷<br>입출력 모듈 호환</span>
-              <span class="p-stock">재고 50개 이상</span>
-              <span class="p-price"><span class="won">₩</span>1,350,000</span>
-              <div class="p-actions">
-                <button class="btn btn-primary btn-sm">장바구니</button>
-                <button class="btn btn-outline btn-sm">상세보기</button>
-              </div>
-            </div>
-          </article>
-
-          <!-- 2 -->
-          <article class="product-card">
-            <div class="product-media" style="background:linear-gradient(150deg,#25313F,#101A22);">
-              <div class="product-badges"><span class="p-badge new">신품</span><span class="p-badge fast">빠른배송</span></div>
-              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/><line x1="8" y1="16" x2="10" y2="16"/><line x1="13" y1="16" x2="16" y2="16"/></svg>
-            </div>
-            <div class="product-body">
-              <span class="p-brand brand-ls">LS ELECTRIC</span>
-              <span class="p-name">인버터 iG5A</span>
-              <span class="p-specs">3상 380V, 22kW<br>벡터제어, 고효율</span>
-              <span class="p-stock">재고 30개 이상</span>
-              <span class="p-price"><span class="won">₩</span>1,100,000</span>
-              <div class="p-actions">
-                <button class="btn btn-primary btn-sm">장바구니</button>
-                <button class="btn btn-outline btn-sm">상세보기</button>
-              </div>
-            </div>
-          </article>
-
-          <!-- 3 -->
-          <article class="product-card">
-            <div class="product-media" style="background:linear-gradient(150deg,#2B2417,#151009);">
-              <div class="product-badges"><span class="p-badge new">신품</span><span class="p-badge hot">인기</span></div>
-              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#E8D9A6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21"/></svg>
-            </div>
-            <div class="product-body">
-              <span class="p-brand brand-fanuc">FANUC</span>
-              <span class="p-name">서보모터 αiF 750W</span>
-              <span class="p-specs">750W, 3000rpm<br>고정밀 위치 제어</span>
-              <span class="p-stock">재고 20개 이상</span>
-              <span class="p-price"><span class="won">₩</span>980,000</span>
-              <div class="p-actions">
-                <button class="btn btn-primary btn-sm">장바구니</button>
-                <button class="btn btn-outline btn-sm">상세보기</button>
-              </div>
-            </div>
-          </article>
-
-          <!-- 4 -->
-          <article class="product-card">
-            <div class="product-media" style="background:linear-gradient(150deg,#232A38,#10141C);">
-              <div class="product-badges"><span class="p-badge new">신품</span></div>
-              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="5.2" r="1"/><circle cx="12" cy="18.8" r="1"/><circle cx="5.2" cy="12" r="1"/><circle cx="18.8" cy="12" r="1"/></svg>
-            </div>
-            <div class="product-body">
-              <span class="p-brand brand-ntn">NTN</span>
-              <span class="p-name">베어링 6206ZZ</span>
-              <span class="p-specs">내경 30mm, 외경 62mm<br>고속 회전용</span>
-              <span class="p-stock">재고 100개 이상</span>
-              <span class="p-price"><span class="won">₩</span>12,500</span>
-              <div class="p-actions">
-                <button class="btn btn-primary btn-sm">장바구니</button>
-                <button class="btn btn-outline btn-sm">상세보기</button>
-              </div>
-            </div>
-          </article>
-
-          <!-- 5 -->
-          <article class="product-card">
-            <div class="product-media" style="background:linear-gradient(150deg,#25313F,#101A22);">
-              <div class="product-badges"><span class="p-badge new">신품</span></div>
-              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="12" height="6" rx="1"/><line x1="15" y1="10" x2="15" y2="14"/><rect x="15" y="8.5" width="6" height="7" rx="1"/></svg>
-            </div>
-            <div class="product-body">
-              <span class="p-brand brand-smc">SMC</span>
-              <span class="p-name">실린더 CDQ2B40-50DMZ</span>
-              <span class="p-specs">복동형, 자석내장<br>튜브내경 40mm</span>
-              <span class="p-stock">재고 15개 이상</span>
-              <span class="p-price"><span class="won">₩</span>85,000</span>
-              <div class="p-actions">
-                <button class="btn btn-primary btn-sm">장바구니</button>
-                <button class="btn btn-outline btn-sm">상세보기</button>
-              </div>
-            </div>
-          </article>
-
-          <!-- 6 -->
-          <article class="product-card">
-            <div class="product-media" style="background:linear-gradient(150deg,#2B2417,#151009);">
-              <div class="product-badges"><span class="p-badge new">신품</span></div>
-              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#E8D9A6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="16" width="8" height="4" rx="1"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="7" y1="10" x2="16" y2="7"/><circle cx="7" cy="10" r="1.4"/><line x1="16" y1="7" x2="16" y2="4"/><circle cx="16" cy="7" r="1.2"/><path d="M16 4l4.5 2.5"/></svg>
-            </div>
-            <div class="product-body">
-              <span class="p-brand brand-fanuc">FANUC</span>
-              <span class="p-name">산업용 로봇 M-10iD/12</span>
-              <span class="p-specs">가반하중 12kg<br>최대작업반경 1,444mm</span>
-              <span class="p-stock">재고 2개 이상</span>
-              <span class="p-price"><span class="won">₩</span>45,000,000</span>
-              <div class="p-actions">
-                <button class="btn btn-primary btn-sm">장바구니</button>
-                <button class="btn btn-outline btn-sm">상세보기</button>
-              </div>
-            </div>
-          </article>
-
-          <!-- 7 -->
-          <article class="product-card">
-            <div class="product-media" style="background:linear-gradient(150deg,#232A38,#10141C);">
-              <div class="product-badges"><span class="p-badge new">신품</span></div>
-              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="1.5"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
-            </div>
-            <div class="product-body">
-              <span class="p-brand brand-omron">OMRON</span>
-              <span class="p-name">파워서플라이 S8VS-06024</span>
-              <span class="p-specs">24V, 2.5A<br>DIN 레일 장착</span>
-              <span class="p-stock">재고 40개 이상</span>
-              <span class="p-price"><span class="won">₩</span>98,000</span>
-              <div class="p-actions">
-                <button class="btn btn-primary btn-sm">장바구니</button>
-                <button class="btn btn-outline btn-sm">상세보기</button>
-              </div>
-            </div>
-          </article>
-
-          <!-- 8 -->
-          <article class="product-card">
-            <div class="product-media" style="background:linear-gradient(150deg,#25313F,#101A22);">
-              <div class="product-badges"><span class="p-badge new">신품</span></div>
-              <button class="wish-btn" aria-label="찜하기"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-              <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="8" rx="1.5"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="17" y1="8" x2="17" y2="16"/></svg>
-            </div>
-            <div class="product-body">
-              <span class="p-brand brand-smc">SMC</span>
-              <span class="p-name">솔레노이드 밸브 SY5120-5LZ</span>
-              <span class="p-specs">5포트, 2위치<br>공압 제어</span>
-              <span class="p-stock">재고 25개 이상</span>
-              <span class="p-price"><span class="won">₩</span>45,000</span>
-              <div class="p-actions">
-                <button class="btn btn-primary btn-sm">장바구니</button>
-                <button class="btn btn-outline btn-sm">상세보기</button>
-              </div>
-            </div>
-          </article>
+          <p style="padding:60px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">불러오는 중...</p>
         </div>
 
         <!-- BOTTOM AI IMAGE-SEARCH PROMO -->
@@ -715,12 +540,11 @@
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
-  // Category select syncs the pill label
-  var catSelect = document.getElementById('catSelect');
-  var catSelectLabel = document.getElementById('catSelectLabel');
-  catSelect.addEventListener('change', function(){ catSelectLabel.textContent = catSelect.value; });
-
-  document.getElementById('goodsSearchForm').addEventListener('submit', function(e){ e.preventDefault(); });
+  document.getElementById('goodsSearchForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    state.q = e.target.querySelector('input[type="text"]').value.trim();
+    render();
+  });
 
   // Collapsible filter groups
   document.querySelectorAll('.filter-group-head').forEach(function(head){
@@ -729,30 +553,230 @@
     });
   });
 
-  // Filter tree active state
-  document.querySelectorAll('.filter-tree a').forEach(function(a){
-    a.addEventListener('click', function(e){
-      e.preventDefault();
-      document.querySelectorAll('.filter-tree a').forEach(function(x){ x.classList.remove('active'); });
-      a.classList.add('active');
-    });
-  });
-
-  // View toggle
+  // View toggle (visual only)
   document.querySelectorAll('.view-toggle button').forEach(function(btn){
     btn.addEventListener('click', function(){
       document.querySelectorAll('.view-toggle button').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
     });
   });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  var TAB_CAT = { rec: null, plc: 1, inv: 2, motor: 3, bearing: 9, cyl: 5 };
+  var BG_GRADS = ['linear-gradient(150deg,#1E293F,#0F1830)','linear-gradient(150deg,#25313F,#101A22)','linear-gradient(150deg,#2B2417,#151009)','linear-gradient(150deg,#232A38,#10141C)'];
+  var PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/><line x1="4" y1="9" x2="20" y2="9"/></svg>';
+  var BRAND_CLASS = { MITSUBISHI:'brand-mitsu', FANUC:'brand-fanuc', SMC:'brand-smc', OMRON:'brand-omron', NTN:'brand-ntn' };
 
-  // Product tabs (visual state; demo keeps the same product set)
-  document.querySelectorAll('.product-tabs button').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.product-tabs button').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
+  var state = { category: '', q: '', brands: new Set(), stock: 'all' };
+  var favSet = new Set();
+  var allCategories = [];
+
+  function fmtWon(n){ return '₩' + Number(n||0).toLocaleString('ko-KR'); }
+  function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function brandClass(m){
+    if (!m) return '';
+    var key = m.toUpperCase();
+    for (var k in BRAND_CLASS) { if (key.indexOf(k) !== -1) return BRAND_CLASS[k]; }
+    if (key.indexOf('LS') !== -1) return 'brand-ls';
+    return '';
+  }
+  function gradFor(id){ var sum = 0; String(id).split('').forEach(function(c){ sum += c.charCodeAt(0); }); return BG_GRADS[sum % BG_GRADS.length]; }
+
+  async function loadCategories(){
+    var res = await sb.from('categories').select('id,name').order('sort_order');
+    allCategories = res.data || [];
+    var chevron = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>';
+
+    var sel = document.getElementById('catSelect');
+    sel.innerHTML = '<option value="">전체 카테고리</option>' + allCategories.map(function(c){ return '<option value="'+c.id+'">'+escapeHtml(c.name)+'</option>'; }).join('');
+
+    var tree = document.getElementById('filterTree');
+    tree.innerHTML = '<a href="#" class="active" data-cat="">전체 ' + chevron + '</a>' +
+      allCategories.map(function(c){ return '<a href="#" data-cat="'+c.id+'">'+escapeHtml(c.name)+' '+chevron+'</a>'; }).join('');
+  }
+
+  async function loadBrandFilter(){
+    var res = await sb.from('products').select('manufacturer').eq('market_type','new').neq('status','deleted');
+    var brands = Array.from(new Set((res.data||[]).map(function(p){ return p.manufacturer; }).filter(Boolean))).sort();
+    var body = document.getElementById('brandCheckList');
+    if (!brands.length) { body.innerHTML = '<span style="font-size:.8rem;color:var(--text-tertiary);">등록된 브랜드 없음</span>'; return; }
+    body.innerHTML = brands.map(function(b){
+      return '<label class="check-row"><input type="checkbox" value="'+escapeHtml(b)+'"> '+escapeHtml(b)+'</label>';
+    }).join('');
+    body.querySelectorAll('input[type="checkbox"]').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        if (this.checked) state.brands.add(this.value); else state.brands.delete(this.value);
+        render();
+      });
+    });
+  }
+
+  function syncCategoryUI(){
+    var catStr = state.category ? String(state.category) : '';
+    document.getElementById('catSelect').value = catStr;
+    var lbl = document.getElementById('catSelectLabel');
+    var sel = document.getElementById('catSelect');
+    lbl.textContent = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '전체 카테고리';
+    document.querySelectorAll('#filterTree a').forEach(function(a){
+      a.classList.toggle('active', (a.dataset.cat || '') === catStr);
+    });
+  }
+
+  function productCardHTML(p){
+    var img = p.product_images && p.product_images.length ? p.product_images[0].url : null;
+    var media = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : PLACEHOLDER_SVG;
+    var badges = '<span class="p-badge new">신품</span>' + (p.stock <= 0 ? '<span class="p-badge" style="background:var(--text-tertiary);">품절</span>' : '');
+    var specs = [p.model_no, p.categories ? p.categories.name : ''].filter(Boolean).map(escapeHtml).join('<br>');
+    return ''
+      + '<article class="product-card">'
+      +   '<div class="product-media" style="background:'+(img ? 'var(--bg-soft)' : gradFor(p.id))+';">'
+      +     '<div class="product-badges">'+badges+'</div>'
+      +     '<button class="wish-btn'+(favSet.has(p.id) ? ' wished' : '')+'" aria-label="찜하기" data-id="'+p.id+'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'
+      +     media
+      +   '</div>'
+      +   '<div class="product-body">'
+      +     '<span class="p-brand '+brandClass(p.manufacturer)+'">'+escapeHtml(p.manufacturer||'')+'</span>'
+      +     '<span class="p-name">'+escapeHtml(p.title)+'</span>'
+      +     '<span class="p-specs">'+specs+'</span>'
+      +     '<span class="p-stock">'+(p.stock > 0 ? '재고 '+p.stock+'개' : '품절')+'</span>'
+      +     '<span class="p-price"><span class="won">₩</span>'+Number(p.price).toLocaleString('ko-KR')+'</span>'
+      +     '<div class="p-actions">'
+      +       '<button class="btn btn-primary btn-sm add-cart-btn" data-id="'+p.id+'" data-stock="'+p.stock+'">장바구니</button>'
+      +       '<a class="btn btn-outline btn-sm" href="product-detail.html?id='+p.id+'">상세보기</a>'
+      +     '</div>'
+      +   '</div>'
+      + '</article>';
+  }
+
+  async function fetchProducts(){
+    var q = sb.from('products')
+      .select('id,title,model_no,manufacturer,price,stock,condition,category_id,categories(name),product_images(url,sort_order)')
+      .eq('market_type','new').neq('status','deleted')
+      .order('sort_order', { foreignTable: 'product_images', ascending: true })
+      .order('created_at', { ascending: false });
+    if (state.category) q = q.eq('category_id', state.category);
+    if (state.q) q = q.ilike('title', '%'+state.q+'%');
+    if (state.stock === 'in') q = q.gt('stock', 0);
+    if (state.stock === 'out') q = q.eq('stock', 0);
+    var res = await q;
+    if (res.error) { console.error(res.error); return []; }
+    var rows = res.data || [];
+    if (state.brands.size) {
+      rows = rows.filter(function(p){
+        if (!p.manufacturer) return false;
+        return Array.from(state.brands).some(function(b){ return p.manufacturer === b; });
+      });
+    }
+    return rows;
+  }
+
+  async function render(){
+    syncCategoryUI();
+    var grid = document.getElementById('productGrid');
+    grid.innerHTML = '<p style="padding:60px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">불러오는 중...</p>';
+    var rows = await fetchProducts();
+    if (!rows.length) { grid.innerHTML = '<p style="padding:60px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">조건에 맞는 상품이 없습니다.</p>'; return; }
+    grid.innerHTML = rows.map(productCardHTML).join('');
+  }
+
+  async function toggleFavorite(productId, btn){
+    if (!window.VERSOI.requireAuth()) return;
+    var uid = window.VERSOI.user.id;
+    btn.disabled = true;
+    try {
+      if (favSet.has(productId)) {
+        await sb.from('favorites').delete().eq('profile_id', uid).eq('product_id', productId);
+        favSet.delete(productId);
+        btn.classList.remove('wished');
+      } else {
+        await sb.from('favorites').insert({ profile_id: uid, product_id: productId });
+        favSet.add(productId);
+        btn.classList.add('wished');
+      }
+    } catch (err) { console.error(err); }
+    btn.disabled = false;
+  }
+
+  async function addToCart(productId, qty, stock){
+    var uid = window.VERSOI.user.id;
+    var existing = await sb.from('cart_items').select('id,qty').eq('profile_id', uid).eq('product_id', productId).maybeSingle();
+    var max = (typeof stock === 'number' && !isNaN(stock)) ? stock : Infinity;
+    if (existing.data) {
+      var next = Math.min(max, existing.data.qty + qty);
+      await sb.from('cart_items').update({ qty: next }).eq('id', existing.data.id);
+    } else {
+      await sb.from('cart_items').insert({ profile_id: uid, product_id: productId, qty: Math.min(max, qty), selected: true });
+    }
+  }
+
+  async function handleAddToCart(productId, btn){
+    if (!window.VERSOI.requireAuth()) return;
+    var original = btn.textContent;
+    btn.disabled = true;
+    try {
+      await addToCart(productId, 1, parseInt(btn.dataset.stock, 10));
+      btn.textContent = '담김';
+    } catch (err) {
+      console.error(err);
+      btn.textContent = '오류';
+    }
+    setTimeout(function(){ btn.textContent = original; btn.disabled = false; }, 1000);
+  }
+
+  // Delegated click handling for dynamically rendered cards
+  document.getElementById('productGrid').addEventListener('click', function(e){
+    var wishBtn = e.target.closest('.wish-btn');
+    if (wishBtn) { toggleFavorite(wishBtn.dataset.id, wishBtn); return; }
+    var cartBtn = e.target.closest('.add-cart-btn');
+    if (cartBtn) { handleAddToCart(cartBtn.dataset.id, cartBtn); return; }
+  });
+
+  document.getElementById('catSelect').addEventListener('change', function(){
+    state.category = this.value;
+    render();
+  });
+
+  document.getElementById('filterTree').addEventListener('click', function(e){
+    var a = e.target.closest('a'); if (!a) return;
+    e.preventDefault();
+    state.category = a.dataset.cat || '';
+    document.querySelectorAll('.product-tabs button').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelector('.product-tabs button[data-ptab="rec"]').classList.add('active');
+    render();
+  });
+
+  document.querySelector('.product-tabs').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if (!btn) return;
+    document.querySelectorAll('.product-tabs button').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    state.category = TAB_CAT[btn.dataset.ptab] || '';
+    render();
+  });
+
+  ['stockAll','stockIn','stockOut'].forEach(function(id){
+    document.getElementById(id).addEventListener('change', function(){
+      if (!this.checked) { document.getElementById('stockAll').checked = true; state.stock = 'all'; render(); return; }
+      state.stock = id === 'stockAll' ? 'all' : (id === 'stockIn' ? 'in' : 'out');
+      ['stockAll','stockIn','stockOut'].forEach(function(other){ if (other !== id) document.getElementById(other).checked = false; });
+      render();
     });
   });
+
+  document.addEventListener('versoi:ready', async function(e){
+    var user = e.detail.user;
+    if (user) {
+      var favRes = await sb.from('favorites').select('product_id').eq('profile_id', user.id);
+      (favRes.data || []).forEach(function(f){ favSet.add(f.product_id); });
+    }
+    await loadCategories();
+    await loadBrandFilter();
+    await render();
+  });
+})();
 </script>
 </body>
 </html>

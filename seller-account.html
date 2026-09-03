@@ -102,32 +102,31 @@
             <div class="admin-card">
               <div class="admin-card-head"><h2>회사 기본 정보</h2><span class="badge badge-good">인증 완료</span></div>
               <div class="info-list">
-                <div class="info-row"><span class="lbl">회사명</span><span class="val">한국브라스트(주)</span><button class="btn btn-ghost btn-sm">수정</button></div>
-                <div class="info-row"><span class="lbl">사업자등록번호</span><span class="val tabular">123-45-67890</span></div>
-                <div class="info-row"><span class="lbl">대표자명</span><span class="val">이성욱</span></div>
-                <div class="info-row"><span class="lbl">업태</span><span class="val">도매 및 소매업</span></div>
-                <div class="info-row"><span class="lbl">종목</span><span class="val">산업용 기계 및 장비</span></div>
-                <div class="info-row"><span class="lbl">사업장 주소</span><span class="val">경기도 화성시 동탄대로 123, 8층 (영천동, 브라스트빌딩)</span></div>
-                <div class="info-row"><span class="lbl">대표 전화번호</span><span class="val tabular">031-123-4567</span></div>
-                <div class="info-row"><span class="lbl">팩스번호</span><span class="val tabular">031-123-4568</span></div>
-                <div class="info-row"><span class="lbl">이메일</span><span class="val">info@kblast.co.kr</span></div>
+                <div class="info-row"><span class="lbl">회사명</span><span class="val" id="ci-name">-</span><button class="btn btn-ghost btn-sm" data-edit="name" data-label="회사명">수정</button></div>
+                <div class="info-row"><span class="lbl">사업자등록번호</span><span class="val tabular" id="ci-bizno">-</span></div>
+                <div class="info-row"><span class="lbl">대표자명</span><span class="val" id="ci-ceo">-</span></div>
+                <div class="info-row"><span class="lbl">업태</span><span class="val" id="ci-biztype">-</span><button class="btn btn-ghost btn-sm" data-edit="biz_type" data-label="업태">수정</button></div>
+                <div class="info-row"><span class="lbl">종목</span><span class="val" id="ci-bizitem">-</span><button class="btn btn-ghost btn-sm" data-edit="biz_item" data-label="종목">수정</button></div>
+                <div class="info-row"><span class="lbl">사업장 주소</span><span class="val" id="ci-address">-</span><button class="btn btn-ghost btn-sm" data-edit="address" data-label="사업장 주소">수정</button></div>
+                <div class="info-row"><span class="lbl">대표 전화번호</span><span class="val tabular" id="ci-phone">-</span><button class="btn btn-ghost btn-sm" data-edit="phone" data-label="대표 전화번호">수정</button></div>
+                <div class="info-row"><span class="lbl">팩스번호</span><span class="val tabular" id="ci-fax">-</span><button class="btn btn-ghost btn-sm" data-edit="fax" data-label="팩스번호">수정</button></div>
+                <div class="info-row"><span class="lbl">이메일</span><span class="val" id="ci-email">-</span><button class="btn btn-ghost btn-sm" data-edit="email" data-label="이메일">수정</button></div>
                 <div class="info-row">
                   <span class="lbl">사업자등록증</span>
                   <div class="val file-row">
-                    <div class="who"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg><span><b>사업자등록증_한국브라스트(주).pdf</b><small>2024.05.10 등록</small></span></div>
+                    <div class="who"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg><span><b id="ci-certname">-</b><small id="ci-certdate"></small></span></div>
                   </div>
-                  <button class="btn btn-ghost btn-sm">재업로드</button>
                 </div>
-                <div class="info-row"><span class="lbl">회사 소개</span><span class="val">한국브라스트(주)는 산업 현장의 유휴 자재, 설비, 중고 장비의 가치를 연결하여 자원 순환을 실현하는 기업입니다.</span><button class="btn btn-ghost btn-sm">수정</button></div>
+                <div class="info-row"><span class="lbl">회사 소개</span><span class="val" id="ci-intro">-</span><button class="btn btn-ghost btn-sm" data-edit="intro" data-label="회사 소개">수정</button></div>
               </div>
             </div>
 
             <div class="admin-card">
               <div class="admin-card-head"><h2>사업자 인증 정보</h2></div>
               <div class="admin-grid-3">
-                <div class="verify-tile"><span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span><div><b>사업자등록증 인증</b><span class="badge badge-good">인증 완료</span><span class="date">인증일: 2024.05.08</span></div></div>
-                <div class="verify-tile"><span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><div><b>대표자 본인 인증</b><span class="badge badge-good">인증 완료</span><span class="date">인증일: 2024.05.08</span></div></div>
-                <div class="verify-tile" style="background:var(--warn-soft);"><span class="ic" style="background:var(--surface);color:var(--warn);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span><div><b>통신판매업 신고</b><span class="badge badge-warn">선택 사항</span><button class="btn btn-ghost btn-sm" style="margin-top:6px;padding:4px 0;">신고 정보 등록</button></div></div>
+                <div class="verify-tile" id="ci-biz-verify-tile"><span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span><div><b>사업자등록증 인증</b><span class="badge badge-good" id="ci-biz-verify-badge">인증 완료</span><span class="date" id="ci-biz-verify-date"></span></div></div>
+                <div class="verify-tile" id="ci-ceo-verify-tile"><span class="ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><div><b>대표자 본인 인증</b><span class="badge badge-good" id="ci-ceo-verify-badge">인증 완료</span><span class="date" id="ci-ceo-verify-date"></span></div></div>
+                <div class="verify-tile" style="background:var(--warn-soft);"><span class="ic" style="background:var(--surface);color:var(--warn);"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span><div><b>통신판매업 신고</b><span class="badge badge-warn" id="ci-mailorder-badge">선택 사항</span><button class="btn btn-ghost btn-sm" id="ci-mailorder-btn" style="margin-top:6px;padding:4px 0;">신고 정보 등록</button></div></div>
               </div>
             </div>
           </div>
@@ -135,31 +134,29 @@
           <div class="admin-stack">
             <div class="admin-card">
               <div class="admin-card-head"><h2>계좌 정보</h2><span class="badge badge-good">본인 계좌 인증 완료</span></div>
-              <div class="kv-row"><span>은행명</span><span>신한은행</span></div>
-              <div class="kv-row"><span>계좌번호</span><span>110-123-456789</span></div>
-              <div class="kv-row"><span>예금주</span><span>한국브라스트(주)</span></div>
-              <div class="kv-row"><span>계좌 인증일</span><span>2024.05.10</span></div>
-              <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:12px;">계좌 변경</button>
+              <div class="kv-row"><span>은행명</span><span id="ci-bank">-</span></div>
+              <div class="kv-row"><span>계좌번호</span><span id="ci-bankacc">-</span></div>
+              <div class="kv-row"><span>예금주</span><span id="ci-bankholder">-</span></div>
+              <div class="kv-row"><span>계좌 인증일</span><span id="ci-bankdate">-</span></div>
+              <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:12px;" id="ci-bank-edit-btn">계좌 변경</button>
             </div>
 
             <div class="admin-card">
               <div class="admin-card-head"><h2>판매자 등급</h2></div>
               <div style="display:flex;align-items:center;gap:12px;">
                 <span class="verify-tile" style="padding:12px;background:var(--accent-soft);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);"><path d="M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg></span>
-                <div><b style="font-size:.94rem;font-weight:800;display:block;">일반 판매자</b><span style="font-size:.78rem;color:var(--text-tertiary);">다음 등급까지 150,000원 남았습니다.</span></div>
+                <div><b style="font-size:.94rem;font-weight:800;display:block;" id="ci-grade">-</b><span style="font-size:.78rem;color:var(--text-tertiary);" id="ci-grade-remain"></span></div>
               </div>
               <div class="grade-bar-wrap">
-                <div class="progress-track"><div class="progress-fill" style="width:70%;"></div></div>
-                <div class="grade-bar-nums">350,000원 / 500,000원</div>
+                <div class="progress-track"><div class="progress-fill" id="ci-grade-bar" style="width:0%;"></div></div>
+                <div class="grade-bar-nums" id="ci-grade-nums">0원 / 0원</div>
               </div>
             </div>
 
             <div class="admin-card">
               <div class="admin-card-head"><h2>가입 정보</h2></div>
-              <div class="kv-row"><span>가입일</span><span>2024.05.08</span></div>
-              <div class="kv-row"><span>최종 로그인</span><span>2025.06.08 14:32</span></div>
+              <div class="kv-row"><span>가입일</span><span id="ci-joined">-</span></div>
               <div class="kv-row"><span>가입 경로</span><span>사업자 등록 후 자동 가입</span></div>
-              <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;margin-top:12px;color:var(--up);">회원 탈퇴</button>
             </div>
 
             <div class="admin-card">
@@ -176,60 +173,13 @@
         <div class="settings-panel" data-tab-panel="t-contacts">
         <div class="admin-grid-2">
           <div class="admin-card">
-            <div class="admin-card-head"><h2>담당자 목록 (총 5명)</h2><button class="btn btn-primary btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>담당자 추가</button></div>
+            <div class="admin-card-head"><h2 id="membersTitle">담당자 목록</h2><button class="btn btn-primary btn-sm" id="addMemberBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>담당자 추가</button></div>
             <div class="data-table-scroll">
             <table class="data-table">
               <thead><tr><th>이름</th><th>부서/직책</th><th>이메일</th><th class="num">연락처</th><th>권한</th><th>상태</th><th>관리</th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">이성욱 <span class="badge badge-accent" style="margin-left:6px;">대표</span></div></div></div></td>
-                  <td>대표이사</td>
-                  <td>slee@kblast.co.kr</td>
-                  <td class="num">010-1234-5678</td>
-                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>관리자</option></select></td>
-                  <td><span class="badge badge-good">활성</span></td>
-                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
-                </tr>
-                <tr>
-                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">김태형</div></div></div></td>
-                  <td>영업팀 / 팀장</td>
-                  <td>kimth@kblast.co.kr</td>
-                  <td class="num">010-3456-7890</td>
-                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>주문/정산 관리자</option></select></td>
-                  <td><span class="badge badge-good">활성</span></td>
-                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
-                </tr>
-                <tr>
-                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">박지현</div></div></div></td>
-                  <td>마케팅팀 / 과장</td>
-                  <td>parkjh@kblast.co.kr</td>
-                  <td class="num">010-2345-6789</td>
-                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>상품/문의 관리자</option></select></td>
-                  <td><span class="badge badge-good">활성</span></td>
-                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
-                </tr>
-                <tr>
-                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">이민수</div></div></div></td>
-                  <td>경영지원팀 / 대리</td>
-                  <td>lee.ms@kblast.co.kr</td>
-                  <td class="num">010-5678-9012</td>
-                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>정산 담당자</option></select></td>
-                  <td><span class="badge badge-muted">정지</span></td>
-                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
-                </tr>
-                <tr>
-                  <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><div><div class="name">최유진</div></div></div></td>
-                  <td>CS팀 / 사원</td>
-                  <td>choi.yj@kblast.co.kr</td>
-                  <td class="num">010-9012-3456</td>
-                  <td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;"><option>문의 담당자</option></select></td>
-                  <td><span class="badge badge-good">활성</span></td>
-                  <td><button class="btn btn-ghost btn-sm chev-btn">관리<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></td>
-                </tr>
-              </tbody>
+              <tbody id="membersTbody"></tbody>
             </table>
             </div>
-            <div style="display:flex;justify-content:center;margin-top:16px;"><div class="pagination"><button disabled>‹</button><button class="active">1</button><button>2</button><button>›</button></div></div>
           </div>
 
           <div class="admin-stack">
@@ -329,10 +279,9 @@
           <div class="admin-stack">
             <div class="admin-card">
               <div class="admin-card-head"><h2>비밀번호 변경</h2></div>
-              <div class="field" style="margin-bottom:14px;"><label>현재 비밀번호</label><input type="text" placeholder="현재 비밀번호를 입력하세요"></div>
-              <div class="field" style="margin-bottom:14px;"><label>새 비밀번호</label><input type="text" placeholder="새 비밀번호를 입력하세요"></div>
-              <div class="field"><label>새 비밀번호 확인</label><input type="text" placeholder="새 비밀번호를 다시 입력하세요"></div>
-              <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;">변경하기</button>
+              <div class="field" style="margin-bottom:14px;"><label>새 비밀번호</label><input type="password" id="newPwInput" placeholder="새 비밀번호를 입력하세요 (8자 이상)"></div>
+              <div class="field"><label>새 비밀번호 확인</label><input type="password" id="newPwConfirm" placeholder="새 비밀번호를 다시 입력하세요"></div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;" id="changePwBtn">변경하기</button>
             </div>
             <div class="admin-card">
               <div class="admin-card-head"><h2>기타 보안 관리</h2></div>
@@ -401,6 +350,162 @@
       if(btn) btn.click();
     }
   })();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seller-common.js"></script>
+<script>
+var AF = { companyId: null, userId: null, company: {}, members: [] };
+var ROLE_LABEL = { admin: '관리자', order_settlement: '주문/정산 관리자', product_inquiry: '상품/문의 관리자', settlement: '정산 담당자', inquiry: '문의 담당자' };
+
+function memberIcon() {
+  return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>';
+}
+
+function memberRowHtml(m) {
+  var roleOpts = Object.keys(ROLE_LABEL).map(function (k) {
+    return '<option value="' + k + '"' + (k === m.role ? ' selected' : '') + '>' + ROLE_LABEL[k] + '</option>';
+  }).join('');
+  return '<tr>' +
+    '<td><div class="row-thumb"><span class="thumb">' + memberIcon() + '</span><div><div class="name">' + SC.esc(m.name || '') + (m.is_owner ? ' <span class="badge badge-accent" style="margin-left:6px;">대표</span>' : '') + '</div></div></div></td>' +
+    '<td>' + SC.esc(m.department || '-') + '</td>' +
+    '<td>' + SC.esc(m.profiles ? m.profiles.email : '') + '</td>' +
+    '<td class="num">' + SC.esc(m.profiles ? m.profiles.phone || '' : '') + '</td>' +
+    '<td><select style="border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:.8rem;font-family:inherit;" onchange="updateMemberRole(' + m.id + ', this.value)" ' + (m.is_owner ? 'disabled' : '') + '>' + roleOpts + '</select></td>' +
+    '<td><span class="badge ' + (m.status === 'active' ? 'badge-good' : 'badge-muted') + '">' + (m.status === 'active' ? '활성' : '정지') + '</span></td>' +
+    '<td><div class="table-actions">' +
+      (m.is_owner ? '' :
+        (m.status === 'active'
+          ? '<button class="btn btn-ghost btn-sm" onclick="toggleMemberStatus(' + m.id + ',\'suspended\')">정지</button>'
+          : '<button class="btn btn-ghost btn-sm" onclick="toggleMemberStatus(' + m.id + ',\'active\')">활성화</button>') +
+        '<button class="btn btn-ghost btn-sm" style="color:var(--up);" onclick="removeMember(' + m.id + ')">삭제</button>') +
+    '</div></td></tr>';
+}
+
+async function loadMembers() {
+  var res = await sb.from('company_members').select('*, profiles(email, phone)').eq('company_id', AF.companyId).order('is_owner', { ascending: false }).order('created_at');
+  AF.members = res.data || [];
+  document.getElementById('membersTbody').innerHTML = AF.members.map(memberRowHtml).join('') ||
+    '<tr><td colspan="7" style="text-align:center;color:var(--text-tertiary);padding:20px 0;">담당자가 없습니다.</td></tr>';
+  document.getElementById('membersTitle').textContent = '담당자 목록 (총 ' + AF.members.length + '명)';
+}
+
+window.updateMemberRole = async function (id, role) {
+  await sb.from('company_members').update({ role: role }).eq('id', id);
+};
+window.toggleMemberStatus = async function (id, status) {
+  await sb.from('company_members').update({ status: status }).eq('id', id);
+  await loadMembers();
+};
+window.removeMember = async function (id) {
+  if (!confirm('이 담당자를 삭제하시겠습니까?')) return;
+  await sb.from('company_members').delete().eq('id', id);
+  await loadMembers();
+};
+
+document.getElementById('addMemberBtn').addEventListener('click', async function () {
+  var email = prompt('초대할 담당자의 VERSOI 가입 이메일을 입력하세요.\n(먼저 회원가입이 되어 있어야 합니다)');
+  if (!email) return;
+  var name = prompt('담당자 이름');
+  if (name === null) return;
+  var department = prompt('부서/직책 (예: 영업팀 / 팀장)') || '';
+  var role = prompt('권한 (admin / order_settlement / product_inquiry / settlement / inquiry)', 'inquiry');
+  if (!role || !ROLE_LABEL[role]) role = 'inquiry';
+  var res = await sb.rpc('invite_company_member', { p_company_id: AF.companyId, p_email: email, p_name: name, p_department: department, p_role: role });
+  if (res.error) { alert('초대 실패: ' + res.error.message); return; }
+  await loadMembers();
+});
+
+function fillEditableRow(field, label) {
+  return async function () {
+    var current = AF.company[field] || '';
+    var next = prompt(label + '을(를) 입력하세요', current);
+    if (next === null) return;
+    var payload = {}; payload[field] = next;
+    await sb.from('companies').update(payload).eq('id', AF.companyId);
+    AF.company[field] = next;
+    renderCompany();
+  };
+}
+
+function renderCompany() {
+  var c = AF.company;
+  document.getElementById('ci-name').textContent = c.name || '-';
+  document.getElementById('ci-bizno').textContent = c.biz_reg_no || '-';
+  document.getElementById('ci-ceo').textContent = c.ceo_name || '-';
+  document.getElementById('ci-biztype').textContent = c.biz_type || '-';
+  document.getElementById('ci-bizitem').textContent = c.biz_item || '-';
+  document.getElementById('ci-address').textContent = c.address || '-';
+  document.getElementById('ci-phone').textContent = c.phone || '-';
+  document.getElementById('ci-fax').textContent = c.fax || '-';
+  document.getElementById('ci-email').textContent = c.email || '-';
+  document.getElementById('ci-certname').textContent = c.biz_cert_filename || '등록된 파일 없음';
+  document.getElementById('ci-certdate').textContent = c.biz_verified_at ? SC.dt(c.biz_verified_at) + ' 등록' : '';
+  document.getElementById('ci-intro').textContent = c.intro || '-';
+
+  document.getElementById('ci-biz-verify-date').textContent = c.biz_verified_at ? ('인증일: ' + SC.dt(c.biz_verified_at)) : '';
+  document.getElementById('ci-biz-verify-badge').textContent = c.biz_verified_at ? '인증 완료' : '미인증';
+  document.getElementById('ci-biz-verify-badge').className = 'badge ' + (c.biz_verified_at ? 'badge-good' : 'badge-warn');
+  document.getElementById('ci-ceo-verify-date').textContent = c.ceo_verified_at ? ('인증일: ' + SC.dt(c.ceo_verified_at)) : '';
+  document.getElementById('ci-ceo-verify-badge').textContent = c.ceo_verified_at ? '인증 완료' : '미인증';
+  document.getElementById('ci-ceo-verify-badge').className = 'badge ' + (c.ceo_verified_at ? 'badge-good' : 'badge-warn');
+  document.getElementById('ci-mailorder-badge').textContent = c.mail_order_reg_no ? '등록 완료' : '선택 사항';
+  document.getElementById('ci-mailorder-badge').className = 'badge ' + (c.mail_order_reg_no ? 'badge-good' : 'badge-warn');
+
+  document.getElementById('ci-bank').textContent = c.bank_name || '-';
+  document.getElementById('ci-bankacc').textContent = c.bank_account || '-';
+  document.getElementById('ci-bankholder').textContent = c.bank_holder || '-';
+  document.getElementById('ci-bankdate').textContent = c.bank_verified_at ? SC.dt(c.bank_verified_at) : '-';
+
+  document.getElementById('ci-grade').textContent = c.grade || '일반 판매자';
+  var remain = Math.max(0, (c.grade_next_threshold || 0) - (c.grade_progress_amount || 0));
+  document.getElementById('ci-grade-remain').textContent = remain > 0 ? ('다음 등급까지 ' + SC.won(remain) + ' 남았습니다.') : '최고 등급입니다.';
+  var pct = c.grade_next_threshold ? Math.min(100, Math.round((c.grade_progress_amount || 0) / c.grade_next_threshold * 100)) : 0;
+  document.getElementById('ci-grade-bar').style.width = pct + '%';
+  document.getElementById('ci-grade-nums').textContent = SC.won(c.grade_progress_amount || 0) + ' / ' + SC.won(c.grade_next_threshold || 0);
+
+  document.getElementById('ci-joined').textContent = c.created_at ? SC.dt(c.created_at) : '-';
+}
+
+async function loadCompany() {
+  var res = await sb.from('companies').select('*').eq('id', AF.companyId).maybeSingle();
+  AF.company = res.data || {};
+  renderCompany();
+}
+
+document.querySelectorAll('[data-edit]').forEach(function (btn) {
+  btn.addEventListener('click', fillEditableRow(btn.getAttribute('data-edit'), btn.getAttribute('data-label')));
+});
+
+document.getElementById('ci-bank-edit-btn').addEventListener('click', async function () {
+  var bank = prompt('은행명', AF.company.bank_name || '');
+  if (bank === null) return;
+  var num = prompt('계좌번호', AF.company.bank_account || '');
+  if (num === null) return;
+  var holder = prompt('예금주', AF.company.bank_holder || '');
+  if (holder === null) return;
+  await sb.from('companies').update({ bank_name: bank, bank_account: num, bank_holder: holder }).eq('id', AF.companyId);
+  await loadCompany();
+});
+
+document.getElementById('changePwBtn').addEventListener('click', async function () {
+  var pw = document.getElementById('newPwInput').value;
+  var pw2 = document.getElementById('newPwConfirm').value;
+  if (pw.length < 8) { alert('비밀번호는 8자 이상이어야 합니다.'); return; }
+  if (pw !== pw2) { alert('비밀번호가 일치하지 않습니다.'); return; }
+  var res = await sb.auth.updateUser({ password: pw });
+  if (res.error) { alert('변경 실패: ' + res.error.message); return; }
+  alert('비밀번호가 변경되었습니다.');
+  document.getElementById('newPwInput').value = '';
+  document.getElementById('newPwConfirm').value = '';
+});
+
+SC.ready(async function (user) {
+  AF.companyId = user.company.id;
+  AF.userId = user.id;
+  await Promise.all([loadCompany(), loadMembers()]);
+});
 </script>
 </body>
 </html>

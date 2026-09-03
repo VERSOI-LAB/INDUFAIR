@@ -134,15 +134,13 @@
           <div class="form-grid">
             <div class="field full">
               <label>요청 제목<span class="req">*</span></label>
-              <input type="text" placeholder="요청 제목을 입력해주세요. (예: PLC 미쓰비시 Q시리즈 견적 요청)">
+              <input type="text" id="rfqTitle" placeholder="요청 제목을 입력해주세요. (예: PLC 미쓰비시 Q시리즈 견적 요청)">
             </div>
             <div class="field">
               <label>카테고리<span class="req">*</span></label>
               <div class="select-wrap">
-                <select>
-                  <option>카테고리를 선택해주세요</option>
-                  <option>FA 자동화</option><option>공작기계</option><option>모터/감속기</option>
-                  <option>유공압</option><option>전기전자</option><option>물류장비</option><option>안전용품</option>
+                <select id="rfqCategory">
+                  <option value="">카테고리를 선택해주세요</option>
                 </select>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
@@ -150,23 +148,24 @@
             <div class="field">
               <label>요청 방식<span class="req">*</span></label>
               <div class="radio-row" style="padding-top:10px;">
-                <label class="radio-pill"><input type="radio" name="rtype" checked> 일반 견적 요청</label>
-                <label class="radio-pill"><input type="radio" name="rtype"> 구매요청 (구해요)</label>
+                <label class="radio-pill"><input type="radio" name="rtype" value="rfq" checked> 일반 견적 요청</label>
+                <label class="radio-pill"><input type="radio" name="rtype" value="wanted"> 구매요청 (구해요)</label>
               </div>
             </div>
             <div class="field">
               <label>희망 납기일</label>
               <div class="date-wrap">
-                <input type="text" placeholder="납기일을 선택해주세요.">
+                <input type="date" id="rfqDeadline">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </div>
             </div>
             <div class="field">
-              <label>요청 지역</label>
-              <div class="select-wrap">
-                <select><option>지역을 선택해주세요</option><option>서울</option><option>경기</option><option>인천</option><option>충청권</option><option>경상권</option><option>전라권</option><option>전국</option></select>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
+              <label>희망 수량</label>
+              <div class="field-suffix"><input type="number" min="1" id="rfqQuantity" class="tabular" value="1"><span>개</span></div>
+            </div>
+            <div class="field">
+              <label>희망 단가 (선택)</label>
+              <div class="field-suffix"><input type="number" min="0" id="rfqDesiredPrice" class="tabular" placeholder="희망 단가"><span>원</span></div>
             </div>
           </div>
         </div>
@@ -176,7 +175,7 @@
           <div class="field full">
             <label>요청 개요<span class="req">*</span></label>
             <div class="textarea-wrap">
-              <textarea maxlength="500" placeholder="요청하시는 제품과 목적을 간단히 입력해주세요." oninput="document.getElementById('rfqCount').textContent=this.value.length"></textarea>
+              <textarea id="rfqSpec" maxlength="500" placeholder="요청하시는 제품과 목적을 간단히 입력해주세요." oninput="document.getElementById('rfqCount').textContent=this.value.length"></textarea>
               <span class="char-count"><span id="rfqCount">0</span> / 500</span>
             </div>
           </div>
@@ -192,7 +191,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary btn-lg btn-wide" style="width:100%;justify-content:center;">다음 단계 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button type="submit" id="rfqSubmitBtn" class="btn btn-primary btn-lg btn-wide" style="width:100%;justify-content:center;">견적 요청 등록하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
       </form>
     </div>
@@ -269,7 +268,69 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.getElementById('rfqForm').addEventListener('submit', function(e){ e.preventDefault(); });
+  var rfqCategorySelect = document.getElementById('rfqCategory');
+
+  document.addEventListener('versoi:ready', async function(){
+    var res = await sb.from('categories').select('id, name').order('sort_order');
+    if (!res.error && res.data) {
+      res.data.forEach(function(cat){
+        var opt = document.createElement('option');
+        opt.value = cat.id;
+        opt.textContent = cat.name;
+        rfqCategorySelect.appendChild(opt);
+      });
+    }
+  });
+
+  document.getElementById('rfqForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    var rtype = document.querySelector('input[name="rtype"]:checked').value;
+    if (rtype === 'wanted') {
+      location.href = 'goomrq-new.html';
+      return;
+    }
+
+    if (!window.VERSOI.requireAuth()) return;
+
+    var title = document.getElementById('rfqTitle').value.trim();
+    var categoryId = rfqCategorySelect.value;
+    var spec = document.getElementById('rfqSpec').value.trim();
+    if (!title || !categoryId || !spec) {
+      alert('요청 제목, 카테고리, 요청 개요는 필수 입력 항목입니다.');
+      return;
+    }
+
+    var btn = document.getElementById('rfqSubmitBtn');
+    btn.disabled = true;
+
+    var quantityVal = document.getElementById('rfqQuantity').value;
+    var priceVal = document.getElementById('rfqDesiredPrice').value;
+    var deadlineVal = document.getElementById('rfqDeadline').value;
+
+    var res = await sb.from('rfq_requests').insert({
+      profile_id: window.VERSOI.user.id,
+      title: title,
+      category_id: categoryId,
+      quantity: quantityVal ? Number(quantityVal) : null,
+      desired_price: priceVal ? Number(priceVal) : null,
+      spec_description: spec,
+      attachments: '[]',
+      deadline: deadlineVal || null,
+      status: 'open'
+    });
+
+    if (res.error) {
+      alert('견적 요청 등록에 실패했습니다: ' + res.error.message);
+      btn.disabled = false;
+      return;
+    }
+
+    location.href = 'rfq.html';
+  });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>

@@ -198,5 +198,125 @@
   });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seller-common.js"></script>
+<script>
+SC.ready(async function (user) {
+  var companyId = user.company.id;
+
+  document.querySelector('.admin-page-head p').textContent = '안녕하세요, ' + user.company.name + '님! 오늘도 좋은 하루 되세요.';
+
+  var [productsRes, orderItemsRes, inquiriesRes, settlementsRes, noticesRes] = await Promise.all([
+    sb.from('products').select('*').eq('company_id', companyId),
+    sb.from('order_items').select('*, orders(order_no, recipient, created_at)').eq('company_id', companyId).order('created_at', { ascending: false }),
+    sb.from('inquiries').select('*, products(title)').eq('company_id', companyId).order('created_at', { ascending: false }),
+    sb.from('settlements').select('*').eq('company_id', companyId).order('period_end', { ascending: false }),
+    sb.from('notices').select('*').order('created_at', { ascending: false }).limit(5)
+  ]);
+
+  var products = productsRes.data || [];
+  var orderItems = orderItemsRes.data || [];
+  var inquiries = inquiriesRes.data || [];
+  var settlements = settlementsRes.data || [];
+  var notices = noticesRes.data || [];
+
+  // ---- stat cards ----
+  var sellingCount = products.filter(function (p) { return p.status === 'selling'; }).length;
+  var confirmedCount = orderItems.filter(function (oi) { return oi.status === 'confirmed' || oi.status === 'delivered'; }).length;
+  var pendingInquiryCount = inquiries.filter(function (i) { return i.status === 'pending'; }).length;
+
+  var now = new Date();
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  var monthRevenue = orderItems
+    .filter(function (oi) { return new Date(oi.created_at) >= monthStart && oi.status !== 'canceled' && oi.status !== 'refunded'; })
+    .reduce(function (sum, oi) { return sum + oi.line_amount; }, 0);
+
+  var nextSettlement = settlements.find(function (s) { return s.status === 'scheduled'; });
+
+  var vals = document.querySelectorAll('.stat-card .val');
+  if (vals[0]) vals[0].textContent = sellingCount;
+  if (vals[1]) vals[1].textContent = orderItems.filter(function (oi) { return oi.status === 'paid'; }).length;
+  if (vals[2]) vals[2].textContent = pendingInquiryCount;
+  if (vals[3]) vals[3].textContent = confirmedCount;
+  if (vals[4]) vals[4].textContent = SC.won(monthRevenue);
+  if (vals[5]) vals[5].textContent = nextSettlement ? SC.won(nextSettlement.settlement_amount) : SC.won(0);
+  var deltas = document.querySelectorAll('.stat-card .delta');
+  if (deltas[5]) deltas[5].textContent = nextSettlement ? ('정산일 ' + SC.dt(nextSettlement.due_date)) : '예정된 정산 없음';
+
+  // ---- recent orders table ----
+  var tbody = document.querySelector('.admin-grid-2 .data-table tbody');
+  if (tbody) {
+    tbody.innerHTML = orderItems.slice(0, 5).map(function (oi) {
+      return '<tr><td class="num">' + SC.esc(oi.orders ? oi.orders.order_no : '') + '</td>' +
+        '<td class="cell-strong">' + SC.esc(oi.product_title) + '</td>' +
+        '<td>' + SC.esc(oi.orders ? oi.orders.recipient : '') + '</td>' +
+        '<td class="num">' + SC.won(oi.line_amount) + '</td>' +
+        '<td class="num">' + SC.dt(oi.created_at, true) + '</td>' +
+        '<td><span class="badge ' + SC.badgeCls(oi.status) + '">' + SC.label(oi.status) + '</span></td></tr>';
+    }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);">최근 주문이 없습니다.</td></tr>';
+  }
+
+  // ---- product status donut ----
+  var counts = { selling: 0, stopped: 0, soldout: 0, deleted: 0 };
+  products.forEach(function (p) { if (counts[p.status] !== undefined) counts[p.status]++; });
+  var total = products.length || 1;
+  var pct = {
+    selling: counts.selling / total * 100,
+    stopped: counts.stopped / total * 100,
+    soldout: counts.soldout / total * 100,
+    deleted: counts.deleted / total * 100
+  };
+  var c1 = pct.selling, c2 = c1 + pct.stopped, c3 = c2 + pct.soldout;
+  var donutEl = document.querySelector('.donut-32');
+  if (donutEl) {
+    donutEl.style.background = 'conic-gradient(var(--good) 0% ' + c1 + '%, var(--accent) ' + c1 + '% ' + c2 + '%, var(--warn) ' + c2 + '% ' + c3 + '%, var(--up) ' + c3 + '% 100%)';
+    donutEl.querySelector('.donut-center b').textContent = products.length;
+    donutEl.querySelector('.donut-center span').textContent = '총 ' + products.length + '개';
+  }
+  var legendItems = document.querySelectorAll('.donut-legend .item b');
+  if (legendItems[0]) legendItems[0].textContent = counts.selling + '개 (' + pct.selling.toFixed(1) + '%)';
+  if (legendItems[1]) legendItems[1].textContent = counts.stopped + '개 (' + pct.stopped.toFixed(1) + '%)';
+  if (legendItems[2]) legendItems[2].textContent = counts.soldout + '개 (' + pct.soldout.toFixed(1) + '%)';
+  if (legendItems[3]) legendItems[3].textContent = counts.deleted + '개 (' + pct.deleted.toFixed(1) + '%)';
+
+  // ---- inquiries mini list (product tab only — this company has no non-product threads) ----
+  var pqPanel = document.querySelector('[data-tab-panel="pq"]');
+  var pqTabBtn = document.querySelector('[data-tab-target="pq"] b');
+  if (pqTabBtn) pqTabBtn.textContent = pendingInquiryCount;
+  if (pqPanel) {
+    pqPanel.innerHTML = inquiries.slice(0, 5).map(function (iq) {
+      return '<div class="inquiry-mini"><span class="thumb"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>' +
+        '<div class="body"><b>' + SC.esc(iq.title || (iq.products ? iq.products.title : '')) + '</b><span>' + SC.dt(iq.created_at, true) + '</span></div>' +
+        '<span class="badge ' + SC.badgeCls(iq.status) + '">' + SC.label(iq.status) + '</span></div>';
+    }).join('') || '<p style="font-size:.82rem;color:var(--text-tertiary);padding:10px 0;">문의가 없습니다.</p>';
+  }
+  var dmPanel = document.querySelector('[data-tab-panel="dm"]');
+  if (dmPanel) dmPanel.innerHTML = '<p style="font-size:.82rem;color:var(--text-tertiary);padding:10px 0;">1:1 문의가 없습니다.</p>';
+
+  // ---- settlement summary card ----
+  if (nextSettlement) {
+    var kvVals = document.querySelectorAll('.admin-grid-3 .admin-card:nth-child(2) .kv-row span:last-child');
+    document.querySelector('.admin-grid-3 .admin-card:nth-child(2) p:nth-of-type(2)').textContent = SC.won(nextSettlement.settlement_amount);
+    document.querySelector('.admin-grid-3 .admin-card:nth-child(2) p:nth-of-type(3)').textContent = '정산일 ' + SC.dt(nextSettlement.due_date);
+    if (kvVals[0]) kvVals[0].textContent = SC.won(nextSettlement.sales_amount);
+    if (kvVals[1]) kvVals[1].textContent = '-' + SC.won(nextSettlement.fee_amount);
+    if (kvVals[2]) kvVals[2].textContent = SC.won(nextSettlement.shipping_amount);
+  }
+
+  // ---- notices ----
+  var noticeList = document.querySelector('.notice-list');
+  if (noticeList) {
+    noticeList.innerHTML = notices.map(function (n) {
+      return '<div class="notice-row"><span>' + SC.esc(n.title) + '</span><span>' + SC.dt(n.created_at) + '</span></div>';
+    }).join('');
+  }
+});
+
+document.querySelector('.admin-head-row .btn-primary').addEventListener('click', function () {
+  location.href = 'seller-products.html?new=1';
+});
+</script>
 </body>
 </html>

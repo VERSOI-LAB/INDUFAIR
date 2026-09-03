@@ -80,13 +80,13 @@
 
       <div class="admin-card">
         <div class="admin-head-row" style="margin-bottom:0;">
-          <div class="count-tabs">
-            <button class="active">전체 <b>128</b></button>
-            <button>결제 완료 <b>36</b></button>
-            <button>배송 준비 <b>18</b></button>
-            <button>배송 중 <b>45</b></button>
-            <button>배송 완료 <b>24</b></button>
-            <button>취소/반품 <b>5</b></button>
+          <div class="count-tabs" id="orderTabs">
+            <button class="active" data-status="all">전체 <b id="ocnt-all">0</b></button>
+            <button data-status="paid">결제 완료 <b id="ocnt-paid">0</b></button>
+            <button data-status="preparing">배송 준비 <b id="ocnt-preparing">0</b></button>
+            <button data-status="shipping">배송 중 <b id="ocnt-shipping">0</b></button>
+            <button data-status="done">배송 완료 <b id="ocnt-done">0</b></button>
+            <button data-status="cancel">취소/반품 <b id="ocnt-cancel">0</b></button>
           </div>
           <div class="right-group">
             <button class="btn btn-ghost btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>엑셀 다운로드</button>
@@ -94,106 +94,21 @@
         </div>
 
         <div class="admin-filter-bar">
-          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="주문번호, 상품명, 구매자명 검색"></div>
-          <input type="date" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;color:var(--text-secondary);font-family:inherit;">
-          <span style="color:var(--text-tertiary);">~</span>
-          <input type="date" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.84rem;color:var(--text-secondary);font-family:inherit;">
-          <select><option>주문 상태 전체</option><option>결제완료</option><option>배송준비</option><option>배송중</option><option>배송완료</option><option>취소/반품</option></select>
-          <select><option>결제 방법 전체</option><option>신용카드</option><option>계좌이체</option></select>
-          <button class="reset-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
+          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="orderSearchInput" placeholder="주문번호, 상품명, 구매자명 검색"></div>
+          <select id="paymentFilter"><option value="">결제 방법 전체</option><option value="card">신용카드</option><option value="transfer">계좌이체</option></select>
+          <button class="reset-btn" id="orderResetBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
         </div>
 
         <div class="data-table-scroll">
         <table class="data-table">
           <thead><tr><th>주문 정보</th><th>상품 정보</th><th class="num">주문 금액</th><th>주문 상태</th><th>결제 상태</th><th class="num">주문일</th><th>관리</th></tr></thead>
-          <tbody>
-              <tr>
-                <td><div class="order-id">20250608-0008</div><div class="order-buyer">구매자 스마트팩토리(주)<br>010-1234-5678</div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">MITSUBISHI Q03UDVCPU</div><div class="sub">PLC CPU 모듈 · 수량 1개</div></div></div></td>
-                <td class="num cell-strong">₩950,000</td>
-                <td><span class="badge badge-accent">배송준비</span></td>
-                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
-                <td class="num">2025.06.08 14:32</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">배송 처리</button></div></td>
-              </tr>
-              <tr>
-                <td><div class="order-id">20250608-0007</div><div class="order-buyer">구매자 한빛ENG<br>010-9876-5432</div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">LS산전 SV075iG5A 인버터</div><div class="sub">0.75kW / 200V · 수량 1개</div></div></div></td>
-                <td class="num cell-strong">₩230,000</td>
-                <td><span class="badge badge-accent">배송중</span></td>
-                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">계좌이체</div></td>
-                <td class="num">2025.06.08 11:20</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">배송 조회</button></div></td>
-              </tr>
-              <tr>
-                <td><div class="order-id">20250607-0006</div><div class="order-buyer">구매자 테크라인<br>010-6543-2109</div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">MITSUBISHI HG-KR73 서보모터</div><div class="sub">750W / 감속기 포함 · 수량 1개</div></div></div></td>
-                <td class="num cell-strong">₩680,000</td>
-                <td><span class="badge badge-good">배송완료</span></td>
-                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
-                <td class="num">2025.06.07 10:15</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">구매확정 확인</button></div></td>
-              </tr>
-              <tr>
-                <td><div class="order-id">20250607-0005</div><div class="order-buyer">구매자 로봇솔루션<br>010-1122-3344</div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">KEYENCE LV-N11N 센서</div><div class="sub">디지털 레이저 센서 · 수량 2개</div></div></div></td>
-                <td class="num cell-strong">₩240,000</td>
-                <td><span class="badge badge-accent">배송중</span></td>
-                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
-                <td class="num">2025.06.07 10:15</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">배송 조회</button></div></td>
-              </tr>
-              <tr>
-                <td><div class="order-id">20250606-0004</div><div class="order-buyer">구매자 대한자동화<br>010-2222-3333</div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">SMC CDQ2B32-50DMZ 실린더</div><div class="sub">Ø32 / 스트로크 50 · 수량 3개</div></div></div></td>
-                <td class="num cell-strong">₩135,000</td>
-                <td><span class="badge badge-good">배송완료</span></td>
-                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">계좌이체</div></td>
-                <td class="num">2025.06.06 09:50</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">구매확정 확인</button></div></td>
-              </tr>
-              <tr>
-                <td><div class="order-id">20250606-0003</div><div class="order-buyer">구매자 스마트팩토리(주)<br>010-1234-5678</div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">YASKAWA SGDH-04AE 서보드라이브</div><div class="sub">400W · 수량 1개</div></div></div></td>
-                <td class="num cell-strong">₩150,000</td>
-                <td><span class="badge badge-muted">취소완료</span></td>
-                <td><span class="badge badge-good">환불완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
-                <td class="num">2025.06.06 14:22</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">상세 보기</button></div></td>
-              </tr>
-              <tr>
-                <td><div class="order-id">20250605-0002</div><div class="order-buyer">구매자 한빛ENG<br>010-9876-5432</div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">송풍기 터보팬 2.2kW</div><div class="sub">220V / 삼상 · 수량 1개</div></div></div></td>
-                <td class="num cell-strong">₩320,000</td>
-                <td><span class="badge badge-accent">배송중</span></td>
-                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
-                <td class="num">2025.06.05 16:30</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">배송 조회</button></div></td>
-              </tr>
-              <tr>
-                <td><div class="order-id">20250605-0001</div><div class="order-buyer">구매자 자동화메카<br>010-3333-4444</div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">MCCB 3P 150A</div><div class="sub">LS ABS 103c · 수량 1개</div></div></div></td>
-                <td class="num cell-strong">₩35,000</td>
-                <td><span class="badge badge-good">배송완료</span></td>
-                <td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">신용카드</div></td>
-                <td class="num">2025.06.05 11:05</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm">상세 보기</button><button class="btn btn-outline btn-sm">구매확정 확인</button></div></td>
-              </tr>
+          <tbody id="ordersTbody">
           </tbody>
         </table>
         </div>
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;flex-wrap:wrap;gap:12px;">
-          <span style="font-size:.82rem;color:var(--text-tertiary);">총 128건</span>
-          <div class="pagination">
-            <button disabled>‹</button>
-            <button class="active">1</button><button>2</button><button>3</button><button>4</button><button>5</button>
-            <span class="ellipsis">…</span><button>16</button>
-            <button>›</button>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--text-tertiary);">
-            보기 <select style="border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-family:inherit;"><option>10개씩</option><option>30개씩</option><option>50개씩</option></select>
-          </div>
+          <span style="font-size:.82rem;color:var(--text-tertiary);" id="orderTotalText">총 0건</span>
         </div>
       </div>
 
@@ -221,5 +136,130 @@
   });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seller-common.js"></script>
+<script>
+var OF = { companyId: null, items: [], activeStatus: 'all' };
+var PAY_LABEL = { card: '신용카드', transfer: '계좌이체' };
+
+function actionButtonsHtml(oi) {
+  if (oi.status === 'paid' || oi.status === 'preparing') {
+    return '<button class="btn btn-outline btn-sm" onclick="processShipping(' + oi.id + ')">배송 처리</button>';
+  }
+  if (oi.status === 'shipping') {
+    return '<button class="btn btn-outline btn-sm" onclick="checkShipping(' + oi.id + ')">배송 조회</button>';
+  }
+  if (oi.status === 'delivered') {
+    return '<button class="btn btn-outline btn-sm" onclick="alert(\'구매자가 아직 구매를 확정하지 않았습니다.\')">구매확정 확인</button>';
+  }
+  if (oi.status === 'confirmed') {
+    return '<button class="btn btn-outline btn-sm" disabled>구매확정 완료</button>';
+  }
+  return '';
+}
+
+function orderRowHtml(oi) {
+  var o = oi.orders || {};
+  return '<tr>' +
+    '<td><div class="order-id">' + SC.esc(o.order_no) + '</div><div class="order-buyer">구매자 ' + SC.esc(o.recipient) + '<br>' + SC.esc(o.phone) + '</div></td>' +
+    '<td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">' + SC.esc(oi.product_title) + '</div><div class="sub">수량 ' + oi.qty + '개</div></div></div></td>' +
+    '<td class="num cell-strong">' + SC.won(oi.line_amount) + '</td>' +
+    '<td><span class="badge ' + SC.badgeCls(oi.status) + '">' + SC.label(oi.status) + '</span></td>' +
+    '<td><span class="badge badge-good">결제완료</span><div style="font-size:.72rem;color:var(--text-tertiary);margin-top:4px;">' + (PAY_LABEL[o.payment_method] || o.payment_method || '') + '</div></td>' +
+    '<td class="num">' + SC.dt(oi.created_at, true) + '</td>' +
+    '<td><div class="table-actions"><button class="btn btn-ghost btn-sm" onclick="toggleOrderDetail(' + oi.id + ')">상세 보기</button>' + actionButtonsHtml(oi) + '</div></td>' +
+    '</tr>' +
+    '<tr id="detail-' + oi.id + '" style="display:none;"><td colspan="7" style="background:var(--bg-soft);">' +
+      '<div style="padding:12px 4px;font-size:.82rem;color:var(--text-secondary);display:flex;flex-wrap:wrap;gap:24px;">' +
+        '<span><b>배송지</b><br>' + SC.esc(o.address || '-') + '</span>' +
+        '<span><b>운송장</b><br>' + (oi.tracking_carrier ? SC.esc(oi.tracking_carrier) + ' ' + SC.esc(oi.tracking_no) : '등록된 운송장 정보가 없습니다') + '</span>' +
+      '</div>' +
+    '</td></tr>';
+}
+
+window.toggleOrderDetail = function (id) {
+  var row = document.getElementById('detail-' + id);
+  if (row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+};
+
+window.processShipping = async function (id) {
+  var carrier = prompt('택배사를 입력하세요 (예: CJ대한통운)');
+  if (carrier === null) return;
+  var tracking = prompt('운송장 번호를 입력하세요');
+  if (tracking === null) return;
+  await sb.from('order_items').update({ status: 'shipping', tracking_carrier: carrier, tracking_no: tracking }).eq('id', id);
+  await loadOrders();
+};
+
+window.checkShipping = async function (id) {
+  var oi = OF.items.find(function (x) { return x.id === id; });
+  var info = oi.tracking_carrier ? (oi.tracking_carrier + ' ' + oi.tracking_no) : '등록된 운송장 정보가 없습니다.';
+  if (confirm('운송장 정보: ' + info + '\n\n배송완료로 처리하시겠습니까?')) {
+    await sb.from('order_items').update({ status: 'delivered' }).eq('id', id);
+    await loadOrders();
+  }
+};
+
+function renderOrders() {
+  var q = document.getElementById('orderSearchInput').value.trim().toLowerCase();
+  var pay = document.getElementById('paymentFilter').value;
+  var list = OF.items.filter(function (oi) {
+    var bucket = oi.status;
+    if (bucket === 'delivered' || bucket === 'confirmed') bucket = 'done';
+    if (bucket === 'canceled' || bucket === 'refund_requested' || bucket === 'refunded') bucket = 'cancel';
+    if (OF.activeStatus !== 'all' && bucket !== OF.activeStatus) return false;
+    if (pay && (!oi.orders || oi.orders.payment_method !== pay)) return false;
+    if (q) {
+      var hay = (oi.product_title + ' ' + (oi.orders ? oi.orders.order_no + ' ' + oi.orders.recipient : '')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  document.getElementById('ordersTbody').innerHTML = list.map(orderRowHtml).join('') ||
+    '<tr><td colspan="7" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">주문 내역이 없습니다.</td></tr>';
+  document.getElementById('orderTotalText').textContent = '총 ' + list.length + '건';
+
+  var counts = { all: OF.items.length, paid: 0, preparing: 0, shipping: 0, done: 0, cancel: 0 };
+  OF.items.forEach(function (oi) {
+    if (oi.status === 'paid') counts.paid++;
+    else if (oi.status === 'preparing') counts.preparing++;
+    else if (oi.status === 'shipping') counts.shipping++;
+    else if (oi.status === 'delivered' || oi.status === 'confirmed') counts.done++;
+    else counts.cancel++;
+  });
+  Object.keys(counts).forEach(function (k) { document.getElementById('ocnt-' + k).textContent = counts[k]; });
+}
+
+async function loadOrders() {
+  var res = await sb.from('order_items').select('*, orders(order_no, recipient, phone, address, payment_method)').eq('company_id', OF.companyId).order('created_at', { ascending: false });
+  OF.items = res.data || [];
+  renderOrders();
+}
+
+document.getElementById('orderTabs').addEventListener('click', function (e) {
+  var btn = e.target.closest('button[data-status]');
+  if (!btn) return;
+  document.querySelectorAll('#orderTabs button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  OF.activeStatus = btn.getAttribute('data-status');
+  renderOrders();
+});
+document.getElementById('orderSearchInput').addEventListener('input', renderOrders);
+document.getElementById('paymentFilter').addEventListener('change', renderOrders);
+document.getElementById('orderResetBtn').addEventListener('click', function () {
+  document.getElementById('orderSearchInput').value = '';
+  document.getElementById('paymentFilter').value = '';
+  OF.activeStatus = 'all';
+  document.querySelectorAll('#orderTabs button').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-status') === 'all'); });
+  renderOrders();
+});
+
+SC.ready(async function (user) {
+  OF.companyId = user.company.id;
+  await loadOrders();
+});
+</script>
 </body>
 </html>

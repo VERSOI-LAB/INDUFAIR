@@ -97,18 +97,15 @@
       </div>
 
       <div class="admin-card" style="margin-bottom:16px;">
-        <div class="count-tabs">
-          <button class="active">전체 <b>25</b></button>
-          <button>답변 대기 <b>7</b></button>
-          <button>답변 완료 <b>16</b></button>
-          <button>내가 문의한 것 <b>2</b></button>
+        <div class="count-tabs" id="inqTabs">
+          <button class="active" data-status="all">전체 <b id="icnt-all">0</b></button>
+          <button data-status="pending">답변 대기 <b id="icnt-pending">0</b></button>
+          <button data-status="answered">답변 완료 <b id="icnt-answered">0</b></button>
         </div>
         <div class="admin-filter-bar">
-          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="상품명, 문의 내용, 구매자명 검색"></div>
-          <select><option>문의 유형 전체</option><option>상품문의</option><option>가격문의</option><option>재고문의</option><option>배송문의</option><option>기타문의</option></select>
-          <select><option>문의 상태 전체</option><option>답변 대기</option><option>답변 완료</option></select>
-          <select><option>상품 전체</option></select>
-          <button class="reset-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
+          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="inqSearchInput" placeholder="상품명, 문의 내용, 구매자명 검색"></div>
+          <select id="inqTypeFilter"><option value="">문의 유형 전체</option><option value="stock">재고문의</option><option value="price">가격문의</option><option value="product">상품문의</option><option value="shipping">배송문의</option><option value="other">기타문의</option></select>
+          <button class="reset-btn" id="inqResetBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
         </div>
       </div>
 
@@ -117,99 +114,47 @@
           <div class="data-table-scroll">
           <table class="data-table">
             <thead><tr><th>문의 정보</th><th>상품 정보</th><th>문의 내용</th><th>문의 유형/상태</th><th class="num">문의일</th></tr></thead>
-            <tbody>
-              <tr style="background:var(--accent-soft);">
-                <td><div class="inquiry-buyer"><span class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div class="lbl"><b>한빛ENG</b><span>김한빛님<br>010-9876-5432</span></div></div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">LS산전 SV075iG5A 인버터</div><div class="sub">0.75kW / 200V</div></div></div></td>
-                <td style="max-width:260px;"><span class="cell-strong" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">혹시 재고가 더 있나요? 대량 구매 가능 여부도 알고 싶습니다.</span></td>
-                <td><span class="badge badge-warn" style="display:block;margin-bottom:6px;">재고문의</span><span class="badge badge-warn">답변 대기</span></td>
-                <td class="num">2025.06.08 14:32</td>
-              </tr>
-              <tr>
-                <td><div class="inquiry-buyer"><span class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div class="lbl"><b>스마트팩토리(주)</b><span>이상훈님<br>010-1234-5678</span></div></div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">MITSUBISHI Q03UDVCPU</div><div class="sub">PLC CPU 모듈</div></div></div></td>
-                <td style="max-width:260px;"><span class="cell-strong" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">가격이 조금 더 조정 가능할까요? 견적서도 요청드립니다.</span></td>
-                <td><span class="badge badge-good" style="display:block;margin-bottom:6px;">가격문의</span><span class="badge badge-good">답변 완료</span></td>
-                <td class="num">2025.06.08 11:20</td>
-              </tr>
-              <tr>
-                <td><div class="inquiry-buyer"><span class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div class="lbl"><b>로봇솔루션</b><span>박로봇님<br>010-1122-3344</span></div></div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">MITSUBISHI HG-KR73 서보모터</div><div class="sub">750W</div></div></div></td>
-                <td style="max-width:260px;"><span class="cell-strong" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">제품 상태는 어떠한가요? 사용 기간이나 보증 여부 궁금합니다.</span></td>
-                <td><span class="badge badge-good" style="display:block;margin-bottom:6px;">상품문의</span><span class="badge badge-good">답변 완료</span></td>
-                <td class="num">2025.06.07 16:45</td>
-              </tr>
-              <tr>
-                <td><div class="inquiry-buyer"><span class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div class="lbl"><b>대한자동화</b><span>정대환님<br>010-2222-3333</span></div></div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">KEYENCE LV-N11N 센서</div><div class="sub">디지털 레이저 센서</div></div></div></td>
-                <td style="max-width:260px;"><span class="cell-strong" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">센서 헤드만 별도 구매가 가능한가요? 가능하다면 가격 부탁드립니다.</span></td>
-                <td><span class="badge badge-warn" style="display:block;margin-bottom:6px;">기타문의</span><span class="badge badge-warn">답변 대기</span></td>
-                <td class="num">2025.06.07 10:15</td>
-              </tr>
-              <tr>
-                <td><div class="inquiry-buyer"><span class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div class="lbl"><b>테크라인</b><span>최테크님<br>010-6543-2109</span></div></div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">SMC CDQ2B32-50DMZ 실린더</div><div class="sub">Ø32 / 스트로크 50</div></div></div></td>
-                <td style="max-width:260px;"><span class="cell-strong" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">당일 발송 가능한가요? 배송비가 별도인지 포함인지도 궁금합니다.</span></td>
-                <td><span class="badge badge-warn" style="display:block;margin-bottom:6px;">배송문의</span><span class="badge badge-warn">답변 대기</span></td>
-                <td class="num">2025.06.06 17:40</td>
-              </tr>
-              <tr>
-                <td><div class="inquiry-buyer"><span class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div class="lbl"><b>한빛ENG</b><span>김한빛님<br>010-9876-5432</span></div></div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">YASKAWA SGDH-04AE 서보드라이브</div><div class="sub">400W</div></div></div></td>
-                <td style="max-width:260px;"><span class="cell-strong" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">드라이브 파라미터 초기값 알 수 있을까요? 매뉴얼도 요청드립니다.</span></td>
-                <td><span class="badge badge-good" style="display:block;margin-bottom:6px;">기타문의</span><span class="badge badge-good">답변 완료</span></td>
-                <td class="num">2025.06.06 14:22</td>
-              </tr>
-              <tr>
-                <td><div class="inquiry-buyer"><span class="avatar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div class="lbl"><b>대한자동화</b><span>정대환님<br>010-2222-3333</span></div></div></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">MCCB 3P 150A</div><div class="sub">LS ABS 103c</div></div></div></td>
-                <td style="max-width:260px;"><span class="cell-strong" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">차단 용량이 어떻게 되나요? 자료 확인 부탁드립니다.</span></td>
-                <td><span class="badge badge-warn" style="display:block;margin-bottom:6px;">상품문의</span><span class="badge badge-warn">답변 대기</span></td>
-                <td class="num">2025.06.05 09:50</td>
-              </tr>
+            <tbody id="inqTbody">
             </tbody>
           </table>
           </div>
-          <div style="display:flex;align-items:center;justify-content:center;margin-top:18px;">
-            <div class="pagination">
-              <button disabled>‹</button>
-              <button class="active">1</button><button>2</button><button>3</button>
-              <button>›</button>
-            </div>
-          </div>
         </div>
 
-        <div class="admin-card inquiry-detail">
+        <div class="admin-card inquiry-detail" id="inqDetailPanel">
           <div class="admin-card-head"><h2>문의 상세 정보</h2></div>
-          <div class="idetail-head">
-            <div class="who"><span class="avatar-lg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div><b>한빛ENG</b><span>김한빛님<br>010-9876-5432</span></div></div>
-            <button class="btn btn-ghost btn-sm">구매자 정보</button>
-          </div>
-
-          <div class="idetail-block">
-            <p class="idetail-block-title">문의 내용</p>
-            <div style="display:flex;gap:16px;font-size:.8rem;color:var(--text-tertiary);margin-bottom:10px;">
-              <span>문의 유형 <b class="badge badge-warn" style="margin-left:4px;">재고문의</b></span>
+          <p id="inqEmptyState" style="font-size:.84rem;color:var(--text-tertiary);padding:20px 0;text-align:center;">왼쪽 목록에서 문의를 선택하세요.</p>
+          <div id="inqDetailBody" style="display:none;">
+            <div class="idetail-head">
+              <div class="who"><span class="avatar-lg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div><b id="id-buyer-name"></b><span id="id-buyer-sub"></span></div></div>
             </div>
-            <p style="font-size:.76rem;color:var(--text-tertiary);margin-bottom:10px;">문의일 2025.06.08 14:32</p>
-            <p class="idetail-body">혹시 재고가 더 있나요?<br>대량 구매(20개 이상)도 가능한지 알고 싶습니다.<br>가능하다면 단가도 함께 알려주세요.<br>감사합니다.</p>
-          </div>
 
-          <div class="idetail-block">
-            <p class="idetail-block-title">상품 정보</p>
-            <div class="idetail-prod">
-              <span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
-              <div style="flex:1;"><b>LS산전 SV075iG5A 인버터</b><span>0.75kW / 200V</span></div>
-              <button class="btn btn-ghost btn-sm">상품 보기</button>
+            <div class="idetail-block">
+              <p class="idetail-block-title">문의 내용</p>
+              <div style="display:flex;gap:16px;font-size:.8rem;color:var(--text-tertiary);margin-bottom:10px;">
+                <span>문의 유형 <b class="badge badge-warn" id="id-type" style="margin-left:4px;"></b></span>
+              </div>
+              <p style="font-size:.76rem;color:var(--text-tertiary);margin-bottom:10px;" id="id-date"></p>
+              <p class="idetail-body" id="id-content"></p>
+            </div>
+
+            <div class="idetail-block">
+              <p class="idetail-block-title">상품 정보</p>
+              <div class="idetail-prod">
+                <span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span>
+                <div style="flex:1;"><b id="id-prod-name"></b><span id="id-prod-sub"></span></div>
+              </div>
+            </div>
+
+            <div class="idetail-block">
+              <p class="idetail-block-title">답변 히스토리</p>
+              <div id="id-messages"></div>
+            </div>
+
+            <div id="id-reply-form">
+              <textarea id="id-reply-text" rows="3" placeholder="답변을 입력하세요" style="border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.86rem;font-family:inherit;width:100%;margin-top:8px;"></textarea>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:10px;" id="id-reply-submit">답변 작성하기</button>
             </div>
           </div>
-
-          <div class="idetail-block">
-            <p class="idetail-block-title">답변 히스토리</p>
-            <div class="answer-empty">아직 답변이 등록되지 않았습니다.</div>
-          </div>
-
-          <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:6px;">답변 작성하기</button>
         </div>
       </div>
 
@@ -237,5 +182,113 @@
   });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seller-common.js"></script>
+<script>
+var QF = { companyId: null, userId: null, list: [], activeStatus: 'all', selectedId: null };
+var TYPE_LABEL = { stock: '재고문의', price: '가격문의', product: '상품문의', shipping: '배송문의', settlement: '정산문의', tax: '세금문의', other: '기타문의' };
+var personIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>';
+
+function inqRowHtml(iq) {
+  var buyerName = (iq.profiles && iq.profiles.name) ? iq.profiles.name : '구매자';
+  var sel = iq.id === QF.selectedId ? ' style="background:var(--accent-soft);"' : '';
+  return '<tr' + sel + ' onclick="selectInquiry(\'' + iq.id + '\')" style="cursor:pointer;">' +
+    '<td><div class="inquiry-buyer"><span class="avatar">' + personIcon + '</span><div class="lbl"><b>' + SC.esc(buyerName) + '</b><span>' + SC.esc(iq.profiles ? iq.profiles.phone || '' : '') + '</span></div></div></td>' +
+    '<td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">' + SC.esc(iq.products ? iq.products.title : '') + '</div></div></div></td>' +
+    '<td style="max-width:260px;"><span class="cell-strong" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + SC.esc(iq.content) + '</span></td>' +
+    '<td><span class="badge badge-warn" style="display:block;margin-bottom:6px;">' + (TYPE_LABEL[iq.inquiry_type] || iq.inquiry_type) + '</span><span class="badge ' + SC.badgeCls(iq.status) + '">' + SC.label(iq.status) + '</span></td>' +
+    '<td class="num">' + SC.dt(iq.created_at, true) + '</td></tr>';
+}
+
+function renderInquiries() {
+  var q = document.getElementById('inqSearchInput').value.trim().toLowerCase();
+  var type = document.getElementById('inqTypeFilter').value;
+  var list = QF.list.filter(function (iq) {
+    if (QF.activeStatus !== 'all' && iq.status !== QF.activeStatus) return false;
+    if (type && iq.inquiry_type !== type) return false;
+    if (q) {
+      var hay = (iq.content + ' ' + (iq.products ? iq.products.title : '') + ' ' + (iq.profiles ? iq.profiles.name : '')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  document.getElementById('inqTbody').innerHTML = list.map(inqRowHtml).join('') ||
+    '<tr><td colspan="5" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">문의가 없습니다.</td></tr>';
+
+  document.getElementById('icnt-all').textContent = QF.list.length;
+  document.getElementById('icnt-pending').textContent = QF.list.filter(function (i) { return i.status === 'pending'; }).length;
+  document.getElementById('icnt-answered').textContent = QF.list.filter(function (i) { return i.status === 'answered'; }).length;
+}
+
+async function loadInquiries() {
+  var res = await sb.from('inquiries').select('*, products(title, model_no), profiles:buyer_profile_id(name, phone)').eq('company_id', QF.companyId).order('created_at', { ascending: false });
+  QF.list = res.data || [];
+  renderInquiries();
+  if (QF.selectedId) selectInquiry(QF.selectedId);
+}
+
+window.selectInquiry = async function (id) {
+  QF.selectedId = id;
+  renderInquiries();
+  var iq = QF.list.find(function (x) { return x.id === id; });
+  if (!iq) return;
+
+  document.getElementById('inqEmptyState').style.display = 'none';
+  document.getElementById('inqDetailBody').style.display = 'block';
+  document.getElementById('id-buyer-name').textContent = iq.profiles ? iq.profiles.name : '구매자';
+  document.getElementById('id-buyer-sub').textContent = iq.profiles ? (iq.profiles.phone || '') : '';
+  document.getElementById('id-type').textContent = TYPE_LABEL[iq.inquiry_type] || iq.inquiry_type;
+  document.getElementById('id-date').textContent = '문의일 ' + SC.dt(iq.created_at, true);
+  document.getElementById('id-content').textContent = iq.content;
+  document.getElementById('id-prod-name').textContent = iq.products ? iq.products.title : '-';
+  document.getElementById('id-prod-sub').textContent = iq.products ? (iq.products.model_no || '') : '';
+
+  var msgRes = await sb.from('inquiry_messages').select('*').eq('inquiry_id', id).order('created_at');
+  var msgs = msgRes.data || [];
+  var msgHtml = msgs.map(function (m) {
+    return '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:.82rem;">' +
+      '<b style="color:' + (m.sender_role === 'seller' ? 'var(--accent)' : 'var(--text)') + ';">' + (m.sender_role === 'seller' ? '판매자' : '구매자') + '</b> ' +
+      '<span style="color:var(--text-tertiary);font-size:.72rem;">' + SC.dt(m.created_at, true) + '</span>' +
+      '<p style="margin-top:4px;">' + SC.esc(m.content) + '</p></div>';
+  }).join('');
+  document.getElementById('id-messages').innerHTML = msgHtml || '<div class="answer-empty">아직 답변이 등록되지 않았습니다.</div>';
+};
+
+document.getElementById('id-reply-submit').addEventListener('click', async function () {
+  if (!QF.selectedId) return;
+  var text = document.getElementById('id-reply-text').value.trim();
+  if (!text) return;
+  await sb.from('inquiry_messages').insert({ inquiry_id: QF.selectedId, sender_id: QF.userId, sender_role: 'seller', content: text });
+  await sb.from('inquiries').update({ status: 'answered' }).eq('id', QF.selectedId);
+  document.getElementById('id-reply-text').value = '';
+  await loadInquiries();
+});
+
+document.getElementById('inqTabs').addEventListener('click', function (e) {
+  var btn = e.target.closest('button[data-status]');
+  if (!btn) return;
+  document.querySelectorAll('#inqTabs button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  QF.activeStatus = btn.getAttribute('data-status');
+  renderInquiries();
+});
+document.getElementById('inqSearchInput').addEventListener('input', renderInquiries);
+document.getElementById('inqTypeFilter').addEventListener('change', renderInquiries);
+document.getElementById('inqResetBtn').addEventListener('click', function () {
+  document.getElementById('inqSearchInput').value = '';
+  document.getElementById('inqTypeFilter').value = '';
+  QF.activeStatus = 'all';
+  document.querySelectorAll('#inqTabs button').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-status') === 'all'); });
+  renderInquiries();
+});
+
+SC.ready(async function (user) {
+  QF.companyId = user.company.id;
+  QF.userId = user.id;
+  await loadInquiries();
+});
+</script>
 </body>
 </html>

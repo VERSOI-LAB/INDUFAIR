@@ -37,6 +37,8 @@
   }
   .help-box p{font-size:.86rem;font-weight:700;}
   .help-box span{font-size:.78rem;color:var(--text-tertiary);font-weight:500;display:block;margin-top:2px;}
+  .ship-track-info{margin-top:10px;font-size:.8rem;color:var(--text-secondary);background:var(--bg-soft);border-radius:8px;padding:10px 12px;display:none;}
+  .empty-state{padding:40px 0;text-align:center;color:var(--text-tertiary);font-size:.9rem;}
 </style>
 </head>
 <body>
@@ -81,8 +83,8 @@
     <div>
       <h1 style="font-size:1.5rem;font-weight:900;">배송/배송조회</h1>
 
-      <div class="board-tabs">
-        <button class="active">배송중</button><button>배송완료</button><button>전체</button>
+      <div class="board-tabs" id="shipTabs">
+        <button class="active" data-status="preparing,shipping">배송중</button><button data-status="delivered,confirmed">배송완료</button><button data-status="">전체</button>
       </div>
 
       <div class="filter-toolbar">
@@ -90,74 +92,12 @@
         <div class="select-field">최근 6개월 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
         <div class="board-search">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="주문번호, 송장번호, 상품명 검색">
+          <input type="text" id="shipSearchInput" placeholder="주문번호, 송장번호, 상품명 검색">
         </div>
       </div>
 
-      <div class="ship-card">
-        <div class="ship-top">
-          <span class="ship-thumb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></span>
-          <div class="ship-info">
-            <div class="ship-order-no tabular">202405080001</div>
-            <div class="ship-name">XGB Series PLC CPU 모듈 외 2건</div>
-            <div class="ship-meta">주문일 <span class="tabular">2024.05.08</span> · 송장번호 <span class="tabular">1234-6076-9012</span></div>
-          </div>
-          <span class="ship-status-tag">배송중</span>
-        </div>
-        <div class="tracker">
-          <div class="tracker-step done"><span class="dot"></span><span>주문완료</span></div>
-          <div class="tracker-step done"><span class="tracker-line"></span><span class="dot"></span><span>배송준비</span></div>
-          <div class="tracker-step done"><span class="tracker-line"></span><span class="dot"></span><span>배송중</span></div>
-          <div class="tracker-step"><span class="tracker-line"></span><span class="dot"></span><span>배송완료</span></div>
-        </div>
-        <div class="ship-bottom">
-          <span class="ship-eta">도착 예정일 <b class="tabular">05.10 (금)</b></span>
-          <button class="btn btn-outline btn-sm">배송조회</button>
-        </div>
-      </div>
-
-      <div class="ship-card">
-        <div class="ship-top">
-          <span class="ship-thumb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="8" rx="2"/><path d="M16 12h4l2 2v3h-6z"/><circle cx="9" cy="19" r="1.4"/><circle cx="18" cy="19" r="1.4"/></svg></span>
-          <div class="ship-info">
-            <div class="ship-order-no tabular">202405020034</div>
-            <div class="ship-name">근접센서 PR30-15AO 외 1건</div>
-            <div class="ship-meta">주문일 <span class="tabular">2024.05.02</span> · 송장번호 <span class="tabular">5678-6432-1080</span></div>
-          </div>
-          <span class="ship-status-tag" style="background:var(--good-soft);color:var(--good);">배송완료</span>
-        </div>
-        <div class="tracker">
-          <div class="tracker-step done"><span class="dot"></span><span>주문완료</span></div>
-          <div class="tracker-step done"><span class="tracker-line"></span><span class="dot"></span><span>배송준비</span></div>
-          <div class="tracker-step done"><span class="tracker-line"></span><span class="dot"></span><span>배송중</span></div>
-          <div class="tracker-step done"><span class="tracker-line"></span><span class="dot"></span><span>배송완료</span></div>
-        </div>
-        <div class="ship-bottom">
-          <span class="ship-eta">도착일 <b class="tabular">05.03 (토)</b></span>
-          <button class="btn btn-outline btn-sm">배송조회</button>
-        </div>
-      </div>
-
-      <div class="ship-card">
-        <div class="ship-top">
-          <span class="ship-thumb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></span>
-          <div class="ship-info">
-            <div class="ship-order-no tabular">202404280012</div>
-            <div class="ship-name">에어 필터 레귤레이터 AW40-04D</div>
-            <div class="ship-meta">주문일 <span class="tabular">2024.04.28</span> · 송장번호 <span class="tabular">5678-6432-1080</span></div>
-          </div>
-          <span class="ship-status-tag">배송중</span>
-        </div>
-        <div class="tracker">
-          <div class="tracker-step done"><span class="dot"></span><span>주문완료</span></div>
-          <div class="tracker-step done"><span class="tracker-line"></span><span class="dot"></span><span>배송준비</span></div>
-          <div class="tracker-step done"><span class="tracker-line"></span><span class="dot"></span><span>배송중</span></div>
-          <div class="tracker-step"><span class="tracker-line"></span><span class="dot"></span><span>배송완료</span></div>
-        </div>
-        <div class="ship-bottom">
-          <span class="ship-eta">도착 예정일 <b class="tabular">04.30 (화)</b></span>
-          <button class="btn btn-outline btn-sm">배송조회</button>
-        </div>
+      <div id="shipCardsContainer">
+        <div class="empty-state">불러오는 중...</div>
       </div>
 
       <div class="help-box">
@@ -182,12 +122,147 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.querySelectorAll('.board-tabs button').forEach(function(btn){
+  document.querySelectorAll('#shipTabs button').forEach(function(btn){
     btn.addEventListener('click', function(){
-      document.querySelectorAll('.board-tabs button').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('#shipTabs button').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
+      if (window.__renderShipping) window.__renderShipping();
     });
   });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  var WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+  function fmtDate(s) {
+    if (!s) return '';
+    var d = new Date(s);
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate());
+  }
+  function fmtEta(dateObj) {
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return p(dateObj.getMonth() + 1) + '.' + p(dateObj.getDate()) + ' (' + WEEKDAYS[dateObj.getDay()] + ')';
+  }
+  var ICONS = [
+    '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>',
+    '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="8" rx="2"/><path d="M16 12h4l2 2v3h-6z"/><circle cx="9" cy="19" r="1.4"/><circle cx="18" cy="19" r="1.4"/></svg>',
+    '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>'
+  ];
+
+  var rows = []; // { item, order }
+  var trackingOpenId = null;
+
+  document.addEventListener('versoi:ready', function (e) {
+    var user = e.detail.user;
+    if (!user) return;
+    loadShipping(user).catch(function (err) { console.error('[shipping]', err); });
+  });
+
+  async function loadShipping(user) {
+    var ordersRes = await window.sb.from('orders').select('*').eq('buyer_id', user.id);
+    var orders = ordersRes.data || [];
+    var orderMap = {};
+    orders.forEach(function (o) { orderMap[o.id] = o; });
+    var orderIds = orders.map(function (o) { return o.id; });
+
+    var items = [];
+    if (orderIds.length) {
+      var itemsRes = await window.sb.from('order_items').select('*')
+        .in('order_id', orderIds)
+        .in('status', ['preparing', 'shipping', 'delivered', 'confirmed'])
+        .order('created_at', { ascending: false });
+      items = itemsRes.data || [];
+    }
+    rows = items.map(function (it) { return { item: it, order: orderMap[it.order_id] || {} }; });
+
+    window.__renderShipping = renderShipping;
+    renderShipping();
+    document.getElementById('shipSearchInput').addEventListener('input', renderShipping);
+  }
+
+  function renderShipping() {
+    var activeTab = document.querySelector('#shipTabs button.active');
+    var statusFilter = activeTab ? activeTab.getAttribute('data-status') : '';
+    var statuses = statusFilter ? statusFilter.split(',') : null;
+    var q = (document.getElementById('shipSearchInput').value || '').trim().toLowerCase();
+
+    var filtered = rows.filter(function (r) {
+      if (statuses && statuses.indexOf(r.item.status) === -1) return false;
+      if (q) {
+        var hay = (r.item.product_title + ' ' + (r.order.order_no || '') + ' ' + (r.item.tracking_no || '')).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+
+    var container = document.getElementById('shipCardsContainer');
+    if (!filtered.length) {
+      container.innerHTML = '<div class="empty-state">배송 중이거나 완료된 주문이 없습니다.</div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(function (r, i) { return renderCard(r, i); }).join('');
+
+    container.querySelectorAll('.js-track-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-id');
+        trackingOpenId = (trackingOpenId === id) ? null : id;
+        renderShipping();
+      });
+    });
+  }
+
+  function renderCard(r, i) {
+    var it = r.item, order = r.order;
+    var id = String(it.id);
+    var doneSteps;
+    var statusLabel, statusStyle;
+    if (it.status === 'preparing') { doneSteps = 2; statusLabel = '배송준비중'; statusStyle = ''; }
+    else if (it.status === 'shipping') { doneSteps = 3; statusLabel = '배송중'; statusStyle = ''; }
+    else { doneSteps = 4; statusLabel = '배송완료'; statusStyle = 'background:var(--good-soft);color:var(--good);'; }
+
+    var steps = ['주문완료', '배송준비', '배송중', '배송완료'];
+    var trackerHtml = steps.map(function (label, idx) {
+      var isDone = idx < doneSteps;
+      return '<div class="tracker-step' + (isDone ? ' done' : '') + '">' +
+        (idx > 0 ? '<span class="tracker-line"></span>' : '') +
+        '<span class="dot"></span><span>' + label + '</span></div>';
+    }).join('');
+
+    var baseDate = order.created_at ? new Date(order.created_at) : new Date();
+    var etaDate = new Date(baseDate.getTime());
+    etaDate.setDate(etaDate.getDate() + (it.status === 'delivered' || it.status === 'confirmed' ? 2 : 4));
+    var etaLabel = (it.status === 'delivered' || it.status === 'confirmed') ? '도착일' : '도착 예정일';
+
+    var hasTracking = !!(it.tracking_carrier || it.tracking_no);
+    var trackInfoHtml = trackingOpenId === id
+      ? '<div class="ship-track-info" style="display:block;">' + (hasTracking
+          ? '택배사: ' + (it.tracking_carrier || '-') + ' · 송장번호: ' + (it.tracking_no || '-')
+          : '아직 등록된 송장 정보가 없습니다. 상품 준비가 완료되면 송장번호가 등록됩니다.') + '</div>'
+      : '';
+
+    return '<div class="ship-card">' +
+      '<div class="ship-top">' +
+      '<span class="ship-thumb">' + ICONS[i % ICONS.length] + '</span>' +
+      '<div class="ship-info">' +
+      '<div class="ship-order-no tabular">' + (order.order_no || '') + '</div>' +
+      '<div class="ship-name">' + it.product_title + (it.qty > 1 ? ' 외 수량 ' + it.qty + '개' : '') + '</div>' +
+      '<div class="ship-meta">주문일 <span class="tabular">' + fmtDate(order.created_at) + '</span> · 송장번호 <span class="tabular">' + (it.tracking_no || '등록 전') + '</span></div>' +
+      '</div>' +
+      '<span class="ship-status-tag" style="' + statusStyle + '">' + statusLabel + '</span>' +
+      '</div>' +
+      '<div class="tracker">' + trackerHtml + '</div>' +
+      '<div class="ship-bottom">' +
+      '<span class="ship-eta">' + etaLabel + ' <b class="tabular">' + fmtEta(etaDate) + '</b></span>' +
+      '<button class="btn btn-outline btn-sm js-track-btn" data-id="' + id + '">배송조회</button>' +
+      '</div>' +
+      trackInfoHtml +
+      '</div>';
+  }
+})();
 </script>
 </body>
 </html>

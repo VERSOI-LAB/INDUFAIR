@@ -34,6 +34,14 @@
   .notice-box p{font-size:.92rem;font-weight:800;margin-bottom:10px;}
   .notice-box ul{display:flex;flex-direction:column;gap:6px;}
   .notice-box li{font-size:.82rem;color:var(--text-secondary);line-height:1.5;}
+  .order-detail-row td{padding:0;border-bottom:1px solid var(--border);}
+  .order-detail-row:last-child td{border-bottom:none;}
+  .order-detail{background:var(--bg-soft);padding:16px 18px;font-size:.84rem;color:var(--text-secondary);}
+  .order-detail dl{display:grid;grid-template-columns:90px 1fr;gap:8px 12px;margin:0;}
+  .order-detail dt{color:var(--text-tertiary);font-weight:700;}
+  .order-detail dd{margin:0;color:var(--text);}
+  .order-detail .detail-note{margin-top:12px;font-size:.8rem;color:var(--accent);font-weight:700;}
+  .empty-row td{padding:26px 8px;text-align:center;color:var(--text-tertiary);font-size:.88rem;}
 </style>
 </head>
 <body>
@@ -78,8 +86,8 @@
     <div>
       <h1 style="font-size:1.5rem;font-weight:900;">취소/환불</h1>
 
-      <div class="board-tabs">
-        <button class="active">취소/교환 신청</button><button>환불 진행중</button><button>환불 완료</button><button>전체</button>
+      <div class="board-tabs" id="cancelTabs">
+        <button data-status="refund_requested">취소/교환 신청</button><button data-status="canceled">환불 진행중</button><button data-status="refunded">환불 완료</button><button class="active" data-status="refund_requested,canceled,refunded">전체</button>
       </div>
 
       <div class="filter-toolbar">
@@ -87,18 +95,15 @@
         <div class="select-field">최근 6개월 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
         <div class="board-search">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="주문번호, 상품명 검색">
+          <input type="text" id="cancelSearchInput" placeholder="주문번호, 상품명 검색">
         </div>
       </div>
 
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:0 20px;overflow-x:auto;margin-top:16px;">
         <table class="order-table">
           <thead><tr><th>신청일</th><th>주문번호</th><th>상품정보</th><th>신청구분</th><th>상태</th><th></th></tr></thead>
-          <tbody>
-            <tr><td class="tabular">2024.05.07</td><td class="tabular">202405070001</td><td class="pname">XGB Series PLC CPU 모듈</td><td>취소</td><td><span class="status-tag3 refund">환불완료</span></td><td><button class="btn btn-outline btn-sm">상세보기</button></td></tr>
-            <tr><td class="tabular">2024.05.03</td><td class="tabular">202405030021</td><td class="pname">근접센서 PR30-15AO</td><td>교환</td><td><span class="status-tag3 refund">환불완료</span></td><td><button class="btn btn-outline btn-sm">상세보기</button></td></tr>
-            <tr><td class="tabular">2024.04.29</td><td class="tabular">202404290015</td><td class="pname">에어 필터 레귤레이터 AW40-04D</td><td>반품</td><td><span class="status-tag3 exchange">환불진행중</span></td><td><button class="btn btn-outline btn-sm">상세보기</button></td></tr>
-            <tr><td class="tabular">2024.04.23</td><td class="tabular">202404230042</td><td class="pname">우레탄 튜브 TU0805</td><td>취소</td><td><span class="status-tag3 refund">환불완료</span></td><td><button class="btn btn-outline btn-sm">상세보기</button></td></tr>
+          <tbody id="cancelTableBody">
+            <tr class="empty-row"><td colspan="6">불러오는 중...</td></tr>
           </tbody>
         </table>
       </div>
@@ -132,12 +137,126 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.querySelectorAll('.board-tabs button').forEach(function(btn){
+  document.querySelectorAll('#cancelTabs button').forEach(function(btn){
     btn.addEventListener('click', function(){
-      document.querySelectorAll('.board-tabs button').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('#cancelTabs button').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
+      if (window.__renderCancel) window.__renderCancel();
     });
   });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  function fmtCurrency(n) { return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
+  function fmtDate(s) {
+    if (!s) return '';
+    var d = new Date(s);
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate());
+  }
+  var STATUS_META = {
+    refund_requested: { label: '신청접수', cls: 'progress' },
+    canceled: { label: '환불진행중', cls: 'exchange' },
+    refunded: { label: '환불완료', cls: 'refund' }
+  };
+
+  var rows = [];
+  var expandedId = null;
+
+  document.addEventListener('versoi:ready', function (e) {
+    var user = e.detail.user;
+    if (!user) return;
+    loadCancelList(user).catch(function (err) { console.error('[cancel]', err); });
+  });
+
+  async function loadCancelList(user) {
+    var ordersRes = await window.sb.from('orders').select('*').eq('buyer_id', user.id);
+    var orders = ordersRes.data || [];
+    var orderMap = {};
+    orders.forEach(function (o) { orderMap[o.id] = o; });
+    var orderIds = orders.map(function (o) { return o.id; });
+
+    var items = [];
+    if (orderIds.length) {
+      var itemsRes = await window.sb.from('order_items').select('*')
+        .in('order_id', orderIds)
+        .in('status', ['canceled', 'refund_requested', 'refunded'])
+        .order('updated_at', { ascending: false });
+      items = itemsRes.data || [];
+    }
+    rows = items.map(function (it) { return { item: it, order: orderMap[it.order_id] || {} }; });
+
+    window.__renderCancel = renderCancel;
+    renderCancel();
+    document.getElementById('cancelSearchInput').addEventListener('input', renderCancel);
+  }
+
+  function renderCancel() {
+    var activeTab = document.querySelector('#cancelTabs button.active');
+    var statusFilter = activeTab ? activeTab.getAttribute('data-status') : '';
+    var statuses = statusFilter ? statusFilter.split(',') : null;
+    var q = (document.getElementById('cancelSearchInput').value || '').trim().toLowerCase();
+
+    var filtered = rows.filter(function (r) {
+      if (statuses && statuses.indexOf(r.item.status) === -1) return false;
+      if (q) {
+        var hay = (r.item.product_title + ' ' + (r.order.order_no || '')).toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+
+    var tbody = document.getElementById('cancelTableBody');
+    if (!filtered.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="6">해당 조건의 취소/환불 내역이 없습니다.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(function (r) { return renderRow(r); }).join('');
+
+    tbody.querySelectorAll('.js-detail-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = btn.getAttribute('data-id');
+        expandedId = (expandedId === id) ? null : id;
+        renderCancel();
+      });
+    });
+  }
+
+  function renderRow(r) {
+    var it = r.item, order = r.order;
+    var meta = STATUS_META[it.status] || { label: it.status, cls: 'progress' };
+    var id = String(it.id);
+    var html = '<tr>' +
+      '<td class="tabular">' + fmtDate(it.updated_at || it.created_at) + '</td>' +
+      '<td class="tabular">' + (order.order_no || '') + '</td>' +
+      '<td class="pname">' + it.product_title + '</td>' +
+      '<td>취소</td>' +
+      '<td><span class="status-tag3 ' + meta.cls + '">' + meta.label + '</span></td>' +
+      '<td><button class="btn btn-outline btn-sm js-detail-toggle" data-id="' + id + '">' + (expandedId === id ? '접기' : '상세보기') + '</button></td>' +
+      '</tr>';
+
+    if (expandedId === id) {
+      var note = it.status === 'refund_requested' ? '판매자 확인 후 환불이 진행됩니다.'
+        : it.status === 'canceled' ? '환불 처리가 진행 중입니다. 영업일 기준 3~7일 소요될 수 있습니다.'
+        : '환불이 완료되었습니다.';
+      html += '<tr class="order-detail-row"><td colspan="6"><div class="order-detail">' +
+        '<dl>' +
+        '<dt>수령인</dt><dd>' + (order.recipient || '-') + '</dd>' +
+        '<dt>연락처</dt><dd>' + (order.phone || '-') + '</dd>' +
+        '<dt>배송지</dt><dd>' + (order.address || '-') + '</dd>' +
+        '<dt>결제수단</dt><dd>' + (order.payment_method === 'card' ? '카드결제' : order.payment_method === 'transfer' ? '무통장입금' : (order.payment_method || '-')) + '</dd>' +
+        '<dt>환불금액</dt><dd>' + fmtCurrency(it.line_amount) + '</dd>' +
+        '</dl>' +
+        '<div class="detail-note">' + note + '</div>' +
+        '</div></td></tr>';
+    }
+    return html;
+  }
+})();
 </script>
 </body>
 </html>

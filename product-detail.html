@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 상품 상세</title>
+<meta name="description" content="산업용품 상세 정보를 확인하고 장바구니에 담거나 바로 구매하는 VERSOI 상품 상세페이지">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .breadcrumb{display:flex;align-items:center;gap:6px;font-size:.85rem;color:var(--text-tertiary);padding-block:18px 0;flex-wrap:wrap;}
+  .breadcrumb a{display:flex;align-items:center;gap:6px;transition:color .15s ease;}
+  .breadcrumb a:hover{color:var(--accent);}
+  .breadcrumb .sep{color:var(--border-strong);}
+  .breadcrumb .current{color:var(--text);font-weight:700;}
+
+  .detail-layout{display:grid;grid-template-columns:1fr 1fr;gap:36px;padding-block:24px 48px;align-items:start;}
+  .detail-media{aspect-ratio:1/1;border-radius:var(--radius-l);background:var(--bg-soft);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+  .detail-media svg{width:34%;height:34%;}
+  .detail-media img{width:100%;height:100%;object-fit:cover;}
+  .detail-badges{position:absolute;top:14px;left:14px;display:flex;gap:6px;z-index:1;}
+  .detail-info{display:flex;flex-direction:column;gap:4px;}
+  .di-brand{font-family:var(--font-en);font-weight:800;font-size:.86rem;color:var(--accent);letter-spacing:.02em;}
+  .di-title{font-size:1.5rem;font-weight:900;line-height:1.35;margin-top:4px;}
+  .di-model{font-size:.86rem;color:var(--text-tertiary);margin-top:6px;}
+  .di-meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+  .di-price-block{margin-top:18px;padding-top:18px;border-top:1px solid var(--border);}
+  .di-price{font-family:var(--font-en);font-weight:900;font-size:1.9rem;}
+  .di-price .won{font-size:1.2rem;font-weight:800;font-family:var(--font-kr);margin-right:2px;}
+  .di-stock{font-size:.86rem;color:var(--text-secondary);margin-top:6px;}
+  .di-stock.out{color:var(--up);font-weight:700;}
+  .di-desc{font-size:.88rem;color:var(--text-secondary);line-height:1.7;margin-top:16px;white-space:pre-wrap;}
+
+  .qty-stepper{display:flex;align-items:center;border:1px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content;}
+  .qty-stepper button{width:36px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);transition:background .15s ease;font-size:1rem;}
+  .qty-stepper button:hover{background:var(--bg-soft);}
+  .qty-stepper button:disabled{opacity:.4;cursor:default;}
+  .qty-stepper input{width:52px;text-align:center;border:none;border-left:1px solid var(--border);border-right:1px solid var(--border);font-family:var(--font-en);font-weight:700;font-size:.92rem;padding:8px 0;}
+  .qty-stepper input:focus{outline:none;}
+  .qty-row{display:flex;align-items:center;gap:14px;margin-top:22px;}
+  .qty-row .qty-label{font-size:.86rem;font-weight:700;color:var(--text-secondary);}
+  .qty-subtotal{margin-left:auto;font-family:var(--font-en);font-weight:800;font-size:1.05rem;}
+
+  .detail-actions{display:flex;gap:10px;margin-top:22px;}
+  .detail-actions .btn{flex:1;justify-content:center;padding:14px 10px;}
+  .detail-wish-btn{width:52px;height:52px;flex:0 0 auto;border-radius:var(--radius-s);border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);transition:color .15s ease,border-color .15s ease;}
+  .detail-wish-btn:hover{color:var(--up);border-color:var(--up);}
+  .detail-wish-btn.wished{color:var(--up);border-color:var(--up);}
+  .detail-wish-btn.wished svg{fill:currentColor;}
+
+  .seller-block{margin-top:24px;padding:16px;background:var(--bg-soft);border-radius:var(--radius-m);display:flex;align-items:center;gap:12px;}
+  .seller-icon{width:38px;height:38px;border-radius:10px;background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .seller-name{font-size:.92rem;font-weight:800;}
+  .seller-sub{font-size:.76rem;color:var(--text-tertiary);margin-top:2px;}
+
+  .qna-section{margin-top:12px;}
+  .qna-item{padding:16px 0;border-bottom:1px solid var(--border);}
+  .qna-item:last-child{border-bottom:none;}
+  .qna-q-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .qna-title{font-size:.92rem;font-weight:700;}
+  .qna-content{font-size:.85rem;color:var(--text-secondary);margin-top:6px;line-height:1.6;}
+  .qna-date{font-size:.72rem;color:var(--text-tertiary);margin-top:6px;}
+  .qna-reply{margin-top:12px;margin-left:16px;padding:12px 14px;background:var(--bg-soft);border-radius:var(--radius-s);}
+  .qna-reply-head{font-size:.76rem;font-weight:800;color:var(--accent);margin-bottom:4px;}
+  .qna-reply-content{font-size:.84rem;color:var(--text-secondary);line-height:1.6;}
+  .qna-empty{padding:24px 0;text-align:center;color:var(--text-tertiary);font-size:.86rem;}
+
+  @media (max-width:900px){
+    .detail-layout{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html" aria-label="VERSOI 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="logo-text">VERSOI</span>
+      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">홈</a>
+      <a href="goods.html">산업용품</a>
+      <a href="used.html">중고장터</a>
+      <a href="brand.html">브랜드관</a>
+      <a href="rfq.html">견적요청(RFQ)</a>
+      <a href="community.html">커뮤니티</a>
+      <a href="support.html">고객센터</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" aria-label="검색">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <a href="cart.html" class="icon-btn" aria-label="장바구니">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      </a>
+      <button class="btn btn-ghost">로그인</button>
+      <button class="btn btn-primary">회원가입</button>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <nav class="breadcrumb" id="breadcrumb" aria-label="이동 경로">
+      <a href="index.html">홈</a>
+      <span class="sep">›</span>
+      <span class="current">불러오는 중...</span>
+    </nav>
+
+    <div id="detailContent">
+      <p style="padding:80px 0;color:var(--text-tertiary);text-align:center;">상품 정보를 불러오는 중...</p>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
+    <div class="footer-links">
+      <a href="#">이용약관</a>
+      <a href="#">개인정보처리방침</a>
+      <a href="#">사업자정보확인</a>
+      <a href="#">제휴/입점문의</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  var navToggle = document.getElementById('navToggle');
+  var mainNav = document.getElementById('mainNav');
+  navToggle.addEventListener('click', function(){
+    var open = mainNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  var PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/><line x1="4" y1="9" x2="20" y2="9"/></svg>';
+  var GRADE_LABEL = { a:'A급', b:'B급', c:'C급', refurb:'리퍼비시', idle:'유휴재고', new:'신품' };
+  var GRADE_CLASS = { a:'grade-a', b:'grade-b', c:'grade-c', refurb:'grade-refurb', idle:'grade-idle', new:'grade-a' };
+
+  var params = new URLSearchParams(location.search);
+  var productId = params.get('id');
+  var product = null;
+  var user = null;
+  var qty = 1;
+  var favored = false;
+
+  function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function fmtWon(n){ return '₩' + Number(n||0).toLocaleString('ko-KR'); }
+  function fmtDate(ts){ if(!ts) return ''; var d = ts.replace('T',' ').slice(0,16); return d.replace(/-/g,'.'); }
+
+  function showError(msg){
+    document.getElementById('detailContent').innerHTML = '<p style="padding:80px 0;color:var(--text-tertiary);text-align:center;">'+escapeHtml(msg)+'</p>';
+  }
+
+  async function loadProduct(){
+    if (!productId) { showError('잘못된 접근입니다. 상품 ID가 없습니다.'); return; }
+    var res = await sb.from('products')
+      .select('id,title,model_no,manufacturer,description,price,stock,condition,market_type,status,category_id,company_id,seller_profile_id,view_count,categories(id,name),companies(id,name),product_images(url,sort_order)')
+      .eq('id', productId)
+      .order('sort_order', { foreignTable: 'product_images', ascending: true })
+      .maybeSingle();
+    if (res.error || !res.data) { showError('상품을 찾을 수 없습니다.'); return; }
+    product = res.data;
+    if (product.status === 'deleted') { showError('삭제되었거나 판매 종료된 상품입니다.'); return; }
+    renderProduct();
+    sb.rpc('increment_product_view', { p_product_id: productId }).then(function(){}, function(){});
+    loadQna();
+  }
+
+  function renderBreadcrumb(){
+    var listUrl = product.market_type === 'used' ? 'used.html' : 'goods.html';
+    var listLabel = product.market_type === 'used' ? '중고장터' : '산업용품';
+    var catName = product.categories ? product.categories.name : '';
+    document.getElementById('breadcrumb').innerHTML =
+      '<a href="index.html">홈</a><span class="sep">›</span>' +
+      '<a href="'+listUrl+'">'+listLabel+'</a><span class="sep">›</span>' +
+      (catName ? '<span class="current" style="color:var(--text-tertiary);font-weight:400;">'+escapeHtml(catName)+'</span><span class="sep">›</span>' : '') +
+      '<span class="current">'+escapeHtml(product.title)+'</span>';
+  }
+
+  function renderProduct(){
+    renderBreadcrumb();
+    document.title = 'VERSOI | ' + product.title;
+
+    var img = product.product_images && product.product_images.length ? product.product_images[0].url : null;
+    var media = img ? '<img src="'+img+'" alt="'+escapeHtml(product.title)+'">' : PLACEHOLDER_SVG;
+
+    var badge = product.market_type === 'used'
+      ? '<span class="grade-badge '+(GRADE_CLASS[product.condition]||'grade-b')+'">'+escapeHtml(GRADE_LABEL[product.condition]||product.condition)+'</span>'
+      : '<span class="p-badge new" style="background:var(--accent);">신품</span>';
+    if (product.stock <= 0) badge += '<span class="p-badge" style="background:var(--text-tertiary);">품절</span>';
+
+    var stockLine = product.stock > 0
+      ? '<span class="di-stock">재고 '+product.stock+'개</span>'
+      : '<span class="di-stock out">품절된 상품입니다</span>';
+
+    var sellerName = product.companies ? product.companies.name : '개인 판매자';
+
+    var html = ''
+      + '<div class="detail-layout">'
+      +   '<div class="detail-media">'
+      +     '<div class="detail-badges">'+badge+'</div>'
+      +     media
+      +   '</div>'
+      +   '<div class="detail-info">'
+      +     '<span class="di-brand">'+escapeHtml(product.manufacturer||'')+'</span>'
+      +     '<h1 class="di-title">'+escapeHtml(product.title)+'</h1>'
+      +     (product.model_no ? '<span class="di-model">모델명: '+escapeHtml(product.model_no)+'</span>' : '')
+      +     '<div class="di-price-block">'
+      +       '<div class="di-price"><span class="won">₩</span>'+Number(product.price).toLocaleString('ko-KR')+'</div>'
+      +       stockLine
+      +     '</div>'
+      +     (product.description ? '<p class="di-desc">'+escapeHtml(product.description)+'</p>' : '')
+      +     '<div class="qty-row">'
+      +       '<span class="qty-label">수량</span>'
+      +       '<div class="qty-stepper">'
+      +         '<button type="button" id="qtyMinus" aria-label="감소">−</button>'
+      +         '<input type="text" class="tabular" id="qtyInput" value="1">'
+      +         '<button type="button" id="qtyPlus" aria-label="증가">+</button>'
+      +       '</div>'
+      +       '<span class="qty-subtotal" id="qtySubtotal">'+fmtWon(product.price)+'</span>'
+      +     '</div>'
+      +     '<div class="detail-actions">'
+      +       '<button class="detail-wish-btn" id="wishBtn" aria-label="찜하기"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'
+      +       '<button class="btn btn-outline btn-lg" id="addCartBtn"'+(product.stock<=0?' disabled':'')+'>장바구니 담기</button>'
+      +       '<button class="btn btn-primary btn-lg" id="buyNowBtn"'+(product.stock<=0?' disabled':'')+'>바로 구매</button>'
+      +     '</div>'
+      +     '<div class="seller-block">'
+      +       '<span class="seller-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg></span>'
+      +       '<div>'
+      +         '<a href="#" class="seller-name" style="color:var(--text);" onclick="return false;">'+escapeHtml(sellerName)+'</a>'
+      +         '<div class="seller-sub">판매자 정보</div>'
+      +       '</div>'
+      +     '</div>'
+      +   '</div>'
+      + '</div>'
+      + '<section class="card-panel qna-section">'
+      +   '<div class="section-head"><h2 style="font-size:1.05rem;">상품 문의</h2></div>'
+      +   '<div id="qnaForm"></div>'
+      +   '<div id="qnaList"><p class="qna-empty">불러오는 중...</p></div>'
+      + '</section>';
+
+    document.getElementById('detailContent').innerHTML = html;
+    bindProductEvents();
+    renderQnaForm();
+  }
+
+  function clampQty(v){
+    v = parseInt(v, 10);
+    if (isNaN(v) || v < 1) v = 1;
+    if (product.stock > 0 && v > product.stock) v = product.stock;
+    return v;
+  }
+
+  function updateSubtotal(){
+    document.getElementById('qtySubtotal').textContent = fmtWon(product.price * qty);
+  }
+
+  function bindProductEvents(){
+    var qtyInput = document.getElementById('qtyInput');
+    document.getElementById('qtyMinus').addEventListener('click', function(){ qty = clampQty(qty - 1); qtyInput.value = qty; updateSubtotal(); });
+    document.getElementById('qtyPlus').addEventListener('click', function(){ qty = clampQty(qty + 1); qtyInput.value = qty; updateSubtotal(); });
+    qtyInput.addEventListener('change', function(){ qty = clampQty(qtyInput.value); qtyInput.value = qty; updateSubtotal(); });
+
+    document.getElementById('wishBtn').addEventListener('click', toggleFavorite);
+    document.getElementById('addCartBtn').addEventListener('click', function(){ handleAddToCart(false); });
+    document.getElementById('buyNowBtn').addEventListener('click', function(){ handleAddToCart(true); });
+
+    if (favored) document.getElementById('wishBtn').classList.add('wished');
+  }
+
+  async function toggleFavorite(){
+    if (!window.VERSOI.requireAuth()) return;
+    var btn = document.getElementById('wishBtn');
+    var uid = window.VERSOI.user.id;
+    btn.disabled = true;
+    try {
+      if (favored) {
+        await sb.from('favorites').delete().eq('profile_id', uid).eq('product_id', productId);
+        favored = false;
+        btn.classList.remove('wished');
+      } else {
+        await sb.from('favorites').insert({ profile_id: uid, product_id: productId });
+        favored = true;
+        btn.classList.add('wished');
+      }
+    } catch (err) { console.error(err); }
+    btn.disabled = false;
+  }
+
+  async function handleAddToCart(buyNow){
+    if (!window.VERSOI.requireAuth()) return;
+    var uid = window.VERSOI.user.id;
+    var btn = document.getElementById(buyNow ? 'buyNowBtn' : 'addCartBtn');
+    var original = btn.textContent;
+    btn.disabled = true;
+    try {
+      var max = product.stock > 0 ? product.stock : Infinity;
+      var existing = await sb.from('cart_items').select('id,qty').eq('profile_id', uid).eq('product_id', productId).maybeSingle();
+      if (existing.data) {
+        await sb.from('cart_items').update({ qty: Math.min(max, existing.data.qty + qty), selected: true }).eq('id', existing.data.id);
+      } else {
+        await sb.from('cart_items').insert({ profile_id: uid, product_id: productId, qty: Math.min(max, qty), selected: true });
+      }
+      if (buyNow) { location.href = 'cart.html'; return; }
+      btn.textContent = '담김';
+      setTimeout(function(){ btn.textContent = original; btn.disabled = false; }, 1000);
+    } catch (err) {
+      console.error(err);
+      btn.textContent = '오류';
+      setTimeout(function(){ btn.textContent = original; btn.disabled = false; }, 1200);
+    }
+  }
+
+  function renderQnaForm(){
+    var wrap = document.getElementById('qnaForm');
+    if (!user) {
+      wrap.innerHTML = '<p style="font-size:.86rem;color:var(--text-tertiary);padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:6px;"><a href="login.html" style="color:var(--accent);font-weight:700;">로그인</a> 후 상품에 대해 문의하실 수 있습니다.</p>';
+      return;
+    }
+    if (!product.company_id) {
+      wrap.innerHTML = '<p style="font-size:.86rem;color:var(--text-tertiary);padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:6px;">개인 판매자 상품은 문의 접수를 지원하지 않습니다.</p>';
+      return;
+    }
+    wrap.innerHTML = ''
+      + '<div style="padding-bottom:16px;margin-bottom:16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px;">'
+      +   '<input type="text" id="qnaTitle" placeholder="문의 제목" style="border:1px solid var(--border);border-radius:9px;padding:11px 13px;font-size:.88rem;color:var(--text);font-family:inherit;">'
+      +   '<textarea id="qnaContent" placeholder="문의 내용을 입력해주세요." rows="3" style="border:1px solid var(--border);border-radius:9px;padding:11px 13px;font-size:.88rem;color:var(--text);font-family:inherit;resize:vertical;"></textarea>'
+      +   '<button class="btn btn-primary btn-sm" id="qnaSubmit" style="align-self:flex-end;">문의 등록</button>'
+      + '</div>';
+    document.getElementById('qnaSubmit').addEventListener('click', submitQna);
+  }
+
+  async function submitQna(){
+    var titleEl = document.getElementById('qnaTitle');
+    var contentEl = document.getElementById('qnaContent');
+    var content = contentEl.value.trim();
+    if (!content) { contentEl.focus(); return; }
+    var title = titleEl.value.trim() || content.slice(0, 30);
+    var btn = document.getElementById('qnaSubmit');
+    btn.disabled = true;
+    var res = await sb.from('inquiries').insert({
+      thread_type: 'product',
+      inquiry_type: 'product',
+      product_id: productId,
+      company_id: product.company_id,
+      buyer_profile_id: user.id,
+      title: title,
+      content: content
+    });
+    btn.disabled = false;
+    if (res.error) { console.error(res.error); alert('문의 등록에 실패했습니다.'); return; }
+    titleEl.value = ''; contentEl.value = '';
+    loadQna();
+  }
+
+  async function loadQna(){
+    var listEl = document.getElementById('qnaList');
+    if (!user) { listEl.innerHTML = ''; return; }
+    var res = await sb.from('inquiries').select('id,title,content,status,created_at')
+      .eq('product_id', productId).order('created_at', { ascending: false });
+    if (res.error) { listEl.innerHTML = ''; console.error(res.error); return; }
+    var rows = res.data || [];
+    if (!rows.length) { listEl.innerHTML = '<p class="qna-empty">등록된 문의가 없습니다.</p>'; return; }
+
+    var ids = rows.map(function(r){ return r.id; });
+    var msgRes = await sb.from('inquiry_messages').select('inquiry_id,sender_role,content,created_at').in('inquiry_id', ids).order('created_at', { ascending: true });
+    var byInquiry = {};
+    (msgRes.data || []).forEach(function(m){ (byInquiry[m.inquiry_id] = byInquiry[m.inquiry_id] || []).push(m); });
+
+    listEl.innerHTML = rows.map(function(r){
+      var statusBadge = r.status === 'answered' ? '<span class="badge badge-good">답변완료</span>' : '<span class="badge badge-warn">답변대기</span>';
+      var replies = (byInquiry[r.id] || []).map(function(m){
+        return '<div class="qna-reply"><div class="qna-reply-head">'+(m.sender_role === 'seller' ? '판매자 답변' : '구매자')+'</div><div class="qna-reply-content">'+escapeHtml(m.content)+'</div></div>';
+      }).join('');
+      return ''
+        + '<div class="qna-item">'
+        +   '<div class="qna-q-row"><span class="qna-title">'+escapeHtml(r.title)+'</span>'+statusBadge+'</div>'
+        +   '<div class="qna-content">'+escapeHtml(r.content)+'</div>'
+        +   '<div class="qna-date">'+fmtDate(r.created_at)+'</div>'
+        +   replies
+        + '</div>';
+    }).join('');
+  }
+
+  document.addEventListener('versoi:ready', async function(e){
+    user = e.detail.user;
+    if (user && productId) {
+      var favRes = await sb.from('favorites').select('id').eq('profile_id', user.id).eq('product_id', productId).maybeSingle();
+      favored = !!favRes.data;
+    }
+    await loadProduct();
+  });
+})();
+</script>
+</body>
+</html>

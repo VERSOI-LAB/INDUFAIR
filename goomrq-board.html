@@ -28,6 +28,19 @@
   .gm-tag{font-size:.66rem;font-weight:800;padding:3px 8px;border-radius:6px;background:#FCE8EA;color:var(--up);flex-shrink:0;}
   .cat-badge{font-size:.76rem;color:var(--text-tertiary);}
   .gm-table td.views{text-align:right;font-family:var(--font-en);}
+  .gm-table tr.gm-row{cursor:pointer;}
+  .gm-detail-row td{background:var(--bg-soft);padding:16px 14px;}
+  .gm-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:12px;}
+  .gm-detail-grid div b{display:block;font-size:.74rem;color:var(--text-tertiary);font-weight:700;margin-bottom:4px;}
+  .gm-detail-grid div span{font-size:.86rem;color:var(--text);font-weight:600;}
+  .gm-detail-desc{white-space:pre-wrap;line-height:1.6;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);margin-bottom:14px;font-size:.86rem;color:var(--text-secondary);}
+  .gm-comment-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+  .gm-comment-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:9px 12px;font-size:.84rem;color:var(--text-secondary);}
+  .gm-comment-item b{color:var(--text);font-weight:700;margin-right:6px;}
+  .gm-comment-item .t{float:right;font-size:.72rem;color:var(--text-tertiary);font-family:var(--font-en);}
+  .gm-comment-form{display:flex;gap:8px;}
+  .gm-comment-form input{flex:1;border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:.84rem;font-family:inherit;}
+  .gm-empty{padding:40px 0;text-align:center;color:var(--text-tertiary);font-size:.88rem;}
 </style>
 </head>
 <body>
@@ -78,32 +91,27 @@
       <div class="board-toolbar">
         <div class="board-search">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="상품명, 모델명, 키워드를 입력하세요">
+          <input type="text" id="boardSearchInput" placeholder="상품명, 모델명, 키워드를 입력하세요">
         </div>
         <div class="select-field">전체 카테고리 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
       </div>
 
-      <div class="board-tabs">
-        <button class="active">전체</button><button>진행중</button><button>완료</button>
+      <div class="board-tabs" id="boardTabs">
+        <button class="active" data-status="">전체</button><button data-status="open">진행중</button><button data-status="closed">완료</button>
       </div>
 
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:0 20px;overflow-x:auto;">
         <table class="gm-table">
           <thead><tr><th style="width:5%;"></th><th>제목</th><th style="width:16%;">카테고리</th><th style="width:16%;">지역</th><th style="width:14%;">작성일</th><th style="width:10%;" class="views">조회</th></tr></thead>
-          <tbody>
-            <tr><td></td><td class="title"><a href="#"><span class="gm-tag">구해요</span>미쓰비시 PLC FX5U-32MR 구합니다.</a></td><td class="cat-badge">PLC</td><td class="cat-badge">화성</td><td class="tabular">2024.05.08</td><td class="views tabular">24</td></tr>
-            <tr><td></td><td class="title"><a href="#"><span class="gm-tag">구해요</span>LS 인버터 SV022iG5A-2 구합니다.</a></td><td class="cat-badge">인버터</td><td class="cat-badge">서울</td><td class="tabular">2024.05.08</td><td class="views tabular">18</td></tr>
-            <tr><td></td><td class="title"><a href="#"><span class="gm-tag">구해요</span>서보모터 SGMJV-02A3A61 구해요.</a></td><td class="cat-badge">서보/모터</td><td class="cat-badge">강남</td><td class="tabular">2024.05.07</td><td class="views tabular">31</td></tr>
-            <tr><td></td><td class="title"><a href="#"><span class="gm-tag">구해요</span>SMC 에어필터 AW40-04D 구합니다.</a></td><td class="cat-badge">공압/유공압</td><td class="cat-badge">화성</td><td class="tabular">2024.05.07</td><td class="views tabular">12</td></tr>
-            <tr><td></td><td class="title"><a href="#"><span class="gm-tag">구해요</span>KEYENCE 근접센서 구해요.</a></td><td class="cat-badge">센서</td><td class="cat-badge">대구</td><td class="tabular">2024.05.06</td><td class="views tabular">15</td></tr>
+          <tbody id="gmTableBody">
+            <tr><td colspan="6" class="gm-empty">불러오는 중...</td></tr>
           </tbody>
         </table>
       </div>
 
       <nav class="pagination" aria-label="페이지 이동">
         <button disabled aria-label="이전"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <button class="active">1</button><button>2</button><button>3</button><button>4</button><button>5</button>
-        <span class="ellipsis">…</span><button>10</button>
+        <button class="active">1</button>
         <button aria-label="다음"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </nav>
     </div>
@@ -124,12 +132,158 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.querySelectorAll('.board-tabs button').forEach(function(btn){
+  // ---- 구해요 board wired to Supabase ----
+  var gmBody = document.getElementById('gmTableBody');
+  var boardSearchInput = document.getElementById('boardSearchInput');
+  var boardTabsEl = document.getElementById('boardTabs');
+  var allPosts = [];
+  var gmCurrentUser = null;
+  var gmStatus = '';
+  var gmQuery = '';
+  var gmOpenId = null;
+  var gmComments = {}; // post_id -> array
+  var gmViewBumped = {}; // post_id -> boolean, client-only visual bump
+
+  function fmtDate(ts){
+    if (!ts) return '';
+    var d = new Date(ts);
+    return d.getFullYear() + '.' + String(d.getMonth()+1).padStart(2,'0') + '.' + String(d.getDate()).padStart(2,'0');
+  }
+  function fmtWon(n){ return n == null ? '' : '₩' + Number(n).toLocaleString('ko-KR'); }
+  function esc(s){ return (s == null ? '' : String(s)).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  function passesFilter(p){
+    if (gmStatus && p.status !== gmStatus) return false;
+    if (gmQuery && p.title.toLowerCase().indexOf(gmQuery) === -1) return false;
+    return true;
+  }
+
+  function renderComments(postId){
+    var list = gmComments[postId] || [];
+    if (!list.length) return '<p style="color:var(--text-tertiary);font-size:.84rem;margin-bottom:10px;">아직 댓글이 없습니다.</p>';
+    return '<div class="gm-comment-list">' + list.map(function(c){
+      var name = (gmCurrentUser && c.profile_id === gmCurrentUser.id)
+        ? ((gmCurrentUser.profile && gmCurrentUser.profile.name) || gmCurrentUser.email)
+        : '회원';
+      return '<div class="gm-comment-item"><span class="t">' + fmtDate(c.created_at) + '</span><b>' + esc(name) + '</b>' + esc(c.content) + '</div>';
+    }).join('') + '</div>';
+  }
+
+  function renderRow(p){
+    var cat = p.categories ? p.categories.name : '';
+    var isOpen = gmOpenId === p.id;
+    var viewCount = p.view_count + (gmViewBumped[p.id] ? 1 : 0);
+    var rowHtml =
+      '<tr class="gm-row" data-id="' + p.id + '">' +
+        '<td></td>' +
+        '<td class="title"><a href="#" onclick="return false;"><span class="gm-tag">구해요</span>' + esc(p.title) + '</a></td>' +
+        '<td class="cat-badge">' + esc(cat || '-') + '</td>' +
+        '<td class="cat-badge">' + esc(p.region || '전국') + '</td>' +
+        '<td class="tabular">' + fmtDate(p.created_at) + '</td>' +
+        '<td class="views tabular">' + viewCount + '</td>' +
+      '</tr>';
+
+    if (!isOpen) return rowHtml;
+
+    var canComment = !!gmCurrentUser;
+    var detailHtml =
+      '<tr class="gm-detail-row" data-detail-id="' + p.id + '"><td colspan="6">' +
+        '<div class="gm-detail-grid">' +
+          '<div><b>예산</b><span>' + (p.budget != null ? fmtWon(p.budget) : '협의') + '</span></div>' +
+          '<div><b>거래 희망 지역</b><span>' + esc(p.region || '전국') + '</span></div>' +
+          '<div><b>상태</b><span>' + (p.status === 'closed' ? '완료' : '진행중') + '</span></div>' +
+        '</div>' +
+        '<div class="gm-detail-desc">' + (esc(p.description) || '상세 설명이 없습니다.').replace(/\n/g,'<br>') + '</div>' +
+        '<p style="font-weight:800;font-size:.82rem;margin-bottom:8px;">댓글</p>' +
+        '<div class="gm-comments-wrap" data-comments-for="' + p.id + '">' + renderComments(p.id) + '</div>' +
+        (canComment
+          ? '<form class="gm-comment-form" data-post-id="' + p.id + '"><input type="text" class="gm-comment-input" placeholder="댓글을 입력하세요" required><button type="submit" class="btn btn-primary btn-sm">등록</button></form>'
+          : '<p style="color:var(--text-tertiary);font-size:.84rem;">로그인 후 댓글을 남길 수 있습니다.</p>') +
+      '</td></tr>';
+
+    return rowHtml + detailHtml;
+  }
+
+  function render(){
+    var filtered = allPosts.filter(passesFilter);
+    if (!filtered.length) {
+      gmBody.innerHTML = '<tr><td colspan="6" class="gm-empty">조건에 맞는 요청이 없습니다.</td></tr>';
+      return;
+    }
+    gmBody.innerHTML = filtered.map(renderRow).join('');
+  }
+
+  async function loadPosts(){
+    var res = await sb.from('wanted_posts')
+      .select('*, categories(name)')
+      .order('created_at', { ascending: false });
+    if (res.error) { console.error('[VERSOI] wanted_posts load error', res.error); gmBody.innerHTML = '<tr><td colspan="6" class="gm-empty">불러오지 못했습니다.</td></tr>'; return; }
+    allPosts = res.data || [];
+    render();
+  }
+
+  async function loadComments(postId){
+    var res = await sb.from('wanted_comments').select('*').eq('post_id', postId).order('created_at', { ascending: true });
+    gmComments[postId] = res.error ? [] : (res.data || []);
+  }
+
+  boardSearchInput.addEventListener('input', function(){
+    gmQuery = this.value.trim().toLowerCase();
+    render();
+  });
+
+  boardTabsEl.querySelectorAll('button').forEach(function(btn){
     btn.addEventListener('click', function(){
-      document.querySelectorAll('.board-tabs button').forEach(function(b){ b.classList.remove('active'); });
+      boardTabsEl.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
+      gmStatus = btn.getAttribute('data-status') || '';
+      render();
     });
   });
+
+  gmBody.addEventListener('click', async function(e){
+    if (e.target.closest('.gm-comment-form')) return;
+    var row = e.target.closest('.gm-row');
+    if (!row) return;
+    var id = row.getAttribute('data-id');
+    if (gmOpenId === id) {
+      gmOpenId = null;
+      render();
+      return;
+    }
+    gmOpenId = id;
+    // cosmetic-only view count bump (wanted_posts UPDATE is owner-restricted by RLS,
+    // so we don't persist this — it's a known gap, not synced across visitors)
+    gmViewBumped[id] = true;
+    if (!gmComments[id]) await loadComments(id);
+    render();
+  });
+
+  gmBody.addEventListener('submit', async function(e){
+    var form = e.target.closest('.gm-comment-form');
+    if (!form) return;
+    e.preventDefault();
+    if (!window.VERSOI.requireAuth()) return;
+    var postId = form.getAttribute('data-post-id');
+    var content = form.querySelector('.gm-comment-input').value.trim();
+    if (!content) return;
+    var res = await sb.from('wanted_comments').insert({
+      post_id: postId,
+      profile_id: gmCurrentUser.id,
+      content: content
+    });
+    if (res.error) { alert('댓글 등록에 실패했습니다: ' + res.error.message); return; }
+    await loadComments(postId);
+    render();
+  });
+
+  document.addEventListener('versoi:ready', function(e){
+    gmCurrentUser = e.detail.user;
+    loadPosts();
+  });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>

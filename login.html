@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 로그인</title>
+<meta name="description" content="VERSOI 계정으로 로그인하고 구매, 판매, 견적 서비스를 이용하세요">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .auth-wrap{max-width:420px;margin:0 auto;padding:56px 16px 80px;}
+  .auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;}
+  .auth-logo .logo-mark{width:38px;height:38px;border-radius:10px;font-size:1.1rem;}
+  .auth-logo b{font-family:var(--font-en);font-weight:800;font-size:1.4rem;}
+  .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:32px 28px;}
+  .auth-card h1{font-size:1.15rem;font-weight:900;text-align:center;margin-bottom:24px;}
+  .auth-field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .auth-field label{font-size:.85rem;font-weight:700;}
+  .auth-field input{border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.9rem;font-family:inherit;width:100%;}
+  .auth-field input:focus{outline:none;border-color:var(--accent);}
+  .auth-error{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:.82rem;font-weight:700;margin-bottom:14px;display:none;}
+  .auth-links{display:flex;justify-content:space-between;font-size:.82rem;color:var(--text-tertiary);margin-top:16px;}
+  .auth-links a{color:var(--accent);font-weight:700;}
+  .demo-card{margin-top:16px;background:var(--bg-soft);border-radius:var(--radius-m);padding:16px;font-size:.78rem;color:var(--text-secondary);line-height:1.7;}
+  .demo-card b{color:var(--text);}
+  .demo-card button{color:var(--accent);font-weight:700;text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html" aria-label="VERSOI 홈으로 이동">
+      <span class="logo-mark">V</span><span class="logo-text">VERSOI</span>
+      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">홈</a><a href="goods.html">산업용품</a><a href="used.html">중고장터</a>
+      <a href="brand.html">브랜드관</a><a href="rfq.html">견적요청(RFQ)</a><a href="community.html">커뮤니티</a><a href="support.html">고객센터</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn btn-ghost">로그인</button>
+      <button class="btn btn-primary">회원가입</button>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h1>로그인</h1>
+      <div class="auth-error" id="authError"></div>
+      <form id="loginForm">
+        <div class="auth-field"><label>이메일</label><input type="email" id="email" required placeholder="example@company.co.kr"></div>
+        <div class="auth-field"><label>비밀번호</label><input type="password" id="password" required placeholder="비밀번호"></div>
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" id="submitBtn">로그인</button>
+      </form>
+      <div class="auth-links">
+        <a href="signup.html">회원가입</a>
+        <a href="seller.html">판매자로 시작하기</a>
+      </div>
+      <div class="demo-card">
+        <b>체험용 데모 계정</b><br>
+        판매자: seller@kblast.co.kr<br>
+        구매자: buyer@smartfactory.co.kr<br>
+        공통 비밀번호: versoi1234!<br>
+        <button type="button" id="fillSeller">판매자 계정 자동입력</button> · <button type="button" id="fillBuyer">구매자 계정 자동입력</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
+    <div class="footer-links"><a href="#">이용약관</a><a href="#">개인정보처리방침</a><a href="#">사업자정보확인</a><a href="#">제휴/입점문의</a></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script>
+  var navToggle = document.getElementById('navToggle');
+  var mainNav = document.getElementById('mainNav');
+  navToggle.addEventListener('click', function(){
+    var open = mainNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  document.getElementById('fillSeller').addEventListener('click', function(){
+    document.getElementById('email').value = 'seller@kblast.co.kr';
+    document.getElementById('password').value = 'versoi1234!';
+  });
+  document.getElementById('fillBuyer').addEventListener('click', function(){
+    document.getElementById('email').value = 'buyer@smartfactory.co.kr';
+    document.getElementById('password').value = 'versoi1234!';
+  });
+
+  function getParam(name){
+    var m = new RegExp('[?&]'+name+'=([^&]*)').exec(location.search);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var errEl = document.getElementById('authError');
+    var btn = document.getElementById('submitBtn');
+    errEl.style.display = 'none';
+    btn.textContent = '로그인 중...';
+    btn.disabled = true;
+    var email = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value;
+    var res = await sb.auth.signInWithPassword({ email: email, password: password });
+    if (res.error) {
+      errEl.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.';
+      errEl.style.display = 'block';
+      btn.textContent = '로그인';
+      btn.disabled = false;
+      return;
+    }
+    var redirect = getParam('redirect');
+    location.href = redirect || 'mypage.html';
+  });
+
+  (async function(){
+    var res = await sb.auth.getSession();
+    if (res.data.session) {
+      var redirect = getParam('redirect');
+      location.href = redirect || 'mypage.html';
+    }
+  })();
+</script>
+</body>
+</html>

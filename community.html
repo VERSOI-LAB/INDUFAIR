@@ -52,6 +52,19 @@
   .comm-more{width:100%;justify-content:center;margin-top:6px;border-top:1px solid var(--border);padding-top:14px;border-radius:0;background:none;color:var(--text-secondary);font-weight:700;font-size:.86rem;display:flex;align-items:center;gap:4px;}
   .comm-more:hover{color:var(--accent);}
 
+  .post-title{cursor:pointer;}
+  .post-detail{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);}
+  .post-detail-body{font-size:.87rem;color:var(--text-secondary);line-height:1.7;white-space:pre-wrap;margin-bottom:14px;}
+  .post-comments-title{font-size:.82rem;font-weight:800;margin-bottom:8px;color:var(--text-tertiary);}
+  .comment-item{padding:9px 0;border-bottom:1px solid var(--border);}
+  .comment-item:last-child{border-bottom:none;}
+  .comment-item b{font-size:.82rem;font-weight:700;margin-right:6px;}
+  .comment-item span{font-size:.72rem;color:var(--text-tertiary);}
+  .comment-item p{font-size:.84rem;color:var(--text);line-height:1.5;margin-top:3px;}
+  .comment-form{display:flex;gap:8px;margin-top:12px;}
+  .comment-form textarea{flex:1;min-height:44px;resize:vertical;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:.85rem;font-family:inherit;}
+  .comment-empty{font-size:.82rem;color:var(--text-tertiary);padding:6px 0;}
+
   .qna-item{padding:11px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:9px;}
   .qna-item:last-child{border-bottom:none;}
   .qna-item svg{color:var(--accent);flex-shrink:0;margin-top:2px;}
@@ -218,92 +231,24 @@
           <div class="comm-head-row">
             <p class="comm-panel-title">인기 게시글</p>
             <div class="comm-sort">
-              <button class="active">최신순</button>
-              <button>조회순</button>
-              <button>댓글순</button>
-              <button>좋아요순</button>
+              <button class="active" data-sort="latest">최신순</button>
+              <button data-sort="views">조회순</button>
+              <button data-sort="comments">댓글순</button>
+              <button data-sort="likes">좋아요순</button>
             </div>
           </div>
 
-          <div class="post-row">
-            <span class="post-cat qna">기술 Q&amp;A</span>
-            <div class="post-main">
-              <a href="#" class="post-title">미쓰비시 Q시리즈 PLC 통신 에러 해결 방법 문의드립니다.</a>
-              <div class="post-meta">
-                <b>자동화엔지니어</b><span>1시간 전</span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span class="tabular">1,256</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="tabular">12</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="tabular">24</span></span>
-              </div>
-            </div>
+          <div class="filter-chip-row" id="boardFilterRow" style="margin-bottom:14px;">
+            <button class="filter-chip on" data-board="all">전체</button>
+            <button class="filter-chip" data-board="free">자유</button>
+            <button class="filter-chip" data-board="qna">Q&amp;A</button>
+            <button class="filter-chip" data-board="news">뉴스</button>
+            <button class="filter-chip" data-board="gov">정부지원</button>
           </div>
 
-          <div class="post-row">
-            <span class="post-cat free">자유 게시판</span>
-            <div class="post-main">
-              <a href="#" class="post-title">스마트팩토리 구축 사례 공유합니다.</a>
-              <div class="post-meta">
-                <b>Factory_Kim</b><span>3시간 전</span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span class="tabular">892</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="tabular">8</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="tabular">16</span></span>
-              </div>
-            </div>
-            <span class="post-thumb"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
-          </div>
+          <div id="postList"><p class="comment-empty">게시글을 불러오는 중입니다...</p></div>
 
-          <div class="post-row">
-            <span class="post-cat price">중고 시세</span>
-            <div class="post-main">
-              <a href="#" class="post-title">서보모터 HG-KR73 시세가 어떻게 될까요?</a>
-              <div class="post-meta">
-                <b>모터전문가</b><span>5시간 전</span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span class="tabular">2,341</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="tabular">23</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="tabular">31</span></span>
-              </div>
-            </div>
-          </div>
-
-          <div class="post-row">
-            <span class="post-cat goomrq">구해요 게시판</span>
-            <div class="post-main">
-              <a href="#" class="post-title">중고 FANUC M-20iA 로봇 구합니다.</a>
-              <div class="post-meta">
-                <b>로봇구매담당</b><span>8시간 전</span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span class="tabular">1,102</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="tabular">15</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="tabular">18</span></span>
-              </div>
-            </div>
-          </div>
-
-          <div class="post-row">
-            <span class="post-cat gov">정부 지원사업</span>
-            <div class="post-main">
-              <a href="#" class="post-title">2024 스마트공장 구축 지원사업 공고 안내</a>
-              <div class="post-meta">
-                <b>VERSOI 운영자</b><span>1일 전</span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span class="tabular">1,843</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="tabular">22</span></span>
-              </div>
-            </div>
-          </div>
-
-          <div class="post-row">
-            <span class="post-cat qna">기술 Q&amp;A</span>
-            <div class="post-main">
-              <a href="#" class="post-title">인버터 과열 알람 문제 해결 경험 공유 부탁드립니다.</a>
-              <div class="post-meta">
-                <b>설비관리자</b><span>1일 전</span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span class="tabular">732</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="tabular">7</span></span>
-                <span class="icn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span class="tabular">11</span></span>
-              </div>
-            </div>
-          </div>
-
-          <button class="comm-more">더 많은 게시글 보기 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+          <button class="comm-more" id="commMoreBtn" style="display:none;">더 많은 게시글 보기 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button>
         </div>
 
         <div>
@@ -413,12 +358,176 @@
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
-  document.querySelectorAll('.comm-sort button').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.comm-sort button').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
+  (function () {
+    var EYE_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    var CMT_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+    var HEART_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+
+    var BOARD_LABEL = { free: '자유 게시판', qna: '기술 Q&amp;A', news: '산업 뉴스', gov: '정부 지원사업' };
+    var BOARD_CLASS = { free: 'free', qna: 'qna', news: '', gov: 'gov' };
+
+    var postList = document.getElementById('postList');
+    var posts = [];
+    var commentCounts = {};
+    var detailComments = {};
+    var expandedId = null;
+    var currentFilter = 'all';
+    var currentSort = 'latest';
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    function fmtDate(iso) {
+      if (!iso) return '';
+      var d = new Date(iso);
+      var p = function (n) { return String(n).padStart(2, '0'); };
+      return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate());
+    }
+
+    async function loadPosts() {
+      var res = await sb.from('community_posts')
+        .select('id, profile_id, board_type, title, content, view_count, like_count, created_at, profiles(name)')
+        .order('created_at', { ascending: false });
+      posts = res.data || [];
+      commentCounts = {};
+      var ids = posts.map(function (p) { return p.id; });
+      if (ids.length) {
+        var cRes = await sb.from('community_comments').select('post_id').in('post_id', ids);
+        (cRes.data || []).forEach(function (c) { commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1; });
+      }
+      render();
+    }
+
+    function sortedFiltered() {
+      var list = posts.slice();
+      if (currentFilter !== 'all') list = list.filter(function (p) { return p.board_type === currentFilter; });
+      if (currentSort === 'latest') list.sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+      else if (currentSort === 'views') list.sort(function (a, b) { return (b.view_count || 0) - (a.view_count || 0); });
+      else if (currentSort === 'comments') list.sort(function (a, b) { return (commentCounts[b.id] || 0) - (commentCounts[a.id] || 0); });
+      else if (currentSort === 'likes') list.sort(function (a, b) { return (b.like_count || 0) - (a.like_count || 0); });
+      return list;
+    }
+
+    function renderDetail(p) {
+      var html = '<div class="post-detail">';
+      html += '<div class="post-detail-body">' + escapeHtml(p.content).replace(/\n/g, '<br>') + '</div>';
+      html += '<div class="post-comments-title">댓글 ' + (commentCounts[p.id] || 0) + '</div>';
+      var comments = detailComments[p.id];
+      if (!comments) {
+        html += '<div class="comment-empty">댓글을 불러오는 중...</div>';
+      } else if (comments.length === 0) {
+        html += '<div class="comment-empty">첫 댓글을 남겨보세요.</div>';
+      } else {
+        comments.forEach(function (c) {
+          var name = c.profiles && c.profiles.name ? c.profiles.name : '익명';
+          html += '<div class="comment-item"><b>' + escapeHtml(name) + '</b><span>' + fmtDate(c.created_at) + '</span><p>' + escapeHtml(c.content) + '</p></div>';
+        });
+      }
+      if (window.VERSOI && window.VERSOI.user) {
+        html += '<div class="comment-form"><textarea class="comment-input" data-post="' + p.id + '" placeholder="댓글을 입력하세요."></textarea><button type="button" class="btn btn-primary comment-submit" data-post="' + p.id + '">등록</button></div>';
+      } else {
+        html += '<div class="comment-empty"><a href="login.html">로그인</a> 후 댓글을 작성할 수 있습니다.</div>';
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function renderRow(p) {
+      var authorName = p.profiles && p.profiles.name ? p.profiles.name : '익명';
+      var cls = BOARD_CLASS[p.board_type] || '';
+      var label = BOARD_LABEL[p.board_type] || p.board_type;
+      var isOpen = expandedId === p.id;
+      var icons = '<span class="icn">' + EYE_SVG + '<span class="tabular">' + (p.view_count || 0).toLocaleString('ko-KR') + '</span></span>' +
+        '<span class="icn">' + CMT_SVG + '<span class="tabular">' + (commentCounts[p.id] || 0) + '</span></span>' +
+        '<span class="icn">' + HEART_SVG + '<span class="tabular">' + (p.like_count || 0) + '</span></span>';
+      return '<div class="post-row" data-id="' + p.id + '">' +
+        '<span class="post-cat' + (cls ? ' ' + cls : '') + '">' + label + '</span>' +
+        '<div class="post-main">' +
+        '<a href="#" class="post-title" data-id="' + p.id + '">' + escapeHtml(p.title) + '</a>' +
+        '<div class="post-meta"><b>' + escapeHtml(authorName) + '</b><span>' + fmtDate(p.created_at) + '</span>' + icons + '</div>' +
+        (isOpen ? renderDetail(p) : '') +
+        '</div></div>';
+    }
+
+    function render() {
+      var list = sortedFiltered();
+      if (!list.length) {
+        postList.innerHTML = '<p class="comment-empty" style="padding:24px 0;text-align:center;">게시글이 없습니다.</p>';
+        return;
+      }
+      postList.innerHTML = list.map(renderRow).join('');
+    }
+
+    async function loadDetail(id) {
+      var post = posts.find(function (p) { return p.id === id; });
+      if (post) {
+        post.view_count = (post.view_count || 0) + 1;
+        sb.from('community_posts').update({ view_count: post.view_count }).eq('id', id).then(function () {}, function () {});
+      }
+      if (!detailComments[id]) {
+        var res = await sb.from('community_comments')
+          .select('id, profile_id, content, created_at, profiles(name)')
+          .eq('post_id', id).order('created_at', { ascending: true });
+        detailComments[id] = res.data || [];
+      }
+    }
+
+    postList.addEventListener('click', async function (e) {
+      var submitBtn = e.target.closest('.comment-submit');
+      if (submitBtn) {
+        var postId = submitBtn.getAttribute('data-post');
+        var ta = postList.querySelector('.comment-input[data-post="' + postId + '"]');
+        var text = ta ? ta.value.trim() : '';
+        if (!text) return;
+        if (!window.VERSOI.requireAuth()) return;
+        submitBtn.disabled = true;
+        var user = window.VERSOI.user;
+        var res = await sb.from('community_comments')
+          .insert({ post_id: postId, profile_id: user.id, content: text })
+          .select('id, profile_id, content, created_at, profiles(name)').single();
+        submitBtn.disabled = false;
+        if (res.error) { alert('댓글 등록에 실패했습니다.'); return; }
+        detailComments[postId] = (detailComments[postId] || []).concat([res.data]);
+        commentCounts[postId] = (commentCounts[postId] || 0) + 1;
+        render();
+        return;
+      }
+      var titleEl = e.target.closest('.post-title');
+      if (!titleEl) return;
+      e.preventDefault();
+      var id = titleEl.getAttribute('data-id');
+      if (expandedId === id) { expandedId = null; render(); return; }
+      expandedId = id;
+      render();
+      await loadDetail(id);
+      render();
     });
-  });
+
+    document.getElementById('boardFilterRow').addEventListener('click', function (e) {
+      var btn = e.target.closest('.filter-chip');
+      if (!btn) return;
+      document.querySelectorAll('#boardFilterRow .filter-chip').forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      currentFilter = btn.getAttribute('data-board');
+      render();
+    });
+
+    document.querySelectorAll('.comm-sort button').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.comm-sort button').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentSort = btn.getAttribute('data-sort');
+        render();
+      });
+    });
+
+    document.addEventListener('versoi:ready', function () { loadPosts(); });
+  })();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>

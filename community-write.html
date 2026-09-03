@@ -133,14 +133,20 @@
             <div class="field full">
               <label>게시판 선택<span class="req">*</span></label>
               <div class="select-wrap">
-                <select><option>게시판을 선택해주세요.</option><option>자유게시판</option><option>질문/답변</option><option>정보 공유</option><option>성공 사례</option></select>
+                <select id="boardTypeSelect">
+                  <option value="">게시판을 선택해주세요.</option>
+                  <option value="free">자유게시판</option>
+                  <option value="qna">기술 Q&amp;A</option>
+                  <option value="news">산업 뉴스</option>
+                  <option value="gov">정부 지원사업</option>
+                </select>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
             </div>
             <div class="field full">
               <label>제목<span class="req">*</span></label>
               <div class="textarea-wrap">
-                <input type="text" maxlength="100" placeholder="제목을 입력해주세요. (최대 100자)" oninput="document.getElementById('titleCount').textContent=this.value.length">
+                <input type="text" id="titleInput" maxlength="100" placeholder="제목을 입력해주세요. (최대 100자)" oninput="document.getElementById('titleCount').textContent=this.value.length">
                 <span class="char-count" style="bottom:auto;top:50%;transform:translateY(-50%);"><span id="titleCount">0</span> / 100</span>
               </div>
             </div>
@@ -170,7 +176,7 @@
                 <button type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
               </div>
               <div class="editor-wrap">
-                <div class="editor-body" contenteditable="true" data-placeholder="내용을 입력해주세요." oninput="document.getElementById('bodyCount').textContent=this.textContent.length"></div>
+                <div class="editor-body" id="editorBody" contenteditable="true" data-placeholder="내용을 입력해주세요." oninput="document.getElementById('bodyCount').textContent=this.textContent.length"></div>
                 <span class="editor-count"><span id="bodyCount">0</span> / 5000</span>
               </div>
             </div>
@@ -195,10 +201,10 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn-ghost">취소</button>
+          <button type="button" class="btn btn-ghost" id="writeCancelBtn">취소</button>
           <div class="right-group">
             <button type="button" class="btn btn-ghost">임시저장</button>
-            <button type="submit" class="btn btn-primary btn-wide">등록하기</button>
+            <button type="submit" class="btn btn-primary btn-wide" id="writeSubmitBtn">등록하기</button>
           </div>
         </div>
       </form>
@@ -241,7 +247,51 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.getElementById('writeForm').addEventListener('submit', function(e){ e.preventDefault(); });
+  var cancelBtn = document.getElementById('writeCancelBtn');
+  if (cancelBtn) cancelBtn.addEventListener('click', function () { location.href = 'community.html'; });
+
+  document.addEventListener('versoi:ready', function (e) {
+    var user = e.detail.user;
+    if (!user) {
+      var next = encodeURIComponent(location.pathname.split('/').pop() + location.search);
+      location.href = 'login.html?redirect=' + next;
+    }
+  });
+
+  document.getElementById('writeForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!window.VERSOI.requireAuth()) return;
+
+    var boardType = document.getElementById('boardTypeSelect').value;
+    var title = document.getElementById('titleInput').value.trim();
+    var content = document.getElementById('editorBody').innerText.trim();
+
+    if (!boardType) { alert('게시판을 선택해주세요.'); return; }
+    if (!title) { alert('제목을 입력해주세요.'); return; }
+    if (!content) { alert('내용을 입력해주세요.'); return; }
+
+    var submitBtn = document.getElementById('writeSubmitBtn');
+    submitBtn.disabled = true;
+
+    var user = window.VERSOI.user;
+    var res = await sb.from('community_posts').insert({
+      profile_id: user.id,
+      board_type: boardType,
+      title: title,
+      content: content
+    });
+
+    submitBtn.disabled = false;
+
+    if (res.error) {
+      alert('게시글 등록에 실패했습니다. 다시 시도해주세요.');
+      return;
+    }
+    location.href = 'community.html';
+  });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>

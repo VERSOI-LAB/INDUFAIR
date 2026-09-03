@@ -79,147 +79,68 @@
 
       <div class="admin-card">
         <div class="admin-head-row" style="margin-bottom:0;">
-          <div class="count-tabs">
-            <button class="active">전체 <b>128</b></button>
-            <button>판매 중 <b>98</b></button>
-            <button>판매 중지 <b>12</b></button>
-            <button>품절 <b>8</b></button>
-            <button>삭제 <b>4</b></button>
+          <div class="count-tabs" id="productTabs">
+            <button class="active" data-status="all">전체 <b id="cnt-all">0</b></button>
+            <button data-status="selling">판매 중 <b id="cnt-selling">0</b></button>
+            <button data-status="stopped">판매 중지 <b id="cnt-stopped">0</b></button>
+            <button data-status="soldout">품절 <b id="cnt-soldout">0</b></button>
+            <button data-status="deleted">삭제 <b id="cnt-deleted">0</b></button>
           </div>
           <div class="right-group">
             <button class="btn btn-ghost btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>대량 관리</button>
-            <button class="btn btn-primary btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>상품 등록</button>
+            <button class="btn btn-primary btn-sm" id="newProductBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>상품 등록</button>
           </div>
         </div>
 
         <div class="admin-filter-bar">
-          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="상품명, 모델명, 제조사 검색"></div>
-          <select><option>전체 카테고리</option><option>PLC/컨트롤러</option><option>인버터</option><option>서보/모터</option><option>센서/스위치</option></select>
-          <select><option>전체 상태</option><option>판매 중</option><option>판매 중지</option><option>품절</option><option>삭제</option></select>
-          <select><option>등록일 전체</option><option>최근 1주일</option><option>최근 1개월</option><option>최근 3개월</option></select>
-          <button class="reset-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
+          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="searchInput" placeholder="상품명, 모델명, 제조사 검색"></div>
+          <select id="categoryFilter"><option value="">전체 카테고리</option></select>
+          <select id="statusFilter"><option value="">전체 상태</option><option value="selling">판매 중</option><option value="stopped">판매 중지</option><option value="soldout">품절</option><option value="deleted">삭제</option></select>
+          <select id="dateFilter"><option value="0">등록일 전체</option><option value="7">최근 1주일</option><option value="30">최근 1개월</option><option value="90">최근 3개월</option></select>
+          <button class="reset-btn" id="resetFilterBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
         </div>
 
         <div class="data-table-scroll">
         <table class="data-table">
           <thead><tr><th><input type="checkbox"></th><th>상품 정보</th><th>카테고리</th><th class="num">판매가</th><th class="num">수량</th><th>상태</th><th class="num">등록일</th><th class="num">조회수</th><th class="num">문의/찜</th><th>관리</th></tr></thead>
-          <tbody>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">MITSUBISHI Q03UDVCPU</div><div class="sub">Q시리즈 PLC CPU 모듈</div></div></div></td>
-                <td>PLC/컨트롤러</td>
-                <td class="num">₩950,000</td>
-                <td class="num">3</td>
-                <td><span class="badge badge-good">판매 중</span></td>
-                <td class="num">2025.06.08</td>
-                <td class="num">152</td>
-                <td class="num">2 / 5</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>수정</button><button class="btn btn-ghost btn-sm chev-btn">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">LS산전 SV075iG5A 인버터</div><div class="sub">0.75kW / 200V</div></div></div></td>
-                <td>인버터</td>
-                <td class="num">₩230,000</td>
-                <td class="num">5</td>
-                <td><span class="badge badge-good">판매 중</span></td>
-                <td class="num">2025.06.08</td>
-                <td class="num">98</td>
-                <td class="num">1 / 3</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>수정</button><button class="btn btn-ghost btn-sm chev-btn">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">MITSUBISHI HG-KR73 서보모터</div><div class="sub">750W / 감속기 포함</div></div></div></td>
-                <td>서보/모터</td>
-                <td class="num">₩680,000</td>
-                <td class="num">2</td>
-                <td><span class="badge badge-good">판매 중</span></td>
-                <td class="num">2025.06.07</td>
-                <td class="num">201</td>
-                <td class="num">3 / 7</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>수정</button><button class="btn btn-ghost btn-sm chev-btn">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">KEYENCE LV-N11N 센서</div><div class="sub">디지털 레이저 센서</div></div></div></td>
-                <td>센서/스위치</td>
-                <td class="num">₩120,000</td>
-                <td class="num">10</td>
-                <td><span class="badge badge-warn">품절</span></td>
-                <td class="num">2025.06.06</td>
-                <td class="num">67</td>
-                <td class="num">0 / 2</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>수정</button><button class="btn btn-ghost btn-sm chev-btn">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">SMC CDQ2B32-50DMZ 실린더</div><div class="sub">Ø32 / 스트로크 50</div></div></div></td>
-                <td>공압/유압</td>
-                <td class="num">₩45,000</td>
-                <td class="num">8</td>
-                <td><span class="badge badge-good">판매 중</span></td>
-                <td class="num">2025.06.06</td>
-                <td class="num">78</td>
-                <td class="num">1 / 1</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>수정</button><button class="btn btn-ghost btn-sm chev-btn">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">YASKAWA SGDH-04AE 서보드라이브</div><div class="sub">400W</div></div></div></td>
-                <td>드라이브</td>
-                <td class="num">₩150,000</td>
-                <td class="num">1</td>
-                <td><span class="badge badge-up">판매 중지</span></td>
-                <td class="num">2025.06.05</td>
-                <td class="num">42</td>
-                <td class="num">0 / 0</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>수정</button><button class="btn btn-ghost btn-sm chev-btn">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">송풍기 터보팬 2.2kW</div><div class="sub">220V / 삼상</div></div></div></td>
-                <td>공작/기계</td>
-                <td class="num">₩320,000</td>
-                <td class="num">1</td>
-                <td><span class="badge badge-good">판매 중</span></td>
-                <td class="num">2025.06.05</td>
-                <td class="num">85</td>
-                <td class="num">0 / 4</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>수정</button><button class="btn btn-ghost btn-sm chev-btn">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
-              <tr>
-                <td><input type="checkbox"></td>
-                <td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">MCCB 3P 150A</div><div class="sub">LS ABS 103c</div></div></div></td>
-                <td>차단기/전기자재</td>
-                <td class="num">₩35,000</td>
-                <td class="num">20</td>
-                <td><span class="badge badge-good">판매 중</span></td>
-                <td class="num">2025.06.04</td>
-                <td class="num">110</td>
-                <td class="num">2 / 6</td>
-                <td><div class="table-actions"><button class="btn btn-ghost btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>수정</button><button class="btn btn-ghost btn-sm chev-btn">더보기<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button></div></td>
-              </tr>
+          <tbody id="productsTbody">
           </tbody>
         </table>
         </div>
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:18px;flex-wrap:wrap;gap:12px;">
-          <span style="font-size:.82rem;color:var(--text-tertiary);">총 128개 상품</span>
-          <div class="pagination">
-            <button disabled>‹</button>
-            <button class="active">1</button><button>2</button><button>3</button><button>4</button><button>5</button>
-            <span class="ellipsis">…</span><button>16</button>
-            <button>›</button>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--text-tertiary);">
-            보기 <select style="border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-family:inherit;"><option>10개</option><option>30개</option><option>50개</option></select>
-          </div>
+          <span style="font-size:.82rem;color:var(--text-tertiary);" id="totalCountText">총 0개 상품</span>
         </div>
       </div>
 
     </div>
     </div>
+</div>
+
+<div id="productModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,17,32,.5);z-index:100;align-items:center;justify-content:center;padding:20px;">
+  <div class="admin-card" style="width:100%;max-width:560px;max-height:88vh;overflow-y:auto;">
+    <div class="admin-card-head"><h2 id="productModalTitle">상품 등록</h2><button class="icon-btn" id="productModalClose" aria-label="닫기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <form id="productForm">
+      <input type="hidden" id="pf-id">
+      <div class="form-grid">
+        <div class="field full"><label>상품명 <span class="req">*</span></label><input type="text" id="pf-title" required></div>
+        <div class="field"><label>모델명</label><input type="text" id="pf-model"></div>
+        <div class="field"><label>제조사</label><input type="text" id="pf-manufacturer"></div>
+        <div class="field"><label>카테고리</label><select id="pf-category"></select></div>
+        <div class="field"><label>거래 구분</label><select id="pf-market"><option value="new">신품</option><option value="used">중고</option></select></div>
+        <div class="field"><label>판매가 <span class="req">*</span></label><input type="number" id="pf-price" min="0" required></div>
+        <div class="field"><label>재고수량 <span class="req">*</span></label><input type="number" id="pf-stock" min="0" value="1" required></div>
+        <div class="field full"><label>상품 설명</label><textarea id="pf-desc" rows="3" style="border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.9rem;font-family:inherit;width:100%;"></textarea></div>
+      </div>
+      <div class="form-actions">
+        <span></span>
+        <div class="right-group">
+          <button type="button" class="btn btn-ghost" id="productModalCancel">취소</button>
+          <button type="submit" class="btn btn-primary btn-wide" id="productSubmitBtn">등록하기</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 <script>
   var sidebarToggle = document.getElementById('sidebarToggle');
@@ -242,5 +163,179 @@
   });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seller-common.js"></script>
+<script>
+var PF = { companyId: null, userId: null, categories: [], products: [], activeStatus: 'all' };
+
+function productRowHtml(p) {
+  var cat = PF.categories.find(function (c) { return c.id === p.category_id; });
+  return '<tr>' +
+    '<td><input type="checkbox"></td>' +
+    '<td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">' + SC.esc(p.title) + '</div><div class="sub">' + SC.esc(p.model_no || p.manufacturer || '') + '</div></div></div></td>' +
+    '<td>' + SC.esc(cat ? cat.name : '-') + '</td>' +
+    '<td class="num">' + SC.won(p.price) + '</td>' +
+    '<td class="num">' + p.stock + '</td>' +
+    '<td><span class="badge ' + SC.badgeCls(p.status) + '">' + SC.label(p.status) + '</span></td>' +
+    '<td class="num">' + SC.dt(p.created_at) + '</td>' +
+    '<td class="num">' + p.view_count + '</td>' +
+    '<td class="num">' + p.inquiry_count + ' / ' + p.like_count + '</td>' +
+    '<td><div class="table-actions">' +
+      '<button class="btn btn-ghost btn-sm" onclick="openProductEdit(\'' + p.id + '\')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>수정</button>' +
+      (p.status === 'selling' ? '<button class="btn btn-ghost btn-sm" onclick="toggleProductStatus(\'' + p.id + '\',\'stopped\')">중지</button>' : (p.status === 'stopped' ? '<button class="btn btn-ghost btn-sm" onclick="toggleProductStatus(\'' + p.id + '\',\'selling\')">재개</button>' : '')) +
+      (p.status !== 'deleted' ? '<button class="btn btn-ghost btn-sm" style="color:var(--up);" onclick="deleteProduct(\'' + p.id + '\')">삭제</button>' : '') +
+    '</div></td></tr>';
+}
+
+function renderProducts() {
+  var q = document.getElementById('searchInput').value.trim().toLowerCase();
+  var cat = document.getElementById('categoryFilter').value;
+  var days = Number(document.getElementById('dateFilter').value);
+  var list = PF.products.filter(function (p) {
+    if (PF.activeStatus !== 'all' && p.status !== PF.activeStatus) return false;
+    if (cat && String(p.category_id) !== cat) return false;
+    if (days) {
+      var cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+      if (new Date(p.created_at) < cutoff) return false;
+    }
+    if (q && (p.title + ' ' + (p.model_no || '') + ' ' + (p.manufacturer || '')).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+  document.getElementById('productsTbody').innerHTML = list.map(productRowHtml).join('') ||
+    '<tr><td colspan="10" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">등록된 상품이 없습니다.</td></tr>';
+  document.getElementById('totalCountText').textContent = '총 ' + list.length + '개 상품';
+
+  ['all', 'selling', 'stopped', 'soldout', 'deleted'].forEach(function (s) {
+    var n = s === 'all' ? PF.products.length : PF.products.filter(function (p) { return p.status === s; }).length;
+    document.getElementById('cnt-' + s).textContent = n;
+  });
+}
+
+async function loadProducts() {
+  var res = await sb.from('products').select('*').eq('company_id', PF.companyId).order('created_at', { ascending: false });
+  PF.products = res.data || [];
+  renderProducts();
+}
+
+window.toggleProductStatus = async function (id, newStatus) {
+  await sb.from('products').update({ status: newStatus }).eq('id', id);
+  await loadProducts();
+};
+window.deleteProduct = async function (id) {
+  if (!confirm('이 상품을 삭제하시겠습니까?')) return;
+  await sb.from('products').update({ status: 'deleted' }).eq('id', id);
+  await loadProducts();
+};
+
+function openProductModal() {
+  document.getElementById('productModalOverlay').style.display = 'flex';
+}
+function closeProductModal() {
+  document.getElementById('productModalOverlay').style.display = 'none';
+  document.getElementById('productForm').reset();
+  document.getElementById('pf-id').value = '';
+}
+window.openProductEdit = function (id) {
+  var p = PF.products.find(function (x) { return x.id === id; });
+  if (!p) return;
+  document.getElementById('productModalTitle').textContent = '상품 수정';
+  document.getElementById('productSubmitBtn').textContent = '수정하기';
+  document.getElementById('pf-id').value = p.id;
+  document.getElementById('pf-title').value = p.title;
+  document.getElementById('pf-model').value = p.model_no || '';
+  document.getElementById('pf-manufacturer').value = p.manufacturer || '';
+  document.getElementById('pf-category').value = p.category_id || '';
+  document.getElementById('pf-market').value = p.market_type;
+  document.getElementById('pf-price').value = p.price;
+  document.getElementById('pf-stock').value = p.stock;
+  document.getElementById('pf-desc').value = p.description || '';
+  openProductModal();
+};
+
+document.getElementById('newProductBtn').addEventListener('click', function () {
+  document.getElementById('productModalTitle').textContent = '상품 등록';
+  document.getElementById('productSubmitBtn').textContent = '등록하기';
+  openProductModal();
+});
+document.getElementById('productModalClose').addEventListener('click', closeProductModal);
+document.getElementById('productModalCancel').addEventListener('click', closeProductModal);
+document.getElementById('productModalOverlay').addEventListener('click', function (e) {
+  if (e.target === this) closeProductModal();
+});
+
+document.getElementById('productForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var id = document.getElementById('pf-id').value;
+  var payload = {
+    title: document.getElementById('pf-title').value.trim(),
+    model_no: document.getElementById('pf-model').value.trim() || null,
+    manufacturer: document.getElementById('pf-manufacturer').value.trim() || null,
+    category_id: document.getElementById('pf-category').value || null,
+    market_type: document.getElementById('pf-market').value,
+    price: Number(document.getElementById('pf-price').value),
+    stock: Number(document.getElementById('pf-stock').value),
+    description: document.getElementById('pf-desc').value.trim()
+  };
+  if (id) {
+    await sb.from('products').update(payload).eq('id', id);
+  } else {
+    payload.seller_profile_id = PF.userId;
+    payload.company_id = PF.companyId;
+    payload.status = 'selling';
+    await sb.from('products').insert(payload);
+  }
+  closeProductModal();
+  await loadProducts();
+});
+
+document.getElementById('productTabs').addEventListener('click', function (e) {
+  var btn = e.target.closest('button[data-status]');
+  if (!btn) return;
+  document.querySelectorAll('#productTabs button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  PF.activeStatus = btn.getAttribute('data-status');
+  renderProducts();
+});
+['searchInput', 'categoryFilter', 'dateFilter'].forEach(function (id) {
+  document.getElementById(id).addEventListener('input', renderProducts);
+  document.getElementById(id).addEventListener('change', renderProducts);
+});
+document.getElementById('statusFilter').addEventListener('change', function () {
+  var v = this.value || 'all';
+  PF.activeStatus = v;
+  document.querySelectorAll('#productTabs button').forEach(function (b) {
+    b.classList.toggle('active', b.getAttribute('data-status') === v);
+  });
+  renderProducts();
+});
+document.getElementById('resetFilterBtn').addEventListener('click', function () {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('categoryFilter').value = '';
+  document.getElementById('statusFilter').value = '';
+  document.getElementById('dateFilter').value = '0';
+  PF.activeStatus = 'all';
+  document.querySelectorAll('#productTabs button').forEach(function (b) {
+    b.classList.toggle('active', b.getAttribute('data-status') === 'all');
+  });
+  renderProducts();
+});
+
+SC.ready(async function (user) {
+  PF.companyId = user.company.id;
+  PF.userId = user.id;
+  var catRes = await sb.from('categories').select('*').order('sort_order');
+  PF.categories = catRes.data || [];
+  var catSelectHtml = PF.categories.map(function (c) { return '<option value="' + c.id + '">' + SC.esc(c.name) + '</option>'; }).join('');
+  document.getElementById('categoryFilter').innerHTML = '<option value="">전체 카테고리</option>' + catSelectHtml;
+  document.getElementById('pf-category').innerHTML = catSelectHtml;
+  await loadProducts();
+
+  if (new URLSearchParams(location.search).get('new') === '1') {
+    document.getElementById('newProductBtn').click();
+  }
+});
+</script>
 </body>
 </html>

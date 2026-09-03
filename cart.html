@@ -199,14 +199,14 @@
     <!-- MAIN -->
     <div>
       <div class="cart-header-row">
-        <h1>장바구니 (<span>3</span>)</h1>
+        <h1>장바구니 (<span id="cartCount">0</span>)</h1>
       </div>
 
       <div class="select-all-row">
-        <label><input type="checkbox" checked id="selectAll">전체 선택 (3/3)</label>
+        <label><input type="checkbox" id="selectAll"><span id="selectAllLabel">전체 선택 (0/0)</span></label>
         <div class="cart-tools">
-          <button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>선택 삭제</button>
-          <button><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14H6L5 6"/></svg>장바구니 비우기</button>
+          <button id="deleteSelectedBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>선택 삭제</button>
+          <button id="clearCartBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14H6L5 6"/></svg>장바구니 비우기</button>
         </div>
       </div>
 
@@ -214,64 +214,22 @@
         <span>상품정보</span><span style="text-align:right;">단가</span><span style="text-align:center;">수량</span><span style="text-align:right;">합계</span><span style="text-align:right;">배송비</span>
       </div>
 
-      <div class="cart-row">
-        <div class="cart-item-info">
-          <input type="checkbox" checked>
-          <span class="cart-thumb"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></span>
-          <div>
-            <div class="ci-brand">LS ELECTRIC</div>
-            <div class="ci-name">XGB Series PLC CPU 모듈</div>
-            <div class="ci-spec">XGB-CPUH</div>
-            <div class="ci-stock">재고 15개</div>
-          </div>
-        </div>
-        <div class="cart-unit-price">₩420,000</div>
-        <div class="qty-col">
-          <div class="qty-stepper"><button aria-label="감소">−</button><input type="text" class="tabular" value="1"><button aria-label="증가">+</button></div>
-          <button class="qty-edit-link">수량변경</button>
-        </div>
-        <div class="cart-sum-price">₩420,000</div>
-        <div class="cart-ship-col"><span class="ship-tag">무료배송</span><button class="cart-remove" aria-label="삭제"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <div id="cartRows">
+        <p style="padding:60px 0;color:var(--text-tertiary);text-align:center;">불러오는 중...</p>
       </div>
 
-      <div class="cart-row">
-        <div class="cart-item-info">
-          <input type="checkbox" checked>
-          <span class="cart-thumb"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="8" rx="2"/><path d="M16 12h4l2 2v3h-6z"/><circle cx="9" cy="19" r="1.4"/><circle cx="18" cy="19" r="1.4"/></svg></span>
-          <div>
-            <div class="ci-brand">Autonics</div>
-            <div class="ci-name">근접센서 PR30-15AO</div>
-            <div class="ci-spec">M30 / AC 2선식 / 비실드형</div>
-            <div class="ci-stock">재고 42개</div>
-          </div>
+      <div id="addressForm" class="form-card" style="display:none;">
+        <p class="form-card-title">배송지 정보를 입력해주세요</p>
+        <div class="form-grid">
+          <div class="field"><label>받는 분 <span class="req">*</span></label><input type="text" id="addrRecipient" placeholder="수령인 성함"></div>
+          <div class="field"><label>연락처 <span class="req">*</span></label><input type="tel" id="addrPhone" placeholder="010-0000-0000"></div>
+          <div class="field full"><label>주소 <span class="req">*</span></label><input type="text" id="addrLine1" placeholder="도로명 주소"></div>
+          <div class="field full"><label>상세주소</label><input type="text" id="addrLine2" placeholder="상세주소 (선택)"></div>
         </div>
-        <div class="cart-unit-price">₩18,000</div>
-        <div class="qty-col">
-          <div class="qty-stepper"><button aria-label="감소">−</button><input type="text" class="tabular" value="2"><button aria-label="증가">+</button></div>
-          <button class="qty-edit-link">수량변경</button>
+        <div class="form-actions">
+          <button class="btn btn-ghost" id="addressCancelBtn">취소</button>
+          <button class="btn btn-primary" id="addressConfirmBtn">이 배송지로 주문하기</button>
         </div>
-        <div class="cart-sum-price">₩36,000</div>
-        <div class="cart-ship-col"><span class="ship-tag paid">₩3,000</span><button class="cart-remove" aria-label="삭제"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-      </div>
-
-      <div class="cart-row">
-        <div class="cart-item-info">
-          <input type="checkbox" checked>
-          <span class="cart-thumb"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></span>
-          <div>
-            <div class="ci-brand">SMC</div>
-            <div class="ci-name">에어 필터 레귤레이터 AW40-04D</div>
-            <div class="ci-spec">1/2" / AC40 / 드레인 콕 포함</div>
-            <div class="ci-stock">재고 8개</div>
-          </div>
-        </div>
-        <div class="cart-unit-price">₩36,000</div>
-        <div class="qty-col">
-          <div class="qty-stepper"><button aria-label="감소">−</button><input type="text" class="tabular" value="1"><button aria-label="증가">+</button></div>
-          <button class="qty-edit-link">수량변경</button>
-        </div>
-        <div class="cart-sum-price">₩36,000</div>
-        <div class="cart-ship-col"><span class="ship-tag">무료배송</span><button class="cart-remove" aria-label="삭제"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
       </div>
 
       <section class="together-strip">
@@ -335,15 +293,15 @@
     <aside class="page-aside">
       <div class="summary-card">
         <p class="summary-title">주문 요약</p>
-        <div class="summary-row"><span>상품금액 (3개)</span><b class="tabular">₩492,000</b></div>
-        <div class="summary-row"><span>배송비</span><b class="tabular">₩3,000</b></div>
+        <div class="summary-row"><span>상품금액 (<span id="summaryItemCount">0</span>개)</span><b class="tabular" id="summarySubtotal">₩0</b></div>
+        <div class="summary-row"><span>배송비</span><b class="tabular" id="summaryShipping">₩0</b></div>
         <div class="summary-row"><span>할인금액</span><b class="tabular" style="color:var(--up);">− ₩0</b></div>
         <div class="summary-total">
           <span>총 결제 예상금액</span>
-          <div class="amt-row"><span class="amt tabular">₩495,000</span><small>(VAT 별도)</small></div>
+          <div class="amt-row"><span class="amt tabular" id="summaryTotal">₩0</span><small>(VAT 별도)</small></div>
         </div>
         <div class="summary-actions">
-          <button class="btn btn-primary btn-lg">주문하기</button>
+          <button class="btn btn-primary btn-lg" id="checkoutBtn">주문하기</button>
           <a href="rfq-new.html" class="btn btn-outline">견적요청하기</a>
           <a href="goods.html" class="btn btn-ghost">쇼핑 계속하기</a>
         </div>
@@ -380,17 +338,262 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  var PLACEHOLDER_SVG = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>';
+  var FREE_SHIP_THRESHOLD = 50000;
+  var FLAT_SHIP_FEE = 3000;
 
-  document.querySelectorAll('.qty-stepper').forEach(function(stepper){
-    var input = stepper.querySelector('input');
-    var buttons = stepper.querySelectorAll('button');
-    buttons[0].addEventListener('click', function(){ input.value = Math.max(1, parseInt(input.value||1,10)-1); });
-    buttons[1].addEventListener('click', function(){ input.value = parseInt(input.value||1,10)+1; });
+  var user = null;
+  var items = []; // { id, qty, selected, product:{...} }
+
+  function fmtWon(n){ return '₩' + Number(n||0).toLocaleString('ko-KR'); }
+  function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+  async function loadCart(){
+    var res = await sb.from('cart_items')
+      .select('id,qty,selected,product:products(id,title,model_no,manufacturer,price,stock,status,product_images(url,sort_order))')
+      .eq('profile_id', user.id)
+      .order('created_at', { ascending: false });
+    if (res.error) { console.error(res.error); items = []; }
+    else { items = (res.data || []).filter(function(r){ return r.product; }); }
+    // Defensive clamp: qty should never exceed current stock (e.g. stock dropped after item was added)
+    var fixes = [];
+    items.forEach(function(i){
+      if (i.product.stock > 0 && i.qty > i.product.stock) { i.qty = i.product.stock; fixes.push(sb.from('cart_items').update({ qty: i.qty }).eq('id', i.id)); }
+    });
+    if (fixes.length) await Promise.all(fixes);
+    renderRows();
+    renderSummary();
+    updateHeaderBadge();
+  }
+
+  function rowHTML(item){
+    var p = item.product;
+    var img = p.product_images && p.product_images.length ? p.product_images[0].url : null;
+    var thumb = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : PLACEHOLDER_SVG;
+    var lineTotal = p.price * item.qty;
+    var soldOut = p.status === 'soldout' || p.stock <= 0;
+    return ''
+      + '<div class="cart-row" data-row-id="'+item.id+'">'
+      +   '<div class="cart-item-info">'
+      +     '<input type="checkbox" class="row-check"'+(item.selected ? ' checked' : '')+(soldOut ? ' disabled' : '')+'>'
+      +     '<span class="cart-thumb">'+thumb+'</span>'
+      +     '<div>'
+      +       '<div class="ci-brand">'+escapeHtml(p.manufacturer||'')+'</div>'
+      +       '<a class="ci-name" href="product-detail.html?id='+p.id+'" style="color:inherit;">'+escapeHtml(p.title)+'</a>'
+      +       '<div class="ci-spec">'+escapeHtml(p.model_no||'')+'</div>'
+      +       '<div class="ci-stock">'+(soldOut ? '<span style="color:var(--up);">품절된 상품입니다</span>' : '재고 '+p.stock+'개')+'</div>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="cart-unit-price">'+fmtWon(p.price)+'</div>'
+      +   '<div class="qty-col">'
+      +     '<div class="qty-stepper">'
+      +       '<button class="qty-minus" aria-label="감소"'+(soldOut?' disabled':'')+'>−</button>'
+      +       '<input type="text" class="tabular qty-input" value="'+item.qty+'"'+(soldOut?' disabled':'')+'>'
+      +       '<button class="qty-plus" aria-label="증가"'+(soldOut?' disabled':'')+'>+</button>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="cart-sum-price">'+fmtWon(lineTotal)+'</div>'
+      +   '<div class="cart-ship-col"><span class="ship-tag">무료배송</span><button class="cart-remove" aria-label="삭제"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>'
+      + '</div>';
+  }
+
+  function renderRows(){
+    var wrap = document.getElementById('cartRows');
+    if (!items.length) {
+      wrap.innerHTML = '<p style="padding:60px 0;color:var(--text-tertiary);text-align:center;">장바구니가 비어 있습니다.<br><a href="goods.html" style="color:var(--accent);font-weight:700;">쇼핑 계속하기 ›</a></p>';
+      return;
+    }
+    wrap.innerHTML = items.map(rowHTML).join('');
+  }
+
+  function computeShipping(subtotal, count){ return count === 0 ? 0 : (subtotal >= FREE_SHIP_THRESHOLD ? 0 : FLAT_SHIP_FEE); }
+
+  function renderSummary(){
+    document.getElementById('cartCount').textContent = items.length;
+    var selectedItems = items.filter(function(i){ return i.selected; });
+    var checkedCount = selectedItems.length;
+    document.getElementById('selectAllLabel').textContent = '전체 선택 (' + checkedCount + '/' + items.length + ')';
+    document.getElementById('selectAll').checked = items.length > 0 && checkedCount === items.length;
+
+    var subtotal = selectedItems.reduce(function(sum, i){ return sum + i.product.price * i.qty; }, 0);
+    var shipping = computeShipping(subtotal, selectedItems.length);
+    var total = subtotal + shipping;
+
+    document.getElementById('summaryItemCount').textContent = checkedCount;
+    document.getElementById('summarySubtotal').textContent = fmtWon(subtotal);
+    document.getElementById('summaryShipping').textContent = fmtWon(shipping);
+    document.getElementById('summaryTotal').textContent = fmtWon(total);
+  }
+
+  function updateHeaderBadge(){
+    var badge = document.querySelector('a[aria-label="장바구니"] .icon-count');
+    if (badge) badge.textContent = items.length;
+  }
+
+  function findItem(rowId){ return items.find(function(i){ return String(i.id) === String(rowId); }); }
+
+  document.getElementById('cartRows').addEventListener('click', async function(e){
+    var row = e.target.closest('.cart-row'); if (!row) return;
+    var rowId = row.dataset.rowId;
+    var item = findItem(rowId); if (!item) return;
+
+    if (e.target.closest('.qty-minus') || e.target.closest('.qty-plus')) {
+      var delta = e.target.closest('.qty-minus') ? -1 : 1;
+      var next = Math.min(item.product.stock, Math.max(1, item.qty + delta));
+      if (next === item.qty) return;
+      item.qty = next;
+      row.querySelector('.qty-input').value = next;
+      row.querySelector('.cart-sum-price').textContent = fmtWon(item.product.price * next);
+      renderSummary();
+      await sb.from('cart_items').update({ qty: next }).eq('id', item.id);
+      return;
+    }
+
+    if (e.target.closest('.cart-remove')) {
+      await sb.from('cart_items').delete().eq('id', item.id);
+      items = items.filter(function(i){ return i.id !== item.id; });
+      renderRows();
+      renderSummary();
+      updateHeaderBadge();
+      return;
+    }
   });
 
-  document.getElementById('selectAll').addEventListener('change', function(){
-    document.querySelectorAll('.cart-item-info input[type="checkbox"]').forEach(function(cb){ cb.checked = this.checked; }.bind(this));
+  document.getElementById('cartRows').addEventListener('change', async function(e){
+    var cb = e.target.closest('.row-check');
+    if (cb) {
+      var row = e.target.closest('.cart-row');
+      var item = findItem(row.dataset.rowId); if (!item) return;
+      item.selected = cb.checked;
+      renderSummary();
+      await sb.from('cart_items').update({ selected: cb.checked }).eq('id', item.id);
+      return;
+    }
+    var qtyInput = e.target.closest('.qty-input');
+    if (qtyInput) {
+      var row2 = e.target.closest('.cart-row');
+      var item2 = findItem(row2.dataset.rowId); if (!item2) return;
+      var v = parseInt(qtyInput.value, 10);
+      if (isNaN(v) || v < 1) v = 1;
+      if (v > item2.product.stock) v = item2.product.stock;
+      item2.qty = v;
+      qtyInput.value = v;
+      row2.querySelector('.cart-sum-price').textContent = fmtWon(item2.product.price * v);
+      renderSummary();
+      await sb.from('cart_items').update({ qty: v }).eq('id', item2.id);
+    }
   });
+
+  document.getElementById('selectAll').addEventListener('change', async function(){
+    var checked = this.checked;
+    if (!items.length) return;
+    items.forEach(function(i){ i.selected = checked; });
+    document.querySelectorAll('.row-check').forEach(function(cb){ cb.checked = checked; });
+    renderSummary();
+    var ids = items.map(function(i){ return i.id; });
+    await sb.from('cart_items').update({ selected: checked }).in('id', ids);
+  });
+
+  document.getElementById('deleteSelectedBtn').addEventListener('click', async function(){
+    var toRemove = items.filter(function(i){ return i.selected; });
+    if (!toRemove.length) return;
+    if (!confirm('선택한 '+toRemove.length+'개 상품을 삭제하시겠습니까?')) return;
+    var ids = toRemove.map(function(i){ return i.id; });
+    await sb.from('cart_items').delete().in('id', ids);
+    items = items.filter(function(i){ return i.selected !== true; });
+    renderRows();
+    renderSummary();
+    updateHeaderBadge();
+  });
+
+  document.getElementById('clearCartBtn').addEventListener('click', async function(){
+    if (!items.length) return;
+    if (!confirm('장바구니를 모두 비우시겠습니까?')) return;
+    await sb.from('cart_items').delete().eq('profile_id', user.id);
+    items = [];
+    renderRows();
+    renderSummary();
+    updateHeaderBadge();
+  });
+
+  // ---- Checkout ----
+  document.getElementById('checkoutBtn').addEventListener('click', async function(){
+    var selectedItems = items.filter(function(i){ return i.selected; });
+    if (!selectedItems.length) { alert('선택된 상품이 없습니다. 주문할 상품을 선택해주세요.'); return; }
+
+    var addrRes = await sb.from('addresses').select('*').eq('profile_id', user.id)
+      .order('is_default', { ascending: false }).order('created_at', { ascending: true }).limit(1).maybeSingle();
+    var addr = addrRes.data;
+
+    if (addr) {
+      var addrLine = addr.addr1 + (addr.addr2 ? ' ' + addr.addr2 : '');
+      if (!confirm('다음 배송지로 주문하시겠습니까?\n' + addr.recipient + ' / ' + addr.phone + '\n' + addrLine)) return;
+      await doCheckout(addr.recipient, addr.phone, addrLine);
+    } else {
+      document.getElementById('addressForm').style.display = 'block';
+      document.getElementById('addressForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  document.getElementById('addressCancelBtn').addEventListener('click', function(){
+    document.getElementById('addressForm').style.display = 'none';
+  });
+
+  document.getElementById('addressConfirmBtn').addEventListener('click', async function(){
+    var recipient = document.getElementById('addrRecipient').value.trim();
+    var phone = document.getElementById('addrPhone').value.trim();
+    var line1 = document.getElementById('addrLine1').value.trim();
+    var line2 = document.getElementById('addrLine2').value.trim();
+    if (!recipient || !phone || !line1) { alert('받는 분, 연락처, 주소를 모두 입력해주세요.'); return; }
+    await doCheckout(recipient, phone, line1 + (line2 ? ' ' + line2 : ''));
+  });
+
+  async function doCheckout(recipient, phone, address){
+    var btn = document.getElementById('checkoutBtn');
+    btn.disabled = true;
+    btn.textContent = '주문 처리 중...';
+    try {
+      var selectedItems = items.filter(function(i){ return i.selected; });
+      var subtotal = selectedItems.reduce(function(sum, i){ return sum + i.product.price * i.qty; }, 0);
+      var shippingFee = computeShipping(subtotal, selectedItems.length);
+      var res = await sb.rpc('checkout_cart', {
+        p_recipient: recipient, p_phone: phone, p_address: address,
+        p_payment_method: 'card', p_shipping_fee: shippingFee
+      });
+      if (res.error) throw res.error;
+      location.href = 'order.html';
+    } catch (err) {
+      console.error(err);
+      var msg = (err && err.message) || '';
+      if (msg.indexOf('cart is empty') !== -1) {
+        alert('장바구니에 선택된 상품이 없습니다.');
+      } else {
+        alert('주문 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+      btn.disabled = false;
+      btn.textContent = '주문하기';
+    }
+  }
+
+  document.addEventListener('versoi:ready', function(e){
+    user = e.detail.user;
+    if (!user) return; // cart.html is buyer-protected; auth.js already redirects if not logged in
+    var chip = document.querySelector('.user-chip .lbl b');
+    var chipSub = document.querySelector('.user-chip .lbl span');
+    var avatar = document.querySelector('.user-avatar');
+    var displayName = user.company ? user.company.name : (user.profile ? user.profile.name : user.email);
+    if (chip) chip.textContent = displayName;
+    if (chipSub) chipSub.textContent = (user.profile && user.profile.member_type === 'business') ? '구매담당자' : '바이어';
+    if (avatar) avatar.textContent = displayName.charAt(0);
+    loadCart();
+  });
+})();
 </script>
 </body>
 </html>

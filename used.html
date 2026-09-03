@@ -47,6 +47,8 @@
     transition:color .15s ease,transform .15s ease;z-index:1;
   }
   .used-wish:hover{color:var(--up);transform:scale(1.08);}
+  .used-wish.wished{color:var(--up);}
+  .used-wish.wished svg{fill:currentColor;}
   .used-body{padding:12px 13px 13px;display:flex;flex-direction:column;gap:4px;}
   .u-brand{font-family:var(--font-en);font-weight:800;font-size:.72rem;color:var(--text-tertiary);letter-spacing:.02em;}
   .u-name{font-size:.87rem;font-weight:700;line-height:1.35;}
@@ -140,16 +142,7 @@
       <div class="side-panel">
         <p class="side-panel-title">카테고리</p>
         <nav class="side-nav" id="catNav">
-          <a href="#" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>전체보기</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg>FA 자동화</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/><circle cx="18" cy="17" r="3"/><path d="M9 15v3"/></svg>공작기계</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.4"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>모터/감속기</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>유공압</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4 14 11 14 10 22 20 10 13 10 13 2"/></svg>전기전자</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>물류장비</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg>측정/계측</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>용접/절단</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>기타 산업장비</a>
+          <a href="#" class="active" data-cat=""><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>전체보기</a>
         </nav>
       </div>
 
@@ -169,13 +162,13 @@
         </div>
         <div class="filter-group">
           <div class="filter-group-head" style="font-size:.88rem;">상태 등급</div>
-          <div class="filter-body">
-            <label class="check-row"><input type="checkbox" checked> 전체</label>
-            <label class="check-row"><input type="checkbox"> A급 (우수)</label>
-            <label class="check-row"><input type="checkbox"> B급 (양호)</label>
-            <label class="check-row"><input type="checkbox"> C급 (보통)</label>
-            <label class="check-row"><input type="checkbox"> 리퍼비시</label>
-            <label class="check-row"><input type="checkbox"> 유휴재고</label>
+          <div class="filter-body" id="gradeFilterBody">
+            <label class="check-row"><input type="checkbox" checked data-grade=""> 전체</label>
+            <label class="check-row"><input type="checkbox" data-grade="a"> A급 (우수)</label>
+            <label class="check-row"><input type="checkbox" data-grade="b"> B급 (양호)</label>
+            <label class="check-row"><input type="checkbox" data-grade="c"> C급 (보통)</label>
+            <label class="check-row"><input type="checkbox" data-grade="refurb"> 리퍼비시</label>
+            <label class="check-row"><input type="checkbox" data-grade="idle"> 유휴재고</label>
           </div>
         </div>
         <div class="filter-group">
@@ -246,179 +239,14 @@
         <button class="filter-chip">인버터 ✕</button>
       </div>
 
-      <div class="used-grid">
-        <!-- 1 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#1E293F,#0F1830);">
-            <div class="used-badges"><span class="grade-badge grade-a">A급</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">MITSUBISHI</span>
-            <span class="u-name">PLC Q시리즈 Q03UDVCPU</span>
-            <span class="u-meta">2019년 · 사용시간 120h<br>경기 화성</span>
-            <span class="u-price">₩950,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>스마트FA</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>4.9</b> · 거래 127건</span>
-          </div>
-        </article>
-        <!-- 2 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#232A38,#10141C);">
-            <div class="used-badges"><span class="grade-badge grade-b">B급</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3v2.4M12 18.6V21M3 12h2.4M18.6 12H21"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">YASKAWA</span>
-            <span class="u-name">서보모터 SGMAH-08AAA61</span>
-            <span class="u-meta">2018년 · 사용시간 980h<br>충남 천안</span>
-            <span class="u-price">₩450,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>정일기계</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>4.8</b> · 거래 93건</span>
-          </div>
-        </article>
-        <!-- 3 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#25313F,#101A22);">
-            <div class="used-badges"><span class="grade-badge grade-a">A급</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/><circle cx="18" cy="17" r="3"/><path d="M9 15v3"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">DOOSAN</span>
-            <span class="u-name">CNC 선반 Lynx 220</span>
-            <span class="u-meta">2016년 · 사용시간 3,250h<br>경남 창원</span>
-            <span class="u-price">₩18,500,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>MACHZONE</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>4.9</b> · 거래 48건</span>
-          </div>
-        </article>
-        <!-- 4 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#232A38,#10141C);">
-            <div class="used-badges"><span class="grade-badge grade-idle">유휴재고</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/><line x1="8" y1="16" x2="10" y2="16"/><line x1="13" y1="16" x2="16" y2="16"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">LS ELECTRIC</span>
-            <span class="u-name">인버터 SV037iG5A-4</span>
-            <span class="u-meta">미사용 · 2022년<br>서울 금천</span>
-            <span class="u-price">₩230,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>테크솔루션</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>5.0</b> · 거래 32건</span>
-          </div>
-        </article>
-        <!-- 5 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#2B2417,#151009);">
-            <div class="used-badges"><span class="grade-badge grade-c">C급</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#E8D9A6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="8" width="12" height="12" rx="1.5"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">HANSHIN</span>
-            <span class="u-name">스크류 콤프레샤 HGS-20A</span>
-            <span class="u-meta">2013년 · 사용시간 7,650h<br>경기 평택</span>
-            <span class="u-price">₩2,200,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>한신기계</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>4.7</b> · 거래 76건</span>
-          </div>
-        </article>
-        <!-- 6 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#2B2417,#151009);">
-            <div class="used-badges"><span class="grade-badge grade-refurb">리퍼비시</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#E8D9A6" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="16" width="8" height="4" rx="1"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="7" y1="10" x2="16" y2="7"/><circle cx="7" cy="10" r="1.4"/><line x1="16" y1="7" x2="16" y2="4"/><circle cx="16" cy="7" r="1.2"/><path d="M16 4l4.5 2.5"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">FANUC</span>
-            <span class="u-name">로봇 M-20iA</span>
-            <span class="u-meta">리퍼비시 · 2017년<br>경기 안산</span>
-            <span class="u-price">₩7,800,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>로봇마스터</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>4.9</b> · 거래 58건</span>
-          </div>
-        </article>
-        <!-- 7 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#232A38,#10141C);">
-            <div class="used-badges"><span class="grade-badge grade-b">B급</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="5.2" r="1"/><circle cx="12" cy="18.8" r="1"/><circle cx="5.2" cy="12" r="1"/><circle cx="18.8" cy="12" r="1"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">SKF</span>
-            <span class="u-name">베어링 6312-2Z/C3</span>
-            <span class="u-meta">2021년 · 사용시간 0h<br>대구 달성</span>
-            <span class="u-price">₩15,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>베어링월드</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>4.8</b> · 거래 211건</span>
-          </div>
-        </article>
-        <!-- 8 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#25313F,#101A22);">
-            <div class="used-badges"><span class="grade-badge grade-a">A급</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="14" height="10" rx="1.5"/><circle cx="18" cy="17" r="3"/><path d="M9 16v3"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">HWACHEON</span>
-            <span class="u-name">머시닝센터 VESTA 1000+</span>
-            <span class="u-meta">2017년 · 사용시간 2,180h<br>경기 시흥</span>
-            <span class="u-price">₩27,000,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>하나머신</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>4.9</b> · 거래 39건</span>
-          </div>
-        </article>
-        <!-- 9 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#232A38,#10141C);">
-            <div class="used-badges"><span class="grade-badge grade-idle">유휴재고</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="1.5"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">WEINTEK</span>
-            <span class="u-name">터치패널 MT8071iE</span>
-            <span class="u-meta">미사용 · 2023년<br>부산 강서</span>
-            <span class="u-price">₩120,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>맨디테크</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>4.9</b> · 거래 14건</span>
-          </div>
-        </article>
-        <!-- 10 -->
-        <article class="used-card">
-          <div class="used-media" style="background:linear-gradient(150deg,#1E293F,#0F1830);">
-            <div class="used-badges"><span class="grade-badge grade-b">B급</span></div>
-            <button class="used-wish" aria-label="찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.4"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>
-          </div>
-          <div class="used-body">
-            <span class="u-brand">SUMITOMO</span>
-            <span class="u-name">감속기 CHHM-6175DA-29</span>
-            <span class="u-meta">2015년 · 사용시간 1,120h<br>경기 김포</span>
-            <span class="u-price">₩380,000</span>
-            <span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>동진기계</span>
-            <span class="u-rating"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg><b>4.6</b> · 거래 61건</span>
-          </div>
-        </article>
+      <div class="used-grid" id="usedGrid">
+        <p style="padding:60px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">불러오는 중...</p>
       </div>
 
       <nav class="pagination" aria-label="페이지 이동">
         <button disabled aria-label="이전"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
         <button class="active">1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>4</button>
-        <button>5</button>
-        <span class="ellipsis">…</span>
-        <button>536</button>
-        <button aria-label="다음"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <button disabled aria-label="다음"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
       </nav>
     </div>
 
@@ -502,29 +330,147 @@
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
-  document.getElementById('usedSearchForm').addEventListener('submit', function(e){ e.preventDefault(); });
-
   document.querySelectorAll('.filter-group-head').forEach(function(head){
     if(head.closest('.filter-panel')){
       head.addEventListener('click', function(){ head.parentElement.classList.toggle('collapsed'); });
     }
   });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function(){
+  var BG_GRADS = ['linear-gradient(150deg,#1E293F,#0F1830)','linear-gradient(150deg,#25313F,#101A22)','linear-gradient(150deg,#2B2417,#151009)','linear-gradient(150deg,#232A38,#10141C)'];
+  var PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/><line x1="4" y1="9" x2="20" y2="9"/></svg>';
+  var GRADE_LABEL = { a:'A급', b:'B급', c:'C급', refurb:'리퍼비시', idle:'유휴재고', new:'신품' };
+  var GRADE_CLASS = { a:'grade-a', b:'grade-b', c:'grade-c', refurb:'grade-refurb', idle:'grade-idle', new:'grade-a' };
 
-  document.querySelectorAll('#catNav a').forEach(function(a){
-    a.addEventListener('click', function(e){
+  var state = { category: '', q: '', grades: new Set() };
+  var favSet = new Set();
+
+  function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function gradFor(id){ var sum = 0; String(id).split('').forEach(function(c){ sum += c.charCodeAt(0); }); return BG_GRADS[sum % BG_GRADS.length]; }
+  function fmtDate(ts){ if(!ts) return ''; return ts.slice(0,10).replace(/-/g,'.'); }
+
+  async function loadCategories(){
+    var res = await sb.from('categories').select('id,name').order('sort_order');
+    var cats = res.data || [];
+    var icon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
+    var nav = document.getElementById('catNav');
+    nav.innerHTML = '<a href="#" class="active" data-cat="">'+icon+'전체보기</a>' +
+      cats.map(function(c){ return '<a href="#" data-cat="'+c.id+'">'+icon+escapeHtml(c.name)+'</a>'; }).join('');
+    nav.addEventListener('click', function(e){
+      var a = e.target.closest('a'); if (!a) return;
       e.preventDefault();
-      document.querySelectorAll('#catNav a').forEach(function(x){ x.classList.remove('active'); });
+      state.category = a.dataset.cat || '';
+      nav.querySelectorAll('a').forEach(function(x){ x.classList.remove('active'); });
       a.classList.add('active');
+      render();
     });
+  }
+
+  function cardHTML(p){
+    var img = p.product_images && p.product_images.length ? p.product_images[0].url : null;
+    var media = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : PLACEHOLDER_SVG;
+    var gClass = GRADE_CLASS[p.condition] || 'grade-b';
+    var gLabel = GRADE_LABEL[p.condition] || p.condition;
+    var metaParts = [];
+    if (p.region) metaParts.push(escapeHtml(p.region));
+    metaParts.push(fmtDate(p.created_at) + ' 등록');
+    var sellerName = p.companies ? p.companies.name : '개인 판매자';
+    return ''
+      + '<article class="used-card">'
+      +   '<div class="used-media" style="background:'+(img ? 'var(--bg-soft)' : gradFor(p.id))+';">'
+      +     '<div class="used-badges"><span class="grade-badge '+gClass+'">'+escapeHtml(gLabel)+'</span></div>'
+      +     '<button class="used-wish'+(favSet.has(p.id) ? ' wished' : '')+'" aria-label="찜하기" data-id="'+p.id+'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'
+      +     media
+      +   '</div>'
+      +   '<div class="used-body">'
+      +     '<span class="u-brand">'+escapeHtml(p.manufacturer||'')+'</span>'
+      +     '<a href="product-detail.html?id='+p.id+'" class="u-name" style="color:inherit;">'+escapeHtml(p.title)+'</a>'
+      +     '<span class="u-meta">'+metaParts.join(' · ')+'</span>'
+      +     '<span class="u-price">'+'₩'+Number(p.price).toLocaleString('ko-KR')+'</span>'
+      +     '<span class="u-seller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>'+escapeHtml(sellerName)+'</span>'
+      +   '</div>'
+      + '</article>';
+  }
+
+  async function fetchProducts(){
+    var q = sb.from('products')
+      .select('id,title,model_no,manufacturer,price,stock,condition,category_id,region,created_at,companies(name),product_images(url,sort_order)')
+      .eq('market_type','used').neq('status','deleted')
+      .order('sort_order', { foreignTable: 'product_images', ascending: true })
+      .order('created_at', { ascending: false });
+    if (state.category) q = q.eq('category_id', state.category);
+    if (state.q) q = q.ilike('title', '%'+state.q+'%');
+    if (state.grades.size) q = q.in('condition', Array.from(state.grades));
+    var res = await q;
+    if (res.error) { console.error(res.error); return []; }
+    return res.data || [];
+  }
+
+  async function render(){
+    var grid = document.getElementById('usedGrid');
+    grid.innerHTML = '<p style="padding:60px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">불러오는 중...</p>';
+    var rows = await fetchProducts();
+    if (!rows.length) { grid.innerHTML = '<p style="padding:60px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">조건에 맞는 상품이 없습니다.</p>'; return; }
+    grid.innerHTML = rows.map(cardHTML).join('');
+  }
+
+  async function toggleFavorite(productId, btn){
+    if (!window.VERSOI.requireAuth()) return;
+    var uid = window.VERSOI.user.id;
+    btn.disabled = true;
+    try {
+      if (favSet.has(productId)) {
+        await sb.from('favorites').delete().eq('profile_id', uid).eq('product_id', productId);
+        favSet.delete(productId);
+        btn.classList.remove('wished');
+      } else {
+        await sb.from('favorites').insert({ profile_id: uid, product_id: productId });
+        favSet.add(productId);
+        btn.classList.add('wished');
+      }
+    } catch (err) { console.error(err); }
+    btn.disabled = false;
+  }
+
+  document.getElementById('usedGrid').addEventListener('click', function(e){
+    var wishBtn = e.target.closest('.used-wish');
+    if (wishBtn) { toggleFavorite(wishBtn.dataset.id, wishBtn); return; }
   });
 
-  document.querySelectorAll('.pagination button:not([disabled])').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      if(btn.classList.contains('active')) return;
-      document.querySelectorAll('.pagination button').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-    });
+  document.getElementById('usedSearchForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    state.q = e.target.querySelector('input[type="text"]').value.trim();
+    render();
   });
+
+  document.getElementById('gradeFilterBody').addEventListener('change', function(e){
+    var cb = e.target.closest('input[type="checkbox"]'); if (!cb) return;
+    var grade = cb.dataset.grade;
+    var all = document.querySelector('#gradeFilterBody input[data-grade=""]');
+    if (grade === '') {
+      if (cb.checked) { state.grades.clear(); document.querySelectorAll('#gradeFilterBody input[data-grade]:not([data-grade=""])').forEach(function(x){ x.checked = false; }); }
+    } else {
+      if (cb.checked) { state.grades.add(grade); all.checked = false; }
+      else { state.grades.delete(grade); }
+      if (!state.grades.size) all.checked = true;
+    }
+    render();
+  });
+
+  document.addEventListener('versoi:ready', async function(e){
+    var user = e.detail.user;
+    if (user) {
+      var favRes = await sb.from('favorites').select('product_id').eq('profile_id', user.id);
+      (favRes.data || []).forEach(function(f){ favSet.add(f.product_id); });
+    }
+    await loadCategories();
+    await render();
+  });
+})();
 </script>
 </body>
 </html>

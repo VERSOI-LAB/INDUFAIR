@@ -106,104 +106,7 @@
           <div class="data-table-scroll">
           <table class="data-table">
             <thead><tr><th>정산번호</th><th class="num">정산 기간</th><th class="num">주문 건수</th><th class="num">판매액</th><th class="num">수수료</th><th class="num">배송비 정산</th><th class="num">정산액</th><th>정산 상태</th><th class="num">지급 예정일</th><th class="num">지급일</th></tr></thead>
-            <tbody>
-              <tr>
-                <td class="cell-strong num">SET250601-0008</td>
-                <td class="num">2025.05.19 ~ 2025.06.01</td>
-                <td class="num">28건</td>
-                <td class="num">₩18,560,000</td>
-                <td class="num" style="color:var(--up);">-₩1,856,000 (10%)</td>
-                <td class="num">₩320,000</td>
-                <td class="num cell-strong">₩17,024,000</td>
-                <td><span class="badge badge-good">정산 완료</span></td>
-                <td class="num">2025.06.05</td>
-                <td class="num">2025.06.05</td>
-              </tr>
-              <tr>
-                <td class="cell-strong num">SET250601-0007</td>
-                <td class="num">2025.05.05 ~ 2025.05.18</td>
-                <td class="num">24건</td>
-                <td class="num">₩15,280,000</td>
-                <td class="num" style="color:var(--up);">-₩1,528,000 (10%)</td>
-                <td class="num">₩280,000</td>
-                <td class="num cell-strong">₩14,032,000</td>
-                <td><span class="badge badge-good">정산 완료</span></td>
-                <td class="num">2025.05.22</td>
-                <td class="num">2025.05.22</td>
-              </tr>
-              <tr>
-                <td class="cell-strong num">SET250501-0006</td>
-                <td class="num">2025.04.21 ~ 2025.05.04</td>
-                <td class="num">22건</td>
-                <td class="num">₩13,450,000</td>
-                <td class="num" style="color:var(--up);">-₩1,345,000 (10%)</td>
-                <td class="num">₩250,000</td>
-                <td class="num cell-strong">₩12,355,000</td>
-                <td><span class="badge badge-good">정산 완료</span></td>
-                <td class="num">2025.05.08</td>
-                <td class="num">2025.05.08</td>
-              </tr>
-              <tr>
-                <td class="cell-strong num">SET250501-0005</td>
-                <td class="num">2025.04.07 ~ 2025.04.20</td>
-                <td class="num">19건</td>
-                <td class="num">₩11,320,000</td>
-                <td class="num" style="color:var(--up);">-₩1,132,000 (10%)</td>
-                <td class="num">₩210,000</td>
-                <td class="num cell-strong">₩10,398,000</td>
-                <td><span class="badge badge-good">정산 완료</span></td>
-                <td class="num">2025.04.24</td>
-                <td class="num">2025.04.24</td>
-              </tr>
-              <tr>
-                <td class="cell-strong num">SET250401-0004</td>
-                <td class="num">2025.03.24 ~ 2025.04.06</td>
-                <td class="num">17건</td>
-                <td class="num">₩9,680,000</td>
-                <td class="num" style="color:var(--up);">-₩968,000 (10%)</td>
-                <td class="num">₩180,000</td>
-                <td class="num cell-strong">₩8,892,000</td>
-                <td><span class="badge badge-good">정산 완료</span></td>
-                <td class="num">2025.04.10</td>
-                <td class="num">2025.04.10</td>
-              </tr>
-              <tr>
-                <td class="cell-strong num">SET250401-0003</td>
-                <td class="num">2025.03.10 ~ 2025.03.23</td>
-                <td class="num">16건</td>
-                <td class="num">₩8,750,000</td>
-                <td class="num" style="color:var(--up);">-₩875,000 (10%)</td>
-                <td class="num">₩160,000</td>
-                <td class="num cell-strong">₩8,035,000</td>
-                <td><span class="badge badge-good">정산 완료</span></td>
-                <td class="num">2025.03.27</td>
-                <td class="num">2025.03.27</td>
-              </tr>
-              <tr>
-                <td class="cell-strong num">SET250301-0002</td>
-                <td class="num">2025.02.24 ~ 2025.03.09</td>
-                <td class="num">15건</td>
-                <td class="num">₩7,620,000</td>
-                <td class="num" style="color:var(--up);">-₩762,000 (10%)</td>
-                <td class="num">₩140,000</td>
-                <td class="num cell-strong">₩6,998,000</td>
-                <td><span class="badge badge-good">정산 완료</span></td>
-                <td class="num">2025.03.13</td>
-                <td class="num">2025.03.13</td>
-              </tr>
-              <tr>
-                <td class="cell-strong num">SET250301-0001</td>
-                <td class="num">2025.02.10 ~ 2025.02.23</td>
-                <td class="num">12건</td>
-                <td class="num">₩5,900,000</td>
-                <td class="num" style="color:var(--up);">-₩590,000 (10%)</td>
-                <td class="num">₩110,000</td>
-                <td class="num cell-strong">₩5,420,000</td>
-                <td><span class="badge badge-accent">정산 예정</span></td>
-                <td class="num">2025.03.01</td>
-                <td class="num">-</td>
-              </tr>
-            </tbody>
+            <tbody id="settleTbody"></tbody>
           </table>
           </div>
         </div>
@@ -211,44 +114,36 @@
         <div class="admin-stack">
           <div class="admin-card">
             <div class="admin-card-head"><h2>정산 예정 내역</h2></div>
-            <p style="font-size:.78rem;color:var(--text-tertiary);font-weight:700;margin-bottom:8px;">2025.06.15 정산 예정</p>
-            <div class="kv-row"><span>총 판매액</span><span>₩20,250,000</span></div>
-            <div class="kv-row"><span>상품 금액</span><span>₩19,800,000</span></div>
-            <div class="kv-row"><span>배송비 정산액</span><span>₩450,000</span></div>
-            <div class="kv-row"><span>수수료 (10%)</span><span style="color:var(--up);">-₩2,025,000</span></div>
-            <div class="kv-row"><span>기타 차감액</span><span>₩0</span></div>
-            <div class="kv-row total"><span>정산 예정 금액</span><span>₩18,225,000</span></div>
-            <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;">정산 주기 변경</button>
+            <p style="font-size:.78rem;color:var(--text-tertiary);font-weight:700;margin-bottom:8px;" id="nextSettleLabel">예정된 정산이 없습니다.</p>
+            <div class="kv-row"><span>총 판매액</span><span id="ns-sales">₩0</span></div>
+            <div class="kv-row"><span>상품 금액</span><span id="ns-goods">₩0</span></div>
+            <div class="kv-row"><span>배송비 정산액</span><span id="ns-ship">₩0</span></div>
+            <div class="kv-row"><span>수수료</span><span style="color:var(--up);" id="ns-fee">-₩0</span></div>
+            <div class="kv-row total"><span>정산 예정 금액</span><span id="ns-total">₩0</span></div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:12px;" id="cycleChangeBtn">정산 주기 변경</button>
           </div>
 
           <div class="admin-card">
             <div class="admin-card-head"><h2>정산 계좌 정보</h2></div>
             <p style="font-size:.8rem;color:var(--text-tertiary);margin-bottom:12px;">정산금은 등록된 계좌로 자동 입금됩니다.</p>
-            <div class="kv-row"><span>은행명</span><span>국민은행</span></div>
-            <div class="kv-row"><span>계좌번호</span><span>1234-5678-9012-34</span></div>
-            <div class="kv-row"><span>예금주</span><span>한국브라스트(주)</span></div>
-            <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:12px;">계좌 정보 수정</button>
+            <div class="kv-row"><span>은행명</span><span id="acc-bank">-</span></div>
+            <div class="kv-row"><span>계좌번호</span><span id="acc-num">-</span></div>
+            <div class="kv-row"><span>예금주</span><span id="acc-holder">-</span></div>
+            <button class="btn btn-outline" style="width:100%;justify-content:center;margin-top:12px;" id="editAccountBtn">계좌 정보 수정</button>
           </div>
         </div>
       </div>
 
       <div class="settle-grid">
         <div class="admin-card">
-          <div class="admin-card-head"><h2>월별 정산 현황</h2><select style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.8rem;font-family:inherit;"><option>6개월</option><option>12개월</option></select></div>
+          <div class="admin-card-head"><h2>월별 정산 현황</h2></div>
           <div class="chart-legend"><span class="item"><span class="dot" style="background:var(--accent-soft-strong);"></span>정산액(원)</span><span class="item"><span class="dot" style="background:var(--good);"></span>주문 건수(건)</span></div>
-          <div class="bar-chart">
-<div class="col"><div class="bar" style="height:68px;"><span class="dot-line" style="top:90px;"></span></div><span>2025.01</span></div>
-<div class="col"><div class="bar" style="height:92px;"><span class="dot-line" style="top:77px;"></span></div><span>2025.02</span></div>
-<div class="col"><div class="bar" style="height:138px;"><span class="dot-line" style="top:41px;"></span></div><span>2025.03</span></div>
-<div class="col"><div class="bar" style="height:110px;"><span class="dot-line" style="top:57px;"></span></div><span>2025.04</span></div>
-<div class="col"><div class="bar" style="height:135px;"><span class="dot-line" style="top:47px;"></span></div><span>2025.05</span></div>
-<div class="col"><div class="bar" style="height:124px;"><span class="dot-line" style="top:57px;"></span></div><span>2025.06</span></div>
-          </div>
+          <div class="bar-chart" id="settleChart"></div>
         </div>
         <div class="admin-card">
-          <div class="admin-card-head"><h2>수수료 안내</h2><button class="btn btn-ghost btn-sm">자세히 보기</button></div>
+          <div class="admin-card-head"><h2>수수료 안내</h2></div>
           <p style="font-size:.78rem;color:var(--text-tertiary);font-weight:700;">기본 수수료율</p>
-          <p style="font-family:var(--font-en);font-weight:900;font-size:1.5rem;margin-top:4px;">10%</p>
+          <p style="font-family:var(--font-en);font-weight:900;font-size:1.5rem;margin-top:4px;" id="feeRateText">10%</p>
           <p style="font-size:.8rem;color:var(--text-secondary);margin-top:16px;font-weight:700;">수수료 부과 기준</p>
           <p style="font-size:.8rem;color:var(--text-tertiary);margin-top:6px;line-height:1.6;">상품 판매 금액(배송비 제외)에 수수료율이 적용됩니다.</p>
           <div class="kv-row" style="margin-top:12px;"><span>예시</span><span></span></div>
@@ -256,7 +151,7 @@
         </div>
         <div class="admin-card">
           <div class="admin-card-head"><h2>세금계산서</h2><a href="seller-tax.html" class="more-link">발행 관리 ›</a></div>
-          <div class="kv-row"><span>발행 가능 건수</span><span>12건</span></div>
+          <div class="kv-row"><span>발행 가능 건수</span><span id="taxPendingCount">0건</span></div>
           <a href="seller-tax.html" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:12px;">세금계산서 발행 관리</a>
           <p style="font-size:.76rem;color:var(--text-tertiary);margin-top:16px;font-weight:800;">발행 참고 사항</p>
           <ul style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
@@ -290,5 +185,88 @@
   });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/seller-common.js"></script>
+<script>
+SC.ready(async function (user) {
+  var companyId = user.company.id;
+
+  var [settleRes, companyRes, taxRes] = await Promise.all([
+    sb.from('settlements').select('*').eq('company_id', companyId).order('period_end', { ascending: false }),
+    sb.from('companies').select('*').eq('id', companyId).maybeSingle(),
+    sb.from('tax_invoices').select('id', { count: 'exact', head: true }).eq('company_id', companyId).eq('status', 'pending')
+  ]);
+  var settlements = settleRes.data || [];
+  var company = companyRes.data || {};
+
+  document.getElementById('settleTbody').innerHTML = settlements.map(function (s) {
+    return '<tr>' +
+      '<td class="cell-strong num">' + SC.esc(s.settlement_no) + '</td>' +
+      '<td class="num">' + SC.dt(s.period_start) + ' ~ ' + SC.dt(s.period_end) + '</td>' +
+      '<td class="num">' + s.order_count + '건</td>' +
+      '<td class="num">' + SC.won(s.sales_amount) + '</td>' +
+      '<td class="num" style="color:var(--up);">-' + SC.won(s.fee_amount) + '</td>' +
+      '<td class="num">' + SC.won(s.shipping_amount) + '</td>' +
+      '<td class="num cell-strong">' + SC.won(s.settlement_amount) + '</td>' +
+      '<td><span class="badge ' + SC.badgeCls(s.status) + '">' + SC.label(s.status) + '</span></td>' +
+      '<td class="num">' + SC.dt(s.due_date) + '</td>' +
+      '<td class="num">' + (s.paid_date ? SC.dt(s.paid_date) : '-') + '</td></tr>';
+  }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">정산 내역이 없습니다.</td></tr>';
+
+  var next = settlements.find(function (s) { return s.status === 'scheduled'; });
+  if (next) {
+    document.getElementById('nextSettleLabel').textContent = SC.dt(next.due_date) + ' 정산 예정';
+    document.getElementById('ns-sales').textContent = SC.won(next.sales_amount);
+    document.getElementById('ns-goods').textContent = SC.won(next.sales_amount - next.shipping_amount);
+    document.getElementById('ns-ship').textContent = SC.won(next.shipping_amount);
+    document.getElementById('ns-fee').textContent = '-' + SC.won(next.fee_amount);
+    document.getElementById('ns-total').textContent = SC.won(next.settlement_amount);
+  }
+
+  document.getElementById('acc-bank').textContent = company.bank_name || '-';
+  document.getElementById('acc-num').textContent = company.bank_account || '-';
+  document.getElementById('acc-holder').textContent = company.bank_holder || '-';
+  document.getElementById('feeRateText').textContent = (company.fee_rate || 10) + '%';
+  document.getElementById('taxPendingCount').textContent = (taxRes.count || 0) + '건';
+
+  // ---- monthly bar chart from real settlements, grouped by period_end month ----
+  var byMonth = {};
+  settlements.forEach(function (s) {
+    var m = s.period_end.slice(0, 7);
+    byMonth[m] = byMonth[m] || { amount: 0, count: 0 };
+    byMonth[m].amount += s.settlement_amount;
+    byMonth[m].count += s.order_count;
+  });
+  var months = Object.keys(byMonth).sort();
+  var maxAmount = Math.max.apply(null, months.map(function (m) { return byMonth[m].amount; }).concat([1]));
+  var maxCount = Math.max.apply(null, months.map(function (m) { return byMonth[m].count; }).concat([1]));
+  document.getElementById('settleChart').innerHTML = months.map(function (m) {
+    var h = Math.max(8, Math.round(byMonth[m].amount / maxAmount * 150));
+    var dotTop = 150 - Math.round(byMonth[m].count / maxCount * 150);
+    return '<div class="col"><div class="bar" style="height:' + h + 'px;"><span class="dot-line" style="top:' + dotTop + 'px;"></span></div><span>' + m.replace('-', '.') + '</span></div>';
+  }).join('');
+
+  document.getElementById('cycleChangeBtn').addEventListener('click', async function () {
+    var cur = company.settlement_cycle === 'biweekly' ? '격주' : '월 1회';
+    var next = company.settlement_cycle === 'biweekly' ? 'monthly' : 'biweekly';
+    if (!confirm('현재 정산 주기: ' + cur + '\n' + (next === 'monthly' ? '월 1회' : '격주') + '(으)로 변경하시겠습니까?')) return;
+    await sb.from('companies').update({ settlement_cycle: next }).eq('id', companyId);
+    location.reload();
+  });
+
+  document.getElementById('editAccountBtn').addEventListener('click', async function () {
+    var bank = prompt('은행명', company.bank_name || '');
+    if (bank === null) return;
+    var num = prompt('계좌번호', company.bank_account || '');
+    if (num === null) return;
+    var holder = prompt('예금주', company.bank_holder || '');
+    if (holder === null) return;
+    await sb.from('companies').update({ bank_name: bank, bank_account: num, bank_holder: holder }).eq('id', companyId);
+    location.reload();
+  });
+});
+</script>
 </body>
 </html>

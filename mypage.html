@@ -35,6 +35,12 @@
   .mp-status.shipping{background:var(--accent-soft);color:var(--accent);}
   .mp-status.done{background:var(--good-soft);color:var(--good);}
   .mp-status.confirmed{background:var(--bg-soft);color:var(--text-secondary);}
+  .mp-status.pending{background:var(--bg-soft);color:var(--text-tertiary);}
+  .mp-status.pay{background:var(--accent-soft);color:var(--accent);}
+  .mp-status.prep{background:var(--warn-soft);color:var(--warn);}
+  .mp-status.cancel{background:color-mix(in srgb, var(--up) 14%, transparent);color:var(--up);}
+  .notif-empty{padding:16px 0;font-size:.84rem;color:var(--text-tertiary);text-align:center;}
+  .mp-loading td{padding:20px 8px;text-align:center;color:var(--text-tertiary);font-size:.86rem;}
 
   .reco-track{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:16px;}
   .reco-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;transition:box-shadow .2s ease,transform .2s ease;}
@@ -105,7 +111,7 @@
     <aside>
       <div class="page-title-block" style="padding-top:26px;">
         <h1>마이페이지</h1>
-        <p>안녕하세요!<br>(주)스마트팩토리 구매담당자님</p>
+        <p id="sidebarGreeting">안녕하세요!<br>고객님</p>
       </div>
 
       <div class="side-panel">
@@ -142,13 +148,13 @@
       <div class="profile-card">
         <span class="profile-avatar"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
         <div class="profile-main">
-          <h1>(주)스마트팩토리 구매담당자님</h1>
+          <h1 id="profileName">-</h1>
           <p class="welcome">환영합니다!</p>
           <div class="profile-meta">
             <span>회원등급 <span class="grade-pill">일반회원</span></span>
-            <span>가입일 <b class="tabular">2024.03.15</b></span>
-            <span>이메일 <b>buyer@smartfactory.co.kr</b></span>
-            <span>연락처 <b class="tabular">010-1234-5678</b></span>
+            <span>가입일 <b class="tabular" id="profileJoin">-</b></span>
+            <span>이메일 <b id="profileEmail">-</b></span>
+            <span>연락처 <b class="tabular" id="profilePhone">-</b></span>
           </div>
         </div>
         <button class="btn btn-outline">내 정보 수정</button>
@@ -157,11 +163,11 @@
       <div class="support-panel" style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:22px 24px;">
         <div class="section-head" style="margin-bottom:0;"><h2 style="font-size:1.02rem;">주문/배송 현황</h2><a href="#" class="more-link">전체보기 ›</a></div>
         <div class="order-stat-row">
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><b class="tabular">3</b><span>주문접수</span></div>
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="7" height="7"/><rect x="9" y="10" width="7" height="7"/><rect x="16" y="10" width="6" height="7"/><path d="M2 10l3-4h14l3 4"/></svg></span><b class="tabular">2</b><span>상품준비중</span></div>
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg></span><b class="tabular">5</b><span>배송중</span></div>
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg></span><b class="tabular">12</b><span>배송완료</span></div>
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><b class="tabular">1</b><span>교환/반품</span></div>
+          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><b class="tabular" id="statPending">0</b><span>주문접수</span></div>
+          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="7" height="7"/><rect x="9" y="10" width="7" height="7"/><rect x="16" y="10" width="6" height="7"/><path d="M2 10l3-4h14l3 4"/></svg></span><b class="tabular" id="statPrep">0</b><span>상품준비중</span></div>
+          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg></span><b class="tabular" id="statShip">0</b><span>배송중</span></div>
+          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg></span><b class="tabular" id="statDone">0</b><span>배송완료</span></div>
+          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><b class="tabular" id="statCancel">0</b><span>교환/반품</span></div>
         </div>
       </div>
 
@@ -170,12 +176,8 @@
         <div style="overflow-x:auto;">
         <table class="mp-table">
           <thead><tr><th>주문번호</th><th>주문일</th><th>상품명</th><th>주문금액</th><th>주문상태</th></tr></thead>
-          <tbody>
-            <tr><td class="tabular">202405070001</td><td class="tabular">2024.05.07</td><td class="title">XGB Series PLC CPU 모듈 외 2건</td><td class="tabular">₩495,000</td><td><span class="mp-status shipping">배송중</span></td></tr>
-            <tr><td class="tabular">202405020034</td><td class="tabular">2024.05.02</td><td class="title">근접센서 PR30-15AO 외 1건</td><td class="tabular">₩36,000</td><td><span class="mp-status done">배송완료</span></td></tr>
-            <tr><td class="tabular">202404280012</td><td class="tabular">2024.04.28</td><td class="title">에어 필터 레귤레이터 AW40-04D</td><td class="tabular">₩36,000</td><td><span class="mp-status done">배송완료</span></td></tr>
-            <tr><td class="tabular">202404220045</td><td class="tabular">2024.04.22</td><td class="title">서지 보호기 SPD-275 외 3건</td><td class="tabular">₩198,000</td><td><span class="mp-status done">배송완료</span></td></tr>
-            <tr><td class="tabular">202404150078</td><td class="tabular">2024.04.15</td><td class="title">우레탄 튜브 TU0805 외 4건</td><td class="tabular">₩29,200</td><td><span class="mp-status confirmed">구매확정</span></td></tr>
+          <tbody id="recentOrdersBody">
+            <tr class="mp-loading"><td colspan="5">불러오는 중...</td></tr>
           </tbody>
         </table>
         </div>
@@ -183,27 +185,7 @@
 
       <div class="support-panel" style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:22px 24px;">
         <div class="section-head" style="margin-bottom:0;"><h2 style="font-size:1.02rem;">맞춤 추천 상품</h2><a href="#" class="more-link">전체보기 ›</a></div>
-        <div class="reco-track">
-          <a class="reco-card" href="#">
-            <div class="reco-media"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></div>
-            <div class="reco-body"><p class="reco-name">XGB Series PLC CPU 모듈</p><p class="reco-brand">XGB-CPUH</p><p class="reco-price">₩420,000</p></div>
-          </a>
-          <a class="reco-card" href="#">
-            <div class="reco-media"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="8" rx="2"/><path d="M16 12h4l2 2v3h-6z"/><circle cx="9" cy="19" r="1.4"/><circle cx="18" cy="19" r="1.4"/></svg></div>
-            <div class="reco-body"><p class="reco-name">근접센서 PR30-15AO</p><p class="reco-brand">Autonics</p><p class="reco-price">₩18,000</p></div>
-          </a>
-          <a class="reco-card" href="#">
-            <div class="reco-media"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></div>
-            <div class="reco-body"><p class="reco-name">에어 필터 레귤레이터 AW40-04D</p><p class="reco-brand">SMC</p><p class="reco-price">₩36,000</p></div>
-          </a>
-          <a class="reco-card" href="#">
-            <div class="reco-media"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 16 0"/><path d="M4 12v4a2 2 0 0 0 2 2h1v-6H4z"/><path d="M20 12v4a2 2 0 0 1-2 2h-1v-6h3z"/></svg></div>
-            <div class="reco-body"><p class="reco-name">우레탄 튜브 TU0805</p><p class="reco-brand">SMC</p><p class="reco-price">₩5,800</p></div>
-          </a>
-          <a class="reco-card" href="#">
-            <div class="reco-media"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div>
-            <div class="reco-body"><p class="reco-name">육각볼트 (스테인리스)</p><p class="reco-brand">MISUMI</p><p class="reco-price">₩120</p></div>
-          </a>
+        <div class="reco-track" id="recoTrack">
         </div>
       </div>
     </div>
@@ -212,19 +194,17 @@
     <aside class="page-aside">
       <div class="side-panel">
         <p class="side-panel-title">나의 활동 요약</p>
-        <div class="activity-row"><span>견적요청 내역</span><b class="tabular">4건</b></div>
-        <div class="activity-row"><span>구해요 등록 내역</span><b class="tabular">2건</b></div>
-        <div class="activity-row"><span>판매 등록 내역</span><b class="tabular">3건</b></div>
-        <div class="activity-row"><span>문의/상담 내역</span><b class="tabular">6건</b></div>
+        <div class="activity-row"><span>견적요청 내역</span><b class="tabular" id="actRfq">0건</b></div>
+        <div class="activity-row"><span>구해요 등록 내역</span><b class="tabular" id="actWanted">0건</b></div>
+        <div class="activity-row"><span>판매 등록 내역</span><b class="tabular" id="actProducts">0건</b></div>
+        <div class="activity-row"><span>문의/상담 내역</span><b class="tabular" id="actInquiries">0건</b></div>
         <div class="activity-row"><span>받은 쿠폰</span><b class="tabular">2장</b></div>
-        <div class="activity-row"><span>관심 상품</span><b class="tabular">8개</b></div>
+        <div class="activity-row"><span>관심 상품</span><b class="tabular" id="actFavorites">0개</b></div>
       </div>
 
       <div class="side-panel" style="margin-top:16px;">
         <div class="side-panel-title-row"><p class="side-panel-title" style="margin:0;">알림</p><a href="#" class="more-link">전체보기 ›</a></div>
-        <div class="alert-item"><p>주문하신 상품이 배송중입니다.</p><span>2024.05.07</span></div>
-        <div class="alert-item"><p>견적요청 답변이 도착했습니다.</p><span>2024.05.07</span></div>
-        <div class="alert-item"><p>쿠폰이 지급되었습니다.</p><span>2024.05.02</span></div>
+        <div id="notifList"><div class="notif-empty">불러오는 중...</div></div>
       </div>
     </aside>
   </div>
@@ -249,6 +229,133 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  function fmtCurrency(n) { return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
+  function fmtDate(s) {
+    if (!s) return '';
+    var d = new Date(s);
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate());
+  }
+  var STATUS_META = {
+    pending_payment: { label: '입금대기', cls: 'pending' },
+    paid: { label: '결제완료', cls: 'pay' },
+    preparing: { label: '상품준비중', cls: 'prep' },
+    shipping: { label: '배송중', cls: 'shipping' },
+    delivered: { label: '배송완료', cls: 'done' },
+    confirmed: { label: '구매확정', cls: 'confirmed' },
+    canceled: { label: '취소', cls: 'cancel' },
+    refund_requested: { label: '환불요청', cls: 'cancel' },
+    refunded: { label: '환불완료', cls: 'cancel' }
+  };
+  var RECO_ICON = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>';
+
+  document.addEventListener('versoi:ready', function (e) {
+    var user = e.detail.user;
+    if (!user) return;
+    loadMypage(user).catch(function (err) { console.error('[mypage]', err); });
+  });
+
+  async function loadMypage(user) {
+    var profile = user.profile || {};
+    var name = (profile.name || user.email) + '님';
+    document.getElementById('profileName').textContent = name;
+    document.getElementById('sidebarGreeting').innerHTML = '안녕하세요!<br>' + name;
+    document.getElementById('profileJoin').textContent = fmtDate(profile.created_at);
+    document.getElementById('profileEmail').textContent = profile.email || user.email;
+    document.getElementById('profilePhone').textContent = profile.phone || '-';
+
+    var ordersRes = await window.sb.from('orders').select('*').eq('buyer_id', user.id);
+    var orders = ordersRes.data || [];
+    var orderMap = {};
+    orders.forEach(function (o) { orderMap[o.id] = o; });
+    var orderIds = orders.map(function (o) { return o.id; });
+
+    var items = [];
+    if (orderIds.length) {
+      var itemsRes = await window.sb.from('order_items').select('*').in('order_id', orderIds).order('created_at', { ascending: false });
+      items = itemsRes.data || [];
+    }
+
+    // stats
+    var counts = { pending: 0, prep: 0, ship: 0, done: 0, cancel: 0 };
+    items.forEach(function (it) {
+      if (it.status === 'pending_payment' || it.status === 'paid') counts.pending++;
+      else if (it.status === 'preparing') counts.prep++;
+      else if (it.status === 'shipping') counts.ship++;
+      else if (it.status === 'delivered' || it.status === 'confirmed') counts.done++;
+      else if (it.status === 'canceled' || it.status === 'refund_requested' || it.status === 'refunded') counts.cancel++;
+    });
+    document.getElementById('statPending').textContent = counts.pending;
+    document.getElementById('statPrep').textContent = counts.prep;
+    document.getElementById('statShip').textContent = counts.ship;
+    document.getElementById('statDone').textContent = counts.done;
+    document.getElementById('statCancel').textContent = counts.cancel;
+
+    // recent orders table
+    var tbody = document.getElementById('recentOrdersBody');
+    var recent = items.slice(0, 5);
+    if (!recent.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="notif-empty">주문 내역이 없습니다.</td></tr>';
+    } else {
+      tbody.innerHTML = recent.map(function (it) {
+        var order = orderMap[it.order_id] || {};
+        var meta = STATUS_META[it.status] || { label: it.status, cls: 'confirmed' };
+        return '<tr>' +
+          '<td class="tabular">' + (order.order_no || '') + '</td>' +
+          '<td class="tabular">' + fmtDate(order.created_at) + '</td>' +
+          '<td class="title">' + it.product_title + (it.qty > 1 ? ' 외 ' + (it.qty - 1) + '개' : '') + '</td>' +
+          '<td class="tabular">' + fmtCurrency(it.line_amount) + '</td>' +
+          '<td><span class="mp-status ' + meta.cls + '">' + meta.label + '</span></td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    // recommended products (cosmetic)
+    var prodRes = await window.sb.from('products').select('id,title,manufacturer,price').eq('status', 'selling').order('created_at', { ascending: false }).limit(5);
+    var products = prodRes.data || [];
+    var recoTrack = document.getElementById('recoTrack');
+    if (products.length) {
+      recoTrack.innerHTML = products.map(function (p) {
+        return '<a class="reco-card" href="goods.html">' +
+          '<div class="reco-media">' + RECO_ICON + '</div>' +
+          '<div class="reco-body"><p class="reco-name">' + p.title + '</p><p class="reco-brand">' + (p.manufacturer || '') + '</p><p class="reco-price">' + fmtCurrency(p.price) + '</p></div>' +
+          '</a>';
+      }).join('');
+    } else {
+      recoTrack.innerHTML = '<div class="notif-empty">추천 상품이 없습니다.</div>';
+    }
+
+    // activity summary
+    var rfqRes = await window.sb.from('rfq_requests').select('id', { count: 'exact', head: true }).eq('profile_id', user.id);
+    var wantedRes = await window.sb.from('wanted_posts').select('id', { count: 'exact', head: true }).eq('profile_id', user.id);
+    var myProductsRes = await window.sb.from('products').select('id', { count: 'exact', head: true }).eq('seller_profile_id', user.id);
+    var inquiriesRes = await window.sb.from('inquiries').select('id', { count: 'exact', head: true }).eq('buyer_profile_id', user.id);
+    var favRes = await window.sb.from('favorites').select('id', { count: 'exact', head: true }).eq('profile_id', user.id);
+    document.getElementById('actRfq').textContent = (rfqRes.count || 0) + '건';
+    document.getElementById('actWanted').textContent = (wantedRes.count || 0) + '건';
+    document.getElementById('actProducts').textContent = (myProductsRes.count || 0) + '건';
+    document.getElementById('actInquiries').textContent = (inquiriesRes.count || 0) + '건';
+    document.getElementById('actFavorites').textContent = (favRes.count || 0) + '개';
+
+    // notifications
+    var notifRes = await window.sb.from('notifications').select('*').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(5);
+    var notifs = notifRes.data || [];
+    var notifList = document.getElementById('notifList');
+    if (!notifs.length) {
+      notifList.innerHTML = '<div class="notif-empty">새 알림이 없습니다.</div>';
+    } else {
+      notifList.innerHTML = notifs.map(function (n) {
+        return '<div class="alert-item"><p>' + n.title + '</p><span>' + fmtDate(n.created_at) + '</span></div>';
+      }).join('');
+    }
+  }
+})();
 </script>
 </body>
 </html>

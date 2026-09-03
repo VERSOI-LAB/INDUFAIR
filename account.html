@@ -26,6 +26,16 @@
   .form-actions-simple{display:flex;align-items:center;justify-content:space-between;margin-top:20px;}
   .link-danger{font-size:.84rem;color:var(--text-tertiary);text-decoration:underline;}
   .link-danger:hover{color:var(--up);}
+
+  .field-wrap{display:flex;align-items:center;gap:12px;flex:1;min-width:0;flex-wrap:wrap;}
+  .edit-form{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;}
+  .edit-form input{border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:.86rem;font-family:inherit;color:var(--text);background:var(--surface);min-width:120px;}
+  .edit-form.addr-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;}
+  .edit-form.addr-form input{width:100%;}
+  .edit-form .edit-actions{display:flex;gap:6px;}
+  .field-note{font-size:.78rem;color:var(--text-tertiary);}
+  .field-msg{font-size:.78rem;color:var(--accent);font-weight:700;}
+  .field-msg.error{color:var(--up);}
 </style>
 </head>
 <body>
@@ -75,30 +85,29 @@
       </div>
 
       <div class="info-panel">
-        <div class="info-row"><span class="lbl">회원구분</span><span class="val kr">일반회원</span></div>
-        <div class="info-row"><span class="lbl">아이디</span><span class="val">smartfactory</span></div>
-        <div class="info-row"><span class="lbl">이름</span><span class="val kr">(주)스마트팩토리 구매담당자</span></div>
-        <div class="info-row"><span class="lbl">이메일</span><span class="val">buyer@smartfactory.co.kr</span><button class="btn btn-outline btn-sm">이메일 변경</button></div>
-        <div class="info-row"><span class="lbl">연락처</span><span class="val">010-1234-5678</span><button class="btn btn-outline btn-sm">변경</button></div>
-        <div class="info-row"><span class="lbl">가입일</span><span class="val">2024.03.15</span></div>
-        <div class="info-row"><span class="lbl">주소</span><span class="val kr">(12345) 경기도 성남시 분당구 판교로 123, 456호</span><button class="btn btn-outline btn-sm">주소 변경</button></div>
+        <div class="info-row"><span class="lbl">회원구분</span><span class="val kr" id="acctMemberType">-</span></div>
+        <div class="info-row"><span class="lbl">아이디</span><span class="val" id="acctUsername">-</span></div>
+        <div class="info-row" id="rowName"><span class="lbl">이름</span><div class="field-wrap" id="nameField"><span class="val kr" id="acctName">-</span><button class="btn btn-outline btn-sm" id="acctNameEditBtn">변경</button></div></div>
+        <div class="info-row" id="rowEmail"><span class="lbl">이메일</span><div class="field-wrap" id="emailField"><span class="val" id="acctEmail">-</span><button class="btn btn-outline btn-sm" id="acctEmailBtn">이메일 변경</button></div></div>
+        <div class="info-row" id="rowPhone"><span class="lbl">연락처</span><div class="field-wrap" id="phoneField"><span class="val" id="acctPhone">-</span><button class="btn btn-outline btn-sm" id="acctPhoneEditBtn">변경</button></div></div>
+        <div class="info-row"><span class="lbl">가입일</span><span class="val" id="acctJoin">-</span></div>
+        <div class="info-row" id="rowAddress"><span class="lbl">주소</span><div class="field-wrap" id="addressField"><span class="val kr" id="acctAddress">-</span><button class="btn btn-outline btn-sm" id="acctAddressEditBtn">주소 변경</button></div></div>
       </div>
 
       <p class="settings-title">마케팅 정보 수신 동의</p>
       <div class="info-panel">
         <div class="toggle-row">
           <span>이메일 수신</span>
-          <label class="toggle"><input type="checkbox" checked><span class="track"><span class="thumb"></span></span></label>
+          <label class="toggle"><input type="checkbox" id="toggleEmailOptin"><span class="track"><span class="thumb"></span></span></label>
         </div>
         <div class="toggle-row">
-          <span>SMS 수신</span>
-          <label class="toggle"><input type="checkbox" checked><span class="track"><span class="thumb"></span></span></label>
+          <span>SMS 수신 <span class="field-note">(준비 중)</span></span>
+          <label class="toggle"><input type="checkbox" checked disabled><span class="track"><span class="thumb"></span></span></label>
         </div>
       </div>
 
       <div class="form-actions-simple">
-        <a href="#" class="link-danger">회원탈퇴</a>
-        <button class="btn btn-primary btn-wide">정보 수정</button>
+        <a href="#" class="link-danger" id="withdrawLink">회원탈퇴</a>
       </div>
     </div>
   </div>
@@ -124,6 +133,178 @@
       btn.classList.add('active');
     });
   });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  function fmtDate(s) {
+    if (!s) return '';
+    var d = new Date(s);
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate());
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  var currentUser = null;
+  var currentAddress = null;
+
+  document.addEventListener('versoi:ready', function (e) {
+    var user = e.detail.user;
+    if (!user) return;
+    currentUser = user;
+    loadAccount(user).catch(function (err) { console.error('[account]', err); });
+  });
+
+  async function loadAccount(user) {
+    var profile = user.profile || {};
+    document.getElementById('acctMemberType').textContent = profile.member_type === 'business' ? '사업자회원' : '일반회원';
+    document.getElementById('acctUsername').textContent = (profile.email || user.email || '').split('@')[0];
+    document.getElementById('acctName').textContent = profile.name || '-';
+    document.getElementById('acctEmail').textContent = profile.email || user.email;
+    document.getElementById('acctPhone').textContent = profile.phone || '-';
+    document.getElementById('acctJoin').textContent = fmtDate(profile.created_at);
+    document.getElementById('toggleEmailOptin').checked = !!profile.marketing_opt_in;
+
+    var addrRes = await window.sb.from('addresses').select('*').eq('profile_id', user.id).order('is_default', { ascending: false }).limit(1).maybeSingle();
+    currentAddress = addrRes.data || null;
+    renderAddress();
+
+    document.getElementById('acctNameEditBtn').addEventListener('click', openNameEdit);
+    document.getElementById('acctPhoneEditBtn').addEventListener('click', openPhoneEdit);
+    document.getElementById('acctAddressEditBtn').addEventListener('click', openAddressEdit);
+    document.getElementById('acctEmailBtn').addEventListener('click', function (e) {
+      e.preventDefault();
+      showEmailNote();
+    });
+    document.getElementById('toggleEmailOptin').addEventListener('change', async function () {
+      var checked = this.checked;
+      var res = await window.sb.from('profiles').update({ marketing_opt_in: checked }).eq('id', currentUser.id);
+      if (res.error) { console.error('[account] marketing_opt_in update failed', res.error); this.checked = !checked; }
+    });
+    document.getElementById('withdrawLink').addEventListener('click', function (e) {
+      e.preventDefault();
+      if (confirm('회원탈퇴를 진행하시겠습니까? 탈퇴 절차는 고객센터를 통해서만 처리됩니다.')) {
+        alert('회원탈퇴는 고객센터 1:1 문의를 통해 접수해 주세요.');
+      }
+    });
+  }
+
+  function renderAddress() {
+    var el = document.getElementById('acctAddress');
+    if (!currentAddress) { el.textContent = '등록된 배송지가 없습니다.'; return; }
+    var a = currentAddress;
+    el.textContent = (a.zipcode ? '(' + a.zipcode + ') ' : '') + (a.addr1 || '') + (a.addr2 ? ', ' + a.addr2 : '');
+  }
+
+  function showEmailNote() {
+    var wrap = document.getElementById('emailField');
+    if (wrap.querySelector('.field-msg')) return;
+    var note = document.createElement('span');
+    note.className = 'field-note';
+    note.textContent = '이메일 변경은 고객센터 1:1 문의를 통해 처리됩니다.';
+    wrap.appendChild(note);
+    setTimeout(function () { if (note.parentNode) note.parentNode.removeChild(note); }, 4000);
+  }
+
+  function openNameEdit() {
+    var wrap = document.getElementById('nameField');
+    var current = document.getElementById('acctName').textContent;
+    wrap.innerHTML = '<form class="edit-form" id="nameEditForm">' +
+      '<input type="text" id="nameInput" value="' + esc(current === '-' ? '' : current) + '">' +
+      '<span class="edit-actions"><button type="submit" class="btn btn-primary btn-sm">저장</button> <button type="button" class="btn btn-outline btn-sm" id="nameCancelBtn">취소</button></span>' +
+      '</form>';
+    document.getElementById('nameCancelBtn').addEventListener('click', function () { renderNameField(current); });
+    document.getElementById('nameEditForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var val = document.getElementById('nameInput').value.trim();
+      if (!val) return;
+      var submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      var res = await window.sb.from('profiles').update({ name: val }).eq('id', currentUser.id);
+      if (res.error) { console.error('[account] name update failed', res.error); submitBtn.disabled = false; return; }
+      renderNameField(val);
+    });
+  }
+  function renderNameField(name) {
+    var wrap = document.getElementById('nameField');
+    wrap.innerHTML = '<span class="val kr" id="acctName">' + esc(name) + '</span><button class="btn btn-outline btn-sm" id="acctNameEditBtn">변경</button>';
+    document.getElementById('acctNameEditBtn').addEventListener('click', openNameEdit);
+  }
+
+  function openPhoneEdit() {
+    var wrap = document.getElementById('phoneField');
+    var current = document.getElementById('acctPhone').textContent;
+    wrap.innerHTML = '<form class="edit-form" id="phoneEditForm">' +
+      '<input type="tel" id="phoneInput" placeholder="010-0000-0000" value="' + esc(current === '-' ? '' : current) + '">' +
+      '<span class="edit-actions"><button type="submit" class="btn btn-primary btn-sm">저장</button> <button type="button" class="btn btn-outline btn-sm" id="phoneCancelBtn">취소</button></span>' +
+      '</form>';
+    document.getElementById('phoneCancelBtn').addEventListener('click', function () { renderPhoneField(current); });
+    document.getElementById('phoneEditForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var val = document.getElementById('phoneInput').value.trim();
+      if (!val) return;
+      var submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      var res = await window.sb.from('profiles').update({ phone: val }).eq('id', currentUser.id);
+      if (res.error) { console.error('[account] phone update failed', res.error); submitBtn.disabled = false; return; }
+      renderPhoneField(val);
+    });
+  }
+  function renderPhoneField(phone) {
+    var wrap = document.getElementById('phoneField');
+    wrap.innerHTML = '<span class="val" id="acctPhone">' + esc(phone) + '</span><button class="btn btn-outline btn-sm" id="acctPhoneEditBtn">변경</button>';
+    document.getElementById('acctPhoneEditBtn').addEventListener('click', openPhoneEdit);
+  }
+
+  function openAddressEdit() {
+    var wrap = document.getElementById('addressField');
+    var a = currentAddress || {};
+    wrap.innerHTML = '<form class="edit-form addr-form" id="addrEditForm">' +
+      '<input type="text" id="addrRecipient" placeholder="받는 사람" value="' + esc(a.recipient || '') + '">' +
+      '<input type="text" id="addrPhone" placeholder="연락처" value="' + esc(a.phone || '') + '">' +
+      '<input type="text" id="addrZip" placeholder="우편번호" value="' + esc(a.zipcode || '') + '">' +
+      '<input type="text" id="addr1" placeholder="주소" value="' + esc(a.addr1 || '') + '">' +
+      '<input type="text" id="addr2" placeholder="상세주소" value="' + esc(a.addr2 || '') + '" style="grid-column:1 / -1;">' +
+      '<span class="edit-actions" style="grid-column:1 / -1;"><button type="submit" class="btn btn-primary btn-sm">저장</button> <button type="button" class="btn btn-outline btn-sm" id="addrCancelBtn">취소</button></span>' +
+      '</form>';
+    document.getElementById('addrCancelBtn').addEventListener('click', renderAddressField);
+    document.getElementById('addrEditForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var payload = {
+        profile_id: currentUser.id,
+        recipient: document.getElementById('addrRecipient').value.trim(),
+        phone: document.getElementById('addrPhone').value.trim(),
+        zipcode: document.getElementById('addrZip').value.trim(),
+        addr1: document.getElementById('addr1').value.trim(),
+        addr2: document.getElementById('addr2').value.trim(),
+        is_default: true
+      };
+      var submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      var res;
+      if (currentAddress && currentAddress.id) {
+        res = await window.sb.from('addresses').update(payload).eq('id', currentAddress.id).select().maybeSingle();
+      } else {
+        res = await window.sb.from('addresses').insert(payload).select().maybeSingle();
+      }
+      if (res.error) { console.error('[account] address save failed', res.error); submitBtn.disabled = false; return; }
+      currentAddress = res.data || Object.assign({ id: currentAddress ? currentAddress.id : undefined }, payload);
+      renderAddressField();
+    });
+  }
+  function renderAddressField() {
+    var wrap = document.getElementById('addressField');
+    wrap.innerHTML = '<span class="val kr" id="acctAddress">-</span><button class="btn btn-outline btn-sm" id="acctAddressEditBtn">주소 변경</button>';
+    renderAddress();
+    document.getElementById('acctAddressEditBtn').addEventListener('click', openAddressEdit);
+  }
+})();
 </script>
 </body>
 </html>
