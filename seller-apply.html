@@ -142,8 +142,8 @@
           <div class="step-media" style="background:var(--surface-2);border:1px dashed var(--border-strong);"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg></div>
           <p class="desc">사업자등록증을 등록해주세요.<br>회사 정보는 자동으로 입력됩니다.</p>
           <div style="display:flex;gap:8px;margin-top:auto;">
-            <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>시진 촬영</button>
-            <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">파일 선택</button>
+            <button type="button" class="btn btn-outline btn-sm mockup-btn" style="flex:1;justify-content:center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>시진 촬영</button>
+            <button type="button" class="btn btn-outline btn-sm mockup-btn" style="flex:1;justify-content:center;">파일 선택</button>
           </div>
         </div>
       
@@ -172,8 +172,8 @@
           </div>
           <p style="font-size:.72rem;color:var(--text-tertiary);margin-bottom:8px;">정보가 정확한가요?</p>
           <div style="display:flex;gap:8px;margin-top:auto;">
-            <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">수정하기</button>
-            <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">맞아요</button>
+            <button type="button" class="btn btn-outline btn-sm mockup-btn" style="flex:1;justify-content:center;">수정하기</button>
+            <button type="button" class="btn btn-primary btn-sm mockup-btn" style="flex:1;justify-content:center;">맞아요</button>
           </div>
         </div>
       
@@ -185,12 +185,12 @@
             <div class="mini-field" style="flex:1;margin-bottom:0;text-align:center;">1234</div>
             <div class="mini-field" style="flex:1;margin-bottom:0;text-align:center;">5678</div>
           </div>
-          <button class="btn btn-outline btn-sm" style="width:100%;justify-content:center;margin-bottom:12px;">인증번호 받기</button>
+          <button type="button" class="btn btn-outline btn-sm mockup-btn" style="width:100%;justify-content:center;margin-bottom:12px;">인증번호 받기</button>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:auto;">
             <div class="mini-field" style="flex:1;margin-bottom:0;">123456</div>
             <span style="font-size:.7rem;color:var(--up);font-family:var(--font-en);flex-shrink:0;">02:45</span>
           </div>
-          <button class="btn btn-primary" style="margin-top:14px;">확인</button>
+          <button type="button" class="btn btn-primary mockup-btn" style="margin-top:14px;">확인</button>
         </div>
       
         <div class="step-card">
@@ -203,7 +203,7 @@
             <label class="mini-check-row"><input type="checkbox" checked>[필수] 개인정보 제3자 제공 동의</label>
             <label class="mini-check-row"><input type="checkbox">[선택] 마케팅 정보 수신 동의</label>
           </div>
-          <button class="btn btn-primary">동의하고 계속하기</button>
+          <button type="button" class="btn btn-primary mockup-btn">동의하고 계속하기</button>
         </div>
       
         <div class="step-card">
@@ -215,8 +215,8 @@
             <div class="mini-field" style="margin-bottom:0;">연락처 (선택)</div>
           </div>
           <div style="display:flex;gap:8px;margin-top:14px;">
-            <button class="btn btn-outline btn-sm" style="flex:1;justify-content:center;">나중에 입력할게요</button>
-            <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center;">다음</button>
+            <button type="button" class="btn btn-outline btn-sm mockup-btn" style="flex:1;justify-content:center;">나중에 입력할게요</button>
+            <button type="button" class="btn btn-primary btn-sm mockup-btn" style="flex:1;justify-content:center;">다음</button>
           </div>
         </div>
       
@@ -327,6 +327,13 @@
       var emailField = document.getElementById('regEmail');
       if (emailField && !emailField.value) emailField.value = user.email || '';
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.querySelectorAll('.mockup-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        alert('위 카드는 입점 절차를 소개하는 미리보기입니다. 실제 등록은 아래 신청서를 작성해주세요.');
+        startBtn.click();
+      });
     });
   });
 
