@@ -190,7 +190,7 @@
           <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>기술지원 연계</li>
           <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>공식 인증 마크 부여</li>
         </ul>
-        <button class="btn btn-outline" style="width:100%;justify-content:center;">입점 신청하기 ›</button>
+        <a class="btn btn-outline" style="width:100%;justify-content:center;" href="seller-apply.html">입점 신청하기 ›</a>
       </div>
 
       <div class="side-panel" style="margin-top:16px;">
@@ -242,7 +242,7 @@
           <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>마케팅 &amp; 홍보 지원</li>
           <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>기술지원 &amp; A/S 연계</li>
         </ul>
-        <button class="btn btn-primary" style="width:auto;margin-top:4px;">입점 신청하기 ›</button>
+        <a class="btn btn-primary" style="width:auto;margin-top:4px;" href="seller-apply.html">입점 신청하기 ›</a>
       </div>
 
       <section style="margin-top:36px;">
@@ -258,7 +258,7 @@
       </section>
 
       <section style="margin-top:36px;">
-        <div class="section-head"><h2 style="font-size:1.1rem;">브랜드별 추천 제품</h2><a href="#" class="more-link">전체 제품 보기 ›</a></div>
+        <div class="section-head"><h2 style="font-size:1.1rem;">브랜드별 추천 제품</h2><a href="goods.html" class="more-link">전체 제품 보기 ›</a></div>
         <div class="brand-tab-row" id="brandTabs">
           <button class="brand-tab active" data-brand="">전체</button>
           <button class="brand-tab" data-brand="FANUC"><span class="dot"></span>FANUC</button>
@@ -270,38 +270,38 @@
         </div>
 
         <div class="rec-carousel">
-          <button class="rec-arrow" aria-label="이전"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <button class="rec-arrow" aria-label="이전" id="recPrevBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
           <div class="rec-track" id="recTrack">
             <p style="padding:40px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">불러오는 중...</p>
           </div>
-          <button class="rec-arrow" aria-label="다음"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="rec-arrow" aria-label="다음" id="recNextBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
       </section>
 
       <div class="brand-service-row">
         <p class="brand-service-title">브랜드 서비스 바로가기</p>
         <div class="service-grid">
-          <a class="service-item" href="#">
+          <a class="service-item" href="#" onclick="alert('준비 중인 기능입니다.');return false;">
             <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
             <b>기술자료실</b>
             <span>매뉴얼, 카탈로그 다운로드</span>
           </a>
-          <a class="service-item" href="#">
+          <a class="service-item" href="#" onclick="alert('준비 중인 기능입니다.');return false;">
             <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
             <b>A/S &amp; 기술지원</b>
             <span>전국 서비스 네트워크</span>
           </a>
-          <a class="service-item" href="#">
+          <a class="service-item" href="#" onclick="alert('준비 중인 기능입니다.');return false;">
             <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
             <b>정품 인증 조회</b>
             <span>제품 시리얼 인증 확인</span>
           </a>
-          <a class="service-item" href="#">
+          <a class="service-item" href="support.html">
             <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
             <b>문의하기</b>
             <span>전문 상담원 연결</span>
           </a>
-          <a class="service-item" href="#">
+          <a class="service-item" href="#" onclick="alert('준비 중인 기능입니다.');return false;">
             <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
             <b>교육 &amp; 세미나</b>
             <span>제품 교육 및 세미나 일정</span>
@@ -316,10 +316,10 @@
   <div class="wrap footer-inner">
     <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
     <div class="footer-links">
-      <a href="#">이용약관</a>
-      <a href="#">개인정보처리방침</a>
-      <a href="#">사업자정보확인</a>
-      <a href="#">제휴/입점문의</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">이용약관</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">개인정보처리방침</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">사업자정보확인</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">제휴/입점문의</a>
     </div>
   </div>
 </footer>
@@ -417,6 +417,13 @@
     state.brand = tab.dataset.brand || '';
     document.querySelectorAll('#brandNav a').forEach(function(a){ a.classList.toggle('active', (a.dataset.brand||'') === state.brand); });
     render();
+  });
+
+  document.getElementById('recPrevBtn').addEventListener('click', function(){
+    document.getElementById('recTrack').scrollBy({ left: -260, behavior: 'smooth' });
+  });
+  document.getElementById('recNextBtn').addEventListener('click', function(){
+    document.getElementById('recTrack').scrollBy({ left: 260, behavior: 'smooth' });
   });
 
   document.addEventListener('versoi:ready', function(){ render(); });

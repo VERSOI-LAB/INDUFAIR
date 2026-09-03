@@ -33,6 +33,8 @@
   .filter-chip-row{margin-top:14px;}
 
   .used-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:20px;}
+  .used-grid.list-view{grid-template-columns:1fr;}
+  .used-grid.list-view .used-card{display:grid;grid-template-columns:180px 1fr;gap:16px;}
   .used-card{
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;
     display:flex;flex-direction:column;transition:box-shadow .2s ease,transform .2s ease,border-color .2s ease;
@@ -135,8 +137,8 @@
       </div>
 
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-        <button class="btn btn-primary" style="justify-content:center;">판매 등록하기</button>
-        <button class="btn btn-ghost" style="justify-content:center;">구해요 등록하기</button>
+        <a class="btn btn-primary" style="justify-content:center;" href="sell-new.html">판매 등록하기</a>
+        <a class="btn btn-ghost" style="justify-content:center;" href="goomrq-new.html">구해요 등록하기</a>
       </div>
 
       <div class="side-panel">
@@ -210,7 +212,7 @@
           </span>
           <div>
             <p>사업자 인증 판매자만 등록 가능<br>안전한 거래 시스템을 제공합니다.</p>
-            <button class="btn btn-outline btn-sm" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.24);color:#fff;">자세히 보기</button>
+            <button type="button" class="btn btn-outline btn-sm" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.24);color:#fff;" onclick="alert('VERSOI 중고장터는 사업자등록증 인증을 완료한 판매자만 상품을 등록할 수 있습니다. 안심하고 거래하세요.');">자세히 보기</button>
           </div>
         </div>
       </div>
@@ -222,9 +224,9 @@
         </form>
         <div class="toolbar-controls">
           <div class="select-field">정확도순 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
-          <div class="view-toggle-wrap" style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface);">
-            <button class="view-btn active" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--accent);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
-            <button class="view-btn" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);border-left:1px solid var(--border);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
+          <div class="view-toggle-wrap" id="viewToggleWrap" style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface);">
+            <button type="button" class="view-btn active" data-view="grid" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--accent);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
+            <button type="button" class="view-btn" data-view="list" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);border-left:1px solid var(--border);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
           </div>
           <div class="select-field">24개씩 보기 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
         </div>
@@ -295,7 +297,7 @@
           <span class="safe-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
           <div><b>거래 후기 시스템</b><span>실제 구매자 후기 확인 가능</span></div>
         </div>
-        <button class="btn btn-outline safe-more">자세히 보기 ›</button>
+        <button type="button" class="btn btn-outline safe-more" onclick="alert('[안전 거래 서비스]\n\n1. 사업자 인증 판매자만 등록 가능 — 실명 및 사업자 검증 완료\n2. 거래 안전 보장 — 결제 보호 및 분쟁 해결 지원\n3. 거래 후기 시스템 — 실제 구매자 후기 확인 가능');">자세히 보기 ›</button>
       </div>
 
       <div class="ai-assist-card">
@@ -304,7 +306,7 @@
           AI 상품 등록
         </div>
         <p>사진만 찍으면 끝!<br>모델 인식부터 상품 등록까지 AI가 자동으로 도와드립니다.</p>
-        <button class="btn btn-primary">상품 등록하기</button>
+        <a class="btn btn-primary" href="sell-new.html">상품 등록하기</a>
       </div>
     </aside>
   </div>
@@ -314,10 +316,10 @@
   <div class="wrap footer-inner">
     <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
     <div class="footer-links">
-      <a href="#">이용약관</a>
-      <a href="#">개인정보처리방침</a>
-      <a href="#">사업자정보확인</a>
-      <a href="#">제휴/입점문의</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">이용약관</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">개인정보처리방침</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">사업자정보확인</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">제휴/입점문의</a>
     </div>
   </div>
 </footer>
@@ -463,6 +465,19 @@
     e.preventDefault();
     state.q = e.target.querySelector('input[type="text"]').value.trim();
     render();
+  });
+
+  document.getElementById('viewToggleWrap').addEventListener('click', function(e){
+    var btn = e.target.closest('.view-btn'); if (!btn) return;
+    document.querySelectorAll('#viewToggleWrap .view-btn').forEach(function(b){
+      b.classList.remove('active');
+      b.style.color = 'var(--text-tertiary)';
+      b.style.background = '';
+    });
+    btn.classList.add('active');
+    btn.style.color = '#fff';
+    btn.style.background = 'var(--accent)';
+    document.getElementById('usedGrid').classList.toggle('list-view', btn.dataset.view === 'list');
   });
 
   document.getElementById('gradeFilterBody').addEventListener('change', function(e){

@@ -161,27 +161,27 @@
 
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
         <a class="btn btn-primary" style="justify-content:center;" href="rfq-new.html">견적 요청하기</a>
-        <button class="btn btn-ghost" style="justify-content:center;">구해요 등록하기</button>
+        <a class="btn btn-ghost" style="justify-content:center;" href="goomrq-new.html">구해요 등록하기</a>
       </div>
 
       <div class="side-panel">
         <p class="side-panel-title">MY RFQ</p>
         <nav class="side-nav">
-          <a href="#" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>전체 요청 현황</a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>진행 중<span class="count">7</span></a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>견적 수신<span class="count">3</span></a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>비교 중<span class="count">2</span></a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>거래 완료<span class="count">12</span></a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>찜한 업체<span class="count">5</span></a>
+          <a href="#" class="active" data-rfq-tab-index="0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>전체 요청 현황</a>
+          <a href="#" data-rfq-tab-index="1"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>진행 중<span class="count">7</span></a>
+          <a href="#" data-rfq-tab-index="2"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>견적 수신<span class="count">3</span></a>
+          <a href="#" data-rfq-tab-index="3"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>비교 중<span class="count">2</span></a>
+          <a href="#" data-rfq-tab-index="4"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>거래 완료<span class="count">12</span></a>
+          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>찜한 업체<span class="count">5</span></a>
         </nav>
       </div>
 
       <div class="side-panel" style="margin-top:16px;">
         <p class="side-panel-title">공급업체 전용</p>
         <nav class="side-nav">
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-8-8"/><path d="M20 4L12 12"/></svg>받은 견적 요청<span class="count">8</span></a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>견적 제출 현황<span class="count">4</span></a>
-          <a href="#"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>단골 구매자 관리</a>
+          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-8-8"/><path d="M20 4L12 12"/></svg>받은 견적 요청<span class="count">8</span></a>
+          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>견적 제출 현황<span class="count">4</span></a>
+          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>단골 구매자 관리</a>
         </nav>
       </div>
 
@@ -191,7 +191,7 @@
           AI 산업 비서 <span class="beta" style="background:rgba(255,255,255,.15);color:#fff;">Beta</span>
         </div>
         <p>필요한 제품을 채팅으로 요청하면 AI가 견적 요청을 도와드립니다.</p>
-        <button class="btn btn-primary">AI 비서에게 요청하기</button>
+        <button type="button" class="btn btn-primary" onclick="alert('AI 산업 비서는 준비 중인 기능입니다.');">AI 비서에게 요청하기</button>
       </div>
     </aside>
 
@@ -263,29 +263,29 @@
         <p class="side-panel-title">빠른 견적 요청</p>
         <p style="font-size:.8rem;color:var(--text-tertiary);margin:-6px 0 10px;">자주 찾는 제품을 빠르게 견적 요청하세요.</p>
         <div class="quick-rfq-list" style="display:flex;flex-direction:column;gap:2px;">
-          <a href="#"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></span>PLC</a>
-          <a href="#"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/></svg></span>서보모터</a>
-          <a href="#"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/></svg></span>인버터</a>
-          <a href="#"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/></svg></span>베어링</a>
-          <a href="#"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="12" height="6" rx="1"/><rect x="15" y="8.5" width="6" height="7" rx="1"/></svg></span>실린더</a>
+          <a href="rfq-new.html?cat=PLC"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></span>PLC</a>
+          <a href="rfq-new.html?cat=%EC%84%9C%EB%B3%B4%EB%AA%A8%ED%84%B0"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/></svg></span>서보모터</a>
+          <a href="rfq-new.html?cat=%EC%9D%B8%EB%B2%84%ED%84%B0"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/></svg></span>인버터</a>
+          <a href="rfq-new.html?cat=%EB%B2%A0%EC%96%B4%EB%A7%81"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/></svg></span>베어링</a>
+          <a href="rfq-new.html?cat=%EC%8B%A4%EB%A6%B0%EB%8D%94"><span class="qicon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="12" height="6" rx="1"/><rect x="15" y="8.5" width="6" height="7" rx="1"/></svg></span>실린더</a>
         </div>
-        <a href="#" class="more-link" style="margin-top:10px;justify-content:flex-end;">전체 보기 ›</a>
+        <a href="rfq-new.html" class="more-link" style="margin-top:10px;justify-content:flex-end;">전체 보기 ›</a>
       </div>
 
       <div class="side-panel">
         <p class="side-panel-title">최근 요청 템플릿</p>
         <ul class="template-list">
-          <li><a href="#">PLC Q시리즈 견적 요청</a><span>2024.05.10</span></li>
-          <li><a href="#">모터/감속기 견적 요청</a><span>2024.05.08</span></li>
-          <li><a href="#">베어링 일괄 견적 요청</a><span>2024.05.05</span></li>
+          <li><a href="rfq-new.html?cat=PLC">PLC Q시리즈 견적 요청</a><span>2024.05.10</span></li>
+          <li><a href="rfq-new.html?cat=%EB%AA%A8%ED%84%B0">모터/감속기 견적 요청</a><span>2024.05.08</span></li>
+          <li><a href="rfq-new.html?cat=%EB%B2%A0%EC%96%B4%EB%A7%81">베어링 일괄 견적 요청</a><span>2024.05.05</span></li>
         </ul>
-        <a href="#" class="more-link" style="margin-top:10px;justify-content:flex-end;">템플릿 관리 ›</a>
+        <a href="#" class="more-link" style="margin-top:10px;justify-content:flex-end;" onclick="alert('템플릿 관리 기능은 준비 중입니다.');return false;">템플릿 관리 ›</a>
       </div>
 
       <div class="goomrq-card">
         <b>구해요 게시판</b>
         <p>필요한 제품을 먼저 요청하고<br>판매 제안을 받아보세요.</p>
-        <button class="btn btn-primary btn-sm">구해요 등록하기</button>
+        <a class="btn btn-primary btn-sm" href="goomrq-new.html">구해요 등록하기</a>
         <svg class="goomrq-icon" width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8A2 2 0 1 1 8 18l-.4-3"/></svg>
       </div>
     </aside>
@@ -296,10 +296,10 @@
   <div class="wrap footer-inner">
     <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
     <div class="footer-links">
-      <a href="#">이용약관</a>
-      <a href="#">개인정보처리방침</a>
-      <a href="#">사업자정보확인</a>
-      <a href="#">제휴/입점문의</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">이용약관</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">개인정보처리방침</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">사업자정보확인</a>
+      <a href="#" onclick="alert('준비 중인 페이지입니다.');return false;">제휴/입점문의</a>
     </div>
   </div>
 </footer>
@@ -461,6 +461,16 @@
     });
   });
 
+  document.querySelectorAll('.side-nav a[data-rfq-tab-index]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      var idx = parseInt(a.getAttribute('data-rfq-tab-index'), 10);
+      var tabBtns = rfqTabsEl.querySelectorAll('button');
+      if (tabBtns[idx]) tabBtns[idx].click();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
   rfqTableEl.addEventListener('click', function(e){
     var form = e.target.closest('.rfq-quote-form');
     if (form) return; // handled by submit handler
@@ -493,6 +503,15 @@
 
   document.addEventListener('versoi:ready', function(e){
     currentUser = e.detail.user;
+    var statusParam = new URLSearchParams(location.search).get('status');
+    if (statusParam !== null) {
+      var tabBtn = rfqTabsEl.querySelector('button[data-status="' + statusParam + '"]');
+      if (tabBtn) {
+        rfqTabsEl.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+        tabBtn.classList.add('active');
+        currentStatus = statusParam;
+      }
+    }
     loadRfqs();
   });
 </script>
