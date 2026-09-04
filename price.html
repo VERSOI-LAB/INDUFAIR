@@ -64,15 +64,8 @@
         <p>주요 산업 설비류 중고 시세 정보를<br>확인하세요.</p>
       </div>
       <div class="side-panel">
-        <nav class="side-nav">
-          <a href="price.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>전체 카테고리</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/></svg>PLC</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/></svg>인버터</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/></svg>서보/모터</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>센서</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="16" width="8" height="4" rx="1"/><line x1="7" y1="16" x2="7" y2="10"/><line x1="7" y1="10" x2="16" y2="7"/></svg>로봇</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/></svg>공압/유공압</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>기타</a>
+        <nav class="side-nav" id="priceCatNav">
+          <a href="#" class="active" data-cat="">전체 카테고리</a>
         </nav>
       </div>
     </aside>
@@ -82,55 +75,18 @@
       <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">실시간 중고 시세 정보를 제공합니다.</p>
 
       <div class="board-toolbar">
-        <div class="board-search">
+        <form class="board-search" id="priceSearchForm">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" placeholder="제품명, 모델명을 입력하세요">
-        </div>
-        <div class="select-field">전체 카테고리 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+          <input type="text" id="priceSearchInput" placeholder="제품명, 모델명을 입력하세요">
+        </form>
+        <div class="select-field" id="priceCatSelectLabel">전체 카테고리 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
       </div>
 
       <h2 style="font-size:1.05rem;font-weight:800;margin-top:24px;">인기 제품 시세</h2>
 
-      <div class="price-card">
-        <span class="price-card-thumb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg></span>
-        <div>
-          <div class="price-card-brand">MITSUBISHI</div>
-          <div class="price-card-name">FX5U-32MR/ES</div>
-          <div class="price-card-cat">PLC</div>
-        </div>
-        <div class="price-card-range">
-          <div class="range tabular">₩150,000 ~ ₩220,000</div>
-          <div class="avg">평균 시세 <b class="tabular" style="color:var(--text);">₩185,000</b></div>
-        </div>
+      <div id="priceCardList">
+        <p style="padding:40px 0;text-align:center;color:var(--text-tertiary);">불러오는 중...</p>
       </div>
-
-      <div class="price-card">
-        <span class="price-card-thumb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/></svg></span>
-        <div>
-          <div class="price-card-brand">LS ELECTRIC</div>
-          <div class="price-card-name">SV022iG5A-2</div>
-          <div class="price-card-cat">인버터</div>
-        </div>
-        <div class="price-card-range">
-          <div class="range tabular">₩200,000 ~ ₩300,000</div>
-          <div class="avg">평균 시세 <b class="tabular" style="color:var(--text);">₩250,000</b></div>
-        </div>
-      </div>
-
-      <div class="price-card">
-        <span class="price-card-thumb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/></svg></span>
-        <div>
-          <div class="price-card-brand">YASKAWA</div>
-          <div class="price-card-name">SGMJV-02A3A61</div>
-          <div class="price-card-cat">서보모터</div>
-        </div>
-        <div class="price-card-range">
-          <div class="range tabular">₩120,000 ~ ₩180,000</div>
-          <div class="avg">평균 시세 <b class="tabular" style="color:var(--text);">₩150,000</b></div>
-        </div>
-      </div>
-
-      <button type="button" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:18px;" onclick="alert('준비 중인 기능입니다.');">더 많은 시세 보기 ›</button>
     </div>
   </div>
 </main>
@@ -153,5 +109,93 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
+<script>
+(function () {
+  var CAT_ICONS = {
+    1: '<rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/>',
+    2: '<rect x="5" y="4" width="14" height="16" rx="2"/><rect x="8" y="7" width="8" height="5" rx="1"/>',
+    3: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.4"/>',
+    4: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/>',
+    5: '<rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/>',
+    9: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.2"/>',
+    7: '<rect x="3" y="5" width="14" height="10" rx="1.5"/><circle cx="18" cy="17" r="3"/>'
+  };
+  var DEFAULT_ICON = '<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+
+  var allCategories = [];
+  var rows = [];
+  var state = { category: '', q: '' };
+
+  function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtWon(n) { return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
+
+  async function loadCategories() {
+    var res = await sb.from('categories').select('id,name').order('sort_order');
+    allCategories = res.data || [];
+    var icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>';
+    var nav = document.getElementById('priceCatNav');
+    nav.innerHTML = '<a href="#" data-cat="">' + icon + '전체 카테고리</a>' +
+      allCategories.map(function (c) { return '<a href="#" data-cat="' + c.id + '">' + icon + esc(c.name) + '</a>'; }).join('');
+    syncCatUI();
+  }
+
+  function syncCatUI() {
+    document.querySelectorAll('#priceCatNav a').forEach(function (a) {
+      a.classList.toggle('active', (a.getAttribute('data-cat') || '') === String(state.category));
+    });
+    var label = state.category ? (allCategories.find(function (c) { return String(c.id) === String(state.category); }) || {}).name : '전체 카테고리';
+    document.getElementById('priceCatSelectLabel').innerHTML = esc(label || '전체 카테고리') + ' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  }
+
+  async function loadPrices() {
+    var q = sb.from('price_references').select('*, categories(id,name)').order('sample_count', { ascending: false });
+    if (state.category) q = q.eq('category_id', state.category);
+    if (state.q) q = q.or('model_no.ilike.%' + state.q + '%,manufacturer.ilike.%' + state.q + '%');
+    var res = await q;
+    rows = res.data || [];
+    render();
+  }
+
+  function render() {
+    var wrap = document.getElementById('priceCardList');
+    if (!rows.length) { wrap.innerHTML = '<p style="padding:40px 0;text-align:center;color:var(--text-tertiary);">조건에 맞는 시세 정보가 없습니다.</p>'; return; }
+    wrap.innerHTML = rows.map(function (p) {
+      var icon = CAT_ICONS[p.category_id] || DEFAULT_ICON;
+      var catName = p.categories ? p.categories.name : '';
+      return '<div class="price-card">' +
+        '<span class="price-card-thumb"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">' + icon + '</svg></span>' +
+        '<div>' +
+        '<div class="price-card-brand">' + esc(p.manufacturer) + '</div>' +
+        '<div class="price-card-name">' + esc(p.model_no) + '</div>' +
+        '<div class="price-card-cat">' + esc(catName) + '</div>' +
+        '</div>' +
+        '<div class="price-card-range">' +
+        '<div class="range tabular">' + fmtWon(p.price_min) + ' ~ ' + fmtWon(p.price_max) + '</div>' +
+        '<div class="avg">평균 시세 <b class="tabular" style="color:var(--text);">' + fmtWon(p.price_avg) + '</b> · 거래 ' + (p.sample_count || 0) + '건</div>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  document.getElementById('priceCatNav').addEventListener('click', function (e) {
+    var a = e.target.closest('a'); if (!a) return;
+    e.preventDefault();
+    state.category = a.getAttribute('data-cat') || '';
+    syncCatUI();
+    loadPrices();
+  });
+
+  document.getElementById('priceSearchForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    state.q = document.getElementById('priceSearchInput').value.trim();
+    loadPrices();
+  });
+
+  document.addEventListener('versoi:ready', async function () {
+    await loadCategories();
+    await loadPrices();
+  });
+})();
+</script>
 </body>
 </html>

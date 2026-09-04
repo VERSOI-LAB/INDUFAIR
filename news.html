@@ -60,12 +60,12 @@
       </div>
       <div class="side-panel">
         <nav class="side-nav">
-          <a href="news.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>전체 뉴스</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>정책/지원</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>기술/동향</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l6-4v15"/><path d="M15 21V13l6-3v11"/><path d="M9 21v-4h6v4"/></svg>산업/경영</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>기업/경영</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v3"/></svg>전시/행사</a>
+          <a href="#" class="active" data-news-cat=""><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>전체 뉴스</a>
+          <a href="#" data-news-cat="정책/지원"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>정책/지원</a>
+          <a href="#" data-news-cat="기술/동향"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>기술/동향</a>
+          <a href="#" data-news-cat="산업/경영"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l6-4v15"/><path d="M15 21V13l6-3v11"/><path d="M9 21v-4h6v4"/></svg>산업/경영</a>
+          <a href="#" data-news-cat="기업/경영"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>기업/경영</a>
+          <a href="#" data-news-cat="전시/행사"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v3"/></svg>전시/행사</a>
         </nav>
       </div>
     </aside>
@@ -112,6 +112,7 @@
   var THUMB_ICON = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>';
   var posts = [];
   var searchQ = '';
+  var catFilter = '';
 
   function escapeHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -125,7 +126,7 @@
 
   async function loadPosts() {
     var res = await sb.from('community_posts')
-      .select('id,title,content,created_at')
+      .select('id,title,content,created_at,news_category')
       .eq('board_type', BOARD_TYPE)
       .order('created_at', { ascending: false });
     posts = res.data || [];
@@ -135,6 +136,7 @@
   function render() {
     var wrap = document.getElementById('newsRows');
     var list = posts;
+    if (catFilter) list = list.filter(function (p) { return p.news_category === catFilter; });
     if (searchQ) list = list.filter(function (p) { return p.title.toLowerCase().indexOf(searchQ.toLowerCase()) !== -1; });
     if (!list.length) { wrap.innerHTML = '<p style="padding:24px 0;text-align:center;color:var(--text-tertiary);">등록된 뉴스가 없습니다.</p>'; return; }
     wrap.innerHTML = list.map(function (p) {
@@ -142,7 +144,7 @@
       return '<div class="news-row">' +
         '<span class="news-thumb">' + THUMB_ICON + '</span>' +
         '<div>' +
-        '<span class="news-tag">산업 뉴스</span>' +
+        '<span class="news-tag">' + escapeHtml(p.news_category || '산업 뉴스') + '</span>' +
         '<a href="community.html?board=news&post=' + p.id + '" class="news-title" style="display:block;">' + escapeHtml(p.title) + '</a>' +
         '<p class="news-desc">' + escapeHtml(desc) + '</p>' +
         '<span class="news-date tabular">' + fmtDate(p.created_at) + '</span>' +
@@ -155,6 +157,17 @@
     e.preventDefault();
     searchQ = document.getElementById('newsSearchInput').value.trim();
     render();
+  });
+
+  var catLinks = document.querySelectorAll('.side-nav [data-news-cat]');
+  catLinks.forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      catFilter = link.getAttribute('data-news-cat');
+      catLinks.forEach(function (l) { l.classList.remove('active'); });
+      link.classList.add('active');
+      render();
+    });
   });
 
   document.addEventListener('versoi:ready', function () { loadPosts(); });
