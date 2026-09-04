@@ -177,6 +177,18 @@
     renderProduct();
     sb.rpc('increment_product_view', { p_product_id: productId }).then(function(){}, function(){});
     loadQna();
+    recordRecentlyViewed(productId);
+  }
+
+  function recordRecentlyViewed(id){
+    try {
+      var KEY = 'versoi_recently_viewed';
+      var list = JSON.parse(localStorage.getItem(KEY) || '[]');
+      list = list.filter(function(x){ return x !== id; });
+      list.unshift(id);
+      if (list.length > 24) list = list.slice(0, 24);
+      localStorage.setItem(KEY, JSON.stringify(list));
+    } catch (e) { /* localStorage unavailable, non-fatal */ }
   }
 
   function renderBreadcrumb(){

@@ -5,7 +5,8 @@
 
   var PATH = location.pathname.split('/').pop() || 'index.html';
 
-  var BUYER_PROTECTED = ['mypage.html', 'order.html', 'shipping.html', 'cancel.html', 'account.html', 'cart.html'];
+  var BUYER_PROTECTED = ['mypage.html', 'order.html', 'shipping.html', 'cancel.html', 'account.html', 'cart.html',
+    'favorites.html', 'coupons.html', 'inquiries.html', 'my-listings.html'];
   var SELLER_PROTECTED = ['seller-dashboard.html', 'seller-products.html', 'seller-orders.html',
     'seller-inquiries.html', 'seller-settlement.html', 'seller-tax.html', 'seller-account.html'];
 
