@@ -81,10 +81,11 @@
     <div>
       <h1 style="font-size:1.5rem;font-weight:900;">회원/계정</h1>
 
-      <div class="board-tabs">
-        <button class="active">회원정보</button><button>비밀번호 변경</button><button>알림 설정</button><button>로그인 기록</button>
+      <div class="board-tabs" data-tab-group>
+        <button class="active" data-tab-target="t-info">회원정보</button><button data-tab-target="t-password">비밀번호 변경</button><button data-tab-target="t-notify">알림 설정</button><button data-tab-target="t-login-history">로그인 기록</button>
       </div>
 
+      <div data-tab-panel="t-info" class="settings-panel active">
       <div class="info-panel">
         <div class="info-row"><span class="lbl">회원구분</span><span class="val kr" id="acctMemberType">-</span></div>
         <div class="info-row"><span class="lbl">아이디</span><span class="val" id="acctUsername">-</span></div>
@@ -107,20 +108,41 @@
         </div>
       </div>
 
-      <p class="settings-title">알림 설정</p>
-      <div class="info-panel">
-        <div class="toggle-row">
-          <span>주문/배송 알림</span>
-          <label class="toggle"><input type="checkbox" id="toggleNotifyOrder"><span class="track"><span class="thumb"></span></span></label>
-        </div>
-        <div class="toggle-row">
-          <span>문의 답변 알림</span>
-          <label class="toggle"><input type="checkbox" id="toggleNotifyInquiry"><span class="track"><span class="thumb"></span></span></label>
+      <div class="form-actions-simple">
+        <a href="#" class="link-danger" id="withdrawLink">회원탈퇴</a>
+      </div>
+      </div>
+
+      <div data-tab-panel="t-password" class="settings-panel">
+        <div class="info-panel">
+          <p class="settings-title" style="margin-top:0;">비밀번호 변경</p>
+          <div class="field" style="margin-bottom:14px;max-width:360px;"><label>새 비밀번호</label><input type="password" id="newPwInput" placeholder="새 비밀번호를 입력하세요 (8자 이상)"></div>
+          <div class="field" style="max-width:360px;"><label>새 비밀번호 확인</label><input type="password" id="newPwConfirm" placeholder="새 비밀번호를 다시 입력하세요"></div>
+          <button type="button" class="btn btn-primary" id="changePwBtn" style="margin-top:16px;">변경하기</button>
         </div>
       </div>
 
-      <div class="form-actions-simple">
-        <a href="#" class="link-danger" id="withdrawLink">회원탈퇴</a>
+      <div data-tab-panel="t-notify" class="settings-panel">
+        <p class="settings-title" style="margin-top:0;">알림 설정</p>
+        <div class="info-panel">
+          <div class="toggle-row">
+            <span>주문/배송 알림</span>
+            <label class="toggle"><input type="checkbox" id="toggleNotifyOrder"><span class="track"><span class="thumb"></span></span></label>
+          </div>
+          <div class="toggle-row">
+            <span>문의 답변 알림</span>
+            <label class="toggle"><input type="checkbox" id="toggleNotifyInquiry"><span class="track"><span class="thumb"></span></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div data-tab-panel="t-login-history" class="settings-panel">
+        <div class="info-panel">
+          <p class="settings-title" style="margin-top:0;">로그인 기록</p>
+          <div class="info-row"><span class="lbl">최근 로그인</span><span class="val" id="lastSignInAt">-</span></div>
+          <div class="info-row"><span class="lbl">현재 접속 브라우저</span><span class="val" id="currentDevice">-</span></div>
+          <p style="font-size:.78rem;color:var(--text-tertiary);margin-top:14px;">보안을 위해 최근 로그인 정보만 표시합니다. 본인이 아닌 로그인이 의심되면 즉시 비밀번호를 변경해주세요.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -140,10 +162,15 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.querySelectorAll('.board-tabs button').forEach(function(btn){
+  document.querySelectorAll('[data-tab-target]').forEach(function(btn){
     btn.addEventListener('click', function(){
-      document.querySelectorAll('.board-tabs button').forEach(function(b){ b.classList.remove('active'); });
+      var group = btn.closest('[data-tab-group]');
+      group.querySelectorAll('[data-tab-target]').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
+      var target = btn.getAttribute('data-tab-target');
+      document.querySelectorAll('[data-tab-panel]').forEach(function(p){ p.classList.remove('active'); });
+      var panel = document.querySelector('[data-tab-panel="' + target + '"]');
+      if (panel) panel.classList.add('active');
     });
   });
 </script>
@@ -208,7 +235,27 @@
         alert('회원탈퇴는 고객센터 1:1 문의를 통해 접수해 주세요.');
       }
     });
+
+    var sessionRes = await window.sb.auth.getSession();
+    var authUser = sessionRes.data.session ? sessionRes.data.session.user : null;
+    document.getElementById('lastSignInAt').textContent = authUser && authUser.last_sign_in_at ? fmtDate(authUser.last_sign_in_at) + ' ' + new Date(authUser.last_sign_in_at).toTimeString().slice(0, 5) : '-';
+    document.getElementById('currentDevice').textContent = navigator.userAgent;
   }
+
+  document.getElementById('changePwBtn').addEventListener('click', async function () {
+    var pw = document.getElementById('newPwInput').value;
+    var pw2 = document.getElementById('newPwConfirm').value;
+    if (pw.length < 8) { alert('비밀번호는 8자 이상이어야 합니다.'); return; }
+    if (pw !== pw2) { alert('비밀번호가 일치하지 않습니다.'); return; }
+    var btn = this;
+    btn.disabled = true;
+    var res = await window.sb.auth.updateUser({ password: pw });
+    btn.disabled = false;
+    if (res.error) { alert('변경 실패: ' + res.error.message); return; }
+    alert('비밀번호가 변경되었습니다.');
+    document.getElementById('newPwInput').value = '';
+    document.getElementById('newPwConfirm').value = '';
+  });
 
   function renderAddress() {
     var el = document.getElementById('acctAddress');
