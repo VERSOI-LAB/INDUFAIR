@@ -853,3 +853,35 @@ img,svg{display:block;max-width:100%;}
      far better for the 5-6 card rows (dashboard/tax/settlement). */
   .stat-card-row{grid-template-columns:1fr !important;}
 }
+
+/* ============ Static info/legal page body copy ============ */
+.legal-content{font-size:.9rem;line-height:1.75;color:var(--text-secondary);}
+.legal-content .updated-at{font-size:.8rem;color:var(--text-tertiary);margin-bottom:24px;}
+.legal-content h2{font-size:1.05rem;font-weight:800;color:var(--text);margin:28px 0 10px;}
+.legal-content h2:first-child{margin-top:0;}
+.legal-content h3{font-size:.94rem;font-weight:700;color:var(--text);margin:18px 0 8px;}
+.legal-content p{margin-bottom:10px;}
+.legal-content ul,.legal-content ol{margin:0 0 10px 1.3em;}
+.legal-content li{margin-bottom:5px;}
+.legal-content table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.85rem;}
+.legal-content th,.legal-content td{border:1px solid var(--border);padding:9px 12px;text-align:left;}
+.legal-content th{background:var(--bg-soft);font-weight:700;color:var(--text);}
+.legal-content strong{color:var(--text);font-weight:700;}
+.legal-content .notice-list-page{display:flex;flex-direction:column;}
+.legal-content .notice-list-page .notice-item{border-bottom:1px solid var(--border);padding:14px 0;}
+.legal-content .notice-list-page .notice-item:last-child{border-bottom:none;}
+.legal-content .notice-list-page .notice-item .faq-page-a{display:none;margin-top:12px;padding:0;}
+.legal-content .notice-list-page .notice-item.open .faq-page-a{display:block;}
+.faq-page-item{border-bottom:1px solid var(--border);}
+.faq-page-item:last-child{border-bottom:none;}
+.faq-page-q{display:flex;align-items:center;gap:10px;padding:16px 4px;cursor:pointer;font-size:.9rem;font-weight:700;color:var(--text);}
+.faq-page-q .faq-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--font-en);font-weight:800;font-size:.76rem;display:flex;align-items:center;justify-content:center;}
+.faq-page-q svg{margin-left:auto;flex-shrink:0;transition:transform .15s ease;color:var(--text-tertiary);}
+.faq-page-item.open .faq-page-q svg{transform:rotate(180deg);}
+.faq-page-a{display:none;padding:0 4px 18px 40px;font-size:.85rem;color:var(--text-secondary);line-height:1.7;}
+.faq-page-item.open .faq-page-a{display:block;}
+.download-page-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 4px;border-bottom:1px solid var(--border);}
+.download-page-row:last-child{border-bottom:none;}
+.download-page-row .who{display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:700;color:var(--text);}
+.download-page-row .who svg{color:var(--text-tertiary);flex-shrink:0;}
+.download-page-row span.hint{font-size:.76rem;font-weight:500;color:var(--text-tertiary);}
