@@ -3,28 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VERSOI 최근 본 상품</title>
-<meta name="description" content="이 브라우저에서 최근 확인한 상품을 모아보는 VERSOI 최근 본 상품">
+<title>VERSOI 결제수단 관리</title>
+<meta name="description" content="저장된 결제수단을 등록하고 관리하는 VERSOI 결제수단 관리">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="styles.css">
 <style>
 
-  .rv-head-row{display:flex;align-items:center;justify-content:space-between;margin-top:20px;}
-  .rv-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:16px;}
-  @media (max-width:1160px){ .rv-grid{grid-template-columns:repeat(4,1fr);} }
-  @media (max-width:900px){ .rv-grid{grid-template-columns:repeat(3,1fr);} }
-  @media (max-width:640px){ .rv-grid{grid-template-columns:repeat(2,1fr);} }
-  .rv-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;transition:box-shadow .2s ease,transform .2s ease;}
-  .rv-card:hover{box-shadow:var(--shadow-2);transform:translateY(-3px);}
-  .rv-media{aspect-ratio:1/1;background:var(--bg-soft);}
-  .rv-media img{width:100%;height:100%;object-fit:cover;}
-  .rv-body{padding:11px 12px 12px;}
-  .rv-brand{font-size:.72rem;color:var(--text-tertiary);}
-  .rv-name{display:block;font-size:.84rem;font-weight:700;color:var(--text);margin-top:2px;line-height:1.4;}
-  .rv-price{font-family:var(--font-en);font-weight:800;font-size:.9rem;margin-top:6px;}
-  .empty-state{padding:60px 0;text-align:center;color:var(--text-tertiary);font-size:.9rem;}
+  .pm-list{display:flex;flex-direction:column;gap:12px;margin-top:16px;}
+  .pm-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px 18px;}
+  .pm-card-icon{width:44px;height:30px;border-radius:6px;background:var(--navy-900);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;flex-shrink:0;}
+  .pm-card-info{flex:1;min-width:0;}
+  .pm-card-title{font-size:.9rem;font-weight:700;color:var(--text);}
+  .pm-card-sub{font-size:.78rem;color:var(--text-tertiary);margin-top:2px;}
+  .pm-default-badge{font-size:.68rem;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:20px;flex-shrink:0;}
+  .pm-add-form{background:var(--surface);border:1px dashed var(--border-strong);border-radius:var(--radius-m);padding:16px 18px;margin-top:16px;display:none;}
+  .pm-add-form.open{display:block;}
+  .pm-add-form .field{margin-bottom:12px;}
+  .pm-add-form label{display:block;font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:5px;}
+  .pm-add-form input,.pm-add-form select{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:.86rem;color:var(--text);font-family:inherit;}
+  .empty-state{padding:40px 0;text-align:center;color:var(--text-tertiary);font-size:.9rem;}
 </style>
 </head>
 <body>
@@ -61,7 +60,7 @@
           <a href="order.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>주문/배송 내역</a>
           <a href="rfq.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>견적요청 내역</a>
           <a href="favorites.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>관심 상품</a>
-          <a href="recently-viewed.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>최근 본 상품</a>
+          <a href="recently-viewed.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>최근 본 상품</a>
           <a href="goomrq-board.html?mine=1"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>구해요 내역</a>
           <a href="my-listings.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>판매 등록 내역</a>
           <a href="inquiries.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>문의/상담 내역</a>
@@ -77,16 +76,28 @@
     </aside>
 
     <div>
-      <h1 style="font-size:1.5rem;font-weight:900;">최근 본 상품</h1>
-      <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">최근 확인하신 상품을 다시 확인해보세요.</p>
+      <h1 style="font-size:1.5rem;font-weight:900;">결제수단 관리</h1>
+      <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">자주 사용하는 결제수단을 등록해두면 주문 시 빠르게 선택할 수 있습니다.</p>
 
-      <div class="rv-head-row">
-        <p style="font-size:.84rem;color:var(--text-tertiary);">이 브라우저에서 최근 확인한 상품 목록입니다.</p>
-        <button type="button" class="btn btn-ghost btn-sm" id="rvClearBtn">전체 삭제</button>
+      <p style="font-size:.8rem;color:var(--text-tertiary);margin-top:12px;">보안을 위해 카드번호는 뒤 4자리만 저장되며, 실제 결제는 매 주문 시 정식 결제창을 통해 진행됩니다.</p>
+      <div class="pm-list" id="pmList">
+        <div class="empty-state">불러오는 중...</div>
       </div>
-      <div class="rv-grid" id="rvGrid">
-        <div class="empty-state" style="grid-column:1/-1;">불러오는 중...</div>
-      </div>
+      <button type="button" class="btn btn-outline" id="pmAddToggleBtn" style="margin-top:14px;">+ 결제수단 추가</button>
+      <form class="pm-add-form" id="pmAddForm">
+        <div class="field"><label>카드사</label>
+          <select id="pmCardCompany">
+            <option>신한카드</option><option>삼성카드</option><option>현대카드</option><option>KB국민카드</option><option>롯데카드</option><option>비씨카드</option><option>하나카드</option><option>우리카드</option><option>기타</option>
+          </select>
+        </div>
+        <div class="field"><label>카드 번호 뒤 4자리</label><input type="text" id="pmLast4" maxlength="4" inputmode="numeric" placeholder="1234"></div>
+        <div class="field"><label>별칭 (선택)</label><input type="text" id="pmNickname" placeholder="예: 회사 법인카드"></div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text-secondary);margin-bottom:14px;"><input type="checkbox" id="pmIsDefault"> 기본 결제수단으로 설정</label>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-ghost" id="pmCancelBtn" style="flex:1;justify-content:center;">취소</button>
+          <button type="submit" class="btn btn-primary" id="pmSaveBtn" style="flex:2;justify-content:center;">등록하기</button>
+        </div>
+      </form>
 
     </div>
   </div>
@@ -111,53 +122,81 @@
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
 <script>
-(function () {
-  var KEY = 'versoi_recently_viewed';
-  function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function fmtWon(n) { return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
+  var pmUserId = null;
+  var pmMethods = [];
 
-  function getIds() {
-    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; }
+  function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  async function loadPaymentMethods() {
+    var res = await sb.from('payment_methods').select('*').eq('profile_id', pmUserId).order('is_default', { ascending: false }).order('created_at', { ascending: false });
+    pmMethods = res.data || [];
+    renderPm();
   }
 
-  async function render() {
-    var grid = document.getElementById('rvGrid');
-    var ids = getIds();
-    if (!ids.length) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">최근 본 상품이 없습니다.<br><a href="goods.html" style="color:var(--accent);font-weight:700;">상품 둘러보기 &rsaquo;</a></div>';
-      return;
-    }
-    var res = await sb.from('products')
-      .select('id,title,manufacturer,price,status,market_type,product_images(url,sort_order)')
-      .in('id', ids);
-    if (res.error) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">불러오지 못했습니다.</div>'; return; }
-    var byId = {};
-    (res.data || []).forEach(function (p) { if (p.status !== 'deleted') byId[p.id] = p; });
-    var ordered = ids.map(function (id) { return byId[id]; }).filter(Boolean);
-    if (!ordered.length) {
-      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">최근 본 상품이 없습니다.</div>';
-      return;
-    }
-    grid.innerHTML = ordered.map(function (p) {
-      var imgs = (p.product_images || []).slice().sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
-      var img = imgs.length ? '<img src="' + imgs[0].url + '" alt="">' : '';
-      return '<a href="product-detail.html?id=' + p.id + '" class="rv-card">' +
-        '<div class="rv-media">' + img + '</div>' +
-        '<div class="rv-body"><span class="rv-brand">' + esc(p.manufacturer || '') + '</span>' +
-        '<span class="rv-name">' + esc(p.title) + '</span>' +
-        '<span class="rv-price">' + fmtWon(p.price) + '</span></div>' +
-        '</a>';
+  function renderPm() {
+    var wrap = document.getElementById('pmList');
+    if (!pmMethods.length) { wrap.innerHTML = '<div class="empty-state">등록된 결제수단이 없습니다.</div>'; return; }
+    wrap.innerHTML = pmMethods.map(function (m) {
+      return '<div class="pm-card">' +
+        '<span class="pm-card-icon">CARD</span>' +
+        '<div class="pm-card-info"><div class="pm-card-title">' + esc(m.card_company) + ' (' + esc(m.nickname || '카드') + ')</div>' +
+        '<div class="pm-card-sub">**** **** **** ' + esc(m.last4) + '</div></div>' +
+        (m.is_default ? '<span class="pm-default-badge">기본</span>' : '') +
+        '<button type="button" class="btn btn-ghost btn-sm js-pm-delete" data-id="' + m.id + '">삭제</button>' +
+        '</div>';
     }).join('');
   }
 
-  document.getElementById('rvClearBtn').addEventListener('click', function () {
-    if (!confirm('최근 본 상품 목록을 모두 삭제하시겠습니까?')) return;
-    localStorage.removeItem(KEY);
-    render();
+  document.getElementById('pmAddToggleBtn').addEventListener('click', function () {
+    document.getElementById('pmAddForm').classList.add('open');
+    this.style.display = 'none';
+  });
+  document.getElementById('pmCancelBtn').addEventListener('click', function () {
+    document.getElementById('pmAddForm').classList.remove('open');
+    document.getElementById('pmAddToggleBtn').style.display = '';
+    document.getElementById('pmAddForm').reset();
   });
 
-  document.addEventListener('versoi:ready', function () { render(); });
-})();
+  document.getElementById('pmAddForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var last4 = document.getElementById('pmLast4').value.trim();
+    if (!/^[0-9]{4}$/.test(last4)) { alert('카드 번호 뒤 4자리를 정확히 입력해주세요.'); return; }
+    var btn = document.getElementById('pmSaveBtn');
+    btn.disabled = true;
+    var isDefault = document.getElementById('pmIsDefault').checked;
+    if (isDefault) {
+      await sb.from('payment_methods').update({ is_default: false }).eq('profile_id', pmUserId);
+    }
+    var res = await sb.from('payment_methods').insert({
+      profile_id: pmUserId,
+      card_company: document.getElementById('pmCardCompany').value,
+      last4: last4,
+      nickname: document.getElementById('pmNickname').value.trim() || null,
+      is_default: isDefault || pmMethods.length === 0
+    });
+    btn.disabled = false;
+    if (res.error) { alert('등록에 실패했습니다: ' + res.error.message); return; }
+    document.getElementById('pmAddForm').reset();
+    document.getElementById('pmAddForm').classList.remove('open');
+    document.getElementById('pmAddToggleBtn').style.display = '';
+    loadPaymentMethods();
+  });
+
+  document.getElementById('pmList').addEventListener('click', async function (e) {
+    var btn = e.target.closest('.js-pm-delete');
+    if (!btn) return;
+    if (!confirm('이 결제수단을 삭제하시겠습니까?')) return;
+    btn.disabled = true;
+    await sb.from('payment_methods').delete().eq('id', btn.getAttribute('data-id'));
+    loadPaymentMethods();
+  });
+
+  document.addEventListener('versoi:ready', function (e) {
+    var user = e.detail.user;
+    if (!user) return;
+    pmUserId = user.id;
+    loadPaymentMethods();
+  });
 
 </script>
 </body>

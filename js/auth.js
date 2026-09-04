@@ -6,7 +6,7 @@
   var PATH = location.pathname.split('/').pop() || 'index.html';
 
   var BUYER_PROTECTED = ['mypage.html', 'order.html', 'shipping.html', 'cancel.html', 'account.html', 'cart.html',
-    'favorites.html', 'coupons.html', 'inquiries.html', 'my-listings.html'];
+    'favorites.html', 'coupons.html', 'inquiries.html', 'my-listings.html', 'company-info.html', 'payment-methods.html'];
   var SELLER_PROTECTED = ['seller-dashboard.html', 'seller-products.html', 'seller-orders.html',
     'seller-inquiries.html', 'seller-settlement.html', 'seller-tax.html', 'seller-account.html'];
 
@@ -230,6 +230,40 @@
     });
   }
 
+  // ---- device tracking (for "로그아웃 된 기기 관리") ----
+  function deviceLabel() {
+    var ua = navigator.userAgent;
+    var browser = 'Unknown Browser';
+    if (ua.indexOf('Edg/') !== -1) browser = 'Edge';
+    else if (ua.indexOf('Chrome/') !== -1) browser = 'Chrome';
+    else if (ua.indexOf('Firefox/') !== -1) browser = 'Firefox';
+    else if (ua.indexOf('Safari/') !== -1) browser = 'Safari';
+    var os = 'Unknown OS';
+    if (ua.indexOf('Mac OS X') !== -1) os = 'macOS';
+    else if (ua.indexOf('Windows') !== -1) os = 'Windows';
+    else if (ua.indexOf('Android') !== -1) os = 'Android';
+    else if (ua.indexOf('iPhone') !== -1 || ua.indexOf('iPad') !== -1) os = 'iOS';
+    else if (ua.indexOf('Linux') !== -1) os = 'Linux';
+    return browser + ' / ' + os;
+  }
+  function recordDevice(user) {
+    try {
+      var KEY = 'versoi_device_id';
+      var deviceId = localStorage.getItem(KEY);
+      if (!deviceId) {
+        deviceId = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem(KEY, deviceId);
+      }
+      window.sb.from('user_devices').upsert({
+        profile_id: user.id,
+        device_id: deviceId,
+        device_label: deviceLabel(),
+        user_agent: navigator.userAgent,
+        last_seen_at: new Date().toISOString()
+      }, { onConflict: 'profile_id,device_id' }).then(function () {}, function () {});
+    } catch (e) { /* non-fatal */ }
+  }
+
   async function init() {
     var user = await currentUser();
 
@@ -243,11 +277,13 @@
     updateBadges(user);
     wireSearchIcon();
     wireNotificationBell(user);
+    if (user) recordDevice(user);
 
     window.VERSOI = window.VERSOI || {};
     window.VERSOI.user = user;
     window.VERSOI.signOut = doLogout;
     window.VERSOI.requireAuth = function () { if (!user) { goLogin(); return false; } return true; };
+    window.VERSOI.currentDeviceId = (function () { try { return localStorage.getItem('versoi_device_id'); } catch (e) { return null; } })();
     document.dispatchEvent(new CustomEvent('versoi:ready', { detail: { user: user } }));
   }
 

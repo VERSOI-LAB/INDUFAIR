@@ -105,6 +105,8 @@
   .rfq-quote-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
   .rfq-quote-item .price{font-weight:800;color:var(--accent);font-family:var(--font-en);}
   .rfq-quote-item .msg{font-size:.8rem;color:var(--text-tertiary);margin-top:2px;}
+  .rfq-fav-company{color:var(--text-tertiary);display:inline-flex;align-items:center;}
+  .rfq-fav-company.on{color:var(--up);}
   .rfq-quote-form{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
   .rfq-quote-form .field{flex:1;min-width:140px;}
   .rfq-empty{padding:40px 0;text-align:center;color:var(--text-tertiary);font-size:.88rem;}
@@ -172,7 +174,7 @@
           <a href="#" data-rfq-tab-index="2"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>견적 수신<span class="count">3</span></a>
           <a href="#" data-rfq-tab-index="3"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>비교 중<span class="count">2</span></a>
           <a href="#" data-rfq-tab-index="4"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>거래 완료<span class="count">12</span></a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>찜한 업체<span class="count">5</span></a>
+          <a href="#" id="favCompaniesLink"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>찜한 업체</a>
         </nav>
       </div>
 
@@ -181,7 +183,7 @@
         <nav class="side-nav">
           <a href="rfq.html?status=open"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-8-8"/><path d="M20 4L12 12"/></svg>받은 견적 요청<span class="count">8</span></a>
           <a href="#" id="myQuotesLink"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>견적 제출 현황<span class="count">4</span></a>
-          <a href="#" onclick="alert('단골 구매자 관리 기능은 준비 중입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>단골 구매자 관리</a>
+          <a href="seller-orders.html?fav_buyers=1"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>단골 구매자 관리</a>
         </nav>
       </div>
 
@@ -383,9 +385,15 @@
       '</div>';
 
     var canQuote = currentUser && currentUser.company && rfq.profile_id !== currentUser.id;
+    var canFavCompany = currentUser && (!currentUser.company || rfq.profile_id === currentUser.id);
     var quoteListHtml = quotes.length
       ? '<div class="rfq-quote-list">' + quotes.map(function(q){
-          return '<div class="rfq-quote-item"><div><div class="price tabular">' + fmtWon(q.price) + '</div>' + (q.message ? '<div class="msg">' + esc(q.message) + '</div>' : '') + '</div><span class="tabular" style="font-size:.76rem;color:var(--text-tertiary);">' + fmtDate(q.created_at) + '</span></div>';
+          var companyName = q.companies ? esc(q.companies.name) : '업체 미상';
+          var isFav = q.company_id && favoriteCompanyIds[q.company_id];
+          var favBtn = (canFavCompany && q.company_id)
+            ? '<button type="button" class="rfq-fav-company' + (isFav ? ' on' : '') + '" data-company-id="' + q.company_id + '" aria-label="업체 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="' + (isFav ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'
+            : '';
+          return '<div class="rfq-quote-item"><div><div class="qcompany" style="font-weight:700;font-size:.82rem;display:flex;align-items:center;gap:6px;">' + companyName + favBtn + '</div><div class="price tabular">' + fmtWon(q.price) + '</div>' + (q.message ? '<div class="msg">' + esc(q.message) + '</div>' : '') + '</div><span class="tabular" style="font-size:.76rem;color:var(--text-tertiary);">' + fmtDate(q.created_at) + '</span></div>';
         }).join('') + '</div>'
       : '<p style="color:var(--text-tertiary);margin-bottom:14px;">아직 제출된 견적이 없습니다.</p>';
 
@@ -419,6 +427,8 @@
   }
 
   var mineQuotesOnly = false;
+  var favCompaniesOnly = false;
+  var favoriteCompanyIds = {};
 
   function passesFilter(rfq){
     if (currentStatus && rfq.status !== currentStatus) return false;
@@ -428,7 +438,32 @@
       var mine = (rfq.rfq_quotes || []).some(function (q) { return q.company_id === currentUser.company.id; });
       if (!mine) return false;
     }
+    if (favCompaniesOnly) {
+      var hasFav = (rfq.rfq_quotes || []).some(function (q) { return q.company_id && favoriteCompanyIds[q.company_id]; });
+      if (!hasFav) return false;
+    }
     return true;
+  }
+
+  async function loadFavoriteCompanies(){
+    if (!currentUser) { favoriteCompanyIds = {}; return; }
+    var res = await sb.from('favorite_companies').select('company_id').eq('profile_id', currentUser.id);
+    favoriteCompanyIds = {};
+    (res.data || []).forEach(function (r) { favoriteCompanyIds[r.company_id] = true; });
+  }
+
+  async function toggleFavoriteCompany(companyId, btn){
+    if (!window.VERSOI.requireAuth()) return;
+    btn.disabled = true;
+    if (favoriteCompanyIds[companyId]) {
+      await sb.from('favorite_companies').delete().eq('profile_id', currentUser.id).eq('company_id', companyId);
+      delete favoriteCompanyIds[companyId];
+    } else {
+      await sb.from('favorite_companies').insert({ profile_id: currentUser.id, company_id: companyId });
+      favoriteCompanyIds[companyId] = true;
+    }
+    btn.disabled = false;
+    render();
   }
 
   function render(){
@@ -442,7 +477,7 @@
 
   async function loadRfqs(){
     var res = await sb.from('rfq_requests')
-      .select('*, categories(name), rfq_quotes(id, price, message, created_at, company_id)')
+      .select('*, categories(name), rfq_quotes(id, price, message, created_at, company_id, companies(id, name))')
       .order('created_at', { ascending: false });
     if (res.error) { console.error('[VERSOI] rfq load error', res.error); rfqTableEl.innerHTML = '<div class="rfq-empty">불러오지 못했습니다.</div>'; return; }
     allRfqs = (res.data || []).map(function (r) {
@@ -517,6 +552,19 @@
     render();
   });
 
+  document.getElementById('favCompaniesLink').addEventListener('click', function(e){
+    e.preventDefault();
+    if (!window.VERSOI.requireAuth()) return;
+    favCompaniesOnly = !favCompaniesOnly;
+    this.classList.toggle('active', favCompaniesOnly);
+    render();
+  });
+
+  rfqTableEl.addEventListener('click', function(e){
+    var favBtn = e.target.closest('.rfq-fav-company');
+    if (favBtn) { e.preventDefault(); e.stopPropagation(); toggleFavoriteCompany(favBtn.getAttribute('data-company-id'), favBtn); return; }
+  });
+
   document.addEventListener('versoi:ready', function(e){
     currentUser = e.detail.user;
     var statusParam = new URLSearchParams(location.search).get('status');
@@ -532,7 +580,11 @@
       mineQuotesOnly = true;
       document.getElementById('myQuotesLink').classList.add('active');
     }
-    loadRfqs();
+    if (new URLSearchParams(location.search).get('fav_companies') === '1' && currentUser) {
+      favCompaniesOnly = true;
+      document.getElementById('favCompaniesLink').classList.add('active');
+    }
+    loadFavoriteCompanies().then(loadRfqs);
   });
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>

@@ -29,6 +29,10 @@
   .status-tag2{font-size:.7rem;font-weight:800;padding:4px 10px;border-radius:20px;flex-shrink:0;white-space:nowrap;}
   .status-tag2.done{background:var(--good-soft);color:var(--good);}
   .status-tag2.wait{background:var(--warn-soft);color:var(--warn);}
+  .qna-bookmark{flex-shrink:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);border-radius:8px;transition:color .15s ease,background .15s ease;}
+  .qna-bookmark:hover{background:var(--bg-soft);}
+  .qna-bookmark.on{color:var(--warn);}
+  .qna-bookmark.on svg{fill:currentColor;}
 </style>
 </head>
 <body>
@@ -67,7 +71,7 @@
           <a href="qna.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>전체 질문</a>
           <a href="#" id="qnaFilterAnswered"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>답변 완료</a>
           <a href="#" id="qnaFilterMine"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>내 답변</a>
-          <a href="#" onclick="alert('준비 중인 기능입니다.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>즐겨찾기</a>
+          <a href="#" id="qnaFilterBookmarked"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>즐겨찾기</a>
         </nav>
       </div>
     </aside>
@@ -151,14 +155,37 @@
         if (currentUserId && c.profile_id === currentUserId) answeredByMe[c.post_id] = true;
       });
     }
+    bookmarked = {};
+    if (currentUserId && ids.length) {
+      var bRes = await sb.from('post_bookmarks').select('post_id').eq('profile_id', currentUserId).in('post_id', ids);
+      (bRes.data || []).forEach(function (b) { bookmarked[b.post_id] = true; });
+    }
     render();
   }
+
+  async function toggleBookmark(postId, btn) {
+    if (!window.VERSOI.requireAuth()) return;
+    btn.disabled = true;
+    if (bookmarked[postId]) {
+      await sb.from('post_bookmarks').delete().eq('profile_id', currentUserId).eq('post_id', postId);
+      delete bookmarked[postId];
+    } else {
+      await sb.from('post_bookmarks').insert({ profile_id: currentUserId, post_id: postId });
+      bookmarked[postId] = true;
+    }
+    btn.disabled = false;
+    render();
+  }
+
+  var bookmarked = {};
+  var BOOKMARK_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
 
   function filtered() {
     var list = posts.slice();
     if (currentTab === 'popular') list.sort(function (a, b) { return (b.view_count || 0) - (a.view_count || 0); });
     if (extraFilter === 'answered') list = list.filter(function (p) { return (commentCounts[p.id] || 0) > 0; });
     if (extraFilter === 'mine') list = list.filter(function (p) { return answeredByMe[p.id]; });
+    if (extraFilter === 'bookmarked') list = list.filter(function (p) { return bookmarked[p.id]; });
     if (searchQ) list = list.filter(function (p) { return p.title.toLowerCase().indexOf(searchQ.toLowerCase()) !== -1; });
     return list;
   }
@@ -170,12 +197,14 @@
     wrap.innerHTML = list.map(function (p) {
       var answered = (commentCounts[p.id] || 0) > 0;
       var statusBadge = answered ? '<span class="status-tag2 done">답변완료</span>' : '<span class="status-tag2 wait">답변대기</span>';
+      var isBookmarked = !!bookmarked[p.id];
       return '<div class="qna-row">' +
         '<span class="qna-icon">' + ICON + '</span>' +
         '<div class="qna-main">' +
         '<a href="community.html?board=qna&post=' + p.id + '" class="q-title">' + escapeHtml(p.title) + '</a>' +
         '<div class="q-meta"><span>답변 <b class="tabular">' + (commentCounts[p.id] || 0) + '</b></span><span>조회 <b class="tabular">' + (p.view_count || 0) + '</b></span><span class="tabular">' + fmtDate(p.created_at) + '</span></div>' +
         '</div>' + statusBadge +
+        '<button type="button" class="qna-bookmark' + (isBookmarked ? ' on' : '') + '" data-post-id="' + p.id + '" aria-label="즐겨찾기">' + BOOKMARK_ICON + '</button>' +
         '</div>';
     }).join('');
   }
@@ -208,6 +237,16 @@
     e.preventDefault();
     if (!window.VERSOI.requireAuth()) return;
     setExtraFilter('mine', this);
+  });
+  document.getElementById('qnaFilterBookmarked').addEventListener('click', function (e) {
+    e.preventDefault();
+    if (!window.VERSOI.requireAuth()) return;
+    setExtraFilter('bookmarked', this);
+  });
+  document.getElementById('qnaRows').addEventListener('click', function (e) {
+    var btn = e.target.closest('.qna-bookmark');
+    if (!btn) return;
+    toggleBookmark(btn.getAttribute('data-post-id'), btn);
   });
 
   document.addEventListener('versoi:ready', function (e) {

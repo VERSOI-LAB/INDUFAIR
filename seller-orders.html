@@ -96,6 +96,7 @@
         <div class="admin-filter-bar">
           <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="orderSearchInput" placeholder="주문번호, 상품명, 구매자명 검색"></div>
           <select id="paymentFilter"><option value="">결제 방법 전체</option><option value="card">신용카드</option><option value="transfer">계좌이체</option></select>
+          <label style="display:flex;align-items:center;gap:6px;font-size:.84rem;color:var(--text-secondary);white-space:nowrap;padding:0 4px;"><input type="checkbox" id="favBuyersOnlyToggle"> 단골 구매자만</label>
           <button class="reset-btn" id="orderResetBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
         </div>
 
@@ -141,7 +142,7 @@
 <script src="js/auth.js"></script>
 <script src="js/seller-common.js"></script>
 <script>
-var OF = { companyId: null, items: [], activeStatus: 'all' };
+var OF = { companyId: null, items: [], activeStatus: 'all', favBuyerIds: {}, favBuyersOnly: false };
 var PAY_LABEL = { card: '신용카드', transfer: '계좌이체' };
 
 function actionButtonsHtml(oi) {
@@ -162,8 +163,12 @@ function actionButtonsHtml(oi) {
 
 function orderRowHtml(oi) {
   var o = oi.orders || {};
+  var isFavBuyer = o.buyer_id && OF.favBuyerIds[o.buyer_id];
+  var favBtn = o.buyer_id
+    ? '<button type="button" class="js-fav-buyer" data-buyer-id="' + o.buyer_id + '" style="color:' + (isFavBuyer ? 'var(--warn)' : 'var(--text-tertiary)') + ';vertical-align:-2px;margin-right:2px;" aria-label="단골 구매자로 등록"><svg width="13" height="13" viewBox="0 0 24 24" fill="' + (isFavBuyer ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/></svg></button>'
+    : '';
   return '<tr>' +
-    '<td><div class="order-id">' + SC.esc(o.order_no) + '</div><div class="order-buyer">구매자 ' + SC.esc(o.recipient) + '<br>' + SC.esc(o.phone) + '</div></td>' +
+    '<td><div class="order-id">' + SC.esc(o.order_no) + '</div><div class="order-buyer">' + favBtn + '구매자 ' + SC.esc(o.recipient) + '<br>' + SC.esc(o.phone) + '</div></td>' +
     '<td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><div><div class="name">' + SC.esc(oi.product_title) + '</div><div class="sub">수량 ' + oi.qty + '개</div></div></div></td>' +
     '<td class="num cell-strong">' + SC.won(oi.line_amount) + '</td>' +
     '<td><span class="badge ' + SC.badgeCls(oi.status) + '">' + SC.label(oi.status) + '</span></td>' +
@@ -211,6 +216,7 @@ function renderOrders() {
     if (bucket === 'canceled' || bucket === 'refund_requested' || bucket === 'refunded') bucket = 'cancel';
     if (OF.activeStatus !== 'all' && bucket !== OF.activeStatus) return false;
     if (pay && (!oi.orders || oi.orders.payment_method !== pay)) return false;
+    if (OF.favBuyersOnly && (!oi.orders || !oi.orders.buyer_id || !OF.favBuyerIds[oi.orders.buyer_id])) return false;
     if (q) {
       var hay = (oi.product_title + ' ' + (oi.orders ? oi.orders.order_no + ' ' + oi.orders.recipient : '')).toLowerCase();
       if (hay.indexOf(q) === -1) return false;
@@ -233,7 +239,7 @@ function renderOrders() {
 }
 
 async function loadOrders() {
-  var res = await sb.from('order_items').select('*, orders(order_no, recipient, phone, address, payment_method)').eq('company_id', OF.companyId).order('created_at', { ascending: false });
+  var res = await sb.from('order_items').select('*, orders(order_no, recipient, phone, address, payment_method, buyer_id)').eq('company_id', OF.companyId).order('created_at', { ascending: false });
   OF.items = res.data || [];
   renderOrders();
 }
@@ -248,13 +254,41 @@ document.getElementById('orderTabs').addEventListener('click', function (e) {
 });
 document.getElementById('orderSearchInput').addEventListener('input', renderOrders);
 document.getElementById('paymentFilter').addEventListener('change', renderOrders);
+document.getElementById('favBuyersOnlyToggle').addEventListener('change', function () {
+  OF.favBuyersOnly = this.checked;
+  renderOrders();
+});
 document.getElementById('orderResetBtn').addEventListener('click', function () {
   document.getElementById('orderSearchInput').value = '';
   document.getElementById('paymentFilter').value = '';
+  document.getElementById('favBuyersOnlyToggle').checked = false;
   OF.activeStatus = 'all';
+  OF.favBuyersOnly = false;
   document.querySelectorAll('#orderTabs button').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-status') === 'all'); });
   renderOrders();
 });
+
+document.getElementById('ordersTbody').addEventListener('click', async function (e) {
+  var btn = e.target.closest('.js-fav-buyer');
+  if (!btn) return;
+  var buyerId = btn.getAttribute('data-buyer-id');
+  btn.disabled = true;
+  if (OF.favBuyerIds[buyerId]) {
+    await sb.from('favorite_buyers').delete().eq('company_id', OF.companyId).eq('buyer_profile_id', buyerId);
+    delete OF.favBuyerIds[buyerId];
+  } else {
+    await sb.from('favorite_buyers').insert({ company_id: OF.companyId, buyer_profile_id: buyerId });
+    OF.favBuyerIds[buyerId] = true;
+  }
+  btn.disabled = false;
+  renderOrders();
+});
+
+async function loadFavBuyers() {
+  var res = await sb.from('favorite_buyers').select('buyer_profile_id').eq('company_id', OF.companyId);
+  OF.favBuyerIds = {};
+  (res.data || []).forEach(function (r) { OF.favBuyerIds[r.buyer_profile_id] = true; });
+}
 
 document.getElementById('exportCsvBtn').addEventListener('click', function () {
   var headers = ['주문번호', '상품명', '수량', '주문금액', '주문상태', '결제방법', '수령인', '주문일'];
@@ -267,7 +301,13 @@ document.getElementById('exportCsvBtn').addEventListener('click', function () {
 
 SC.ready(async function (user) {
   OF.companyId = user.company.id;
+  await loadFavBuyers();
   await loadOrders();
+  if (new URLSearchParams(location.search).get('fav_buyers') === '1') {
+    document.getElementById('favBuyersOnlyToggle').checked = true;
+    OF.favBuyersOnly = true;
+    renderOrders();
+  }
 });
 </script>
 </body>

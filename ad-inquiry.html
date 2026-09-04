@@ -3,12 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VERSOI 서비스 정책</title>
-<meta name="description" content="VERSOI 수수료, 배송, 취소/환불, 정산 등 서비스 운영 정책 안내">
+<title>VERSOI 광고문의</title>
+<meta name="description" content="VERSOI 광고 상품 문의 및 접수">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="styles.css">
+
+<style>
+  .ad-form .field{margin-bottom:16px;}
+  .ad-form label{display:block;font-size:.84rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+  .ad-form input,.ad-form select,.ad-form textarea{width:100%;border:1px solid var(--border);border-radius:9px;padding:11px 13px;font-size:.88rem;color:var(--text);font-family:inherit;}
+  .ad-form textarea{resize:vertical;min-height:120px;}
+  .ad-form input:focus,.ad-form select:focus,.ad-form textarea:focus{outline:none;border-color:var(--accent);}
+</style>
 </head>
 <body>
 
@@ -46,66 +54,39 @@
           <a href="notices.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/></svg>공지사항</a>
           <a href="consult.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1:1 문의하기</a>
           <a href="seller-apply.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>입점문의</a>
-          <a href="ad-inquiry.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8A2 2 0 1 1 8 18l-.4-3"/></svg>광고문의</a>
+          <a href="#" onclick="alert('광고 문의는 1:1 문의를 통해 접수해 주세요.');return false;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8A2 2 0 1 1 8 18l-.4-3"/></svg>광고문의</a>
           <a href="guide.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>이용 가이드</a>
           <a href="safe-trade.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>안전거래 가이드</a>
-          <a href="policy.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>서비스 정책</a>
+          <a href="policy.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>서비스 정책</a>
           <a href="downloads.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9m18 0H3m18 0l-1.5 3h-15L3 15"/></svg>다운로드 센터</a>
         </nav>
       </div>
     </aside>
 
     <div>
-      <h1 style="font-size:1.5rem;font-weight:900;">서비스 정책</h1>
-      <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">VERSOI 서비스 운영과 관련된 주요 정책을 안내해드립니다.</p>
+      <h1 style="font-size:1.5rem;font-weight:900;">광고문의</h1>
+      <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">메인 배너, 검색 상단 노출 등 VERSOI 광고 상품에 대해 문의해주세요.</p>
 
       <div class="card-panel" style="margin-top:20px;">
 
-        <article class="legal-content">
-          <h2>1. 판매 수수료 정책</h2>
-          <table>
-            <thead><tr><th>구분</th><th>수수료</th><th>비고</th></tr></thead>
-            <tbody>
-              <tr><td>신품 산업용품 판매</td><td>거래액의 3~5%</td><td>카테고리별 상이, 판매자센터에서 확인</td></tr>
-              <tr><td>중고장터 판매</td><td>0% (무료)</td><td>결제 수수료는 구매자 부담</td></tr>
-              <tr><td>견적요청(RFQ) 매칭</td><td>무료</td><td>거래 성사 시 별도 수수료 없음</td></tr>
-              <tr><td>결제 수수료</td><td>PG사 정책에 따름</td><td>결제수단별 상이</td></tr>
-            </tbody>
-          </table>
-
-          <h2>2. 배송 정책</h2>
-          <ul>
-            <li>50,000원 이상 구매 시 무료배송, 미만 시 기본 배송비 3,000원이 부과됩니다.</li>
-            <li>도서/산간 지역은 추가 배송비가 발생할 수 있습니다.</li>
-            <li>평일 오후 3시 이전 주문 건은 당일 출고를 원칙으로 하며, 판매자 사정에 따라 변동될 수 있습니다.</li>
-          </ul>
-          <p>자세한 배송 조회 방법은 <a href="shipping.html" style="color:var(--accent);font-weight:700;">배송/배송조회</a> 페이지를 확인하세요.</p>
-
-          <h2>3. 취소·반품·환불 정책</h2>
-          <ul>
-            <li>배송 시작 전에는 언제든 무료로 취소할 수 있습니다.</li>
-            <li>배송 완료 후 반품은 수령일로부터 7일 이내 신청 가능하며, 단순 변심의 경우 왕복 배송비가 발생할 수 있습니다.</li>
-            <li>제품 하자 또는 오배송의 경우 배송비 없이 전액 환불됩니다.</li>
-            <li>환불은 결제수단에 따라 영업일 기준 3~7일이 소요됩니다.</li>
-          </ul>
-          <p>자세한 절차는 <a href="cancel.html" style="color:var(--accent);font-weight:700;">취소/환불</a> 페이지에서 신청하실 수 있습니다.</p>
-
-          <h2>4. 정산 정책 (판매자)</h2>
-          <ul>
-            <li>정산은 구매 확정일 기준 매월 1회, 지정된 정산일에 등록된 계좌로 자동 입금됩니다.</li>
-            <li>세금계산서는 정산 완료 후 자동 발행되며, 판매자센터 &gt; 세금계산서 관리에서 직접 발행도 가능합니다.</li>
-          </ul>
-
-          <h2>5. 게시물 및 커뮤니티 운영 정책</h2>
-          <ul>
-            <li>허위 매물, 중복 게시, 광고성 도배 게시물은 사전 통지 없이 삭제될 수 있습니다.</li>
-            <li>욕설, 비방, 개인정보 노출 등 커뮤니티 가이드라인을 위반하는 게시물은 제재 대상입니다.</li>
-            <li>지속적인 위반 시 서비스 이용이 제한될 수 있습니다.</li>
-          </ul>
-
-          <h2>6. 정책의 변경</h2>
-          <p>본 서비스 정책은 운영상 필요에 따라 변경될 수 있으며, 중요한 변경 사항은 공지사항을 통해 사전 안내드립니다.</p>
-        </article>
+        <p style="margin-bottom:16px;font-size:.86rem;color:var(--text-secondary);">VERSOI 광고 상품(메인 배너, 검색 상단 노출, 브랜드관 입점 등)에 대해 문의해주시면 담당자가 확인 후 연락드립니다.</p>
+        <form class="ad-form" id="adInquiryForm">
+          <div class="field"><label>회사명<span class="req">*</span></label><input type="text" id="adCompany" required placeholder="회사명을 입력해주세요"></div>
+          <div class="field"><label>담당자명<span class="req">*</span></label><input type="text" id="adName" required placeholder="담당자명을 입력해주세요"></div>
+          <div class="field"><label>연락처<span class="req">*</span></label><input type="tel" id="adPhone" required placeholder="010-0000-0000"></div>
+          <div class="field"><label>이메일<span class="req">*</span></label><input type="email" id="adEmail" required placeholder="company@example.co.kr"></div>
+          <div class="field">
+            <label>관심 광고 상품</label>
+            <select id="adProduct">
+              <option value="메인 배너">메인 배너</option>
+              <option value="검색 상단 노출">검색 상단 노출</option>
+              <option value="브랜드관 입점">브랜드관 입점</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+          <div class="field"><label>문의 내용<span class="req">*</span></label><textarea id="adContent" required placeholder="광고 집행 예정 시기, 예산, 목적 등을 자유롭게 남겨주세요."></textarea></div>
+          <button type="submit" class="btn btn-primary btn-lg" id="adSubmitBtn" style="width:100%;justify-content:center;">문의 접수하기</button>
+        </form>
 
       </div>
     </div>
@@ -126,6 +107,33 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
+  document.getElementById('adInquiryForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!window.VERSOI.requireAuth()) return;
+    var company = document.getElementById('adCompany').value.trim();
+    var name = document.getElementById('adName').value.trim();
+    var phone = document.getElementById('adPhone').value.trim();
+    var email = document.getElementById('adEmail').value.trim();
+    var product = document.getElementById('adProduct').value;
+    var content = document.getElementById('adContent').value.trim();
+    var btn = document.getElementById('adSubmitBtn');
+    btn.disabled = true;
+    var body = '[관심 상품] ' + product + '\n[회사명] ' + company + '\n[담당자] ' + name + '\n[연락처] ' + phone + '\n[이메일] ' + email + '\n\n' + content;
+    var res = await sb.from('inquiries').insert({
+      thread_type: 'etc',
+      inquiry_type: 'other',
+      buyer_profile_id: window.VERSOI.user.id,
+      title: '[광고문의] ' + company,
+      content: body
+    });
+    btn.disabled = false;
+    if (res.error) { alert('문의 접수에 실패했습니다: ' + res.error.message); return; }
+    alert('광고 문의가 접수되었습니다. 담당자가 확인 후 연락드리겠습니다.');
+    document.getElementById('adInquiryForm').reset();
+  });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
 </body>
 </html>
