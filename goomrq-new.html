@@ -17,6 +17,7 @@
     font-family:var(--font-en);font-weight:800;font-size:.78rem;color:var(--accent);background:var(--accent-soft);
     padding:2px 9px;border-radius:20px;
   }
+  .ai-status-box{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:.85rem;font-weight:700;}
   .promo-card{background:linear-gradient(150deg,var(--navy-900),var(--navy-700));border-radius:var(--radius-l);padding:20px;color:#fff;position:relative;overflow:hidden;}
   .promo-card::before{content:"";position:absolute;inset:0;opacity:.4;background-image:radial-gradient(color-mix(in srgb,#fff 16%,transparent) 1px, transparent 1px);background-size:20px 20px;mask-image:radial-gradient(80% 100% at 100% 100%, #000, transparent 72%);}
   .promo-card > *{position:relative;z-index:1;}
@@ -196,10 +197,14 @@
             <div class="dropzone" id="goomDropzone">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1"/><path d="M9 15V4M9 4l3 3M9 4l-3 3"/></svg>
               <div class="dz-main">이미지를 드래그하거나 클릭하여 업로드하세요.</div>
-              <div class="dz-sub">JPG, PNG 파일 / 최대 5장 / 각 10MB 이하</div>
+              <div class="dz-sub">JPG, PNG 파일 / 최대 5장 / 각 10MB 이하 · AI가 상품명·모델명·카테고리·설명을 자동으로 채워드려요.</div>
             </div>
             <input type="file" id="goomAttachInput" accept="image/*" multiple style="display:none;">
             <div class="attach-list" id="goomAttachList"></div>
+            <div class="ai-status-box" id="goomAiStatus" style="display:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              <span id="goomAiStatusText">AI가 사진을 분석하고 있어요...</span>
+            </div>
           </div>
         </div>
 
@@ -322,13 +327,23 @@
   }
 
   goomDropzone.addEventListener('click', function () { goomAttachInput.click(); });
-
-  goomAttachInput.addEventListener('change', async function () {
-    if (!window.VERSOI.requireAuth()) return;
-    var files = Array.prototype.slice.call(goomAttachInput.files || []);
+  goomDropzone.addEventListener('dragover', function (e) { e.preventDefault(); });
+  goomDropzone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    handleGoomFiles(e.dataTransfer.files);
+  });
+  goomAttachInput.addEventListener('change', function () {
+    handleGoomFiles(goomAttachInput.files);
     goomAttachInput.value = '';
+  });
+
+  async function handleGoomFiles(fileList) {
+    if (!window.VERSOI.requireAuth()) return;
+    var files = Array.prototype.slice.call(fileList || []);
+    if (!files.length) return;
     var uid = (goomUser && goomUser.id) || (window.VERSOI.user && window.VERSOI.user.id);
     if (!uid) return;
+    var isFirstImage = !goomPendingAttachments.length && files.some(function (f) { return f.type.indexOf('image/') === 0; });
 
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
@@ -350,7 +365,77 @@
       }
       goomRenderAttachList();
     }
-  });
+
+    if (isFirstImage) {
+      var firstImage = files.find(function (f) { return f.type.indexOf('image/') === 0; });
+      if (firstImage) runGoomAiAnalysis(firstImage);
+    }
+  }
+
+  function resizeGoomForAi(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        var maxDim = 1568;
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function runGoomAiAnalysis(file) {
+    var statusBox = document.getElementById('goomAiStatus');
+    var statusText = document.getElementById('goomAiStatusText');
+    statusBox.style.display = 'flex';
+    statusText.textContent = 'AI가 사진을 분석하고 있어요...';
+    try {
+      var dataUrl = await resizeGoomForAi(file);
+      var base64 = dataUrl.split(',')[1];
+      var sessionRes = await sb.auth.getSession();
+      var token = sessionRes.data.session ? sessionRes.data.session.access_token : null;
+      var categoryNames = Array.from(goomCategorySelect.options).slice(1).map(function (opt) { return opt.textContent; });
+      var res = await fetch('https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1/ai-product-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg', categories: categoryNames })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) {
+        statusText.textContent = data.error || 'AI 분석에 실패했습니다. 직접 입력해주세요.';
+        setTimeout(function () { statusBox.style.display = 'none'; }, 2500);
+        return;
+      }
+      var applied = false;
+      if (data.title && data.title !== '식별할 수 없습니다' && !document.getElementById('goomTitle').value.trim()) {
+        document.getElementById('goomTitle').value = data.title; applied = true;
+      }
+      if (data.model_no && !document.getElementById('goomModel').value.trim()) {
+        document.getElementById('goomModel').value = data.model_no; applied = true;
+      }
+      if (data.description && !document.getElementById('goomDesc').value.trim()) {
+        document.getElementById('goomDesc').value = data.description;
+        document.getElementById('goomCount').textContent = data.description.length;
+        applied = true;
+      }
+      if (data.category) {
+        var match = Array.from(goomCategorySelect.options).find(function (opt) { return opt.textContent === data.category; });
+        if (match) { goomCategorySelect.value = match.value; applied = true; }
+      }
+      statusText.textContent = applied ? 'AI 자동입력 완료! 내용을 확인해주세요.' : '사진 속 제품을 식별하지 못했어요. 직접 입력해주세요.';
+      setTimeout(function () { statusBox.style.display = 'none'; }, 2500);
+    } catch (err) {
+      console.error('[goomrq-new] AI analysis failed', err);
+      statusText.textContent = 'AI 분석 중 오류가 발생했습니다. 직접 입력해주세요.';
+      setTimeout(function () { statusBox.style.display = 'none'; }, 2500);
+    }
+  }
 
   document.getElementById('goomrqForm').addEventListener('submit', async function(e){
     e.preventDefault();

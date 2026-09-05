@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="styles.css">
 <style>
+  .ai-status-box{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:.85rem;font-weight:700;}
   .rq-quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
   .rq-quick-grid a{
     display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;border-radius:var(--radius-m);
@@ -186,9 +187,13 @@
           <div class="dropzone" id="rfqDropzone">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1"/><path d="M9 15V4M9 4l3 3M9 4l-3 3"/></svg>
             <div class="dz-main">파일을 드래그하거나 클릭하여 첨부하세요.</div>
-            <div class="dz-sub">도면, 사양서, 참고 이미지 등을 첨부하면 정확한 견적에 도움이 됩니다. (최대 10MB)<br>첨부 가능 파일 : PDF, DWG, DOC, DOCX, XLS, XLSX, JPG, PNG</div>
+            <div class="dz-sub">도면, 사양서, 참고 이미지 등을 첨부하면 정확한 견적에 도움이 됩니다. (최대 10MB)<br>첨부 가능 파일 : PDF, DWG, DOC, DOCX, XLS, XLSX, JPG, PNG · 이미지 첨부 시 AI가 제목·카테고리·요청 내용을 자동으로 채워드려요.</div>
           </div>
           <input type="file" id="rfqAttachInput" multiple style="display:none;">
+          <div class="ai-status-box" id="rfqAiStatus" style="display:none;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            <span id="rfqAiStatusText">AI가 사진을 분석하고 있어요...</span>
+          </div>
           <div class="attach-list" id="rfqAttachList"></div>
         </div>
 
@@ -336,13 +341,23 @@
   }
 
   rfqDropzone.addEventListener('click', function () { rfqAttachInput.click(); });
-
-  rfqAttachInput.addEventListener('change', async function () {
-    if (!window.VERSOI.requireAuth()) return;
-    var files = Array.prototype.slice.call(rfqAttachInput.files || []);
+  rfqDropzone.addEventListener('dragover', function (e) { e.preventDefault(); });
+  rfqDropzone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    handleRfqFiles(e.dataTransfer.files);
+  });
+  rfqAttachInput.addEventListener('change', function () {
+    handleRfqFiles(rfqAttachInput.files);
     rfqAttachInput.value = '';
+  });
+
+  async function handleRfqFiles(fileList) {
+    if (!window.VERSOI.requireAuth()) return;
+    var files = Array.prototype.slice.call(fileList || []);
+    if (!files.length) return;
     var uid = (rfqUser && rfqUser.id) || (window.VERSOI.user && window.VERSOI.user.id);
     if (!uid) return;
+    var isFirstImage = !rfqPendingAttachments.length && files.some(function (f) { return f.type.indexOf('image/') === 0; });
 
     for (var i = 0; i < files.length; i++) {
       var file = files[i];
@@ -364,7 +379,76 @@
       }
       rfqRenderAttachList();
     }
-  });
+
+    if (isFirstImage) {
+      var firstImage = files.find(function (f) { return f.type.indexOf('image/') === 0; });
+      if (firstImage) runRfqAiAnalysis(firstImage);
+    }
+  }
+
+  function resizeRfqForAi(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        var maxDim = 1568;
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function runRfqAiAnalysis(file) {
+    var statusBox = document.getElementById('rfqAiStatus');
+    var statusText = document.getElementById('rfqAiStatusText');
+    statusBox.style.display = 'flex';
+    statusText.textContent = 'AI가 사진을 분석하고 있어요...';
+    try {
+      var dataUrl = await resizeRfqForAi(file);
+      var base64 = dataUrl.split(',')[1];
+      var sessionRes = await sb.auth.getSession();
+      var token = sessionRes.data.session ? sessionRes.data.session.access_token : null;
+      var categoryNames = Array.from(rfqCategorySelect.options).slice(1).map(function (opt) { return opt.textContent; });
+      var res = await fetch('https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1/ai-product-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg', categories: categoryNames })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) {
+        statusText.textContent = data.error || 'AI 분석에 실패했습니다. 직접 입력해주세요.';
+        setTimeout(function () { statusBox.style.display = 'none'; }, 2500);
+        return;
+      }
+      var applied = false;
+      var rfqTitleEl = document.getElementById('rfqTitle');
+      if (data.title && data.title !== '식별할 수 없습니다' && !rfqTitleEl.value.trim()) {
+        rfqTitleEl.value = data.title; applied = true;
+      }
+      var rfqSpecEl = document.getElementById('rfqSpec');
+      if (data.description && !rfqSpecEl.value.trim()) {
+        rfqSpecEl.value = data.description.slice(0, 500);
+        document.getElementById('rfqCount').textContent = rfqSpecEl.value.length;
+        applied = true;
+      }
+      if (data.category) {
+        var match = Array.from(rfqCategorySelect.options).find(function (opt) { return opt.textContent === data.category; });
+        if (match) { rfqCategorySelect.value = match.value; applied = true; }
+      }
+      statusText.textContent = applied ? 'AI 자동입력 완료! 내용을 확인해주세요.' : '사진 속 제품을 식별하지 못했어요. 직접 입력해주세요.';
+      setTimeout(function () { statusBox.style.display = 'none'; }, 2500);
+    } catch (err) {
+      console.error('[rfq-new] AI analysis failed', err);
+      statusText.textContent = 'AI 분석 중 오류가 발생했습니다. 직접 입력해주세요.';
+      setTimeout(function () { statusBox.style.display = 'none'; }, 2500);
+    }
+  }
 
   document.getElementById('rfqForm').addEventListener('submit', async function(e){
     e.preventDefault();
