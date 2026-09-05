@@ -4,57 +4,59 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VERSOI 입점사 등록 프로세스</title>
-<meta name="description" content="사업자등록증 인증부터 판매자센터 입장까지, VERSOI 입점사 등록 10단계 프로세스 안내">
+<meta name="description" content="사업자등록증 인증부터 판매자센터 입장까지, VERSOI 입점사 등록 10단계 프로세스">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="styles.css">
 <style>
-
   .apply-wizard{display:flex;align-items:flex-start;justify-content:space-between;background:var(--surface);border:1px solid var(--border);
     border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:22px clamp(14px,2vw,28px);margin-top:20px;overflow-x:auto;}
   .apply-wizard .wizard-step .num{width:26px;height:26px;font-size:.76rem;}
-  .apply-wizard .wizard-step span{font-size:.78rem;}
+  .apply-wizard .wizard-step span{font-size:.78rem;white-space:nowrap;}
   .apply-wizard .wizard-line{margin:0 6px;}
-  .step-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:20px;}
-  .step-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);
-    padding:20px 18px;display:flex;flex-direction:column;min-height:100%;}
-  .step-card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-  .step-card-num{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--font-en);
-    font-weight:800;font-size:.8rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .step-card-head b{font-size:.86rem;font-weight:800;}
-  .step-media{aspect-ratio:16/11;background:var(--bg-soft);border-radius:var(--radius-m);display:flex;align-items:center;justify-content:center;
-    color:var(--text-tertiary);margin-bottom:14px;overflow:hidden;position:relative;}
-  .step-card p.desc{font-size:.76rem;color:var(--text-tertiary);line-height:1.5;margin-bottom:12px;}
-  .step-mini-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;flex:1;}
-  .step-mini-list li{display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--text-secondary);}
-  .step-mini-list svg{color:var(--good);flex-shrink:0;}
-  .step-card .btn{width:100%;justify-content:center;margin-top:auto;}
-  .mini-field{border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:.74rem;color:var(--text-tertiary);margin-bottom:8px;}
-  .mini-kv{display:flex;justify-content:space-between;font-size:.72rem;padding:6px 0;border-bottom:1px solid var(--border);}
-  .mini-kv:last-child{border-bottom:none;}
-  .mini-kv span:first-child{color:var(--text-tertiary);}
-  .mini-kv span:last-child{font-weight:700;color:var(--text);}
-  .mini-progress{width:100%;height:6px;border-radius:6px;background:var(--bg-soft);overflow:hidden;margin-top:8px;}
-  .mini-progress i{display:block;height:100%;background:var(--accent);border-radius:6px;}
-  .mini-check-row{display:flex;align-items:center;gap:7px;font-size:.72rem;color:var(--text-secondary);padding:4px 0;}
-  .mini-check-row input{accent-color:var(--accent);width:13px;height:13px;flex-shrink:0;}
-  .step-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;}
-  .step-stat-row div{background:var(--bg-soft);border-radius:8px;padding:8px 4px;text-align:center;}
-  .step-stat-row b{display:block;font-family:var(--font-en);font-weight:800;font-size:.86rem;}
-  .step-stat-row span{font-size:.62rem;color:var(--text-tertiary);}
-  .guide-mini{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:.74rem;}
-  .guide-mini:last-child{border-bottom:none;}
-  .guide-mini .n{width:22px;height:22px;border-radius:7px;background:var(--accent-soft);color:var(--accent);flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;font-family:var(--font-en);font-weight:800;font-size:.66rem;}
-  .guide-mini b{display:block;font-weight:700;}
-  .guide-mini span{color:var(--text-tertiary);font-size:.68rem;}
-  @media (max-width:1240px){ .step-grid{grid-template-columns:repeat(3,1fr);} }
-  @media (max-width:820px){ .step-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:560px){ .step-grid{grid-template-columns:1fr;} }
+  .apply-wizard .wizard-step.done{color:var(--accent);}
+  .apply-wizard .wizard-step.done .num{background:var(--accent);color:#fff;}
 
-  .auth-error{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:.82rem;font-weight:700;margin-bottom:14px;display:none;}
-
+  .apply-panel{display:none;max-width:520px;margin:28px auto 0;}
+  .apply-panel.active{display:block;}
+  .apply-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:32px 28px;}
+  .apply-card-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .apply-card-num{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-family:var(--font-en);
+    font-weight:800;font-size:.84rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .apply-card-head b{font-size:1rem;font-weight:800;}
+  .apply-media{aspect-ratio:16/10;background:var(--bg-soft);border-radius:var(--radius-m);display:flex;align-items:center;justify-content:center;
+    color:var(--text-tertiary);margin-bottom:16px;overflow:hidden;position:relative;}
+  .apply-card p.desc{font-size:.84rem;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;}
+  .apply-mini-list{display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
+  .apply-mini-list li{display:flex;align-items:center;gap:8px;font-size:.84rem;color:var(--text-secondary);}
+  .apply-mini-list svg{color:var(--good);flex-shrink:0;}
+  .apply-kv{display:flex;justify-content:space-between;font-size:.86rem;padding:9px 0;border-bottom:1px solid var(--border);gap:12px;}
+  .apply-kv:last-child{border-bottom:none;}
+  .apply-kv span:first-child{color:var(--text-tertiary);flex-shrink:0;}
+  .apply-kv span:last-child{font-weight:700;color:var(--text);text-align:right;}
+  .apply-progress{width:100%;height:6px;border-radius:6px;background:var(--bg-soft);overflow:hidden;margin-top:10px;}
+  .apply-progress i{display:block;height:100%;width:35%;background:var(--accent);border-radius:6px;animation:apply-indeterminate 1.2s ease-in-out infinite;}
+  @keyframes apply-indeterminate{0%{margin-left:-35%;}100%{margin-left:100%;}}
+  .apply-check-row{display:flex;align-items:center;gap:8px;font-size:.85rem;color:var(--text-secondary);padding:7px 0;}
+  .apply-check-row input{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0;}
+  .apply-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+  .apply-stat-row div{background:var(--bg-soft);border-radius:8px;padding:10px 4px;text-align:center;}
+  .apply-stat-row b{display:block;font-family:var(--font-en);font-weight:800;font-size:.94rem;}
+  .apply-stat-row span{font-size:.66rem;color:var(--text-tertiary);}
+  .apply-guide{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.84rem;}
+  .apply-guide:last-child{border-bottom:none;}
+  .apply-guide .n{width:24px;height:24px;border-radius:7px;background:var(--accent-soft);color:var(--accent);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-family:var(--font-en);font-weight:800;font-size:.7rem;}
+  .apply-guide b{display:block;font-weight:700;}
+  .apply-guide span{color:var(--text-tertiary);font-size:.76rem;}
+  .apply-field{margin-bottom:14px;}
+  .apply-field label{display:block;font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+  .apply-field input{width:100%;border:1px solid var(--border);border-radius:9px;padding:11px 13px;font-size:.88rem;color:var(--text);font-family:inherit;}
+  .apply-field input:focus{outline:none;border-color:var(--accent);}
+  .phone-parts{display:flex;gap:6px;}
+  .phone-parts input{text-align:center;}
+  .apply-error{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:.82rem;font-weight:700;margin-bottom:14px;display:none;}
 </style>
 </head>
 <body>
@@ -100,194 +102,197 @@
 <main>
   <div class="wrap" style="padding-block:26px 64px;">
     <h1 style="font-size:1.55rem;font-weight:900;">입점사 등록 프로세스</h1>
-    <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">간단한 3단계로 판매를 시작하세요!</p>
+    <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">간단한 단계로 판매를 시작하세요!</p>
 
-    <div class="apply-wizard">
-        <div class="wizard-step active"><span class="num">1</span><span>판매 시작하기</span></div>
-        <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">2</span><span>사업자등록증 촬영/업로드</span></div>
-        <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">3</span><span>정보 자동 인식 중</span></div>
-        <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">4</span><span>회사 정보 확인</span></div>
-        <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">5</span><span>휴대폰 본인 인증</span></div>
-        <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">6</span><span>약관 동의</span></div>
-        <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">7</span><span>추가 정보 선택 (선택)</span></div>
-        <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">8</span><span>가입 완료</span></div>
-        <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">9</span><span>판매자센터 입장</span></div>
-        <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">10</span><span>판매 가이드 안내 (선택)</span></div>
+    <div class="apply-wizard" id="applyWizard">
+      <div class="wizard-step active" data-step="1"><span class="num">1</span><span>판매 시작하기</span></div>
+      <div class="wizard-line"></div>
+      <div class="wizard-step" data-step="2"><span class="num">2</span><span>사업자등록증 촬영/업로드</span></div>
+      <div class="wizard-line"></div>
+      <div class="wizard-step" data-step="3"><span class="num">3</span><span>정보 자동 인식 중</span></div>
+      <div class="wizard-line"></div>
+      <div class="wizard-step" data-step="4"><span class="num">4</span><span>회사 정보 확인</span></div>
+      <div class="wizard-line"></div>
+      <div class="wizard-step" data-step="5"><span class="num">5</span><span>휴대폰 번호 입력</span></div>
+      <div class="wizard-line"></div>
+      <div class="wizard-step" data-step="6"><span class="num">6</span><span>약관 동의</span></div>
+      <div class="wizard-line"></div>
+      <div class="wizard-step" data-step="7"><span class="num">7</span><span>추가 정보 선택 (선택)</span></div>
+      <div class="wizard-line"></div>
+      <div class="wizard-step" data-step="8"><span class="num">8</span><span>가입 완료</span></div>
+      <div class="wizard-line"></div>
+      <div class="wizard-step" data-step="9"><span class="num">9</span><span>판매자센터 입장</span></div>
+      <div class="wizard-line"></div>
+      <div class="wizard-step" data-step="10"><span class="num">10</span><span>판매 가이드 안내 (선택)</span></div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="apply-panel active" data-panel="1">
+      <div class="apply-card">
+        <div class="apply-card-head"><span class="apply-card-num">1</span><b>판매 시작하기</b></div>
+        <div class="apply-media"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M9 21V13h6v8"/></svg></div>
+        <ul class="apply-mini-list">
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>사업자등록증으로 간단 등록</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>판매 수수료는 업계 최저</li>
+          <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>빠른 정산, 안전한 거래</li>
+        </ul>
+        <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;" id="startSellingBtn">판매 시작하기</button>
       </div>
+    </div>
 
-    <div class="step-grid">
-      
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">1</span><b>판매 시작하기</b></div>
-          <div class="step-media"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/><path d="M9 21V13h6v8"/></svg></div>
-          <ul class="step-mini-list">
-            <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>사업자등록증으로 간단 등록</li>
-            <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>판매 수수료는 업계 최저</li>
-            <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>빠른 정산, 안전한 거래</li>
-          </ul>
-          <a href="#" class="btn btn-primary" id="startSellingBtn">판매 시작하기</a>
+    <!-- STEP 2 -->
+    <div class="apply-panel" data-panel="2">
+      <div class="apply-card">
+        <div class="apply-card-head"><span class="apply-card-num">2</span><b>사업자등록증 촬영/업로드</b></div>
+        <div class="apply-media" style="background:var(--surface-2);border:1px dashed var(--border-strong);" id="certPreview"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg></div>
+        <p class="desc">사업자등록증을 등록해주세요.<br>회사 정보는 자동으로 인식됩니다.</p>
+        <div style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-outline" style="flex:1;justify-content:center;" id="certCaptureBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>사진 촬영</button>
+          <button type="button" class="btn btn-outline" style="flex:1;justify-content:center;" id="certUploadBtn">파일 선택</button>
         </div>
+        <input type="file" id="certCaptureInput" accept="image/*" capture="environment" style="display:none;">
+        <input type="file" id="certUploadInput" accept="image/*" style="display:none;">
+        <button type="button" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:14px;" data-prev="1">이전</button>
+      </div>
+    </div>
 
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">2</span><b>사업자등록증 촬영/업로드</b></div>
-          <div class="step-media" style="background:var(--surface-2);border:1px dashed var(--border-strong);"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg></div>
-          <p class="desc">사업자등록증을 등록해주세요.<br>회사 정보는 자동으로 입력됩니다.</p>
-          <div style="display:flex;gap:8px;margin-top:auto;">
-            <button type="button" class="btn btn-outline btn-sm mockup-btn" style="flex:1;justify-content:center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>시진 촬영</button>
-            <button type="button" class="btn btn-outline btn-sm mockup-btn" style="flex:1;justify-content:center;">파일 선택</button>
-          </div>
+    <!-- STEP 3 -->
+    <div class="apply-panel" data-panel="3">
+      <div class="apply-card">
+        <div class="apply-card-head"><span class="apply-card-num">3</span><b>정보 자동 인식 중</b></div>
+        <div class="apply-media" style="background:var(--accent-soft);">
+          <svg width="56" height="56" viewBox="0 0 36 36" style="transform:rotate(-90deg);">
+            <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--accent-soft-strong)" stroke-width="3"/>
+            <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="60 37"/>
+          </svg>
         </div>
-      
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">3</span><b>정보 자동 인식 중</b></div>
-          <div class="step-media" style="background:var(--accent-soft);">
+        <p style="font-size:.9rem;font-weight:800;text-align:center;line-height:1.6;">사업자등록증 정보를<br>자동으로 인식하고 있어요.<br><span style="font-weight:400;color:var(--text-tertiary);font-size:.78rem;">잠시만 기다려주세요.</span></p>
+        <div class="apply-progress"><i></i></div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="apply-panel" data-panel="4">
+      <div class="apply-card">
+        <div class="apply-card-head"><span class="apply-card-num">4</span><b>회사 정보 확인</b></div>
+        <p class="desc" id="ocrHintText">인식된 회사 정보를 확인하고, 틀린 부분이 있으면 직접 수정해주세요.</p>
+        <div class="apply-error" id="step4Error"></div>
+        <div class="apply-field"><label>회사명<span class="req">*</span></label><input type="text" id="companyNameInput" placeholder="회사명"></div>
+        <div class="apply-field"><label>대표자명<span class="req">*</span></label><input type="text" id="ceoNameInput" placeholder="대표자명"></div>
+        <div class="apply-field"><label>사업자등록번호<span class="req">*</span></label><input type="text" id="bizRegNoInput" placeholder="000-00-00000"></div>
+        <div class="apply-field"><label>업태<span class="req">*</span></label><input type="text" id="bizTypeInput" placeholder="예: 제조업"></div>
+        <div class="apply-field"><label>종목<span class="req">*</span></label><input type="text" id="bizItemInput" placeholder="예: 산업용 기계 및 장비"></div>
+        <div class="apply-field"><label>사업장 주소<span class="req">*</span></label><input type="text" id="addressInput" placeholder="사업장 주소"></div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button type="button" class="btn btn-outline" style="flex:1;justify-content:center;" data-prev="2">다시 촬영</button>
+          <button type="button" class="btn btn-primary" style="flex:1;justify-content:center;" id="step4NextBtn">다음</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="apply-panel" data-panel="5">
+      <div class="apply-card">
+        <div class="apply-card-head"><span class="apply-card-num">5</span><b>휴대폰 번호 입력</b></div>
+        <p class="desc">거래 안내를 받을 대표자 또는 담당자 휴대폰 번호를 입력해주세요.</p>
+        <div class="phone-parts">
+          <input type="text" inputmode="numeric" maxlength="3" id="phonePart1" placeholder="010" style="flex:1;">
+          <input type="text" inputmode="numeric" maxlength="4" id="phonePart2" placeholder="1234" style="flex:1;">
+          <input type="text" inputmode="numeric" maxlength="4" id="phonePart3" placeholder="5678" style="flex:1;">
+        </div>
+        <div class="apply-error" id="step5Error" style="margin-top:14px;"></div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button type="button" class="btn btn-ghost" style="flex:1;justify-content:center;" data-prev="4">이전</button>
+          <button type="button" class="btn btn-primary" style="flex:1;justify-content:center;" id="step5NextBtn">다음</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="apply-panel" data-panel="6">
+      <div class="apply-card">
+        <div class="apply-card-head"><span class="apply-card-num">6</span><b>약관 동의</b></div>
+        <p class="desc">서비스 이용을 위해 약관에 동의해주세요.</p>
+        <label class="apply-check-row" style="font-weight:800;color:var(--text);border-bottom:1px solid var(--border);margin-bottom:6px;padding-bottom:10px;"><input type="checkbox" id="agreeAll">전체 동의합니다.</label>
+        <label class="apply-check-row"><input type="checkbox" class="agree-required" id="agreeTerms">[필수] 서비스 이용약관 보기</label>
+        <label class="apply-check-row"><input type="checkbox" class="agree-required" id="agreePrivacy">[필수] 개인정보 수집 및 이용 동의</label>
+        <label class="apply-check-row"><input type="checkbox" class="agree-required" id="agreeThirdParty">[필수] 개인정보 제3자 제공 동의</label>
+        <label class="apply-check-row"><input type="checkbox" id="agreeMarketing">[선택] 마케팅 정보 수신 동의</label>
+        <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;" id="step6NextBtn">동의하고 계속하기</button>
+      </div>
+    </div>
+
+    <!-- STEP 7 -->
+    <div class="apply-panel" data-panel="7">
+      <div class="apply-card">
+        <div class="apply-card-head"><span class="apply-card-num">7</span><b>추가 정보 선택 (선택)</b></div>
+        <p class="desc">추가 정보를 입력하면 더 편리하게 이용할 수 있습니다.</p>
+        <div class="apply-field"><label>담당자 이름</label><input type="text" id="contactNameInput" placeholder="담당자 이름"></div>
+        <div class="apply-field"><label>담당자 이메일</label><input type="email" id="contactEmailInput" placeholder="담당자 이메일"></div>
+        <div class="apply-field"><label>연락처 (선택)</label><input type="text" id="contactPhoneInput" placeholder="추가 연락처"></div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button type="button" class="btn btn-outline" style="flex:1;justify-content:center;" id="step7SkipBtn">나중에 입력할게요</button>
+          <button type="button" class="btn btn-primary" style="flex:1;justify-content:center;" id="step7NextBtn">다음</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 8 -->
+    <div class="apply-panel" data-panel="8">
+      <div class="apply-card" style="text-align:center;">
+        <div class="apply-card-head" style="justify-content:center;"><span class="apply-card-num">8</span><b>가입 완료</b></div>
+        <div id="step8Pending">
+          <div class="apply-media" style="background:var(--accent-soft);">
             <svg width="56" height="56" viewBox="0 0 36 36" style="transform:rotate(-90deg);">
               <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--accent-soft-strong)" stroke-width="3"/>
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="97.4" stroke-dashoffset="15"/>
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="60 37"/>
             </svg>
           </div>
-          <p style="font-size:.84rem;font-weight:800;text-align:center;line-height:1.5;">사업자등록증 정보를<br>자동으로 인식하고 있어요.<br><span style="font-weight:400;color:var(--text-tertiary);font-size:.74rem;">잠시만 기다려주세요.</span></p>
-          <div class="mini-kv" style="margin-top:14px;"><span>인식 중...</span><span>85%</span></div>
-          <div class="mini-progress"><i style="width:85%;"></i></div>
+          <p style="font-size:.9rem;font-weight:800;">입점 등록을 처리하고 있어요...</p>
         </div>
-      
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">4</span><b>회사 정보 확인</b></div>
-          <p class="desc">인식된 회사 정보를 확인해주세요.</p>
-          <div style="margin-bottom:12px;">
-            <div class="mini-kv"><span>회사명</span><span>한국브라스트(주)</span></div>
-            <div class="mini-kv"><span>대표자명</span><span>이성욱</span></div>
-            <div class="mini-kv"><span>사업자번호</span><span>124-81-12345</span></div>
-            <div class="mini-kv"><span>업태</span><span>제조업</span></div>
-            <div class="mini-kv"><span>종목</span><span>산업용 기계 및 장비</span></div>
-          </div>
-          <p style="font-size:.72rem;color:var(--text-tertiary);margin-bottom:8px;">정보가 정확한가요?</p>
-          <div style="display:flex;gap:8px;margin-top:auto;">
-            <button type="button" class="btn btn-outline btn-sm mockup-btn" style="flex:1;justify-content:center;">수정하기</button>
-            <button type="button" class="btn btn-primary btn-sm mockup-btn" style="flex:1;justify-content:center;">맞아요</button>
-          </div>
+        <div id="step8Error" style="display:none;">
+          <div class="apply-error" id="step8ErrorText" style="display:block;text-align:left;"></div>
+          <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;" id="step8RetryBtn">다시 시도하기</button>
         </div>
-      
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">5</span><b>휴대폰 본인 인증</b></div>
-          <p class="desc">본인 인증을 진행해주세요.<br>대표자 또는 담당자 휴대폰으로 인증합니다.</p>
-          <div style="display:flex;gap:6px;margin-bottom:10px;">
-            <div class="mini-field" style="flex:1;margin-bottom:0;text-align:center;">010</div>
-            <div class="mini-field" style="flex:1;margin-bottom:0;text-align:center;">1234</div>
-            <div class="mini-field" style="flex:1;margin-bottom:0;text-align:center;">5678</div>
-          </div>
-          <button type="button" class="btn btn-outline btn-sm mockup-btn" style="width:100%;justify-content:center;margin-bottom:12px;">인증번호 받기</button>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:auto;">
-            <div class="mini-field" style="flex:1;margin-bottom:0;">123456</div>
-            <span style="font-size:.7rem;color:var(--up);font-family:var(--font-en);flex-shrink:0;">02:45</span>
-          </div>
-          <button type="button" class="btn btn-primary mockup-btn" style="margin-top:14px;">확인</button>
-        </div>
-      
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">6</span><b>약관 동의</b></div>
-          <p class="desc">서비스 이용을 위해 약관에 동의해주세요.</p>
-          <div style="flex:1;">
-            <label class="mini-check-row" style="font-weight:800;color:var(--text);"><input type="checkbox" checked>전체 동의합니다.</label>
-            <label class="mini-check-row"><input type="checkbox" checked>[필수] 서비스 이용약관 보기</label>
-            <label class="mini-check-row"><input type="checkbox" checked>[필수] 개인정보 수집 및 이용 동의</label>
-            <label class="mini-check-row"><input type="checkbox" checked>[필수] 개인정보 제3자 제공 동의</label>
-            <label class="mini-check-row"><input type="checkbox">[선택] 마케팅 정보 수신 동의</label>
-          </div>
-          <button type="button" class="btn btn-primary mockup-btn">동의하고 계속하기</button>
-        </div>
-      
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">7</span><b>추가 정보 선택 (선택)</b></div>
-          <p class="desc">추가 정보를 입력하면 더 편리하게 이용할 수 있습니다.</p>
-          <div style="margin-bottom:auto;">
-            <div class="mini-field">담당자 이름</div>
-            <div class="mini-field">담당자 이메일</div>
-            <div class="mini-field" style="margin-bottom:0;">연락처 (선택)</div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:14px;">
-            <button type="button" class="btn btn-outline btn-sm mockup-btn" style="flex:1;justify-content:center;">나중에 입력할게요</button>
-            <button type="button" class="btn btn-primary btn-sm mockup-btn" style="flex:1;justify-content:center;">다음</button>
-          </div>
-        </div>
-      
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">8</span><b>가입 완료</b></div>
-          <div class="step-media" style="background:var(--good-soft);">
+        <div id="step8Success" style="display:none;">
+          <div class="apply-media" style="background:var(--good-soft);">
             <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>
           </div>
-          <p style="font-size:.86rem;font-weight:800;text-align:center;">입점 등록이 완료되었습니다!</p>
-          <p style="font-size:.74rem;color:var(--text-tertiary);text-align:center;margin-top:6px;margin-bottom:auto;">이제 VERSOI에서 상품을 등록하고<br>판매를 시작할 수 있어요.</p>
-          <a href="seller-dashboard.html" class="btn btn-primary" style="margin-top:14px;">판매자센터 바로가기</a>
-          <a href="index.html" class="btn btn-ghost btn-sm" style="justify-content:center;margin-top:6px;">메인으로 이동</a>
+          <p style="font-size:.94rem;font-weight:800;">입점 등록이 완료되었습니다!</p>
+          <p style="font-size:.82rem;color:var(--text-tertiary);margin-top:8px;">이제 VERSOI에서 상품을 등록하고<br>판매를 시작할 수 있어요.</p>
+          <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;" id="step8NextBtn">다음</button>
         </div>
-      
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">9</span><b>판매자센터 입장</b></div>
-          <p style="font-size:.8rem;font-weight:800;margin-bottom:10px;">한국브라스트(주)님 환영합니다!</p>
-          <a href="seller-products.html" class="btn btn-primary btn-sm" style="justify-content:center;margin-bottom:12px;">상품 등록하기</a>
-          <p style="font-size:.7rem;color:var(--text-tertiary);font-weight:700;margin-bottom:6px;">오늘의 현황</p>
-          <div class="step-stat-row">
-            <div><b>0</b><span>판매중 상품</span></div>
-            <div><b>0</b><span>문의</span></div>
-            <div><b>0</b><span>판매 완료</span></div>
-            <div><b>₩0</b><span>총 판매액</span></div>
-          </div>
-          <a href="seller-dashboard.html" class="btn btn-outline btn-sm" style="justify-content:center;margin-top:auto;">판매자센터 바로가기</a>
-        </div>
-      
-        <div class="step-card">
-          <div class="step-card-head"><span class="step-card-num">10</span><b>판매 가이드 안내 (선택)</b></div>
-          <p class="desc">처음이신가요? 가이드를 따라해보세요.</p>
-          <div style="margin-bottom:auto;">
-            <div class="guide-mini"><span class="n">01</span><div><b>상품 등록 방법</b><span>사진만으로 간단하게 등록할 수 있어요.</span></div></div>
-            <div class="guide-mini"><span class="n">02</span><div><b>주문 및 배송 관리</b><span>주문 확인부터 배송 처리까지 한 번에.</span></div></div>
-            <div class="guide-mini"><span class="n">03</span><div><b>정산 및 수수료 안내</b><span>수수료와 정산 확정 함께 알아보기.</span></div></div>
-            <div class="guide-mini"><span class="n">04</span><div><b>자주 묻는 질문</b><span>판매에 필요한 모든 정보를 확인하세요.</span></div></div>
-          </div>
-          <a href="seller-dashboard.html" class="btn btn-outline">가이드 바로가기</a>
-        </div>
-    </div>
-
-    <div class="form-card" id="companyRegForm" hidden style="margin-top:24px;">
-      <p class="form-card-title">회사 정보 입력</p>
-      <p style="font-size:.82rem;color:var(--text-tertiary);margin-top:-12px;margin-bottom:20px;">아래 정보를 입력하면 바로 입점이 완료됩니다.</p>
-      <div class="auth-error" id="regError"></div>
-      <form id="regForm">
-        <div class="form-grid">
-          <div class="field"><label>회사명<span class="req">*</span></label><input type="text" id="regName" required placeholder="회사명을 입력하세요"></div>
-          <div class="field"><label>사업자등록번호<span class="req">*</span></label><input type="text" id="regBizRegNo" required placeholder="000-00-00000"></div>
-          <div class="field"><label>대표자명<span class="req">*</span></label><input type="text" id="regCeoName" required placeholder="대표자명을 입력하세요"></div>
-          <div class="field"><label>업태<span class="req">*</span></label><input type="text" id="regBizType" required placeholder="예: 제조업"></div>
-          <div class="field"><label>종목<span class="req">*</span></label><input type="text" id="regBizItem" required placeholder="예: 산업용 기계 및 장비"></div>
-          <div class="field"><label>대표 전화번호<span class="req">*</span></label><input type="tel" id="regPhone" required placeholder="02-000-0000"></div>
-          <div class="field"><label>이메일<span class="req">*</span></label><input type="email" id="regEmail" required placeholder="company@example.co.kr"></div>
-          <div class="field full"><label>사업장 주소<span class="req">*</span></label><input type="text" id="regAddress" required placeholder="사업장 주소를 입력하세요"></div>
-        </div>
-        <label class="consent-check" style="margin:20px 0;"><input type="checkbox" id="regAgree" required><span>[필수] 이용약관 및 개인정보 처리방침에 동의합니다.</span></label>
-        <div style="display:flex;gap:10px;">
-          <button type="button" class="btn btn-outline" id="regCancelBtn" style="flex:1;justify-content:center;">취소</button>
-          <button type="submit" class="btn btn-primary" id="regSubmitBtn" style="flex:2;justify-content:center;">입점 신청 완료하기</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="form-card" id="regSuccess" hidden style="margin-top:24px;text-align:center;padding:44px 24px;">
-      <div style="width:56px;height:56px;border-radius:50%;background:var(--good-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8 12 11 15 16 9"/></svg>
       </div>
-      <p style="font-size:1rem;font-weight:800;">입점 등록이 완료되었습니다!</p>
-      <p style="font-size:.82rem;color:var(--text-tertiary);margin-top:6px;">이제 VERSOI에서 상품을 등록하고<br>판매를 시작할 수 있어요.</p>
-      <a href="seller-dashboard.html" class="btn btn-primary" style="margin-top:18px;">판매자센터 바로가기</a>
+    </div>
+
+    <!-- STEP 9 -->
+    <div class="apply-panel" data-panel="9">
+      <div class="apply-card">
+        <div class="apply-card-head"><span class="apply-card-num">9</span><b>판매자센터 입장</b></div>
+        <p style="font-size:.86rem;font-weight:800;margin-bottom:14px;" id="welcomeText">환영합니다!</p>
+        <a href="seller-products.html" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:16px;">상품 등록하기</a>
+        <p style="font-size:.76rem;color:var(--text-tertiary);font-weight:700;margin-bottom:8px;">오늘의 현황</p>
+        <div class="apply-stat-row">
+          <div><b>0</b><span>판매중 상품</span></div>
+          <div><b>0</b><span>문의</span></div>
+          <div><b>0</b><span>판매 완료</span></div>
+          <div><b>₩0</b><span>총 판매액</span></div>
+        </div>
+        <button type="button" class="btn btn-outline" style="width:100%;justify-content:center;" id="step9NextBtn">다음</button>
+      </div>
+    </div>
+
+    <!-- STEP 10 -->
+    <div class="apply-panel" data-panel="10">
+      <div class="apply-card">
+        <div class="apply-card-head"><span class="apply-card-num">10</span><b>판매 가이드 안내 (선택)</b></div>
+        <p class="desc">처음이신가요? 가이드를 따라해보세요.</p>
+        <div class="apply-guide"><span class="n">01</span><div><b>상품 등록 방법</b><span>사진만으로 간단하게 등록할 수 있어요.</span></div></div>
+        <div class="apply-guide"><span class="n">02</span><div><b>주문 및 배송 관리</b><span>주문 확인부터 배송 처리까지 한 번에.</span></div></div>
+        <div class="apply-guide"><span class="n">03</span><div><b>정산 및 수수료 안내</b><span>수수료와 정산 확정 함께 알아보기.</span></div></div>
+        <div class="apply-guide"><span class="n">04</span><div><b>자주 묻는 질문</b><span>판매에 필요한 모든 정보를 확인하세요.</span></div></div>
+        <a href="seller-dashboard.html" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;">가이드 바로가기</a>
+      </div>
     </div>
   </div>
 </main>
@@ -312,77 +317,195 @@
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
 <script>
-  document.addEventListener('versoi:ready', function (e) {
-    var user = e.detail.user;
-    var startBtn = document.getElementById('startSellingBtn');
-    if (!startBtn) return;
+(function () {
+  var FUNCTIONS_URL = 'https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1';
+  var currentUser = null;
+  var certFile = null;
 
-    startBtn.addEventListener('click', function (ev) {
-      ev.preventDefault();
-      if (!user) { location.href = 'signup.html'; return; }
-      if (user.company) { location.href = 'seller-dashboard.html'; return; }
-
-      var formSection = document.getElementById('companyRegForm');
-      formSection.hidden = false;
-      var emailField = document.getElementById('regEmail');
-      if (emailField && !emailField.value) emailField.value = user.email || '';
-      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  function goToStep(step) {
+    document.querySelectorAll('.apply-panel').forEach(function (p) {
+      p.classList.toggle('active', Number(p.dataset.panel) === step);
     });
-
-    document.querySelectorAll('.mockup-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        alert('위 카드는 입점 절차를 소개하는 미리보기입니다. 실제 등록은 아래 신청서를 작성해주세요.');
-        startBtn.click();
-      });
+    document.querySelectorAll('#applyWizard .wizard-step').forEach(function (s) {
+      var n = Number(s.dataset.step);
+      s.classList.toggle('active', n === step);
+      s.classList.toggle('done', n < step);
     });
+    window.scrollTo({ top: document.getElementById('applyWizard').offsetTop - 80, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('[data-prev]').forEach(function (btn) {
+    btn.addEventListener('click', function () { goToStep(Number(btn.dataset.prev)); });
   });
 
-  var regCancelBtn = document.getElementById('regCancelBtn');
-  if (regCancelBtn) {
-    regCancelBtn.addEventListener('click', function () {
-      document.getElementById('companyRegForm').hidden = true;
-      document.getElementById('regForm').reset();
-    });
+  // ---- Step 1 ----
+  document.getElementById('startSellingBtn').addEventListener('click', function () {
+    if (!currentUser) { location.href = 'signup.html'; return; }
+    if (currentUser.company) { location.href = 'seller-dashboard.html'; return; }
+    goToStep(2);
+  });
+
+  // ---- Step 2: photo capture/upload ----
+  function handleCertFile(file) {
+    if (!file) return;
+    certFile = file;
+    var reader = new FileReader();
+    reader.onload = function () {
+      document.getElementById('certPreview').innerHTML = '<img src="' + reader.result + '" style="width:100%;height:100%;object-fit:cover;">';
+    };
+    reader.readAsDataURL(file);
+    goToStep(3);
+    runOcr(file);
   }
+  document.getElementById('certCaptureBtn').addEventListener('click', function () { document.getElementById('certCaptureInput').click(); });
+  document.getElementById('certUploadBtn').addEventListener('click', function () { document.getElementById('certUploadInput').click(); });
+  document.getElementById('certCaptureInput').addEventListener('change', function () { handleCertFile(this.files[0]); this.value = ''; });
+  document.getElementById('certUploadInput').addEventListener('change', function () { handleCertFile(this.files[0]); this.value = ''; });
 
-  var regForm = document.getElementById('regForm');
-  if (regForm) {
-    regForm.addEventListener('submit', async function (ev) {
-      ev.preventDefault();
-      var errEl = document.getElementById('regError');
-      errEl.style.display = 'none';
-      var btn = document.getElementById('regSubmitBtn');
-
-      var payload = {
-        p_name: document.getElementById('regName').value.trim(),
-        p_biz_reg_no: document.getElementById('regBizRegNo').value.trim(),
-        p_ceo_name: document.getElementById('regCeoName').value.trim(),
-        p_biz_type: document.getElementById('regBizType').value.trim(),
-        p_biz_item: document.getElementById('regBizItem').value.trim(),
-        p_address: document.getElementById('regAddress').value.trim(),
-        p_phone: document.getElementById('regPhone').value.trim(),
-        p_email: document.getElementById('regEmail').value.trim()
+  // ---- Step 3: OCR ----
+  function resizeForOcr(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        var maxDim = 1600;
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.88));
+        URL.revokeObjectURL(img.src);
       };
-
-      btn.textContent = '처리 중...';
-      btn.disabled = true;
-
-      var res = await sb.rpc('register_company', payload);
-
-      if (res.error) {
-        errEl.textContent = '등록 중 오류가 발생했습니다: ' + res.error.message;
-        errEl.style.display = 'block';
-        btn.textContent = '입점 신청 완료하기';
-        btn.disabled = false;
-        return;
-      }
-
-      document.getElementById('companyRegForm').hidden = true;
-      var successEl = document.getElementById('regSuccess');
-      successEl.hidden = false;
-      successEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
     });
   }
+
+  async function runOcr(file) {
+    try {
+      var dataUrl = await resizeForOcr(file);
+      var base64 = dataUrl.split(',')[1];
+      var sessionRes = await sb.auth.getSession();
+      var token = sessionRes.data.session ? sessionRes.data.session.access_token : null;
+      var res = await fetch(FUNCTIONS_URL + '/ai-business-reg-ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' })
+      });
+      var data = await res.json();
+      if (res.ok && !data.error) {
+        document.getElementById('companyNameInput').value = data.company_name || '';
+        document.getElementById('ceoNameInput').value = data.ceo_name || '';
+        document.getElementById('bizRegNoInput').value = data.biz_reg_no || '';
+        document.getElementById('bizTypeInput').value = data.biz_type || '';
+        document.getElementById('bizItemInput').value = data.biz_item || '';
+        document.getElementById('addressInput').value = data.address || '';
+        document.getElementById('ocrHintText').textContent = '인식된 회사 정보를 확인하고, 틀린 부분이 있으면 직접 수정해주세요.';
+      } else {
+        document.getElementById('ocrHintText').textContent = (data.error || '자동 인식에 실패했습니다.') + ' 아래 정보를 직접 입력해주세요.';
+      }
+    } catch (err) {
+      console.error('[seller-apply] OCR failed', err);
+      document.getElementById('ocrHintText').textContent = '자동 인식 중 오류가 발생했습니다. 아래 정보를 직접 입력해주세요.';
+    }
+    goToStep(4);
+  }
+
+  // ---- Step 4: confirm company info ----
+  document.getElementById('step4NextBtn').addEventListener('click', function () {
+    var errEl = document.getElementById('step4Error');
+    var required = ['companyNameInput', 'ceoNameInput', 'bizRegNoInput', 'bizTypeInput', 'bizItemInput', 'addressInput'];
+    var missing = required.some(function (id) { return !document.getElementById(id).value.trim(); });
+    if (missing) {
+      errEl.textContent = '모든 항목을 입력해주세요.';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    goToStep(5);
+  });
+
+  // ---- Step 5: phone number ----
+  document.getElementById('step5NextBtn').addEventListener('click', function () {
+    var p1 = document.getElementById('phonePart1').value.trim();
+    var p2 = document.getElementById('phonePart2').value.trim();
+    var p3 = document.getElementById('phonePart3').value.trim();
+    var errEl = document.getElementById('step5Error');
+    if (!p1 || !p2 || !p3) {
+      errEl.textContent = '휴대폰 번호를 모두 입력해주세요.';
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+    goToStep(6);
+  });
+
+  // ---- Step 6: terms ----
+  var requiredChecks = document.querySelectorAll('.agree-required');
+  document.getElementById('agreeAll').addEventListener('change', function () {
+    var checked = this.checked;
+    requiredChecks.forEach(function (cb) { cb.checked = checked; });
+    document.getElementById('agreeMarketing').checked = checked;
+  });
+  document.getElementById('step6NextBtn').addEventListener('click', function () {
+    var allRequired = Array.prototype.every.call(requiredChecks, function (cb) { return cb.checked; });
+    if (!allRequired) { alert('필수 약관에 동의해주세요.'); return; }
+    goToStep(7);
+  });
+
+  // ---- Step 7: optional info ----
+  document.getElementById('step7SkipBtn').addEventListener('click', function () { goToStep(8); submitRegistration(); });
+  document.getElementById('step7NextBtn').addEventListener('click', function () { goToStep(8); submitRegistration(); });
+
+  // ---- Step 8: submit ----
+  async function submitRegistration() {
+    document.getElementById('step8Pending').style.display = '';
+    document.getElementById('step8Error').style.display = 'none';
+    document.getElementById('step8Success').style.display = 'none';
+
+    var phone = document.getElementById('phonePart1').value.trim() + '-' + document.getElementById('phonePart2').value.trim() + '-' + document.getElementById('phonePart3').value.trim();
+
+    var payload = {
+      p_name: document.getElementById('companyNameInput').value.trim(),
+      p_biz_reg_no: document.getElementById('bizRegNoInput').value.trim(),
+      p_ceo_name: document.getElementById('ceoNameInput').value.trim(),
+      p_biz_type: document.getElementById('bizTypeInput').value.trim(),
+      p_biz_item: document.getElementById('bizItemInput').value.trim(),
+      p_address: document.getElementById('addressInput').value.trim(),
+      p_phone: phone,
+      p_email: (currentUser && currentUser.email) || ''
+    };
+
+    var res = await sb.rpc('register_company', payload);
+
+    if (res.error) {
+      document.getElementById('step8Pending').style.display = 'none';
+      document.getElementById('step8ErrorText').textContent = '등록 중 오류가 발생했습니다: ' + res.error.message;
+      document.getElementById('step8Error').style.display = 'block';
+      return;
+    }
+
+    var companyId = res.data;
+    var contactName = document.getElementById('contactNameInput').value.trim();
+    if (contactName) {
+      await sb.from('company_members').update({ name: contactName }).eq('company_id', companyId).eq('profile_id', currentUser.id);
+    }
+
+    document.getElementById('welcomeText').textContent = (payload.p_name || '판매자') + '님 환영합니다!';
+    document.getElementById('step8Pending').style.display = 'none';
+    document.getElementById('step8Success').style.display = 'block';
+  }
+
+  document.getElementById('step8RetryBtn').addEventListener('click', submitRegistration);
+  document.getElementById('step8NextBtn').addEventListener('click', function () { goToStep(9); });
+
+  // ---- Step 9 ----
+  document.getElementById('step9NextBtn').addEventListener('click', function () { goToStep(10); });
+
+  document.addEventListener('versoi:ready', function (e) {
+    currentUser = e.detail.user;
+  });
+})();
 </script>
 </body>
 </html>
