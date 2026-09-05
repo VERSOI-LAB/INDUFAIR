@@ -10,7 +10,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="styles.css">
 <style>
-  .used-banner{padding:22px clamp(16px,3vw,28px);display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;}
+  .used-banner{
+    padding:22px clamp(16px,3vw,28px);display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;
+    background:
+      linear-gradient(100deg, var(--navy-900) 30%, color-mix(in srgb, var(--navy-900) 55%, transparent) 65%, color-mix(in srgb, var(--navy-800) 25%, transparent) 90%),
+      url("이미지/web/중고장터_메인.jpg");
+    background-size:cover;background-position:center;
+  }
   .used-banner h1{color:#fff;font-size:1.32rem;font-weight:900;margin-bottom:10px;}
   .used-banner-right{display:flex;align-items:center;gap:14px;padding-left:24px;border-left:1px solid rgba(255,255,255,.14);}
   .used-banner-right .shield{

@@ -25,21 +25,14 @@
   .goods-hero-bg{
     position:absolute;inset:0;z-index:-1;
     background:
-      radial-gradient(46% 90% at 88% 30%, color-mix(in srgb, var(--accent) 42%, transparent), transparent 62%),
-      linear-gradient(115deg, var(--navy-900) 38%, var(--navy-800) 68%, var(--navy-700));
-  }
-  .goods-hero-bg::before{
-    content:"";position:absolute;inset:0;opacity:.4;
-    background-image:
-      linear-gradient(color-mix(in srgb, #fff 6%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in srgb, #fff 6%, transparent) 1px, transparent 1px);
-    background-size:40px 40px;
-    mask-image:radial-gradient(65% 100% at 78% 30%, #000, transparent 78%);
+      linear-gradient(100deg, var(--navy-900) 25%, color-mix(in srgb, var(--navy-900) 50%, transparent) 58%, color-mix(in srgb, var(--navy-800) 30%, transparent) 78%),
+      url("이미지/web/산업용품_메인.jpg");
+    background-size:cover;background-position:center;
   }
   .goods-hero-inner{
     max-width:none;margin-inline:auto;padding:52px clamp(16px,4vw,32px) 40px;
-    display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center;
   }
+  .goods-hero-copy{max-width:640px;}
   .goods-hero-copy .eyebrow{font-size:.9rem;font-weight:800;color:#8FB0FF;margin-bottom:10px;}
   .goods-hero-copy h1{font-size:clamp(1.7rem,3.2vw,2.5rem);font-weight:900;color:#fff;line-height:1.32;}
   .goods-hero-copy p{margin-top:14px;color:#B7C4E0;font-size:.98rem;line-height:1.65;}
@@ -49,20 +42,6 @@
     color:#DCE6FA;font-size:.82rem;font-weight:700;padding:8px 14px;border-radius:24px;
   }
   .goods-badge svg{color:#8FB0FF;flex-shrink:0;}
-  .goods-hero-visual{position:relative;height:220px;display:flex;align-items:center;justify-content:center;}
-  .rig{position:relative;width:100%;height:100%;}
-  .rig-plate{
-    position:absolute;inset:8% 4%;border-radius:16px;
-    background:linear-gradient(150deg,#1B2C55,#0C1631);
-    border:1px solid rgba(255,255,255,.08);
-    box-shadow:inset 0 0 60px rgba(0,0,0,.4);
-  }
-  .rig-arm{position:absolute;left:50%;bottom:10%;transform:translateX(-50%);color:#C9D8F5;width:58%;height:78%;}
-  .rig-dot{position:absolute;width:9px;height:9px;border-radius:50%;background:#5FA6FF;box-shadow:0 0 12px 3px rgba(95,166,255,.7);}
-  .rig-dot.d1{top:18%;left:20%;}
-  .rig-dot.d2{top:30%;right:16%;}
-  .rig-dot.d3{bottom:16%;left:14%;}
-
   /* ============ Search + AI image search row ============ */
   .goods-search-row{margin-top:-30px;position:relative;z-index:2;display:grid;grid-template-columns:1fr 320px;gap:20px;}
   .goods-search-bar{
@@ -189,46 +168,27 @@
 
   /* Bottom AI image-search promo strip */
   .ai-scan-promo{
-    margin-top:44px;background:linear-gradient(120deg,var(--navy-900),var(--navy-700) 70%);
+    margin-top:44px;
+    background:
+      linear-gradient(100deg, var(--navy-900) 30%, color-mix(in srgb, var(--navy-900) 55%, transparent) 62%, transparent 88%),
+      url("이미지/web/산업용품_AI 이미지 검색으로.jpg");
+    background-size:cover;background-position:center;
     border-radius:var(--radius-l);padding:clamp(24px,3.4vw,36px);position:relative;overflow:hidden;
-    display:grid;grid-template-columns:1fr auto auto auto auto;gap:20px;align-items:center;
+    min-height:220px;display:flex;align-items:center;
   }
-  .ai-scan-promo::before{
-    content:"";position:absolute;inset:0;opacity:.45;
-    background-image:radial-gradient(color-mix(in srgb,#fff 14%,transparent) 1px, transparent 1px);
-    background-size:24px 24px;mask-image:radial-gradient(70% 140% at 0% 50%, #000, transparent 75%);
-  }
-  .ai-scan-copy{position:relative;z-index:1;}
+  .ai-scan-copy{position:relative;z-index:1;max-width:420px;}
   .ai-scan-copy h3{color:#fff;font-size:1.2rem;font-weight:900;line-height:1.4;}
   .ai-scan-copy p{color:#B7C4E0;font-size:.85rem;margin-top:8px;line-height:1.55;max-width:34ch;}
   .ai-scan-copy .btn{margin-top:16px;}
-  .scan-step{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
-  .scan-icon{
-    width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
-    display:flex;align-items:center;justify-content:center;color:#DCE6FA;
-  }
-  .scan-icon.result{background:var(--surface);color:var(--accent);flex-direction:column;gap:2px;padding:6px;text-align:center;}
-  .scan-icon.result .rb{font-family:var(--font-en);font-size:.56rem;font-weight:800;color:var(--text);}
-  .scan-label{font-size:.72rem;color:#AFC0E4;font-weight:700;text-align:center;}
-  .scan-checklist{display:flex;flex-direction:column;gap:6px;position:relative;z-index:1;}
-  .scan-checklist span{display:flex;align-items:center;gap:6px;font-size:.78rem;color:#DCE6FA;font-weight:600;}
-  .scan-checklist svg{color:#5FE0A6;flex-shrink:0;}
-  .scan-arrow{color:#5A76B8;flex-shrink:0;position:relative;z-index:1;}
 
   /* ============ Responsive ============ */
   @media (max-width:1160px){
     .product-grid{grid-template-columns:repeat(3,1fr);}
   }
   @media (max-width:1080px){
-    .goods-hero-inner{grid-template-columns:1fr;}
-    .goods-hero-visual{order:-1;height:160px;}
     .goods-search-row{grid-template-columns:1fr;}
     .goods-layout{grid-template-columns:1fr;}
     .filter-panel{position:static;}
-    .ai-scan-promo{grid-template-columns:1fr;text-align:center;}
-    .ai-scan-copy p{max-width:none;margin-inline:auto;}
-    .scan-checklist{align-items:center;}
-    .scan-arrow{transform:rotate(90deg);margin-inline:auto;}
   }
   @media (max-width:720px){
     .product-grid{grid-template-columns:repeat(2,1fr);}
@@ -298,25 +258,6 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 5.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
             전문 상담
           </span>
-        </div>
-      </div>
-      <div class="goods-hero-visual" aria-hidden="true">
-        <div class="rig">
-          <div class="rig-plate"></div>
-          <svg class="rig-arm" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="10" y="78" width="26" height="14" rx="2"/>
-            <line x1="23" y1="78" x2="23" y2="58"/>
-            <line x1="23" y1="58" x2="55" y2="42"/>
-            <circle cx="23" cy="58" r="4"/>
-            <line x1="55" y1="42" x2="55" y2="22"/>
-            <circle cx="55" cy="42" r="4"/>
-            <line x1="55" y1="22" x2="80" y2="14"/>
-            <circle cx="55" cy="22" r="3.5"/>
-            <path d="M80 14l7 4M80 14l3 8"/>
-          </svg>
-          <span class="rig-dot d1"></span>
-          <span class="rig-dot d2"></span>
-          <span class="rig-dot d3"></span>
         </div>
       </div>
     </div>
@@ -505,28 +446,6 @@
             <h3>AI 이미지 검색으로<br>원하는 제품을 바로 찾으세요!</h3>
             <p>제품 사진을 업로드하면 AI가 자동으로 제품을 인식하여 상품을 추천해드립니다.</p>
             <button type="button" class="btn btn-primary" id="aiScanPromoBtn">이미지 검색하기 →</button>
-          </div>
-          <div class="scan-step">
-            <div class="scan-icon">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1"/><path d="M9 15V4M9 4l3 3M9 4l-3 3"/></svg>
-            </div>
-            <span class="scan-label">사진 업로드</span>
-          </div>
-          <svg class="scan-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
-          <div class="scan-step">
-            <div class="scan-icon">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 15l-4.5-4.5L9 18"/></svg>
-            </div>
-            <span class="scan-label">AI 제품 인식</span>
-          </div>
-          <svg class="scan-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
-          <div class="scan-step">
-            <div class="scan-icon result">
-              <span class="rb">MITSUBISHI</span>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>
-              <span class="rb">PLC Q시리즈</span>
-            </div>
-            <span class="scan-label">상품 추천</span>
           </div>
         </div>
       </div>

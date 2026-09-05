@@ -10,10 +10,15 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="styles.css">
 <style>
-  .comm-hero{padding:34px clamp(16px,3vw,28px);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;min-height:150px;}
+  .comm-hero{
+    padding:34px clamp(16px,3vw,28px);display:flex;align-items:center;min-height:180px;
+    background:
+      linear-gradient(100deg, var(--navy-900) 30%, color-mix(in srgb, var(--navy-900) 55%, transparent) 65%, color-mix(in srgb, var(--navy-800) 25%, transparent) 90%),
+      url("이미지/web/커뮤니티_메인.jpg");
+    background-size:cover;background-position:center;
+  }
   .comm-hero h1{color:#fff;font-size:1.5rem;font-weight:900;line-height:1.4;}
   .comm-hero p{color:#B7C4E0;font-size:.9rem;margin-top:10px;}
-  .comm-hero-visual{width:230px;height:120px;color:#7C9AE0;position:relative;}
 
   .topic-nav{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:20px;}
   .topic-item{
@@ -108,7 +113,7 @@
 
   @media (max-width:1160px){ .topic-nav{grid-template-columns:repeat(4,1fr);} .topic-cards{grid-template-columns:repeat(3,1fr);} }
   @media (max-width:1080px){ .comm-cols{grid-template-columns:1fr;} }
-  @media (max-width:640px){ .topic-nav{grid-template-columns:repeat(3,1fr);} .topic-cards{grid-template-columns:repeat(2,1fr);} .comm-hero{grid-template-columns:1fr;} .comm-hero-visual{display:none;} }
+  @media (max-width:640px){ .topic-nav{grid-template-columns:repeat(3,1fr);} .topic-cards{grid-template-columns:repeat(2,1fr);} }
 
   .side-nav a.cat-parent{font-weight:800;}
   .side-nav a.cat-parent svg.chev{margin-left:auto;}
@@ -204,20 +209,6 @@
         <div>
           <h1>산업인의 경험이 모여<br>산업의 미래가 됩니다.</h1>
           <p>정보 공유 · 문제 해결 · 네트워킹까지 VERSOI 커뮤니티에서!</p>
-        </div>
-        <div class="comm-hero-visual" aria-hidden="true">
-          <svg viewBox="0 0 230 120" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;">
-            <rect x="8" y="60" width="30" height="30" rx="3"/>
-            <circle cx="23" cy="50" r="9"/>
-            <rect x="90" y="70" width="30" height="20" rx="3"/>
-            <circle cx="105" cy="60" r="9"/>
-            <rect x="170" y="55" width="30" height="35" rx="3"/>
-            <circle cx="185" cy="45" r="9"/>
-            <path d="M38 65l52 5M120 78l50-15" opacity=".6"/>
-            <circle cx="60" cy="20" r="10"/><path d="M60 12v16M52 20h16" opacity=".7"/>
-            <circle cx="150" cy="18" r="8"/>
-            <circle cx="215" cy="40" r="6"/>
-          </svg>
         </div>
       </div>
 
