@@ -262,12 +262,10 @@
     <aside class="page-aside">
       <div class="side-panel">
         <p class="side-panel-title">최근 요청 템플릿</p>
-        <ul class="template-list">
-          <li><a href="rfq-new.html?cat=PLC">PLC Q시리즈 견적 요청</a><span>2024.05.10</span></li>
-          <li><a href="rfq-new.html?cat=%EB%AA%A8%ED%84%B0">모터/감속기 견적 요청</a><span>2024.05.08</span></li>
-          <li><a href="rfq-new.html?cat=%EB%B2%A0%EC%96%B4%EB%A7%81">베어링 일괄 견적 요청</a><span>2024.05.05</span></li>
+        <ul class="template-list" id="rfqTemplateList">
+          <li style="color:var(--text-tertiary);font-size:.82rem;">불러오는 중...</li>
         </ul>
-        <a href="#" class="more-link" style="margin-top:10px;justify-content:flex-end;" onclick="alert('템플릿 관리 기능은 준비 중입니다.');return false;">템플릿 관리 ›</a>
+        <a href="rfq-templates.html" class="more-link" style="margin-top:10px;justify-content:flex-end;">템플릿 관리 ›</a>
       </div>
 
       <div class="goomrq-card">
@@ -574,7 +572,19 @@
       document.getElementById('favCompaniesLink').classList.add('active');
     }
     loadFavoriteCompanies().then(loadRfqs);
+    loadTemplatePreview();
   });
+
+  async function loadTemplatePreview(){
+    var listEl = document.getElementById('rfqTemplateList');
+    if (!currentUser) { listEl.innerHTML = '<li style="color:var(--text-tertiary);font-size:.82rem;"><a href="login.html?redirect=rfq.html">로그인</a> 후 이용할 수 있어요.</li>'; return; }
+    var res = await sb.from('rfq_templates').select('id,title,created_at').eq('profile_id', currentUser.id).order('created_at', { ascending: false }).limit(3);
+    var rows = (res.data || []);
+    if (!rows.length) { listEl.innerHTML = '<li style="color:var(--text-tertiary);font-size:.82rem;">저장된 템플릿이 없습니다.</li>'; return; }
+    listEl.innerHTML = rows.map(function(t){
+      return '<li><a href="rfq-new.html?template=' + t.id + '">' + esc(t.title) + '</a><span>' + fmtDate(t.created_at) + '</span></li>';
+    }).join('');
+  }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>

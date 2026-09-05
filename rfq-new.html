@@ -92,6 +92,7 @@
           <a href="rfq.html?status=answered"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>비교 중<span class="count">2</span></a>
           <a href="rfq.html?status=closed"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>거래 완료<span class="count">12</span></a>
           <a href="rfq.html?fav_companies=1"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>찜한 업체</a>
+          <a href="rfq-templates.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>내 요청 템플릿</a>
         </nav>
       </div>
 
@@ -197,8 +198,9 @@
           <div class="attach-list" id="rfqAttachList"></div>
         </div>
 
-        <div class="form-actions">
-          <button type="submit" id="rfqSubmitBtn" class="btn btn-primary btn-lg btn-wide" style="width:100%;justify-content:center;">견적 요청 등록하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <div class="form-actions" style="display:flex;gap:10px;">
+          <button type="button" id="rfqSaveTemplateBtn" class="btn btn-outline btn-lg" style="flex:0 0 auto;white-space:nowrap;">템플릿으로 저장</button>
+          <button type="submit" id="rfqSubmitBtn" class="btn btn-primary btn-lg btn-wide" style="flex:1;justify-content:center;">견적 요청 등록하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
       </form>
     </div>
@@ -296,6 +298,40 @@
       var titleField = document.getElementById('rfqTitle');
       if (!titleField.value.trim()) titleField.value = catParam + ' 견적 요청';
     }
+
+    var templateId = new URLSearchParams(location.search).get('template');
+    if (templateId && rfqUser) {
+      var tRes = await sb.from('rfq_templates').select('*').eq('id', templateId).eq('profile_id', rfqUser.id).maybeSingle();
+      if (tRes.data) {
+        var t = tRes.data;
+        document.getElementById('rfqTitle').value = t.title || '';
+        if (t.category_id) rfqCategorySelect.value = t.category_id;
+        if (t.quantity) document.getElementById('rfqQuantity').value = t.quantity;
+        if (t.desired_price) document.getElementById('rfqDesiredPrice').value = t.desired_price;
+        document.getElementById('rfqSpec').value = t.spec_description || '';
+        document.getElementById('rfqCount').textContent = (t.spec_description || '').length;
+      }
+    }
+  });
+
+  document.getElementById('rfqSaveTemplateBtn').addEventListener('click', async function () {
+    if (!window.VERSOI.requireAuth()) return;
+    var title = document.getElementById('rfqTitle').value.trim();
+    var categoryId = rfqCategorySelect.value;
+    if (!title || !categoryId) { alert('템플릿으로 저장하려면 요청 제목과 카테고리를 먼저 입력해주세요.'); return; }
+    var quantityVal = document.getElementById('rfqQuantity').value;
+    var priceVal = document.getElementById('rfqDesiredPrice').value;
+    var spec = document.getElementById('rfqSpec').value.trim();
+    var res = await sb.from('rfq_templates').insert({
+      profile_id: window.VERSOI.user.id,
+      title: title,
+      category_id: categoryId,
+      quantity: quantityVal ? Number(quantityVal) : null,
+      desired_price: priceVal ? Number(priceVal) : null,
+      spec_description: spec || null
+    });
+    if (res.error) { alert('템플릿 저장에 실패했습니다: ' + res.error.message); return; }
+    alert('템플릿으로 저장되었습니다. rfq-templates.html에서 확인할 수 있어요.');
   });
 
   document.getElementById('rqQuickGrid').addEventListener('click', function(e){

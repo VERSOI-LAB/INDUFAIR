@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 견적요청 템플릿 관리</title>
+<meta name="description" content="자주 요청하는 견적 조건을 템플릿으로 저장하고 재사용하는 VERSOI 견적요청 템플릿 관리">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .rt-list{display:flex;flex-direction:column;gap:12px;margin-top:20px;}
+  .rt-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);box-shadow:var(--shadow-1);
+    padding:18px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  .rt-main{flex:1;min-width:220px;}
+  .rt-title{font-size:.94rem;font-weight:800;}
+  .rt-meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:.78rem;color:var(--text-tertiary);}
+  .rt-meta b{color:var(--text-secondary);font-weight:700;}
+  .rt-spec{font-size:.8rem;color:var(--text-secondary);margin-top:6px;line-height:1.5;}
+  .rt-actions{display:flex;gap:8px;flex-shrink:0;}
+  .empty-state{padding:60px 0;text-align:center;color:var(--text-tertiary);font-size:.9rem;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html" aria-label="VERSOI 홈으로 이동">
+      <span class="logo-mark">V</span><span class="logo-text">VERSOI</span>
+      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">홈</a><a href="goods.html">산업용품</a><a href="used.html">중고장터</a>
+      <a href="brand.html">브랜드관</a><a href="rfq.html" class="active">견적요청(RFQ)</a><a href="community.html">커뮤니티</a><a href="support.html">고객센터</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" aria-label="검색"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="icon-btn" aria-label="알림"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="icon-count">5</span></button>
+      <a href="cart.html" class="icon-btn" aria-label="장바구니"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span class="icon-count">3</span></a>
+      <a href="mypage.html" class="icon-btn" aria-label="마이페이지"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></a>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap page-layout">
+    <aside>
+      <div class="page-title-block" style="padding-top:26px;">
+        <h1>견적요청 (RFQ)</h1>
+        <p>필요한 제품의 견적을 요청하고<br>여러 공급업체의 견적을 비교해보세요.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        <a class="btn btn-primary" style="justify-content:center;" href="rfq-new.html">견적 요청하기</a>
+        <a class="btn btn-ghost" style="justify-content:center;" href="goomrq-new.html">구매요청(구해요) 등록하기</a>
+      </div>
+
+      <div class="side-panel">
+        <p class="side-panel-title">MY RFQ</p>
+        <nav class="side-nav">
+          <a href="rfq.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>전체 요청 현황</a>
+          <a href="rfq.html?status=open"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>진행 중</a>
+          <a href="rfq.html?status=answered"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>견적 수신</a>
+          <a href="rfq.html?fav_companies=1"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>찜한 업체</a>
+          <a href="rfq-templates.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>내 요청 템플릿</a>
+        </nav>
+      </div>
+    </aside>
+
+    <div>
+      <h1 style="font-size:1.5rem;font-weight:900;">내 요청 템플릿</h1>
+      <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">자주 요청하는 견적 조건을 템플릿으로 저장해두면 다음 요청 시 바로 불러올 수 있어요.</p>
+
+      <div class="rt-list" id="rtList">
+        <div class="empty-state">불러오는 중...</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
+    <div class="footer-links"><a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a><a href="business-info.html">사업자정보확인</a><a href="seller-apply.html">제휴/입점문의</a></div>
+  </div>
+</footer>
+
+<script>
+  var navToggle = document.getElementById('navToggle');
+  var mainNav = document.getElementById('mainNav');
+  navToggle.addEventListener('click', function(){
+    var open = mainNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmtNum(n) { return n == null ? '' : Number(n).toLocaleString('ko-KR'); }
+
+  async function loadTemplates(user) {
+    var list = document.getElementById('rtList');
+    var res = await sb.from('rfq_templates')
+      .select('id,title,quantity,desired_price,spec_description,created_at,categories(name)')
+      .eq('profile_id', user.id)
+      .order('created_at', { ascending: false });
+    if (res.error) { list.innerHTML = '<div class="empty-state">불러오지 못했습니다.</div>'; return; }
+    var rows = res.data || [];
+    if (!rows.length) {
+      list.innerHTML = '<div class="empty-state">저장된 템플릿이 없습니다.<br>견적 요청서 작성 중 "템플릿으로 저장" 버튼을 눌러 저장해보세요.<br><a href="rfq-new.html" style="color:var(--accent);font-weight:700;">견적 요청하기 &rsaquo;</a></div>';
+      return;
+    }
+    list.innerHTML = rows.map(function (r) {
+      var catName = r.categories && r.categories.name ? r.categories.name : '';
+      var metaParts = [];
+      if (catName) metaParts.push('<span>카테고리 <b>' + esc(catName) + '</b></span>');
+      if (r.quantity) metaParts.push('<span>수량 <b>' + fmtNum(r.quantity) + '개</b></span>');
+      if (r.desired_price) metaParts.push('<span>희망단가 <b>' + fmtNum(r.desired_price) + '원</b></span>');
+      return '<div class="rt-card" data-id="' + r.id + '">' +
+        '<div class="rt-main">' +
+        '<div class="rt-title">' + esc(r.title) + '</div>' +
+        '<div class="rt-meta">' + metaParts.join('') + '</div>' +
+        (r.spec_description ? '<div class="rt-spec">' + esc(r.spec_description.slice(0, 80)) + '</div>' : '') +
+        '</div>' +
+        '<div class="rt-actions">' +
+        '<a href="rfq-new.html?template=' + r.id + '" class="btn btn-primary btn-sm">이 템플릿으로 요청하기</a>' +
+        '<button type="button" class="btn btn-outline btn-sm rt-delete" data-id="' + r.id + '">삭제</button>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  document.getElementById('rtList').addEventListener('click', async function (e) {
+    var btn = e.target.closest('.rt-delete');
+    if (!btn) return;
+    if (!confirm('이 템플릿을 삭제하시겠습니까?')) return;
+    var user = window.VERSOI.user;
+    if (!user) return;
+    btn.disabled = true;
+    await sb.from('rfq_templates').delete().eq('id', btn.dataset.id).eq('profile_id', user.id);
+    await loadTemplates(user);
+  });
+
+  document.addEventListener('versoi:ready', function (e) {
+    var user = e.detail.user;
+    if (!user) { location.href = 'login.html?redirect=rfq-templates.html'; return; }
+    loadTemplates(user);
+  });
+})();
+</script>
+</body>
+</html>
