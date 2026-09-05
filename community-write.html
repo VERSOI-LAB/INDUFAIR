@@ -161,6 +161,32 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
             </div>
+            <div class="field" id="govTargetBizField" style="display:none;">
+              <label>대상 업종</label>
+              <div class="select-wrap">
+                <select id="govTargetBizSelect">
+                  <option value="">전체 업종</option>
+                  <option value="제조업">제조업</option>
+                  <option value="서비스업">서비스업</option>
+                  <option value="도소매업">도소매업</option>
+                  <option value="건설업">건설업</option>
+                  <option value="기타">기타</option>
+                </select>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
+            <div class="field" id="govTargetSizeField" style="display:none;">
+              <label>대상 기업 규모</label>
+              <div class="select-wrap">
+                <select id="govTargetSizeSelect">
+                  <option value="">전체 규모</option>
+                  <option value="소상공인">소상공인</option>
+                  <option value="중소기업">중소기업</option>
+                  <option value="중견기업">중견기업</option>
+                </select>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
             <div class="field full">
               <label>제목<span class="req">*</span></label>
               <div class="textarea-wrap">
@@ -338,8 +364,11 @@
   });
 
   function syncNewsCategoryField() {
-    var isNews = document.getElementById('boardTypeSelect').value === 'news';
-    document.getElementById('newsCategoryField').style.display = isNews ? '' : 'none';
+    var boardVal = document.getElementById('boardTypeSelect').value;
+    document.getElementById('newsCategoryField').style.display = boardVal === 'news' ? '' : 'none';
+    var isGov = boardVal === 'gov';
+    document.getElementById('govTargetBizField').style.display = isGov ? '' : 'none';
+    document.getElementById('govTargetSizeField').style.display = isGov ? '' : 'none';
   }
   document.getElementById('boardTypeSelect').addEventListener('change', syncNewsCategoryField);
 
@@ -467,6 +496,10 @@
       attachments: attachments
     };
     if (boardType === 'news') insertRow.news_category = document.getElementById('newsCategorySelect').value;
+    if (boardType === 'gov') {
+      insertRow.gov_target_biz_type = document.getElementById('govTargetBizSelect').value || null;
+      insertRow.gov_target_size = document.getElementById('govTargetSizeSelect').value || null;
+    }
     var res = await sb.from('community_posts').insert(insertRow);
 
     submitBtn.disabled = false;
