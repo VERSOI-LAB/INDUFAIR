@@ -60,13 +60,9 @@
   .brand-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   .brand-tab .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.5;flex-shrink:0;}
 
-  .rec-carousel{position:relative;display:flex;align-items:center;gap:12px;margin-top:16px;}
-  .rec-track{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;overflow:hidden;}
-  .rec-arrow{
-    width:34px;height:34px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text-secondary);
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s ease,color .15s ease;box-shadow:var(--shadow-1);
-  }
-  .rec-arrow:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .rec-carousel{position:relative;margin-top:16px;}
+  .rec-track{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+  .rec-viewall{margin-top:18px;display:flex;justify-content:center;}
   .rec-card{
     background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;
     transition:box-shadow .2s ease,transform .2s ease;
@@ -264,11 +260,12 @@
         </div>
 
         <div class="rec-carousel">
-          <button class="rec-arrow" aria-label="이전" id="recPrevBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg></button>
           <div class="rec-track" id="recTrack">
             <p style="padding:40px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">불러오는 중...</p>
           </div>
-          <button class="rec-arrow" aria-label="다음" id="recNextBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <div class="rec-viewall">
+            <a href="goods.html" class="btn btn-outline">전체보기</a>
+          </div>
         </div>
       </section>
 
@@ -439,14 +436,7 @@
     render();
   });
 
-  document.getElementById('recPrevBtn').addEventListener('click', function(){
-    document.getElementById('recTrack').scrollBy({ left: -260, behavior: 'smooth' });
-  });
-  document.getElementById('recNextBtn').addEventListener('click', function(){
-    document.getElementById('recTrack').scrollBy({ left: 260, behavior: 'smooth' });
-  });
-
-  document.addEventListener('versoi:ready', async function(){
+document.addEventListener('versoi:ready', async function(){
     var brandParam = new URLSearchParams(location.search).get('brand');
     if (brandParam) {
       state.brand = brandParam;
