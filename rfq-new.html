@@ -187,7 +187,7 @@
           <div class="dropzone" id="rfqDropzone">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1"/><path d="M9 15V4M9 4l3 3M9 4l-3 3"/></svg>
             <div class="dz-main">파일을 드래그하거나 클릭하여 첨부하세요.</div>
-            <div class="dz-sub">도면, 사양서, 참고 이미지 등을 첨부하면 정확한 견적에 도움이 됩니다. (최대 10MB)<br>첨부 가능 파일 : PDF, DWG, DOC, DOCX, XLS, XLSX, JPG, PNG · 이미지 첨부 시 AI가 제목·카테고리·요청 내용을 자동으로 채워드려요.</div>
+            <div class="dz-sub">도면, 사양서, 참고 이미지 등을 첨부하면 정확한 견적에 도움이 됩니다. (최대 10MB)<br>첨부 가능 파일 : PDF, DWG, DOC, DOCX, XLS, XLSX, JPG, PNG · 이미지 첨부 시 AI가 제목·카테고리·요청 내용을 자동으로 채워드려요. 명판·라벨이 보이는 사진을 함께 올리면 인식률이 올라갑니다.</div>
           </div>
           <input type="file" id="rfqAttachInput" multiple style="display:none;">
           <div class="ai-status-box" id="rfqAiStatus" style="display:none;">
@@ -381,8 +381,8 @@
     }
 
     if (isFirstImage) {
-      var firstImage = files.find(function (f) { return f.type.indexOf('image/') === 0; });
-      if (firstImage) runRfqAiAnalysis(firstImage);
+      var imageFiles = files.filter(function (f) { return f.type.indexOf('image/') === 0; });
+      if (imageFiles.length) runRfqAiAnalysis(imageFiles);
     }
   }
 
@@ -404,21 +404,21 @@
     });
   }
 
-  async function runRfqAiAnalysis(file) {
+  async function runRfqAiAnalysis(files) {
     var statusBox = document.getElementById('rfqAiStatus');
     var statusText = document.getElementById('rfqAiStatusText');
     statusBox.style.display = 'flex';
     statusText.textContent = 'AI가 사진을 분석하고 있어요...';
     try {
-      var dataUrl = await resizeRfqForAi(file);
-      var base64 = dataUrl.split(',')[1];
+      var dataUrls = await Promise.all(files.map(resizeRfqForAi));
+      var images = dataUrls.map(function (u) { return { data: u.split(',')[1], mimeType: 'image/jpeg' }; });
       var sessionRes = await sb.auth.getSession();
       var token = sessionRes.data.session ? sessionRes.data.session.access_token : null;
       var categoryNames = Array.from(rfqCategorySelect.options).slice(1).map(function (opt) { return opt.textContent; });
       var res = await fetch('https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1/ai-product-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg', categories: categoryNames })
+        body: JSON.stringify({ images: images, categories: categoryNames })
       });
       var data = await res.json();
       if (!res.ok || data.error) {

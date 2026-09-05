@@ -161,7 +161,7 @@
             <div class="ai-photo-dropzone" id="photoDropzone">
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
               <div class="dz-main">사진을 드래그하거나 클릭하여 등록하세요</div>
-              <div class="dz-sub">첫 사진이 대표 사진이 되며, AI가 자동으로 배경을 흰색으로 정리합니다. (최대 8장)</div>
+              <div class="dz-sub">첫 사진이 대표 사진이 되며, AI가 자동으로 배경을 흰색으로 정리합니다. (최대 8장)<br>제품명/모델명이 찍힌 명판·라벨이 보이는 각도의 사진을 함께 올리면 AI 인식률이 크게 올라갑니다.</div>
             </div>
             <input type="file" id="photoInput" accept="image/*" multiple style="display:none;">
             <div class="photo-grid" id="photoGrid"></div>
@@ -532,21 +532,21 @@
     return new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.92); });
   }
 
-  async function analyzeFirstPhoto(file) {
+  async function analyzePhotos(files) {
     if (!window.VERSOI.requireAuth()) return;
     var statusBox = document.getElementById('aiStatusBox');
     var statusText = document.getElementById('aiStatusText');
     statusBox.style.display = 'flex';
     statusText.textContent = 'AI가 사진을 분석하고 있어요...';
     try {
-      var dataUrl = await resizeForAnalysis(file);
-      var base64 = dataUrl.split(',')[1];
+      var dataUrls = await Promise.all(files.map(resizeForAnalysis));
+      var images = dataUrls.map(function (u) { return { data: u.split(',')[1], mimeType: 'image/jpeg' }; });
       var sessionRes = await sb.auth.getSession();
       var token = sessionRes.data.session ? sessionRes.data.session.access_token : null;
       var res = await fetch(FUNCTIONS_URL + '/ai-product-register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg', categories: allCategories.map(function (c) { return c.name; }) })
+        body: JSON.stringify({ images: images, categories: allCategories.map(function (c) { return c.name; }) })
       });
       var data = await res.json();
       if (!res.ok || data.error) {
@@ -614,7 +614,7 @@
       })(files[i]);
     }
 
-    if (isFirstBatch) analyzeFirstPhoto(files[0]);
+    if (isFirstBatch) analyzePhotos(files);
   }
 
   document.getElementById('photoDropzone').addEventListener('click', function () { document.getElementById('photoInput').click(); });

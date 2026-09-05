@@ -128,7 +128,7 @@
           <div class="dropzone" id="pfImageDropzone" style="cursor:pointer;">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
             <div class="dz-main">사진을 드래그하거나 클릭하여 업로드하세요</div>
-            <div class="dz-sub">여러 장 선택 가능 · AI가 상품명·모델명·제조사·카테고리·설명을 자동으로 채워드립니다.</div>
+            <div class="dz-sub">여러 장 선택 가능 · AI가 상품명·모델명·제조사·카테고리·설명을 자동으로 채워드립니다.<br>제품명/모델명이 찍힌 명판·라벨이 보이는 각도의 사진을 함께 올리면 인식률이 크게 올라갑니다.</div>
           </div>
           <input type="file" id="pf-images" accept="image/*" multiple style="display:none;">
           <div id="pf-image-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
@@ -358,20 +358,20 @@ function resizeForAiAnalysis(file) {
   });
 }
 
-async function runProductAiAnalysis(file) {
+async function runProductAiAnalysis(files) {
   var statusBox = document.getElementById('pfAiStatus');
   var statusText = document.getElementById('pfAiStatusText');
   statusBox.style.display = 'flex';
   statusText.textContent = 'AI가 사진을 분석하고 있어요...';
   try {
-    var dataUrl = await resizeForAiAnalysis(file);
-    var base64 = dataUrl.split(',')[1];
+    var dataUrls = await Promise.all(files.map(resizeForAiAnalysis));
+    var images = dataUrls.map(function (u) { return { data: u.split(',')[1], mimeType: 'image/jpeg' }; });
     var sessionRes = await sb.auth.getSession();
     var token = sessionRes.data.session ? sessionRes.data.session.access_token : null;
     var res = await fetch(PF_FUNCTIONS_URL + '/ai-product-register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ image: base64, mimeType: 'image/jpeg', categories: PF.categories.map(function (c) { return c.name; }) })
+      body: JSON.stringify({ images: images, categories: PF.categories.map(function (c) { return c.name; }) })
     });
     var data = await res.json();
     if (!res.ok || data.error) {
@@ -422,7 +422,7 @@ function handlePfFiles(fileList) {
 
   syncPendingFilesToInput();
   renderPendingPreview();
-  if (isFirst) runProductAiAnalysis(files[0]);
+  if (isFirst) runProductAiAnalysis(files);
 }
 document.getElementById('pfImageDropzone').addEventListener('click', function () { document.getElementById('pf-images').click(); });
 document.getElementById('pfImageDropzone').addEventListener('dragover', function (e) { e.preventDefault(); });
