@@ -97,7 +97,7 @@
 <script src="js/seller-common.js"></script>
 <script>
 SC.ready(async function () {
-  var res = await sb.from('categories').select('*').order('sort_order');
+  var res = await sb.from('categories').select('*').not('parent_id', 'is', null).order('sort_order');
   var cats = res.data || [];
   var countRes = await sb.from('products').select('category_id');
   var counts = {};

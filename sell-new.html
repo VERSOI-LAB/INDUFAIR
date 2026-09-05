@@ -330,7 +330,7 @@
 (function () {
   async function loadCategories() {
     var sel = document.getElementById('categorySelect');
-    var res = await sb.from('categories').select('id,name').order('sort_order');
+    var res = await sb.from('categories').select('id,name').not('parent_id', 'is', null).order('sort_order');
     var cats = res.data || [];
     cats.forEach(function (c) {
       var opt = document.createElement('option');

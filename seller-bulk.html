@@ -164,7 +164,7 @@ document.getElementById('bulkSubmitBtn').addEventListener('click', async functio
 SC.ready(async function (user) {
   BF.companyId = user.company.id;
   BF.userId = user.id;
-  var res = await sb.from('categories').select('*').order('sort_order');
+  var res = await sb.from('categories').select('*').not('parent_id', 'is', null).order('sort_order');
   BF.categories = res.data || [];
 });
 </script>

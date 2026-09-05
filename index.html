@@ -82,7 +82,7 @@
   .section-grid{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;}
   .pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
   .pick-card{
-    border-radius:var(--radius-l);overflow:hidden;position:relative;color:#fff;
+    display:block;border-radius:var(--radius-l);overflow:hidden;position:relative;color:#fff;text-decoration:none;
     box-shadow:var(--shadow-1);transition:transform .2s ease, box-shadow .2s ease;
   }
   .pick-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-2);}
@@ -122,7 +122,7 @@
     position:relative;overflow:hidden;
   }
   .ai-promo-inner::before{
-    content:"";position:absolute;inset:0;opacity:.5;
+    content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
     background-image:radial-gradient(color-mix(in srgb,#fff 14%,transparent) 1px, transparent 1px);
     background-size:26px 26px;
     mask-image:radial-gradient(60% 90% at 100% 0%, #000, transparent 70%);
@@ -313,34 +313,34 @@
   <section class="wrap quick-categories">
     <div class="card-panel">
       <h2 class="visually-hidden">빠른 카테고리</h2>
-      <div class="category-row">
+      <div class="category-row" id="quickCategoryRow">
         <a class="category-item" href="goods.html">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg></span>
-          <span>FA 자동화</span>
+          <span>자동화·제어</span>
         </a>
         <a class="category-item" href="goods.html">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/><circle cx="18" cy="17" r="3"/><path d="M9 15v3"/></svg></span>
-          <span>공작기계</span>
+          <span>기계·가공</span>
         </a>
         <a class="category-item" href="goods.html">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.4"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg></span>
-          <span>모터/감속기</span>
+          <span>모터·동력전달</span>
         </a>
         <a class="category-item" href="goods.html">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></span>
-          <span>유공압</span>
+          <span>공압·유압</span>
         </a>
         <a class="category-item" href="goods.html">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4 14 11 14 10 22 20 10 13 10 13 2"/></svg></span>
-          <span>전기전자</span>
+          <span>전기·전자</span>
         </a>
         <a class="category-item" href="goods.html">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg></span>
-          <span>물류장비</span>
+          <span>물류·설비</span>
         </a>
         <a class="category-item" href="goods.html">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
-          <span>안전용품</span>
+          <span>안전·환경</span>
         </a>
         <a class="category-item more" href="goods.html">
           <span class="cat-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
@@ -358,7 +358,7 @@
           <h2>오늘의 추천</h2>
         </div>
         <div class="pick-grid">
-          <article class="pick-card pick-used" id="used-pick">
+          <a class="pick-card pick-used" id="used-pick" href="used.html">
             <div class="pick-visual">
               <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="14" height="10" rx="1.5"/><circle cx="18" cy="17" r="3"/><path d="M9 16v3"/></svg>
             </div>
@@ -367,8 +367,8 @@
               <p>검증된 중고 장비를 합리적인 가격에</p>
               <span class="btn btn-outline btn-sm">바로가기</span>
             </div>
-          </article>
-          <article class="pick-card pick-idle">
+          </a>
+          <a class="pick-card pick-idle" href="used.html?grade=idle">
             <div class="pick-visual">
               <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="7" height="7"/><rect x="9" y="10" width="7" height="7"/><rect x="16" y="10" width="6" height="7"/><path d="M2 10l3-4h14l3 4"/></svg>
             </div>
@@ -377,8 +377,8 @@
               <p>기업의 유휴재고를 특별한 가격에</p>
               <span class="btn btn-outline btn-sm">바로가기</span>
             </div>
-          </article>
-          <article class="pick-card pick-new">
+          </a>
+          <a class="pick-card pick-new" href="goods.html">
             <div class="pick-visual">
               <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="1.5"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="14" y2="12"/><circle cx="17" cy="17" r="1"/></svg>
             </div>
@@ -387,7 +387,7 @@
               <p>최신 산업용품을 빠르고 안전하게</p>
               <span class="btn btn-outline btn-sm">바로가기</span>
             </div>
-          </article>
+          </a>
         </div>
       </div>
 
@@ -510,7 +510,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             FAQ
           </a>
-          <a class="cs-item" href="consult.html">
+          <a class="cs-item" href="inquiry-new.html">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             1:1 문의
           </a>
@@ -647,5 +647,18 @@
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/ai-assistant.js"></script>
+<script>
+(function () {
+  async function wireQuickCategories() {
+    var links = document.querySelectorAll('#quickCategoryRow a.category-item:not(.more)');
+    var res = await sb.from('categories').select('id,name').is('parent_id', null).order('sort_order');
+    var cats = res.data || [];
+    links.forEach(function (a, i) {
+      if (cats[i]) a.href = 'goods.html?category=' + cats[i].id;
+    });
+  }
+  document.addEventListener('versoi:ready', wireQuickCategories, { once: true });
+})();
+</script>
 </body>
 </html>

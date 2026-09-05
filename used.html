@@ -89,6 +89,11 @@
   @media (max-width:1160px){ .used-banner{grid-template-columns:1fr;} .used-banner-right{border-left:none;padding-left:0;border-top:1px solid rgba(255,255,255,.14);padding-top:14px;} .used-grid{grid-template-columns:repeat(3,1fr);} }
   @media (max-width:900px){ .used-grid{grid-template-columns:repeat(2,1fr);} }
   @media (max-width:640px){ .toolbar-row{flex-direction:column;} .toolbar-controls{flex-wrap:wrap;} }
+
+  .side-nav a.cat-parent{font-weight:800;}
+  .side-nav a.cat-parent svg{margin-left:auto;}
+  .side-nav a.cat-child{padding-left:33px;font-size:.85rem;color:var(--text-secondary);}
+  .side-nav a.cat-back{color:var(--text-tertiary);font-size:.82rem;margin-bottom:4px;}
 </style>
 </head>
 <body>
@@ -235,9 +240,9 @@
       <div class="filter-chip-row" id="quickFilterChips">
         <button class="filter-chip reset" data-action="reset">전체 초기화</button>
         <button class="filter-chip on" data-chip-cat="">전체</button>
-        <button class="filter-chip" data-chip-cat="FA 자동화">FA 자동화 ✕</button>
-        <button class="filter-chip" data-chip-cat="PLC">PLC ✕</button>
-        <button class="filter-chip" data-chip-cat="서보">서보모터 ✕</button>
+        <button class="filter-chip" data-chip-cat="자동화·제어">자동화·제어 ✕</button>
+        <button class="filter-chip" data-chip-cat="PLC/컨트롤러">PLC ✕</button>
+        <button class="filter-chip" data-chip-cat="서보/모터">서보모터 ✕</button>
         <button class="filter-chip" data-chip-cat="인버터">인버터 ✕</button>
       </div>
 
@@ -348,40 +353,77 @@
   var GRADE_LABEL = { a:'A급', b:'B급', c:'C급', refurb:'리퍼비시', idle:'유휴재고', new:'신품' };
   var GRADE_CLASS = { a:'grade-a', b:'grade-b', c:'grade-c', refurb:'grade-refurb', idle:'grade-idle', new:'grade-a' };
 
-  var state = { category: '', q: '', grades: new Set(), chipCat: '' };
+  var state = { category: '', categoryName: '', q: '', grades: new Set(), chipCat: '' };
   var favSet = new Set();
   var allCategories = [];
+  var topCategories = [];
 
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
   function gradFor(id){ var sum = 0; String(id).split('').forEach(function(c){ sum += c.charCodeAt(0); }); return BG_GRADS[sum % BG_GRADS.length]; }
   function fmtDate(ts){ if(!ts) return ''; return ts.slice(0,10).replace(/-/g,'.'); }
 
-  async function loadCategories(){
-    var res = await sb.from('categories').select('id,name').order('sort_order');
-    allCategories = res.data || [];
-    var icon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
+  var CAT_ICON = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>';
+  var CHEVRON_RIGHT = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="margin-left:auto;"><polyline points="9 18 15 12 9 6"/></svg>';
+  var CHEVRON_LEFT = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>';
+  var navDrillParentId = ''; // '' = showing the 7 대분류; otherwise showing that parent's 중분류
+
+  function renderCatNav(){
     var nav = document.getElementById('catNav');
-    nav.innerHTML = '<a href="#" class="active" data-cat="">'+icon+'전체보기</a>' +
-      allCategories.map(function(c){ return '<a href="#" data-cat="'+c.id+'">'+icon+escapeHtml(c.name)+'</a>'; }).join('');
+    if (!navDrillParentId) {
+      nav.innerHTML = '<a href="#" class="'+(state.category === '' ? 'active' : '')+'" data-cat="">'+CAT_ICON+'전체보기</a>' +
+        topCategories.map(function(top){
+          return '<a href="#" class="cat-parent'+(String(state.category) === String(top.id) ? ' active' : '')+'" data-cat-parent="'+top.id+'">'+escapeHtml(top.name)+CHEVRON_RIGHT+'</a>';
+        }).join('');
+    } else {
+      var top = topCategories.find(function(c){ return String(c.id) === String(navDrillParentId); });
+      var children = allCategories.filter(function(c){ return String(c.parent_id) === String(navDrillParentId); });
+      nav.innerHTML = '<a href="#" class="cat-back" data-cat-back="1">'+CHEVRON_LEFT+' 전체 카테고리</a>' +
+        '<a href="#" class="cat-parent'+(String(state.category) === String(navDrillParentId) ? ' active' : '')+'" data-cat-parent="'+navDrillParentId+'">'+(top ? escapeHtml(top.name) : '')+' 전체</a>' +
+        children.map(function(c){ return '<a href="#" class="cat-child'+(String(state.category) === String(c.id) ? ' active' : '')+'" data-cat="'+c.id+'">'+escapeHtml(c.name)+'</a>'; }).join('');
+    }
+  }
+
+  async function loadCategories(){
+    var res = await sb.from('categories').select('id,name,parent_id').not('parent_id', 'is', null).order('sort_order');
+    allCategories = res.data || [];
+    var topRes = await sb.from('categories').select('id,name').is('parent_id', null).order('sort_order');
+    topCategories = topRes.data || [];
+    renderCatNav();
+    var nav = document.getElementById('catNav');
     nav.addEventListener('click', function(e){
       var a = e.target.closest('a'); if (!a) return;
       e.preventDefault();
-      state.category = a.dataset.cat || '';
+      if (a.dataset.catBack) {
+        navDrillParentId = '';
+        renderCatNav();
+        return;
+      }
+      if (a.dataset.catParent) {
+        state.category = a.dataset.catParent;
+        var top = topCategories.find(function(c){ return String(c.id) === a.dataset.catParent; });
+        state.categoryName = top ? top.name : '';
+        navDrillParentId = a.dataset.catParent; // drill into this 대분류's 중분류
+      } else {
+        state.category = a.dataset.cat || '';
+        var leaf = allCategories.find(function(c){ return String(c.id) === state.category; });
+        state.categoryName = leaf ? leaf.name : '';
+        if (!state.category) navDrillParentId = ''; // "전체보기" resets to top level
+      }
       state.chipCat = ''; // sidebar nav is the source of truth now; no quick-chip corresponds
-      nav.querySelectorAll('a').forEach(function(x){ x.classList.remove('active'); });
-      a.classList.add('active');
+      renderCatNav();
       syncChipUI();
       render();
     });
   }
 
-  // Quick-filter chips are shorthand for a subset of real categories (matched by name).
-  // "FA 자동화" has no matching row in `categories`, so it behaves like "전체" (clears the filter)
-  // while still visually highlighting as the selected chip.
+  // Quick-filter chips are shorthand for a subset of real categories, matched by exact name
+  // against either the 대분류 (top-level) or 중분류 (leaf) category list.
   function categoryIdForChip(chipName){
     if (!chipName) return '';
-    var match = allCategories.find(function(c){ return c.name.indexOf(chipName) !== -1; });
-    return match ? String(match.id) : '';
+    var top = topCategories.find(function(c){ return c.name === chipName; });
+    if (top) return String(top.id);
+    var leaf = allCategories.find(function(c){ return c.name === chipName; });
+    return leaf ? String(leaf.id) : '';
   }
 
   function syncChipUI(){
@@ -401,11 +443,11 @@
     var sellerName = p.companies ? p.companies.name : '개인 판매자';
     return ''
       + '<article class="used-card">'
-      +   '<div class="used-media" style="background:'+(img ? 'var(--bg-soft)' : gradFor(p.id))+';">'
+      +   '<a class="used-media" href="product-detail.html?id='+p.id+'" style="background:'+(img ? 'var(--bg-soft)' : gradFor(p.id))+';">'
       +     '<div class="used-badges"><span class="grade-badge '+gClass+'">'+escapeHtml(gLabel)+'</span></div>'
       +     '<button class="used-wish'+(favSet.has(p.id) ? ' wished' : '')+'" aria-label="찜하기" data-id="'+p.id+'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'
       +     media
-      +   '</div>'
+      +   '</a>'
       +   '<div class="used-body">'
       +     '<span class="u-brand">'+escapeHtml(p.manufacturer||'')+'</span>'
       +     '<a href="product-detail.html?id='+p.id+'" class="u-name" style="color:inherit;">'+escapeHtml(p.title)+'</a>'
@@ -422,7 +464,16 @@
       .eq('market_type','used').neq('status','deleted')
       .order('sort_order', { foreignTable: 'product_images', ascending: true })
       .order('created_at', { ascending: false });
-    if (state.category) q = q.eq('category_id', state.category);
+    if (state.category) {
+      var isLeaf = allCategories.some(function(c){ return String(c.id) === String(state.category); });
+      if (isLeaf) {
+        q = q.eq('category_id', state.category);
+      } else {
+        var childRes = await sb.from('categories').select('id').eq('parent_id', state.category);
+        var childIds = (childRes.data || []).map(function(c){ return c.id; });
+        q = childIds.length ? q.in('category_id', childIds) : q.eq('category_id', -1);
+      }
+    }
     if (state.q) q = q.ilike('title', '%'+state.q+'%');
     if (state.grades.size) q = q.in('condition', Array.from(state.grades));
     var res = await q;
@@ -458,7 +509,7 @@
 
   document.getElementById('usedGrid').addEventListener('click', function(e){
     var wishBtn = e.target.closest('.used-wish');
-    if (wishBtn) { toggleFavorite(wishBtn.dataset.id, wishBtn); return; }
+    if (wishBtn) { e.preventDefault(); toggleFavorite(wishBtn.dataset.id, wishBtn); return; }
   });
 
   document.getElementById('usedSearchForm').addEventListener('submit', function(e){
@@ -500,9 +551,9 @@
     if (btn.dataset.action === 'reset') {
       state.chipCat = '';
       state.category = '';
-      document.querySelectorAll('#catNav a').forEach(function(a){ a.classList.remove('active'); });
-      var allNav = document.querySelector('#catNav a[data-cat=""]');
-      if (allNav) allNav.classList.add('active');
+      state.categoryName = '';
+      navDrillParentId = '';
+      renderCatNav();
       syncChipUI();
       render();
       return;
@@ -512,9 +563,11 @@
     // Clicking the already-active chip (besides "전체") clears the filter, like removing a tag.
     state.chipCat = (state.chipCat === chipCat && chipCat !== '') ? '' : chipCat;
     state.category = categoryIdForChip(state.chipCat);
-    document.querySelectorAll('#catNav a').forEach(function(a){ a.classList.remove('active'); });
-    var navLink = document.querySelector('#catNav a[data-cat="'+state.category+'"]') || document.querySelector('#catNav a[data-cat=""]');
-    if (navLink) navLink.classList.add('active');
+    var matchedTop = topCategories.find(function(c){ return String(c.id) === state.category; });
+    var matchedLeaf = allCategories.find(function(c){ return String(c.id) === state.category; });
+    state.categoryName = matchedTop ? matchedTop.name : (matchedLeaf ? matchedLeaf.name : '');
+    navDrillParentId = matchedTop ? String(matchedTop.id) : (matchedLeaf ? String(matchedLeaf.parent_id) : '');
+    renderCatNav();
     syncChipUI();
     render();
   });
@@ -527,6 +580,16 @@
     }
     await loadCategories();
     syncChipUI();
+    var gradeParam = new URLSearchParams(location.search).get('grade');
+    if (gradeParam) {
+      var gradeCb = document.querySelector('#gradeFilterBody input[data-grade="'+gradeParam+'"]');
+      if (gradeCb) {
+        state.grades.add(gradeParam);
+        gradeCb.checked = true;
+        var allCb = document.querySelector('#gradeFilterBody input[data-grade=""]');
+        if (allCb) allCb.checked = false;
+      }
+    }
     await render();
   });
 })();

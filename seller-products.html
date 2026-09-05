@@ -380,7 +380,7 @@ document.getElementById('resetFilterBtn').addEventListener('click', function () 
 SC.ready(async function (user) {
   PF.companyId = user.company.id;
   PF.userId = user.id;
-  var catRes = await sb.from('categories').select('*').order('sort_order');
+  var catRes = await sb.from('categories').select('*').not('parent_id', 'is', null).order('sort_order');
   PF.categories = catRes.data || [];
   var catSelectHtml = PF.categories.map(function (c) { return '<option value="' + c.id + '">' + SC.esc(c.name) + '</option>'; }).join('');
   document.getElementById('categoryFilter').innerHTML = '<option value="">전체 카테고리</option>' + catSelectHtml;

@@ -358,33 +358,33 @@
         <a href="#filterTree" class="more-link" id="popularCatMoreLink">전체보기 ›</a>
       </div>
       <div class="category-row" id="popularCatRow">
-        <a class="category-item" href="#" data-cat-name="FA">
+        <a class="category-item" href="#" data-cat-parent="자동화·제어">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="1.5"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg></span>
-          <span>FA 자동화</span>
+          <span>자동화·제어</span>
         </a>
-        <a class="category-item" href="#" data-cat-name="공작">
+        <a class="category-item" href="#" data-cat-parent="기계·가공">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/><circle cx="18" cy="17" r="3"/><path d="M9 15v3"/></svg></span>
-          <span>공작기계</span>
+          <span>기계·가공</span>
         </a>
-        <a class="category-item" href="#" data-cat-name="모터">
+        <a class="category-item" href="#" data-cat-parent="모터·동력전달">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.4"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg></span>
-          <span>모터/감속기</span>
+          <span>모터·동력전달</span>
         </a>
-        <a class="category-item" href="#" data-cat-name="공압">
+        <a class="category-item" href="#" data-cat-parent="공압·유압">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="10" height="6" rx="1"/><path d="M14 11h4a2 2 0 0 1 2 2v2h-6"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg></span>
-          <span>유공압</span>
+          <span>공압·유압</span>
         </a>
-        <a class="category-item" href="#" data-cat-name="전기">
+        <a class="category-item" href="#" data-cat-parent="전기·전자">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4 14 11 14 10 22 20 10 13 10 13 2"/></svg></span>
-          <span>전기전자</span>
+          <span>전기·전자</span>
         </a>
-        <a class="category-item" href="#" data-cat-name="">
+        <a class="category-item" href="#" data-cat-parent="물류·설비">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg></span>
-          <span>물류장비</span>
+          <span>물류·설비</span>
         </a>
-        <a class="category-item" href="#" data-cat-name="">
+        <a class="category-item" href="#" data-cat-parent="안전·환경">
           <span class="cat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
-          <span>안전용품</span>
+          <span>안전·환경</span>
         </a>
       </div>
     </section>
@@ -587,10 +587,11 @@
   var PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/><line x1="4" y1="9" x2="20" y2="9"/></svg>';
   var BRAND_CLASS = { MITSUBISHI:'brand-mitsu', FANUC:'brand-fanuc', SMC:'brand-smc', OMRON:'brand-omron', NTN:'brand-ntn' };
 
-  var state = { category: '', q: '', brands: new Set(), stock: 'all', priceMin: null, priceMax: null, sort: 'pop' };
+  var state = { category: '', categoryName: '', q: '', brands: new Set(), stock: 'all', priceMin: null, priceMax: null, sort: 'pop' };
   var SORT_LABELS = { pop: '인기순', new: '최신순', price_asc: '낮은 가격순', price_desc: '높은 가격순' };
   var favSet = new Set();
   var allCategories = [];
+  var topCategories = [];
 
   function fmtWon(n){ return '₩' + Number(n||0).toLocaleString('ko-KR'); }
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
@@ -604,8 +605,10 @@
   function gradFor(id){ var sum = 0; String(id).split('').forEach(function(c){ sum += c.charCodeAt(0); }); return BG_GRADS[sum % BG_GRADS.length]; }
 
   async function loadCategories(){
-    var res = await sb.from('categories').select('id,name').order('sort_order');
+    var res = await sb.from('categories').select('id,name').not('parent_id', 'is', null).order('sort_order');
     allCategories = res.data || [];
+    var topRes = await sb.from('categories').select('id,name').is('parent_id', null).order('sort_order');
+    topCategories = topRes.data || [];
     var chevron = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>';
 
     var sel = document.getElementById('catSelect');
@@ -634,10 +637,15 @@
 
   function syncCategoryUI(){
     var catStr = state.category ? String(state.category) : '';
-    document.getElementById('catSelect').value = catStr;
-    var lbl = document.getElementById('catSelectLabel');
     var sel = document.getElementById('catSelect');
-    lbl.textContent = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '전체 카테고리';
+    var lbl = document.getElementById('catSelectLabel');
+    var isLeaf = allCategories.some(function(c){ return String(c.id) === catStr; });
+    sel.value = isLeaf ? catStr : '';
+    if (catStr && !isLeaf && state.categoryName) {
+      lbl.textContent = state.categoryName;
+    } else {
+      lbl.textContent = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '전체 카테고리';
+    }
     document.querySelectorAll('#filterTree a').forEach(function(a){
       a.classList.toggle('active', (a.dataset.cat || '') === catStr);
     });
@@ -678,7 +686,16 @@
     else if (state.sort === 'price_desc') q = q.order('price', { ascending: false });
     else if (state.sort === 'new') q = q.order('created_at', { ascending: false });
     else q = q.order('view_count', { ascending: false }).order('created_at', { ascending: false });
-    if (state.category) q = q.eq('category_id', state.category);
+    if (state.category) {
+      var isLeaf = allCategories.some(function(c){ return String(c.id) === String(state.category); });
+      if (isLeaf) {
+        q = q.eq('category_id', state.category);
+      } else {
+        var childRes = await sb.from('categories').select('id').eq('parent_id', state.category);
+        var childIds = (childRes.data || []).map(function(c){ return c.id; });
+        q = childIds.length ? q.in('category_id', childIds) : q.eq('category_id', -1);
+      }
+    }
     if (state.q) q = q.ilike('title', '%'+state.q+'%');
     if (state.stock === 'in') q = q.gt('stock', 0);
     if (state.stock === 'out') q = q.eq('stock', 0);
@@ -774,9 +791,10 @@
   document.getElementById('popularCatRow').addEventListener('click', function(e){
     var a = e.target.closest('a'); if (!a) return;
     e.preventDefault();
-    var keyword = a.getAttribute('data-cat-name');
-    var match = keyword ? allCategories.find(function(c){ return c.name.indexOf(keyword) !== -1; }) : null;
+    var parentName = a.getAttribute('data-cat-parent');
+    var match = parentName ? topCategories.find(function(c){ return c.name === parentName; }) : null;
     state.category = match ? String(match.id) : '';
+    state.categoryName = match ? match.name : '';
     document.querySelectorAll('.product-tabs button').forEach(function(b){ b.classList.remove('active'); });
     var recTab = document.querySelector('.product-tabs button[data-ptab="rec"]');
     if (recTab) recTab.classList.add('active');
@@ -907,13 +925,20 @@
       var favRes = await sb.from('favorites').select('product_id').eq('profile_id', user.id);
       (favRes.data || []).forEach(function(f){ favSet.add(f.product_id); });
     }
-    var qParam = new URLSearchParams(location.search).get('q');
+    var params = new URLSearchParams(location.search);
+    var qParam = params.get('q');
     if (qParam) {
       state.q = qParam;
       var searchInput = document.querySelector('#goodsSearchForm input[type="text"]');
       if (searchInput) searchInput.value = qParam;
     }
     await loadCategories();
+    var catParam = params.get('category');
+    if (catParam) {
+      state.category = catParam;
+      var catRes = await sb.from('categories').select('name').eq('id', catParam).maybeSingle();
+      if (catRes.data) state.categoryName = catRes.data.name;
+    }
     await loadBrandFilter();
     await render();
   });

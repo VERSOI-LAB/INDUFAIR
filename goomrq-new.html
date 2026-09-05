@@ -282,7 +282,7 @@
 
   document.addEventListener('versoi:ready', async function(e){
     goomUser = e.detail.user;
-    var res = await sb.from('categories').select('id, name').order('sort_order');
+    var res = await sb.from('categories').select('id, name').not('parent_id', 'is', null).order('sort_order');
     if (!res.error && res.data) {
       res.data.forEach(function(cat){
         var opt = document.createElement('option');
