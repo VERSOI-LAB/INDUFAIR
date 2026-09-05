@@ -403,7 +403,12 @@
       e.preventDefault();
       if (a.dataset.catBack) {
         navDrillParentId = '';
+        state.category = '';
+        state.categoryName = '';
+        state.chipCat = '';
         renderCatNav();
+        syncChipUI();
+        render();
         return;
       }
       if (a.dataset.catParent) {

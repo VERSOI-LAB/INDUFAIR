@@ -604,19 +604,37 @@
   }
   function gradFor(id){ var sum = 0; String(id).split('').forEach(function(c){ sum += c.charCodeAt(0); }); return BG_GRADS[sum % BG_GRADS.length]; }
 
+  var CHEVRON_RIGHT = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="margin-left:auto;"><polyline points="9 18 15 12 9 6"/></svg>';
+  var CHEVRON_LEFT = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>';
+  var filterTreeDrillParentId = ''; // '' = showing the 7 대분류; otherwise showing that parent's 중분류
+
+  function renderFilterTree(){
+    var catStr = state.category ? String(state.category) : '';
+    var tree = document.getElementById('filterTree');
+    if (!filterTreeDrillParentId) {
+      tree.innerHTML = '<a href="#" class="'+(catStr === '' ? 'active' : '')+'" data-cat="">전체 '+CHEVRON_RIGHT+'</a>' +
+        topCategories.map(function(top){
+          return '<a href="#" data-cat-parent="'+top.id+'" class="'+(catStr === String(top.id) ? 'active' : '')+'">'+escapeHtml(top.name)+' '+CHEVRON_RIGHT+'</a>';
+        }).join('');
+    } else {
+      var top = topCategories.find(function(c){ return String(c.id) === String(filterTreeDrillParentId); });
+      var children = allCategories.filter(function(c){ return String(c.parent_id) === String(filterTreeDrillParentId); });
+      tree.innerHTML = '<a href="#" data-cat-back="1">'+CHEVRON_LEFT+' 전체 카테고리</a>' +
+        '<a href="#" data-cat-parent="'+filterTreeDrillParentId+'" class="'+(catStr === String(filterTreeDrillParentId) ? 'active' : '')+'" style="font-weight:800;">'+(top ? escapeHtml(top.name) : '')+' 전체</a>' +
+        children.map(function(c){ return '<a href="#" data-cat="'+c.id+'" class="'+(catStr === String(c.id) ? 'active' : '')+'" style="padding-left:26px;font-size:.85rem;">'+escapeHtml(c.name)+'</a>'; }).join('');
+    }
+  }
+
   async function loadCategories(){
-    var res = await sb.from('categories').select('id,name').not('parent_id', 'is', null).order('sort_order');
+    var res = await sb.from('categories').select('id,name,parent_id').not('parent_id', 'is', null).order('sort_order');
     allCategories = res.data || [];
     var topRes = await sb.from('categories').select('id,name').is('parent_id', null).order('sort_order');
     topCategories = topRes.data || [];
-    var chevron = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>';
 
     var sel = document.getElementById('catSelect');
     sel.innerHTML = '<option value="">전체 카테고리</option>' + allCategories.map(function(c){ return '<option value="'+c.id+'">'+escapeHtml(c.name)+'</option>'; }).join('');
 
-    var tree = document.getElementById('filterTree');
-    tree.innerHTML = '<a href="#" class="active" data-cat="">전체 ' + chevron + '</a>' +
-      allCategories.map(function(c){ return '<a href="#" data-cat="'+c.id+'">'+escapeHtml(c.name)+' '+chevron+'</a>'; }).join('');
+    renderFilterTree();
   }
 
   async function loadBrandFilter(){
@@ -646,9 +664,7 @@
     } else {
       lbl.textContent = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '전체 카테고리';
     }
-    document.querySelectorAll('#filterTree a').forEach(function(a){
-      a.classList.toggle('active', (a.dataset.cat || '') === catStr);
-    });
+    renderFilterTree();
   }
 
   function productCardHTML(p){
@@ -658,11 +674,11 @@
     var specs = [p.model_no, p.categories ? p.categories.name : ''].filter(Boolean).map(escapeHtml).join('<br>');
     return ''
       + '<article class="product-card">'
-      +   '<div class="product-media" style="background:'+(img ? 'var(--bg-soft)' : gradFor(p.id))+';">'
+      +   '<a class="product-media" href="product-detail.html?id='+p.id+'" style="background:'+(img ? 'var(--bg-soft)' : gradFor(p.id))+';">'
       +     '<div class="product-badges">'+badges+'</div>'
       +     '<button class="wish-btn'+(favSet.has(p.id) ? ' wished' : '')+'" aria-label="찜하기" data-id="'+p.id+'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'
       +     media
-      +   '</div>'
+      +   '</a>'
       +   '<div class="product-body">'
       +     '<span class="p-brand '+brandClass(p.manufacturer)+'">'+escapeHtml(p.manufacturer||'')+'</span>'
       +     '<span class="p-name">'+escapeHtml(p.title)+'</span>'
@@ -769,9 +785,9 @@
   // Delegated click handling for dynamically rendered cards
   document.getElementById('productGrid').addEventListener('click', function(e){
     var wishBtn = e.target.closest('.wish-btn');
-    if (wishBtn) { toggleFavorite(wishBtn.dataset.id, wishBtn); return; }
+    if (wishBtn) { e.preventDefault(); toggleFavorite(wishBtn.dataset.id, wishBtn); return; }
     var cartBtn = e.target.closest('.add-cart-btn');
-    if (cartBtn) { handleAddToCart(cartBtn.dataset.id, cartBtn); return; }
+    if (cartBtn) { e.preventDefault(); handleAddToCart(cartBtn.dataset.id, cartBtn); return; }
   });
 
   document.getElementById('catSelect').addEventListener('change', function(){
@@ -782,9 +798,28 @@
   document.getElementById('filterTree').addEventListener('click', function(e){
     var a = e.target.closest('a'); if (!a) return;
     e.preventDefault();
-    state.category = a.dataset.cat || '';
+    if (a.dataset.catBack) {
+      filterTreeDrillParentId = '';
+      state.category = '';
+      state.categoryName = '';
+      renderFilterTree();
+      render();
+      return;
+    }
+    if (a.dataset.catParent) {
+      state.category = a.dataset.catParent;
+      var top = topCategories.find(function(c){ return String(c.id) === a.dataset.catParent; });
+      state.categoryName = top ? top.name : '';
+      filterTreeDrillParentId = a.dataset.catParent;
+    } else {
+      state.category = a.dataset.cat || '';
+      var leaf = allCategories.find(function(c){ return String(c.id) === state.category; });
+      state.categoryName = leaf ? leaf.name : '';
+      if (!state.category) filterTreeDrillParentId = '';
+    }
     document.querySelectorAll('.product-tabs button').forEach(function(b){ b.classList.remove('active'); });
     document.querySelector('.product-tabs button[data-ptab="rec"]').classList.add('active');
+    renderFilterTree();
     render();
   });
 

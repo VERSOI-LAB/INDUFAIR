@@ -123,33 +123,62 @@
   var DEFAULT_ICON = '<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
 
   var allCategories = [];
+  var topCategories = [];
   var rows = [];
-  var state = { category: '', q: '' };
+  var state = { category: '', categoryName: '', q: '' };
+  var priceCatDrillParentId = '';
 
   function esc(s) { return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmtWon(n) { return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
 
-  async function loadCategories() {
-    var res = await sb.from('categories').select('id,name').not('parent_id', 'is', null).order('sort_order');
-    allCategories = res.data || [];
-    var icon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>';
+  var CAT_CHEVRON_RIGHT = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="margin-left:auto;"><polyline points="9 18 15 12 9 6"/></svg>';
+  var CAT_CHEVRON_LEFT = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>';
+  var CAT_ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>';
+
+  function renderPriceCatNav() {
     var nav = document.getElementById('priceCatNav');
-    nav.innerHTML = '<a href="#" data-cat="">' + icon + '전체 카테고리</a>' +
-      allCategories.map(function (c) { return '<a href="#" data-cat="' + c.id + '">' + icon + esc(c.name) + '</a>'; }).join('');
+    var catStr = state.category ? String(state.category) : '';
+    if (!priceCatDrillParentId) {
+      nav.innerHTML = '<a href="#" data-cat="" class="' + (catStr === '' ? 'active' : '') + '">' + CAT_ICON + '전체 카테고리</a>' +
+        topCategories.map(function (top) {
+          return '<a href="#" data-cat-parent="' + top.id + '" class="' + (catStr === String(top.id) ? 'active' : '') + '">' + CAT_ICON + esc(top.name) + CAT_CHEVRON_RIGHT + '</a>';
+        }).join('');
+    } else {
+      var top = topCategories.find(function (c) { return String(c.id) === String(priceCatDrillParentId); });
+      var children = allCategories.filter(function (c) { return String(c.parent_id) === String(priceCatDrillParentId); });
+      nav.innerHTML = '<a href="#" data-cat-back="1">' + CAT_CHEVRON_LEFT + ' 전체 카테고리</a>' +
+        '<a href="#" data-cat-parent="' + priceCatDrillParentId + '" class="' + (catStr === String(priceCatDrillParentId) ? 'active' : '') + '" style="font-weight:800;">' + (top ? esc(top.name) : '') + ' 전체</a>' +
+        children.map(function (c) { return '<a href="#" data-cat="' + c.id + '" class="' + (catStr === String(c.id) ? 'active' : '') + '" style="padding-left:26px;font-size:.85rem;">' + esc(c.name) + '</a>'; }).join('');
+    }
+  }
+
+  async function loadCategories() {
+    var res = await sb.from('categories').select('id,name,parent_id').not('parent_id', 'is', null).order('sort_order');
+    allCategories = res.data || [];
+    var topRes = await sb.from('categories').select('id,name').is('parent_id', null).order('sort_order');
+    topCategories = topRes.data || [];
+    renderPriceCatNav();
     syncCatUI();
   }
 
   function syncCatUI() {
-    document.querySelectorAll('#priceCatNav a').forEach(function (a) {
-      a.classList.toggle('active', (a.getAttribute('data-cat') || '') === String(state.category));
-    });
-    var label = state.category ? (allCategories.find(function (c) { return String(c.id) === String(state.category); }) || {}).name : '전체 카테고리';
+    renderPriceCatNav();
+    var label = state.category ? state.categoryName : '전체 카테고리';
     document.getElementById('priceCatSelectLabel').innerHTML = esc(label || '전체 카테고리') + ' <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>';
   }
 
   async function loadPrices() {
     var q = sb.from('price_references').select('*, categories(id,name)').order('sample_count', { ascending: false });
-    if (state.category) q = q.eq('category_id', state.category);
+    if (state.category) {
+      var isLeaf = allCategories.some(function (c) { return String(c.id) === String(state.category); });
+      if (isLeaf) {
+        q = q.eq('category_id', state.category);
+      } else {
+        var childRes = await sb.from('categories').select('id').eq('parent_id', state.category);
+        var childIds = (childRes.data || []).map(function (c) { return c.id; });
+        q = childIds.length ? q.in('category_id', childIds) : q.eq('category_id', -1);
+      }
+    }
     if (state.q) q = q.or('model_no.ilike.%' + state.q + '%,manufacturer.ilike.%' + state.q + '%');
     var res = await q;
     rows = res.data || [];
@@ -180,7 +209,25 @@
   document.getElementById('priceCatNav').addEventListener('click', function (e) {
     var a = e.target.closest('a'); if (!a) return;
     e.preventDefault();
-    state.category = a.getAttribute('data-cat') || '';
+    if (a.dataset.catBack) {
+      priceCatDrillParentId = '';
+      state.category = '';
+      state.categoryName = '';
+      syncCatUI();
+      loadPrices();
+      return;
+    }
+    if (a.dataset.catParent) {
+      state.category = a.dataset.catParent;
+      var top = topCategories.find(function (c) { return String(c.id) === a.dataset.catParent; });
+      state.categoryName = top ? top.name : '';
+      priceCatDrillParentId = a.dataset.catParent;
+    } else {
+      state.category = a.getAttribute('data-cat') || '';
+      var leaf = allCategories.find(function (c) { return String(c.id) === state.category; });
+      state.categoryName = leaf ? leaf.name : '';
+      if (!state.category) priceCatDrillParentId = '';
+    }
     syncCatUI();
     loadPrices();
   });
