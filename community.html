@@ -247,6 +247,8 @@
             <button class="filter-chip" data-board="qna">Q&amp;A</button>
             <button class="filter-chip" data-board="news">뉴스</button>
             <button class="filter-chip" data-board="gov">정부지원</button>
+            <button class="filter-chip" data-board="event">이벤트/프로모션</button>
+            <button class="filter-chip" data-board="success">성공 사례</button>
           </div>
 
           <div id="postList"><p class="comment-empty">게시글을 불러오는 중입니다...</p></div>
@@ -366,8 +368,8 @@
     var CMT_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
     var HEART_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
 
-    var BOARD_LABEL = { free: '자유 게시판', qna: '기술 Q&amp;A', news: '산업 뉴스', gov: '정부 지원사업' };
-    var BOARD_CLASS = { free: 'free', qna: 'qna', news: '', gov: 'gov' };
+    var BOARD_LABEL = { free: '자유 게시판', qna: '기술 Q&amp;A', news: '산업 뉴스', gov: '정부 지원사업', event: '이벤트/프로모션', success: '성공 사례' };
+    var BOARD_CLASS = { free: 'free', qna: 'qna', news: '', gov: 'gov', event: 'gov', success: 'qna' };
 
     var postList = document.getElementById('postList');
     var posts = [];
@@ -473,7 +475,7 @@
         '<a href="goomrq-board.html" style="display:none;">' + goomrqIcon + '구해요 게시판</a>' +
         '<a href="relocation.html" style="display:none;">' + relocIcon + '공장 이전·폐업 센터</a>' +
         '<a href="#" data-comm-board="gov" class="' + (currentFilter === 'gov' ? 'active' : '') + '">' + govIcon + '정부 지원사업</a>' +
-        '<a href="#" onclick="alert(\'준비 중인 기능입니다.\');return false;">' + eventIcon + '이벤트/프로모션</a>';
+        '<a href="#" data-comm-board="event" class="' + (currentFilter === 'event' ? 'active' : '') + '">' + eventIcon + '이벤트/프로모션</a>';
     }
 
     function renderDetail(p) {
