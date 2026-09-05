@@ -15,7 +15,18 @@
   .bulk-textarea{width:100%;min-height:160px;border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.82rem;font-family:var(--font-en),monospace;line-height:1.6;}
   .bulk-preview td, .bulk-preview th{white-space:nowrap;}
   .bulk-error{color:var(--up);}
-
+  .ai-status-box{display:flex;align-items:center;gap:10px;margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:.85rem;font-weight:700;}
+  .bulk-photo-row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
+  .bulk-photo-dropzone{width:160px;flex-shrink:0;}
+  .bulk-photo-thumb{position:relative;width:160px;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--border);flex-shrink:0;}
+  .bulk-photo-thumb img{width:100%;height:100%;object-fit:contain;background:#fff;}
+  .bulk-photo-thumb .processing{position:absolute;inset:0;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:var(--text-secondary);text-align:center;padding:6px;}
+  .bulk-mini-form{flex:1;min-width:260px;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .bulk-mini-form .field{margin:0;}
+  .bulk-mini-form .field.full{grid-column:1/-1;}
+  .bulk-mini-form label{display:block;font-size:.76rem;font-weight:700;color:var(--text-tertiary);margin-bottom:4px;}
+  .bulk-mini-form input,.bulk-mini-form select{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:.84rem;font-family:inherit;}
+  .bulk-row-remove{color:var(--up);cursor:pointer;background:none;border:none;font-size:.78rem;font-weight:700;}
 </style>
 </head>
 <body>
@@ -79,6 +90,38 @@
         <p style="color:var(--text-tertiary);font-size:.82rem;">상품 관리 <span style="color:var(--border-strong);margin:0 6px;">/</span> 대량 등록</p>
       </div>
 
+      <div class="admin-card" style="margin-bottom:16px;">
+        <div class="admin-card-head"><h2>사진으로 추가</h2></div>
+        <p style="font-size:.78rem;color:var(--text-tertiary);margin-bottom:12px;line-height:1.6;">사진 한 장씩 올리면 AI가 상품명·모델명·카테고리·설명을 자동으로 채워드립니다. 판매가·재고를 확인한 뒤 목록에 추가하세요.</p>
+        <div class="bulk-photo-row">
+          <div class="bulk-photo-dropzone dropzone" id="bulkPhotoDropzone" style="cursor:pointer;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <div class="dz-main" style="font-size:.8rem;">사진 업로드</div>
+            <div class="dz-sub" style="font-size:.68rem;">클릭 또는 드래그</div>
+          </div>
+          <input type="file" id="bulkPhotoInput" accept="image/*" style="display:none;">
+          <div id="bulkMiniFormWrap" style="display:none;flex:1;min-width:260px;">
+            <div class="bulk-mini-form">
+              <div class="field full"><label>상품명 *</label><input type="text" id="bmf-title"></div>
+              <div class="field"><label>모델명</label><input type="text" id="bmf-model"></div>
+              <div class="field"><label>카테고리 *</label><select id="bmf-category"></select></div>
+              <div class="field"><label>판매가 *</label><input type="number" id="bmf-price" min="0"></div>
+              <div class="field"><label>재고수량 *</label><input type="number" id="bmf-stock" min="0" value="1"></div>
+              <div class="field"><label>거래 구분</label><select id="bmf-market"><option value="new">신품</option><option value="used">중고</option></select></div>
+              <div class="field full"><label>상품 설명</label><input type="text" id="bmf-desc"></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+              <button type="button" class="btn btn-ghost btn-sm" id="bmfCancelBtn">취소</button>
+              <button type="button" class="btn btn-primary btn-sm" id="bmfAddBtn">목록에 추가</button>
+            </div>
+          </div>
+        </div>
+        <div class="ai-status-box" id="bulkAiStatus" style="display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          <span id="bulkAiStatusText">AI가 사진을 분석하고 있어요...</span>
+        </div>
+      </div>
+
       <div class="admin-grid-2">
         <div class="admin-card">
           <div class="admin-card-head"><h2>CSV 붙여넣기</h2></div>
@@ -97,8 +140,8 @@
           <div class="admin-card-head"><h2>미리보기 (<span id="bulkCount">0</span>건)</h2></div>
           <div class="data-table-scroll">
           <table class="data-table bulk-preview">
-            <thead><tr><th>상품명</th><th>모델명</th><th>카테고리</th><th class="num">판매가</th><th class="num">재고</th><th>구분</th></tr></thead>
-            <tbody id="bulkPreviewTbody"><tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px 0;">왼쪽에 CSV를 입력하고 미리보기를 눌러주세요.</td></tr></tbody>
+            <thead><tr><th>상품명</th><th>모델명</th><th>카테고리</th><th class="num">판매가</th><th class="num">재고</th><th>구분</th><th></th></tr></thead>
+            <tbody id="bulkPreviewTbody"><tr><td colspan="7" style="text-align:center;color:var(--text-tertiary);padding:20px 0;">CSV를 입력하거나 사진을 추가해주세요.</td></tr></tbody>
           </table>
           </div>
         </div>
@@ -114,51 +157,239 @@
     sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); });
   }
 </script>
+<script type="importmap">
+{
+  "imports": {
+    "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0-dev.20250206-d981b153d3/dist/ort.min.mjs"
+  }
+}
+</script>
+<script type="module">
+  import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/dist/index.mjs';
+  window.__removeBackground = removeBackground;
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/seller-common.js"></script>
 <script>
-var BF = { companyId: null, userId: null, categories: [], parsed: [] };
+var BF = { companyId: null, userId: null, categories: [], parsed: [], pendingPhotoFile: null };
+var BF_FUNCTIONS_URL = 'https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1';
 
 function parseCsv(text) {
   var lines = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
   var out = [];
   lines.forEach(function (line) {
     var parts = line.split(',').map(function (p) { return p.trim(); });
-    if (parts.length < 5) { out.push({ error: '항목 부족: ' + line }); return; }
+    if (parts.length < 5) { out.push({ error: '항목 부족: ' + line, source: 'csv' }); return; }
     var cat = BF.categories.find(function (c) { return c.name === parts[2]; });
     out.push({
       title: parts[0], model_no: parts[1], category_name: parts[2], category_id: cat ? cat.id : null,
       price: Number(parts[3]), stock: Number(parts[4]), market_type: parts[5] === 'used' ? 'used' : 'new',
+      description: '', source: 'csv', file: null,
       error: (!parts[0] || isNaN(Number(parts[3])) || isNaN(Number(parts[4]))) ? '형식 오류: ' + line : (!cat ? '알 수 없는 카테고리: ' + parts[2] : null)
     });
   });
   return out;
 }
 
-document.getElementById('bulkPreviewBtn').addEventListener('click', function () {
-  BF.parsed = parseCsv(document.getElementById('bulkInput').value);
+function renderBulkPreview() {
   document.getElementById('bulkCount').textContent = BF.parsed.filter(function (r) { return !r.error; }).length;
-  document.getElementById('bulkPreviewTbody').innerHTML = BF.parsed.map(function (r) {
-    if (r.error) return '<tr><td colspan="6" class="bulk-error">' + SC.esc(r.error) + '</td></tr>';
-    return '<tr><td class="cell-strong">' + SC.esc(r.title) + '</td><td>' + SC.esc(r.model_no) + '</td><td>' + SC.esc(r.category_name) + '</td><td class="num">' + SC.won(r.price) + '</td><td class="num">' + r.stock + '</td><td>' + (r.market_type === 'used' ? '중고' : '신품') + '</td></tr>';
-  }).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:20px 0;">입력된 내용이 없습니다.</td></tr>';
+  document.getElementById('bulkPreviewTbody').innerHTML = BF.parsed.map(function (r, i) {
+    if (r.error) {
+      return '<tr><td colspan="6" class="bulk-error">' + SC.esc(r.error) + '</td><td><button type="button" class="bulk-row-remove" data-remove="' + i + '">삭제</button></td></tr>';
+    }
+    return '<tr><td class="cell-strong">' + (r.source === 'photo' ? '📷 ' : '') + SC.esc(r.title) + '</td><td>' + SC.esc(r.model_no) + '</td><td>' + SC.esc(r.category_name) + '</td><td class="num">' + SC.won(r.price) + '</td><td class="num">' + r.stock + '</td><td>' + (r.market_type === 'used' ? '중고' : '신품') + '</td><td><button type="button" class="bulk-row-remove" data-remove="' + i + '">삭제</button></td></tr>';
+  }).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-tertiary);padding:20px 0;">CSV를 입력하거나 사진을 추가해주세요.</td></tr>';
   document.getElementById('bulkSubmitBtn').disabled = BF.parsed.length === 0 || BF.parsed.every(function (r) { return r.error; });
+}
+
+document.getElementById('bulkPreviewTbody').addEventListener('click', function (e) {
+  var btn = e.target.closest('[data-remove]'); if (!btn) return;
+  BF.parsed.splice(Number(btn.dataset.remove), 1);
+  renderBulkPreview();
+});
+
+document.getElementById('bulkPreviewBtn').addEventListener('click', function () {
+  var photoRows = BF.parsed.filter(function (r) { return r.source === 'photo'; });
+  BF.parsed = parseCsv(document.getElementById('bulkInput').value).concat(photoRows);
+  renderBulkPreview();
 });
 
 document.getElementById('bulkSubmitBtn').addEventListener('click', async function () {
   var valid = BF.parsed.filter(function (r) { return !r.error; });
   if (!valid.length) return;
   if (!confirm(valid.length + '건의 상품을 등록하시겠습니까?')) return;
-  var rows = valid.map(function (r) {
-    return { title: r.title, model_no: r.model_no, category_id: r.category_id, price: r.price, stock: r.stock,
-      market_type: r.market_type, seller_profile_id: BF.userId, company_id: BF.companyId, status: 'selling', description: '' };
-  });
-  var res = await sb.from('products').insert(rows);
-  if (res.error) { alert('등록 실패: ' + res.error.message); return; }
+  var btn = this;
+  btn.disabled = true;
+  for (var i = 0; i < valid.length; i++) {
+    var r = valid[i];
+    btn.textContent = '등록 중... (' + (i + 1) + '/' + valid.length + ')';
+    var insRes = await sb.from('products').insert({
+      title: r.title, model_no: r.model_no || null, category_id: r.category_id, price: r.price, stock: r.stock,
+      market_type: r.market_type, seller_profile_id: BF.userId, company_id: BF.companyId, status: 'selling', description: r.description || ''
+    }).select('id').single();
+    if (insRes.error) { console.error('bulk insert failed', insRes.error); continue; }
+    if (r.file) {
+      var productId = insRes.data.id;
+      try {
+        var path = BF.userId + '/' + productId + '/' + Date.now() + '-0.jpg';
+        var up = await sb.storage.from('product-images').upload(path, r.file);
+        if (!up.error) {
+          var pub = sb.storage.from('product-images').getPublicUrl(path);
+          await sb.from('product_images').insert({ product_id: productId, url: pub.data.publicUrl, sort_order: 0 });
+        }
+      } catch (err) { console.error('bulk image upload failed', err); }
+    }
+  }
+  btn.disabled = false;
   alert(valid.length + '건이 등록되었습니다.');
   location.href = 'seller-products.html';
+});
+
+// ---- 사진으로 추가 ----
+var bulkPhotoDropzone = document.getElementById('bulkPhotoDropzone');
+var bulkPhotoInput = document.getElementById('bulkPhotoInput');
+
+function renderBulkPhotoDropzoneIdle() {
+  bulkPhotoDropzone.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg><div class="dz-main" style="font-size:.8rem;">사진 업로드</div><div class="dz-sub" style="font-size:.68rem;">클릭 또는 드래그</div>';
+}
+function renderBulkPhotoThumb(url, processing) {
+  bulkPhotoDropzone.innerHTML = '<div class="bulk-photo-thumb"><img src="' + url + '">' + (processing ? '<div class="processing">배경 제거 중</div>' : '') + '</div>';
+}
+
+bulkPhotoDropzone.addEventListener('click', function () { bulkPhotoInput.click(); });
+bulkPhotoDropzone.addEventListener('dragover', function (e) { e.preventDefault(); });
+bulkPhotoDropzone.addEventListener('drop', function (e) { e.preventDefault(); handleBulkPhoto(e.dataTransfer.files[0]); });
+bulkPhotoInput.addEventListener('change', function () { handleBulkPhoto(bulkPhotoInput.files[0]); bulkPhotoInput.value = ''; });
+
+function loadImageEl(src) {
+  return new Promise(function (resolve, reject) {
+    var img = new Image();
+    img.onload = function () { resolve(img); };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+async function removeBgToWhite(file) {
+  var fgBlob = await window.__removeBackground(file);
+  var img = await loadImageEl(URL.createObjectURL(fgBlob));
+  var canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0);
+  return new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.92); });
+}
+function resizeForAi(file) {
+  return new Promise(function (resolve, reject) {
+    var img = new Image();
+    img.onload = function () {
+      var maxDim = 1568;
+      var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.82));
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function runBulkAiAnalysis(file) {
+  try {
+    var dataUrl = await resizeForAi(file);
+    var base64 = dataUrl.split(',')[1];
+    var sessionRes = await sb.auth.getSession();
+    var token = sessionRes.data.session ? sessionRes.data.session.access_token : null;
+    var res = await fetch(BF_FUNCTIONS_URL + '/ai-product-register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ image: base64, mimeType: 'image/jpeg', categories: BF.categories.map(function (c) { return c.name; }) })
+    });
+    var data = await res.json();
+    if (!res.ok || data.error) return null;
+    return data;
+  } catch (err) {
+    console.error('[seller-bulk] AI analysis failed', err);
+    return null;
+  }
+}
+
+async function handleBulkPhoto(file) {
+  if (!file) return;
+  var originalUrl = URL.createObjectURL(file);
+  renderBulkPhotoThumb(originalUrl, true);
+  document.getElementById('bulkAiStatus').style.display = 'flex';
+  document.getElementById('bulkAiStatusText').textContent = 'AI가 사진을 분석하고 있어요...';
+
+  var bgPromise = window.__removeBackground
+    ? removeBgToWhite(file).catch(function (err) { console.warn('[seller-bulk] background removal failed, using original photo', err); return file; })
+    : Promise.resolve(file);
+  var aiPromise = runBulkAiAnalysis(file);
+
+  var finalBlob = await bgPromise;
+  var finalFile = finalBlob instanceof File ? finalBlob : new File([finalBlob], file.name, { type: 'image/jpeg' });
+  BF.pendingPhotoFile = finalFile;
+  renderBulkPhotoThumb(URL.createObjectURL(finalFile), false);
+
+  var data = await aiPromise;
+  document.getElementById('bmf-title').value = (data && data.title && data.title !== '식별할 수 없습니다') ? data.title : '';
+  document.getElementById('bmf-model').value = (data && data.model_no) || '';
+  document.getElementById('bmf-desc').value = (data && data.description) || '';
+  document.getElementById('bmf-price').value = '';
+  document.getElementById('bmf-stock').value = '1';
+  document.getElementById('bmf-category').value = '';
+  if (data && data.category) {
+    var match = BF.categories.find(function (c) { return c.name === data.category; });
+    if (match) document.getElementById('bmf-category').value = String(match.id);
+  }
+  document.getElementById('bulkAiStatusText').textContent = data ? 'AI 자동입력 완료! 판매가와 재고를 입력하고 추가해주세요.' : '사진 속 제품을 식별하지 못했어요. 직접 입력해주세요.';
+  setTimeout(function () { document.getElementById('bulkAiStatus').style.display = 'none'; }, 3000);
+  document.getElementById('bulkMiniFormWrap').style.display = 'block';
+}
+
+function resetBulkMiniForm() {
+  document.getElementById('bulkMiniFormWrap').style.display = 'none';
+  document.getElementById('bmf-title').value = '';
+  document.getElementById('bmf-model').value = '';
+  document.getElementById('bmf-desc').value = '';
+  document.getElementById('bmf-price').value = '';
+  document.getElementById('bmf-stock').value = '1';
+  document.getElementById('bmf-category').value = '';
+  BF.pendingPhotoFile = null;
+  renderBulkPhotoDropzoneIdle();
+}
+document.getElementById('bmfCancelBtn').addEventListener('click', resetBulkMiniForm);
+document.getElementById('bmfAddBtn').addEventListener('click', function () {
+  var title = document.getElementById('bmf-title').value.trim();
+  var categoryId = document.getElementById('bmf-category').value;
+  var price = Number(document.getElementById('bmf-price').value);
+  var stock = Number(document.getElementById('bmf-stock').value);
+  if (!title || !categoryId || !document.getElementById('bmf-price').value || isNaN(price)) {
+    alert('상품명, 카테고리, 판매가를 입력해주세요.');
+    return;
+  }
+  var cat = BF.categories.find(function (c) { return String(c.id) === categoryId; });
+  BF.parsed.push({
+    title: title,
+    model_no: document.getElementById('bmf-model').value.trim(),
+    category_name: cat ? cat.name : '',
+    category_id: categoryId,
+    price: price,
+    stock: stock || 1,
+    market_type: document.getElementById('bmf-market').value,
+    description: document.getElementById('bmf-desc').value.trim(),
+    source: 'photo',
+    file: BF.pendingPhotoFile,
+    error: null
+  });
+  renderBulkPreview();
+  resetBulkMiniForm();
 });
 
 SC.ready(async function (user) {
@@ -166,6 +397,9 @@ SC.ready(async function (user) {
   BF.userId = user.id;
   var res = await sb.from('categories').select('*').not('parent_id', 'is', null).order('sort_order');
   BF.categories = res.data || [];
+  var catOptions = BF.categories.map(function (c) { return '<option value="' + c.id + '">' + SC.esc(c.name) + '</option>'; }).join('');
+  document.getElementById('bmf-category').innerHTML = '<option value="">선택</option>' + catOptions;
+  renderBulkPreview();
 });
 </script>
 </body>
