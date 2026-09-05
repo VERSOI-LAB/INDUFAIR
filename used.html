@@ -94,6 +94,8 @@
   .side-nav a.cat-parent svg{margin-left:auto;}
   .side-nav a.cat-child{padding-left:33px;font-size:.85rem;color:var(--text-secondary);}
   .side-nav a.cat-back{color:var(--text-tertiary);font-size:.82rem;margin-bottom:4px;}
+  .sort-option:hover{background:var(--bg-soft);}
+  .filter-chip .chip-remove{margin-left:5px;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -143,7 +145,6 @@
 
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
         <a class="btn btn-primary" style="justify-content:center;" href="sell-new.html">판매 등록하기</a>
-        <a class="btn btn-ghost" style="justify-content:center;" href="goomrq-new.html">구해요 등록하기</a>
       </div>
 
       <div class="side-panel">
@@ -228,22 +229,29 @@
           <button type="submit">검색</button>
         </form>
         <div class="toolbar-controls">
-          <div class="select-field">정확도순 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+          <div style="position:relative;">
+            <button type="button" class="select-field" id="usedSortBtn"><span id="usedSortLabel">정확도순</span> <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div id="usedSortMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;min-width:130px;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-2);z-index:50;overflow:hidden;">
+              <button type="button" class="sort-option" data-sort="relevance" style="display:block;width:100%;text-align:left;padding:10px 14px;font-size:.84rem;font-weight:600;background:none;">정확도순</button>
+              <button type="button" class="sort-option" data-sort="new" style="display:block;width:100%;text-align:left;padding:10px 14px;font-size:.84rem;font-weight:600;background:none;">최신순</button>
+              <button type="button" class="sort-option" data-sort="price_asc" style="display:block;width:100%;text-align:left;padding:10px 14px;font-size:.84rem;font-weight:600;background:none;">낮은가격순</button>
+              <button type="button" class="sort-option" data-sort="price_desc" style="display:block;width:100%;text-align:left;padding:10px 14px;font-size:.84rem;font-weight:600;background:none;">높은가격순</button>
+            </div>
+          </div>
           <div class="view-toggle-wrap" id="viewToggleWrap" style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface);">
             <button type="button" class="view-btn active" data-view="grid" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--accent);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></button>
             <button type="button" class="view-btn" data-view="list" style="width:38px;height:38px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);border-left:1px solid var(--border);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
           </div>
-          <div class="select-field">24개씩 보기 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
         </div>
       </div>
 
       <div class="filter-chip-row" id="quickFilterChips">
         <button class="filter-chip reset" data-action="reset">전체 초기화</button>
         <button class="filter-chip on" data-chip-cat="">전체</button>
-        <button class="filter-chip" data-chip-cat="자동화·제어">자동화·제어 ✕</button>
-        <button class="filter-chip" data-chip-cat="PLC/컨트롤러">PLC ✕</button>
-        <button class="filter-chip" data-chip-cat="서보/모터">서보모터 ✕</button>
-        <button class="filter-chip" data-chip-cat="인버터">인버터 ✕</button>
+        <button class="filter-chip" data-chip-cat="자동화·제어">자동화·제어 <span class="chip-remove" data-chip-remove="자동화·제어">✕</span></button>
+        <button class="filter-chip" data-chip-cat="PLC/컨트롤러">PLC <span class="chip-remove" data-chip-remove="PLC/컨트롤러">✕</span></button>
+        <button class="filter-chip" data-chip-cat="서보/모터">서보모터 <span class="chip-remove" data-chip-remove="서보/모터">✕</span></button>
+        <button class="filter-chip" data-chip-cat="인버터">인버터 <span class="chip-remove" data-chip-remove="인버터">✕</span></button>
       </div>
 
       <div class="used-grid" id="usedGrid">
@@ -353,7 +361,7 @@
   var GRADE_LABEL = { a:'A급', b:'B급', c:'C급', refurb:'리퍼비시', idle:'유휴재고', new:'신품' };
   var GRADE_CLASS = { a:'grade-a', b:'grade-b', c:'grade-c', refurb:'grade-refurb', idle:'grade-idle', new:'grade-a' };
 
-  var state = { category: '', categoryName: '', q: '', grades: new Set(), chipCat: '' };
+  var state = { category: '', categoryName: '', q: '', grades: new Set(), chipCat: '', sort: 'relevance' };
   var favSet = new Set();
   var allCategories = [];
   var topCategories = [];
@@ -462,8 +470,10 @@
     var q = sb.from('products')
       .select('id,title,model_no,manufacturer,price,stock,condition,category_id,region,created_at,companies(name),product_images(url,sort_order)')
       .eq('market_type','used').neq('status','deleted')
-      .order('sort_order', { foreignTable: 'product_images', ascending: true })
-      .order('created_at', { ascending: false });
+      .order('sort_order', { foreignTable: 'product_images', ascending: true });
+    if (state.sort === 'price_asc') q = q.order('price', { ascending: true });
+    else if (state.sort === 'price_desc') q = q.order('price', { ascending: false });
+    else q = q.order('created_at', { ascending: false }); // 'new' and 'relevance' (no ranking signal yet) both fall back to newest-first
     if (state.category) {
       var isLeaf = allCategories.some(function(c){ return String(c.id) === String(state.category); });
       if (isLeaf) {
@@ -545,19 +555,29 @@
     render();
   });
 
+  function resetAllFilters(){
+    state.chipCat = '';
+    state.category = '';
+    state.categoryName = '';
+    state.q = '';
+    navDrillParentId = '';
+    var searchInput = document.querySelector('#usedSearchForm input[type="text"]');
+    if (searchInput) searchInput.value = '';
+    renderCatNav();
+    syncChipUI();
+    render();
+  }
+
   document.getElementById('quickFilterChips').addEventListener('click', function(e){
-    var btn = e.target.closest('.filter-chip'); if (!btn) return;
     e.preventDefault();
-    if (btn.dataset.action === 'reset') {
-      state.chipCat = '';
-      state.category = '';
-      state.categoryName = '';
-      navDrillParentId = '';
-      renderCatNav();
-      syncChipUI();
-      render();
+    var removeEl = e.target.closest('.chip-remove');
+    if (removeEl) {
+      // The × always clears that specific term, regardless of whether it's currently active.
+      if (state.chipCat === removeEl.dataset.chipRemove) resetAllFilters();
       return;
     }
+    var btn = e.target.closest('.filter-chip'); if (!btn) return;
+    if (btn.dataset.action === 'reset') { resetAllFilters(); return; }
     var chipCat = btn.dataset.chipCat;
     if (chipCat === undefined) return;
     // Clicking the already-active chip (besides "전체") clears the filter, like removing a tag.
@@ -570,6 +590,22 @@
     renderCatNav();
     syncChipUI();
     render();
+  });
+
+  document.getElementById('usedSortBtn').addEventListener('click', function(e){
+    e.stopPropagation();
+    var menu = document.getElementById('usedSortMenu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('usedSortMenu').addEventListener('click', function(e){
+    var btn = e.target.closest('.sort-option'); if (!btn) return;
+    state.sort = btn.dataset.sort;
+    document.getElementById('usedSortLabel').textContent = btn.textContent;
+    document.getElementById('usedSortMenu').style.display = 'none';
+    render();
+  });
+  document.addEventListener('click', function(){
+    document.getElementById('usedSortMenu').style.display = 'none';
   });
 
   document.addEventListener('versoi:ready', async function(e){
