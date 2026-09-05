@@ -163,7 +163,6 @@
 
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
         <a class="btn btn-primary" style="justify-content:center;" href="rfq-new.html">견적 요청하기</a>
-        <a class="btn btn-ghost" style="justify-content:center;" href="goomrq-new.html">구해요 등록하기</a>
       </div>
 
       <div class="side-panel">
@@ -469,7 +468,10 @@
   function render(){
     var filtered = allRfqs.filter(passesFilter);
     if (!filtered.length) {
-      rfqTableEl.innerHTML = '<div class="rfq-empty">조건에 맞는 견적 요청이 없습니다.</div>';
+      var emptyMsg = (favCompaniesOnly && !Object.keys(favoriteCompanyIds).length)
+        ? '아직 찜한 업체가 없습니다. 받은 견적의 업체명 옆 하트를 눌러 찜해보세요.'
+        : '조건에 맞는 견적 요청이 없습니다.';
+      rfqTableEl.innerHTML = '<div class="rfq-empty">' + emptyMsg + '</div>';
       return;
     }
     rfqTableEl.innerHTML = filtered.map(renderRow).join('');
