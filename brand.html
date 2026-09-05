@@ -347,7 +347,7 @@
     var media = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : PLACEHOLDER_SVG;
     return ''
       + '<article class="rec-card">'
-      +   '<div class="rec-media">'+media+'</div>'
+      +   '<a class="rec-media" href="product-detail.html?id='+p.id+'">'+media+'</a>'
       +   '<div class="rec-body">'
       +     '<span class="rec-brand">'+escapeHtml(p.manufacturer||'')+'</span>'
       +     '<p class="rec-name">'+escapeHtml(p.title)+'</p>'
