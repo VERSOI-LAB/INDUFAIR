@@ -178,6 +178,17 @@
   });
 </script>
 
+<script type="importmap">
+{
+  "imports": {
+    "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0-dev.20250206-d981b153d3/dist/ort.min.mjs"
+  }
+}
+</script>
+<script type="module">
+  import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/dist/index.mjs';
+  window.__removeBackground = removeBackground;
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-client.js"></script>
 <script src="js/auth.js"></script>
@@ -285,15 +296,17 @@ function renderImagePreview(productId) {
       '<button type="button" onclick="deleteProductImage(' + img.id + ', this)" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--up);color:#fff;font-size:.7rem;line-height:1;">×</button></div>';
   }).join('');
 }
+var pfFileSeq = 0;
 function syncPendingFilesToInput() {
   var dt = new DataTransfer();
-  PF.pendingFiles.forEach(function (f) { dt.items.add(f); });
+  PF.pendingFiles.forEach(function (p) { dt.items.add(p.file); });
   document.getElementById('pf-images').files = dt.files;
 }
 function renderPendingPreview() {
-  document.getElementById('pf-pending-preview').innerHTML = PF.pendingFiles.map(function (file, i) {
-    return '<div class="pf-img-tile" style="position:relative;width:64px;height:64px;">' +
-      '<img src="' + URL.createObjectURL(file) + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;border:1px solid var(--border);">' +
+  document.getElementById('pf-pending-preview').innerHTML = PF.pendingFiles.map(function (p, i) {
+    return '<div class="pf-img-tile" style="position:relative;width:64px;height:64px;background:#fff;border-radius:8px;">' +
+      '<img src="' + p.url + '" style="width:100%;height:100%;object-fit:contain;border-radius:8px;border:1px solid var(--border);background:#fff;">' +
+      (p.processing ? '<div style="position:absolute;inset:0;background:rgba(255,255,255,.85);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--text-secondary);text-align:center;">배경 제거 중</div>' : '') +
       '<button type="button" data-pending-remove="' + i + '" style="position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:var(--up);color:#fff;font-size:.7rem;line-height:1;">×</button></div>';
   }).join('');
 }
@@ -303,6 +316,29 @@ document.getElementById('pf-pending-preview').addEventListener('click', function
   syncPendingFilesToInput();
   renderPendingPreview();
 });
+
+function loadImageEl(src) {
+  return new Promise(function (resolve, reject) {
+    var img = new Image();
+    img.onload = function () { resolve(img); };
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+// Runs client-side background removal (누끼따기) and composites the result onto a plain white background.
+async function removeBgToWhite(file) {
+  var fgBlob = await window.__removeBackground(file);
+  var img = await loadImageEl(URL.createObjectURL(fgBlob));
+  var canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0);
+  return new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.92); });
+}
 
 function resizeForAiAnalysis(file) {
   return new Promise(function (resolve, reject) {
@@ -365,7 +401,25 @@ function handlePfFiles(fileList) {
   var files = Array.prototype.slice.call(fileList || []);
   if (!files.length) return;
   var isFirst = PF.pendingFiles.length === 0 && !document.getElementById('pf-id').value;
-  PF.pendingFiles = PF.pendingFiles.concat(files);
+
+  files.forEach(function (file) {
+    var entry = { id: 'pf' + (++pfFileSeq), file: file, url: URL.createObjectURL(file), processing: true };
+    PF.pendingFiles.push(entry);
+
+    var bgRemoval = window.__removeBackground
+      ? removeBgToWhite(file).catch(function (err) { console.warn('[seller-products] background removal failed, using original photo', err); return file; })
+      : Promise.resolve(file);
+
+    bgRemoval.then(function (finalBlob) {
+      var finalFile = finalBlob instanceof File ? finalBlob : new File([finalBlob], file.name, { type: 'image/jpeg' });
+      entry.file = finalFile;
+      entry.url = URL.createObjectURL(finalFile);
+      entry.processing = false;
+      syncPendingFilesToInput();
+      renderPendingPreview();
+    });
+  });
+
   syncPendingFilesToInput();
   renderPendingPreview();
   if (isFirst) runProductAiAnalysis(files[0]);
