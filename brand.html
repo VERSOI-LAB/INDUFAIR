@@ -86,7 +86,7 @@
     box-shadow:var(--shadow-1);padding:26px 28px;
   }
   .brand-service-title{font-size:1.02rem;font-weight:800;margin-bottom:20px;}
-  .service-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+  .service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
   .service-item{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:12px 8px;border-radius:var(--radius-m);transition:background .15s ease;}
   .service-item:hover{background:var(--bg-soft);}
   .service-icon{
@@ -118,6 +118,10 @@
     .rec-track{grid-template-columns:repeat(2,1fr);}
     .service-grid{grid-template-columns:repeat(2,1fr);}
   }
+  .brand-fav-btn{margin-left:auto;flex-shrink:0;color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;}
+  .brand-fav-btn:hover{background:var(--surface);color:var(--up);}
+  .brand-fav-btn.on{color:var(--up);}
+  .brand-fav-btn.on svg{fill:currentColor;}
 </style>
 </head>
 <body>
@@ -168,16 +172,16 @@
       <div class="side-panel">
         <nav class="side-nav" id="brandNav">
           <a href="#" class="active" data-brand=""><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>전체 브랜드</a>
-          <a href="#" data-brand="FANUC"><span class="brand-dot bp-fanuc">F</span>FANUC</a>
-          <a href="#" data-brand="MITSUBISHI"><span class="brand-dot bp-mitsu">M</span>Mitsubishi Electric</a>
-          <a href="#" data-brand="SMC"><span class="brand-dot bp-smc">S</span>SMC</a>
-          <a href="#" data-brand="LS"><span class="brand-dot bp-ls">L</span>LS ELECTRIC</a>
-          <a href="#" data-brand="HYUNDAI"><span class="brand-dot bp-hyundai">H</span>Hyundai WIA</a>
-          <a href="#" data-brand="THK"><span class="brand-dot bp-thk">T</span>THK</a>
-          <a href="#" data-brand="OMRON"><span class="brand-dot" style="color:#181B4B;">O</span>OMRON</a>
-          <a href="#" data-brand="SIEMENS"><span class="brand-dot" style="color:#009999;">S</span>SIEMENS</a>
-          <a href="#" data-brand="KEYENCE"><span class="brand-dot" style="color:#A6192E;">K</span>KEYENCE</a>
-          <a href="#" data-brand="SCHNEIDER"><span class="brand-dot" style="color:#3DCD58;">S</span>Schneider Electric</a>
+          <a href="#" data-brand="FANUC"><span class="brand-dot bp-fanuc">F</span>FANUC<button type="button" class="brand-fav-btn" data-brand-name="FANUC" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
+          <a href="#" data-brand="MITSUBISHI"><span class="brand-dot bp-mitsu">M</span>Mitsubishi Electric<button type="button" class="brand-fav-btn" data-brand-name="MITSUBISHI" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
+          <a href="#" data-brand="SMC"><span class="brand-dot bp-smc">S</span>SMC<button type="button" class="brand-fav-btn" data-brand-name="SMC" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
+          <a href="#" data-brand="LS"><span class="brand-dot bp-ls">L</span>LS ELECTRIC<button type="button" class="brand-fav-btn" data-brand-name="LS" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
+          <a href="#" data-brand="HYUNDAI"><span class="brand-dot bp-hyundai">H</span>Hyundai WIA<button type="button" class="brand-fav-btn" data-brand-name="HYUNDAI" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
+          <a href="#" data-brand="THK"><span class="brand-dot bp-thk">T</span>THK<button type="button" class="brand-fav-btn" data-brand-name="THK" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
+          <a href="#" data-brand="OMRON"><span class="brand-dot" style="color:#181B4B;">O</span>OMRON<button type="button" class="brand-fav-btn" data-brand-name="OMRON" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
+          <a href="#" data-brand="SIEMENS"><span class="brand-dot" style="color:#009999;">S</span>SIEMENS<button type="button" class="brand-fav-btn" data-brand-name="SIEMENS" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
+          <a href="#" data-brand="KEYENCE"><span class="brand-dot" style="color:#A6192E;">K</span>KEYENCE<button type="button" class="brand-fav-btn" data-brand-name="KEYENCE" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
+          <a href="#" data-brand="SCHNEIDER"><span class="brand-dot" style="color:#3DCD58;">S</span>Schneider Electric<button type="button" class="brand-fav-btn" data-brand-name="SCHNEIDER" aria-label="브랜드 찜하기"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button></a>
         </nav>
       </div>
 
@@ -291,20 +295,15 @@
             <b>A/S &amp; 기술지원</b>
             <span>전국 서비스 네트워크</span>
           </a>
-          <a class="service-item" href="#" onclick="alert('준비 중인 기능입니다.');return false;">
+          <a class="service-item" href="auth-check.html">
             <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
             <b>정품 인증 조회</b>
-            <span>제품 시리얼 인증 확인</span>
+            <span>제품 시리얼 인증 문의</span>
           </a>
           <a class="service-item" href="support.html">
             <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
             <b>문의하기</b>
             <span>전문 상담원 연결</span>
-          </a>
-          <a class="service-item" href="#" onclick="alert('준비 중인 기능입니다.');return false;">
-            <span class="service-icon"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-            <b>교육 &amp; 세미나</b>
-            <span>제품 교육 및 세미나 일정</span>
           </a>
         </div>
       </div>
@@ -339,6 +338,35 @@
 (function(){
   var PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>';
   var state = { brand: '' };
+  var favoriteBrands = {};
+
+  async function loadFavoriteBrands(){
+    if (!window.VERSOI || !window.VERSOI.user) { favoriteBrands = {}; return; }
+    var res = await sb.from('favorite_brands').select('brand_name').eq('profile_id', window.VERSOI.user.id);
+    favoriteBrands = {};
+    (res.data || []).forEach(function(r){ favoriteBrands[r.brand_name] = true; });
+    syncFavBtnUI();
+  }
+
+  function syncFavBtnUI(){
+    document.querySelectorAll('.brand-fav-btn').forEach(function(btn){
+      btn.classList.toggle('on', !!favoriteBrands[btn.dataset.brandName]);
+    });
+  }
+
+  async function toggleFavoriteBrand(brandName, btn){
+    if (!window.VERSOI.requireAuth()) return;
+    btn.disabled = true;
+    if (favoriteBrands[brandName]) {
+      await sb.from('favorite_brands').delete().eq('profile_id', window.VERSOI.user.id).eq('brand_name', brandName);
+      delete favoriteBrands[brandName];
+    } else {
+      await sb.from('favorite_brands').insert({ profile_id: window.VERSOI.user.id, brand_name: brandName });
+      favoriteBrands[brandName] = true;
+    }
+    btn.disabled = false;
+    syncFavBtnUI();
+  }
 
   function escapeHtml(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
 
@@ -401,6 +429,8 @@
   }
 
   document.getElementById('brandNav').addEventListener('click', function(e){
+    var favBtn = e.target.closest('.brand-fav-btn');
+    if (favBtn) { e.preventDefault(); toggleFavoriteBrand(favBtn.dataset.brandName, favBtn); return; }
     var a = e.target.closest('a'); if (!a) return;
     e.preventDefault();
     document.querySelectorAll('#brandNav a').forEach(function(x){ x.classList.remove('active'); });
@@ -426,7 +456,16 @@
     document.getElementById('recTrack').scrollBy({ left: 260, behavior: 'smooth' });
   });
 
-  document.addEventListener('versoi:ready', function(){ render(); });
+  document.addEventListener('versoi:ready', async function(){
+    var brandParam = new URLSearchParams(location.search).get('brand');
+    if (brandParam) {
+      state.brand = brandParam;
+      document.querySelectorAll('#brandNav a').forEach(function(a){ a.classList.toggle('active', (a.dataset.brand || '') === brandParam); });
+      document.querySelectorAll('#brandTabs .brand-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.brand === brandParam); });
+    }
+    await loadFavoriteBrands();
+    render();
+  });
 })();
 </script>
 </body>
