@@ -84,20 +84,27 @@
   .section-grid{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;}
   .pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
   .pick-card{
-    display:block;border-radius:var(--radius-l);overflow:hidden;position:relative;color:#fff;text-decoration:none;
+    display:block;border-radius:var(--radius-l);overflow:hidden;position:relative;text-decoration:none;
     box-shadow:var(--shadow-1);transition:transform .2s ease, box-shadow .2s ease;
+    aspect-ratio:1.7/1;
   }
   .pick-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-2);}
-  .pick-visual{
-    aspect-ratio:4/3;position:relative;display:flex;align-items:center;justify-content:center;
-    background-size:cover;background-position:center;
-  }
+  .pick-visual{position:absolute;inset:0;background-size:cover;background-position:center;}
   .pick-used .pick-visual{background-image:url("이미지/web/홈_중고장비 추천.jpg");}
   .pick-idle .pick-visual{background-image:url("이미지/web/홈_유휴재고 추천.jpg");}
   .pick-new .pick-visual{background-image:url("이미지/web/홈_신품추천.jpg");}
-  .pick-body{padding:18px 20px 20px;background:var(--surface);color:var(--text);}
-  .pick-body h3{font-size:1.08rem;font-weight:800;margin-bottom:6px;}
-  .pick-body p{font-size:.85rem;color:var(--text-secondary);margin-bottom:14px;line-height:1.5;}
+  .pick-card::before{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(100deg, rgba(10,16,32,.82) 0%, rgba(10,16,32,.6) 38%, rgba(10,16,32,.08) 62%, transparent 78%);
+  }
+  .pick-new::before{
+    background:linear-gradient(100deg, rgba(255,255,255,.94) 0%, rgba(255,255,255,.85) 38%, rgba(255,255,255,.15) 62%, transparent 78%);
+  }
+  .pick-body{position:relative;z-index:1;height:100%;padding:24px 26px;display:flex;flex-direction:column;justify-content:center;}
+  .pick-body h3{font-size:1.15rem;font-weight:800;margin-bottom:8px;color:#fff;}
+  .pick-body p{font-size:.85rem;margin-bottom:16px;line-height:1.5;color:rgba(255,255,255,.82);}
+  .pick-new .pick-body h3{color:var(--accent);}
+  .pick-new .pick-body p{color:var(--text-secondary);}
 
   .trending{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);padding:22px 22px 18px;box-shadow:var(--shadow-1);}
   .trending h3{font-size:1.02rem;font-weight:800;margin-bottom:14px;}
@@ -142,9 +149,9 @@
   .action-card h3{font-size:1.08rem;font-weight:800;margin-bottom:6px;}
   .action-card p{font-size:.86rem;color:var(--text-secondary);line-height:1.55;margin-bottom:18px;}
   .action-visual{
-    background:var(--bg-soft);border-radius:var(--radius-m);height:220px;margin-bottom:18px;
+    background:var(--bg-soft);border-radius:var(--radius-m);height:320px;margin-bottom:18px;
     display:flex;align-items:center;justify-content:center;color:var(--accent);position:relative;overflow:hidden;
-    background-size:contain;background-repeat:no-repeat;background-position:center;
+    background-size:cover;background-position:center;
   }
   .av-request{background-image:url("이미지/web/홈_구해요 찾습니다.jpg");}
   .av-rfq{background-image:url("이미지/web/홈_견적요청.jpg");}
@@ -346,7 +353,7 @@
             <div class="pick-body">
               <h3>중고장비 추천</h3>
               <p>검증된 중고 장비를 합리적인 가격에</p>
-              <span class="btn btn-outline btn-sm">바로가기</span>
+              <span class="btn btn-primary btn-sm">바로가기</span>
             </div>
           </a>
           <a class="pick-card pick-idle" href="used.html?grade=idle">
@@ -354,7 +361,7 @@
             <div class="pick-body">
               <h3>유휴재고 추천</h3>
               <p>기업의 유휴재고를 특별한 가격에</p>
-              <span class="btn btn-outline btn-sm">바로가기</span>
+              <span class="btn btn-primary btn-sm">바로가기</span>
             </div>
           </a>
           <a class="pick-card pick-new" href="goods.html">
@@ -362,7 +369,7 @@
             <div class="pick-body">
               <h3>신품 추천</h3>
               <p>최신 산업용품을 빠르고 안전하게</p>
-              <span class="btn btn-outline btn-sm">바로가기</span>
+              <span class="btn btn-primary btn-sm">바로가기</span>
             </div>
           </a>
         </div>
