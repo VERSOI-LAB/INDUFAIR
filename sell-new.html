@@ -18,12 +18,36 @@
     padding:2px 9px;border-radius:20px;
   }
   .promo-card{background:linear-gradient(150deg,var(--navy-900),var(--navy-700));border-radius:var(--radius-l);padding:20px;color:#fff;position:relative;overflow:hidden;}
-  .promo-card::before{content:"";position:absolute;inset:0;opacity:.4;background-image:radial-gradient(color-mix(in srgb,#fff 16%,transparent) 1px, transparent 1px);background-size:20px 20px;mask-image:radial-gradient(80% 100% at 100% 100%, #000, transparent 72%);}
+  .promo-card::before{content:"";position:absolute;inset:0;opacity:.4;pointer-events:none;background-image:radial-gradient(color-mix(in srgb,#fff 16%,transparent) 1px, transparent 1px);background-size:20px 20px;mask-image:radial-gradient(80% 100% at 100% 100%, #000, transparent 72%);}
   .promo-card > *{position:relative;z-index:1;}
   .promo-card b{display:block;font-size:1.02rem;font-weight:800;margin-bottom:8px;line-height:1.4;}
   .promo-card ul{display:flex;flex-direction:column;gap:6px;margin:10px 0 16px;}
   .promo-card li{font-size:.8rem;color:#B7C4E0;}
   .promo-icon-wrap{position:absolute;bottom:-6px;right:-4px;color:rgba(255,255,255,.14);}
+
+  .wizard-step{cursor:default;}
+  .wizard-step.done{color:var(--accent);}
+  .wizard-panel{display:none;}
+  .wizard-panel.active{display:block;}
+
+  .ai-photo-dropzone{border:2px dashed var(--border);border-radius:var(--radius-l);padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+  .ai-photo-dropzone:hover{border-color:var(--accent);background:var(--accent-soft);}
+  .ai-photo-dropzone svg{color:var(--text-tertiary);margin:0 auto 10px;}
+  .ai-photo-dropzone .dz-main{font-size:.94rem;font-weight:800;}
+  .ai-photo-dropzone .dz-sub{font-size:.8rem;color:var(--text-tertiary);margin-top:6px;line-height:1.5;}
+  .photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin-top:14px;}
+  .photo-thumb{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--border);}
+  .photo-thumb img{width:100%;height:100%;object-fit:contain;background:#fff;}
+  .photo-thumb .photo-badge{position:absolute;top:6px;left:6px;background:var(--accent);color:#fff;font-size:.68rem;font-weight:800;padding:2px 7px;border-radius:20px;}
+  .photo-thumb .photo-processing{position:absolute;inset:0;background:rgba(255,255,255,.85);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:var(--text-secondary);text-align:center;padding:6px;}
+  .photo-thumb .photo-remove{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:flex;align-items:center;justify-content:center;}
+  .ai-status-box{display:flex;align-items:center;gap:10px;margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:.85rem;font-weight:700;}
+  .ai-status-box svg{flex-shrink:0;}
+  .ai-fill-badge{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:20px;margin-left:6px;}
+  .review-row{display:flex;justify-content:space-between;gap:16px;padding:10px 2px;border-bottom:1px solid var(--border);font-size:.86rem;}
+  .review-row:last-child{border-bottom:none;}
+  .review-row span:first-child{color:var(--text-tertiary);flex-shrink:0;}
+  .review-row span:last-child{font-weight:700;text-align:right;}
 </style>
 </head>
 <body>
@@ -116,102 +140,153 @@
     <!-- MAIN -->
     <div>
       <h1 style="font-size:1.5rem;font-weight:900;">판매 등록하기</h1>
-      <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">정확한 정보를 입력할수록 더 빠른 거래가 가능합니다.</p>
+      <p style="margin-top:8px;font-size:.9rem;color:var(--text-secondary);">사진 한 장이면 AI가 나머지 정보를 자동으로 채워드려요.</p>
 
       <div class="wizard-steps">
-        <div class="wizard-step active"><span class="num">1</span><span>상품 정보 입력</span></div>
+        <div class="wizard-step active" data-step="1"><span class="num">1</span><span>사진 등록</span></div>
         <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">2</span><span>상세 정보 입력</span></div>
+        <div class="wizard-step" data-step="2"><span class="num">2</span><span>상품 정보 입력</span></div>
         <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">3</span><span>사진 등록</span></div>
+        <div class="wizard-step" data-step="3"><span class="num">3</span><span>상세 정보 입력</span></div>
         <div class="wizard-line"></div>
-        <div class="wizard-step"><span class="num">4</span><span>등록 완료</span></div>
+        <div class="wizard-step" data-step="4"><span class="num">4</span><span>등록 완료</span></div>
       </div>
 
       <form id="sellForm">
-        <div class="form-card">
-          <p class="form-card-title">기본 정보</p>
-          <div class="form-grid">
-            <div class="field">
-              <label>카테고리<span class="req">*</span></label>
-              <div class="select-wrap">
-                <select id="categorySelect"><option value="">카테고리를 선택하세요</option></select>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
+        <!-- STEP 1: 사진 등록 -->
+        <div class="wizard-panel active" data-panel="1">
+          <div class="form-card">
+            <p class="form-card-title">상품 사진</p>
+            <p style="font-size:.84rem;color:var(--text-secondary);margin-bottom:14px;">사진을 등록하면 AI가 배경을 제거하고, 상품명·카테고리·상태·설명까지 자동으로 채워드립니다.</p>
+            <div class="ai-photo-dropzone" id="photoDropzone">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              <div class="dz-main">사진을 드래그하거나 클릭하여 등록하세요</div>
+              <div class="dz-sub">첫 사진이 대표 사진이 되며, AI가 자동으로 배경을 흰색으로 정리합니다. (최대 8장)</div>
             </div>
-            <div class="field">
-              <label>브랜드</label>
-              <input type="text" id="brandInput" placeholder="브랜드명을 입력하세요">
+            <input type="file" id="photoInput" accept="image/*" multiple style="display:none;">
+            <div class="photo-grid" id="photoGrid"></div>
+            <div class="ai-status-box" id="aiStatusBox" style="display:none;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+              <span id="aiStatusText">AI가 사진을 분석하고 있어요...</span>
             </div>
-            <div class="field">
-              <label>상품명<span class="req">*</span></label>
-              <input type="text" id="titleInput" maxlength="100" placeholder="상품명을 입력하세요 (최대 100자)">
-            </div>
-            <div class="field">
-              <label>모델명</label>
-              <input type="text" id="modelInput" placeholder="모델명을 입력하세요">
-            </div>
-            <div class="field">
-              <label>판매가<span class="req">*</span></label>
-              <div class="field-suffix"><input type="text" class="tabular" id="priceInput" placeholder="판매 가격을 입력하세요"><span>원</span></div>
-            </div>
-            <div class="field">
-              <label>재고 수량</label>
-              <div class="field-suffix"><input type="text" class="tabular" id="stockInput" value="1"><span>개</span></div>
-            </div>
-            <div class="field full">
-              <label>상품 상태<span class="req">*</span></label>
-              <div class="radio-row">
-                <label class="radio-pill"><input type="radio" name="cond" value="new" checked> 새상품</label>
-                <label class="radio-pill"><input type="radio" name="cond" value="a"> 사용감 적음</label>
-                <label class="radio-pill"><input type="radio" name="cond" value="b"> 사용감 있음</label>
-                <label class="radio-pill"><input type="radio" name="cond" value="c"> 중고품</label>
-              </div>
-            </div>
-            <div class="field">
-              <label>구매 시기</label>
-              <div class="date-wrap">
-                <input type="text" id="purchaseDateInput" placeholder="구매 시기를 선택해주세요">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              </div>
-            </div>
-            <div class="field full">
-              <label>거래 방법<span class="req">*</span></label>
-              <div class="radio-row">
-                <label class="radio-pill"><input type="radio" name="deliv" value="direct" checked> 직거래</label>
-                <label class="radio-pill"><input type="radio" name="deliv" value="delivery"> 택배거래</label>
-                <label class="radio-pill"><input type="radio" name="deliv" value="delivery"> 화물거래</label>
-              </div>
-            </div>
-            <div class="field full" style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;">
-              <div class="field" style="margin:0;">
-                <label>위치<span class="req">*</span></label>
-                <input type="text" id="regionInput" placeholder="거래 가능한 지역을 선택하세요">
-              </div>
-              <button type="button" class="btn btn-outline" style="height:44px;" id="sellLocationBtn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                상세 위치 입력
-              </button>
+          </div>
+          <div class="form-actions">
+            <div></div>
+            <div class="right-group">
+              <button type="button" class="btn btn-primary btn-wide" id="step1NextBtn" disabled>다음 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
             </div>
           </div>
         </div>
 
-        <div class="form-card">
-          <p class="form-card-title">상품 설명</p>
-          <div class="field full">
-            <label>상품 설명<span class="req">*</span></label>
-            <div class="textarea-wrap">
-              <textarea id="descTextarea" maxlength="2000" placeholder="상품에 대한 상세 설명을 입력해주세요. (기능, 특징, 구성품, 사용 이력 등)" oninput="document.getElementById('sellCount').textContent=this.value.length"></textarea>
-              <span class="char-count"><span id="sellCount">0</span> / 2000</span>
+        <!-- STEP 2: 상품 정보 입력 -->
+        <div class="wizard-panel" data-panel="2">
+          <div class="form-card">
+            <p class="form-card-title">기본 정보</p>
+            <div class="form-grid">
+              <div class="field">
+                <label>카테고리<span class="req">*</span><span class="ai-fill-badge" id="aiBadgeCategory" style="display:none;">✦ AI 자동입력</span></label>
+                <div class="select-wrap">
+                  <select id="categorySelect"><option value="">카테고리를 선택하세요</option></select>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+              <div class="field">
+                <label>브랜드<span class="ai-fill-badge" id="aiBadgeBrand" style="display:none;">✦ AI 자동입력</span></label>
+                <input type="text" id="brandInput" placeholder="브랜드명을 입력하세요">
+              </div>
+              <div class="field">
+                <label>상품명<span class="req">*</span><span class="ai-fill-badge" id="aiBadgeTitle" style="display:none;">✦ AI 자동입력</span></label>
+                <input type="text" id="titleInput" maxlength="100" placeholder="상품명을 입력하세요 (최대 100자)">
+              </div>
+              <div class="field">
+                <label>모델명<span class="ai-fill-badge" id="aiBadgeModel" style="display:none;">✦ AI 자동입력</span></label>
+                <input type="text" id="modelInput" placeholder="모델명을 입력하세요">
+              </div>
+              <div class="field">
+                <label>판매가<span class="req">*</span></label>
+                <div class="field-suffix"><input type="text" class="tabular" id="priceInput" placeholder="판매 가격을 입력하세요"><span>원</span></div>
+              </div>
+              <div class="field">
+                <label>재고 수량</label>
+                <div class="field-suffix"><input type="text" class="tabular" id="stockInput" value="1"><span>개</span></div>
+              </div>
+              <div class="field full">
+                <label>상품 상태<span class="req">*</span><span class="ai-fill-badge" id="aiBadgeCondition" style="display:none;">✦ AI 자동입력</span></label>
+                <div class="radio-row">
+                  <label class="radio-pill"><input type="radio" name="cond" value="new" checked> 새상품</label>
+                  <label class="radio-pill"><input type="radio" name="cond" value="a"> 사용감 적음</label>
+                  <label class="radio-pill"><input type="radio" name="cond" value="b"> 사용감 있음</label>
+                  <label class="radio-pill"><input type="radio" name="cond" value="c"> 중고품</label>
+                </div>
+              </div>
+              <div class="field">
+                <label>구매 시기</label>
+                <div class="date-wrap">
+                  <input type="text" id="purchaseDateInput" placeholder="구매 시기를 선택해주세요">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+              </div>
+              <div class="field full">
+                <label>거래 방법<span class="req">*</span></label>
+                <div class="radio-row">
+                  <label class="radio-pill"><input type="radio" name="deliv" value="direct" checked> 직거래</label>
+                  <label class="radio-pill"><input type="radio" name="deliv" value="delivery"> 택배거래</label>
+                  <label class="radio-pill"><input type="radio" name="deliv" value="delivery"> 화물거래</label>
+                </div>
+              </div>
+              <div class="field full" style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;">
+                <div class="field" style="margin:0;">
+                  <label>위치<span class="req">*</span></label>
+                  <input type="text" id="regionInput" placeholder="거래 가능한 지역을 선택하세요">
+                </div>
+                <button type="button" class="btn btn-outline" style="height:44px;" id="sellLocationBtn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  상세 위치 입력
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" data-prev="1">이전</button>
+            <div class="right-group">
+              <button type="button" class="btn btn-ghost" id="sellDraftSaveBtn">임시저장</button>
+              <button type="button" class="btn btn-primary btn-wide" data-next="3">다음 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
             </div>
           </div>
         </div>
 
-        <div class="form-actions">
-          <button type="button" class="btn btn-ghost" id="sellDraftSaveBtn">임시저장</button>
-          <div class="right-group">
-            <button type="button" class="btn btn-ghost" id="sellCancelBtn">취소</button>
-            <button type="submit" class="btn btn-primary btn-wide" id="sellSubmitBtn">등록하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <!-- STEP 3: 상세 정보 입력 -->
+        <div class="wizard-panel" data-panel="3">
+          <div class="form-card">
+            <p class="form-card-title">상품 설명<span class="ai-fill-badge" id="aiBadgeDesc" style="display:none;">✦ AI 자동입력</span></p>
+            <div class="field full">
+              <label>상품 설명<span class="req">*</span></label>
+              <div class="textarea-wrap">
+                <textarea id="descTextarea" maxlength="2000" placeholder="상품에 대한 상세 설명을 입력해주세요. (기능, 특징, 구성품, 사용 이력 등)" oninput="document.getElementById('sellCount').textContent=this.value.length"></textarea>
+                <span class="char-count"><span id="sellCount">0</span> / 2000</span>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" data-prev="2">이전</button>
+            <div class="right-group">
+              <button type="button" class="btn btn-ghost" id="sellCancelBtn">취소</button>
+              <button type="button" class="btn btn-primary btn-wide" data-next="4">다음 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: 등록 완료 -->
+        <div class="wizard-panel" data-panel="4">
+          <div class="form-card">
+            <p class="form-card-title">등록 정보 확인</p>
+            <div id="reviewBox"></div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" data-prev="3">이전</button>
+            <div class="right-group">
+              <button type="submit" class="btn btn-primary btn-wide" id="sellSubmitBtn">등록하기 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+            </div>
           </div>
         </div>
       </form>
@@ -223,29 +298,25 @@
         <p class="side-panel-title">판매 등록 가이드</p>
         <div class="guide-check-item">
           <span class="guide-check-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg></span>
-          <div><b>정확한 카테고리 선택</b><span>검색 노출이 높아집니다.</span></div>
+          <div><b>선명한 사진 먼저 등록</b><span>AI 자동 인식 정확도가 높아집니다.</span></div>
         </div>
         <div class="guide-check-item">
           <span class="guide-check-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></span>
-          <div><b>상세한 상품 설명 작성</b><span>신뢰도와 구매 문의가 증가합니다.</span></div>
-        </div>
-        <div class="guide-check-item">
-          <span class="guide-check-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
-          <div><b>선명한 사진 등록</b><span>구매 결정에 큰 도움이 됩니다.</span></div>
+          <div><b>AI 자동입력 결과 확인</b><span>자동으로 채워진 정보는 꼭 다시 확인해주세요.</span></div>
         </div>
         <div class="guide-check-item">
           <span class="guide-check-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>
           <div><b>정확한 가격 설정</b><span>유사 상품을 참고하여 설정하세요.</span></div>
         </div>
-        <button type="button" class="btn btn-outline" style="width:100%;justify-content:space-between;margin-top:6px;" onclick="alert('[판매 등록 가이드]\n\n1. 정확한 카테고리를 선택하면 검색 노출이 높아집니다.\n2. 상세한 상품 설명은 신뢰도와 구매 문의를 높입니다.\n3. 선명한 사진은 구매 결정에 큰 도움이 됩니다.\n4. 유사 상품 시세를 참고해 가격을 설정하세요.');">가이드 더보기 ›</button>
+        <button type="button" class="btn btn-outline" style="width:100%;justify-content:space-between;margin-top:6px;" onclick="alert('[판매 등록 가이드]\n\n1. 선명한 사진을 등록하면 AI가 상품 정보를 더 정확히 채워줍니다.\n2. AI가 자동으로 채운 정보는 등록 전에 꼭 확인/수정해주세요.\n3. 유사 상품 시세를 참고해 가격을 설정하세요.');">가이드 더보기 ›</button>
       </div>
 
       <div class="side-panel" style="margin-top:16px;">
         <p class="side-panel-title">등록 전 체크리스트</p>
+        <div class="checklist-item"><span class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>대표 사진을 등록했나요?</div>
         <div class="checklist-item"><span class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>카테고리와 상품명을 정확히 입력했나요?</div>
         <div class="checklist-item"><span class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>상품 상태와 거래 방법을 선택했나요?</div>
         <div class="checklist-item"><span class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>상품 설명을 자세히 작성했나요?</div>
-        <div class="checklist-item"><span class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>대표 사진을 등록할 준비가 되었나요?</div>
         <button type="button" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px;" id="checklistDownloadBtn">체크리스트 다운로드 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
       </div>
 
@@ -272,6 +343,17 @@
   </div>
 </footer>
 
+<script type="importmap">
+{
+  "imports": {
+    "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0-dev.20250206-d981b153d3/dist/ort.min.mjs"
+  }
+}
+</script>
+<script type="module">
+  import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/dist/index.mjs';
+  window.__removeBackground = removeBackground;
+</script>
 <script>
   var navToggle = document.getElementById('navToggle');
   var mainNav = document.getElementById('mainNav');
@@ -308,10 +390,10 @@
 
   document.getElementById('checklistDownloadBtn').addEventListener('click', function(){
     var text = '[VERSOI 판매 등록 체크리스트]\n\n' +
+      '☐ 대표 사진을 등록했나요?\n' +
       '☐ 카테고리와 상품명을 정확히 입력했나요?\n' +
       '☐ 상품 상태와 거래 방법을 선택했나요?\n' +
-      '☐ 상품 설명을 자세히 작성했나요?\n' +
-      '☐ 대표 사진을 등록할 준비가 되었나요?\n';
+      '☐ 상품 설명을 자세히 작성했나요?\n';
     var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -328,21 +410,239 @@
 <script src="js/auth.js"></script>
 <script>
 (function () {
-  async function loadCategories() {
-    var sel = document.getElementById('categorySelect');
-    var res = await sb.from('categories').select('id,name').not('parent_id', 'is', null).order('sort_order');
-    var cats = res.data || [];
-    cats.forEach(function (c) {
-      var opt = document.createElement('option');
-      opt.value = c.id;
-      opt.textContent = c.name;
-      sel.appendChild(opt);
+  var FUNCTIONS_URL = 'https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1';
+  var CONDITION_LABEL = { new: '새상품', a: '사용감 적음', b: '사용감 있음', c: '중고품' };
+  var TRADE_LABEL = { direct: '직거래', delivery: '택배/화물거래' };
+
+  var currentStep = 1;
+  var photos = []; // { id, file, url, uploading, processed }
+  var allCategories = [];
+  var aiApplied = { category: false, brand: false, title: false, model: false, condition: false, description: false };
+  var photoSeq = 0;
+
+  function escapeHtml(s) { return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  // ---- Step navigation ----
+  function goToStep(step) {
+    currentStep = step;
+    document.querySelectorAll('.wizard-panel').forEach(function (p) {
+      p.classList.toggle('active', Number(p.dataset.panel) === step);
     });
+    document.querySelectorAll('.wizard-step').forEach(function (s) {
+      var n = Number(s.dataset.step);
+      s.classList.toggle('active', n === step);
+      s.classList.toggle('done', n < step);
+    });
+    if (step === 4) renderReview();
+    window.scrollTo({ top: document.querySelector('.wizard-steps').offsetTop - 90, behavior: 'smooth' });
+  }
+
+  document.getElementById('sellForm').addEventListener('click', function (e) {
+    var nextBtn = e.target.closest('[data-next]');
+    if (nextBtn) { goToStep(Number(nextBtn.dataset.next)); return; }
+    var prevBtn = e.target.closest('[data-prev]');
+    if (prevBtn) { goToStep(Number(prevBtn.dataset.prev)); return; }
+  });
+
+  function renderReview() {
+    var cond = checkedValue('cond');
+    var deliv = checkedValue('deliv');
+    var catName = '';
+    var catSel = document.getElementById('categorySelect');
+    if (catSel.selectedIndex > 0) catName = catSel.options[catSel.selectedIndex].text;
+    var rows = [
+      ['대표 사진', photos.length ? photos.length + '장 등록됨' : '없음'],
+      ['카테고리', catName || '-'],
+      ['상품명', document.getElementById('titleInput').value.trim() || '-'],
+      ['브랜드', document.getElementById('brandInput').value.trim() || '-'],
+      ['모델명', document.getElementById('modelInput').value.trim() || '-'],
+      ['판매가', document.getElementById('priceInput').value.trim() ? document.getElementById('priceInput').value.trim() + '원' : '-'],
+      ['상품 상태', CONDITION_LABEL[cond] || '-'],
+      ['거래 방법', TRADE_LABEL[deliv] || '-'],
+      ['위치', document.getElementById('regionInput').value.trim() || '-']
+    ];
+    document.getElementById('reviewBox').innerHTML = rows.map(function (r) {
+      return '<div class="review-row"><span>' + escapeHtml(r[0]) + '</span><span>' + escapeHtml(r[1]) + '</span></div>';
+    }).join('');
   }
 
   function checkedValue(name) {
     var el = document.querySelector('input[name="' + name + '"]:checked');
     return el ? el.value : '';
+  }
+
+  // ---- Photo handling ----
+  function renderPhotoGrid() {
+    var grid = document.getElementById('photoGrid');
+    grid.innerHTML = photos.map(function (p, i) {
+      return '<div class="photo-thumb" data-id="' + p.id + '">' +
+        (i === 0 ? '<span class="photo-badge">대표</span>' : '') +
+        '<img src="' + p.url + '" alt="">' +
+        (p.processing ? '<div class="photo-processing">배경 제거 중...</div>' : '') +
+        '<button type="button" class="photo-remove" data-remove="' + p.id + '" aria-label="삭제"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>' +
+        '</div>';
+    }).join('');
+    document.getElementById('step1NextBtn').disabled = photos.length === 0;
+  }
+
+  document.getElementById('photoGrid').addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-remove]'); if (!btn) return;
+    photos = photos.filter(function (p) { return p.id !== btn.dataset.remove; });
+    renderPhotoGrid();
+  });
+
+  function loadImage(src) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  function resizeForAnalysis(file) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () {
+        var maxDim = 1024;
+        var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  // Runs client-side background removal (누끼따기) and composites the result onto a plain white background.
+  async function removeBgToWhite(file) {
+    var fgBlob = await window.__removeBackground(file); // transparent-background PNG of just the product
+    var img = await loadImage(URL.createObjectURL(fgBlob));
+    var canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+    return new Promise(function (resolve) { canvas.toBlob(resolve, 'image/jpeg', 0.92); });
+  }
+
+  async function analyzeFirstPhoto(file) {
+    if (!window.VERSOI.requireAuth()) return;
+    var statusBox = document.getElementById('aiStatusBox');
+    var statusText = document.getElementById('aiStatusText');
+    statusBox.style.display = 'flex';
+    statusText.textContent = 'AI가 사진을 분석하고 있어요...';
+    try {
+      var dataUrl = await resizeForAnalysis(file);
+      var base64 = dataUrl.split(',')[1];
+      var sessionRes = await sb.auth.getSession();
+      var token = sessionRes.data.session ? sessionRes.data.session.access_token : null;
+      var res = await fetch(FUNCTIONS_URL + '/ai-product-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg', categories: allCategories.map(function (c) { return c.name; }) })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) {
+        statusText.textContent = data.error || 'AI 분석에 실패했습니다. 직접 입력해주세요.';
+        setTimeout(function () { statusBox.style.display = 'none'; }, 2500);
+        return;
+      }
+      var applied = applyAiSuggestion(data);
+      statusText.textContent = applied
+        ? 'AI 자동입력 완료! 다음 단계에서 내용을 확인해주세요.'
+        : '사진 속 제품을 식별하지 못했어요. 직접 입력해주세요.';
+      setTimeout(function () { statusBox.style.display = 'none'; }, 2500);
+    } catch (err) {
+      console.error('[sell-new] AI analysis failed', err);
+      statusText.textContent = 'AI 분석 중 오류가 발생했습니다. 직접 입력해주세요.';
+      setTimeout(function () { statusBox.style.display = 'none'; }, 2500);
+    }
+  }
+
+  function applyAiSuggestion(data) {
+    if (data.title && data.title !== '식별할 수 없습니다') { document.getElementById('titleInput').value = data.title; aiApplied.title = true; }
+    if (data.manufacturer) { document.getElementById('brandInput').value = data.manufacturer; aiApplied.brand = true; }
+    if (data.model_no) { document.getElementById('modelInput').value = data.model_no; aiApplied.model = true; }
+    if (data.description) { document.getElementById('descTextarea').value = data.description; document.getElementById('sellCount').textContent = data.description.length; aiApplied.description = true; }
+    if (data.condition) {
+      var radio = document.querySelector('input[name="cond"][value="' + data.condition + '"]');
+      if (radio) { radio.checked = true; aiApplied.condition = true; }
+    }
+    if (data.category) {
+      var match = allCategories.find(function (c) { return c.name === data.category; });
+      if (match) { document.getElementById('categorySelect').value = String(match.id); aiApplied.category = true; }
+    }
+    document.getElementById('aiBadgeTitle').style.display = aiApplied.title ? '' : 'none';
+    document.getElementById('aiBadgeBrand').style.display = aiApplied.brand ? '' : 'none';
+    document.getElementById('aiBadgeModel').style.display = aiApplied.model ? '' : 'none';
+    document.getElementById('aiBadgeCondition').style.display = aiApplied.condition ? '' : 'none';
+    document.getElementById('aiBadgeCategory').style.display = aiApplied.category ? '' : 'none';
+    document.getElementById('aiBadgeDesc').style.display = aiApplied.description ? '' : 'none';
+    return aiApplied.title || aiApplied.brand || aiApplied.model || aiApplied.condition || aiApplied.category || aiApplied.description;
+  }
+
+  async function handleFiles(fileList) {
+    if (!window.VERSOI.requireAuth()) return;
+    var files = Array.prototype.slice.call(fileList || []).slice(0, 8 - photos.length);
+    if (!files.length) return;
+    var isFirstBatch = photos.length === 0;
+
+    for (var i = 0; i < files.length; i++) {
+      (function (file) {
+        var id = 'p' + (++photoSeq);
+        var entry = { id: id, file: file, url: URL.createObjectURL(file), processing: true };
+        photos.push(entry);
+        renderPhotoGrid();
+
+        var bgRemoval = window.__removeBackground
+          ? removeBgToWhite(file).catch(function (err) { console.warn('[sell-new] background removal failed, using original photo', err); return file; })
+          : Promise.resolve(file);
+
+        bgRemoval.then(function (finalBlob) {
+          entry.file = finalBlob;
+          entry.url = URL.createObjectURL(finalBlob);
+          entry.processing = false;
+          renderPhotoGrid();
+        });
+      })(files[i]);
+    }
+
+    if (isFirstBatch) analyzeFirstPhoto(files[0]);
+  }
+
+  document.getElementById('photoDropzone').addEventListener('click', function () { document.getElementById('photoInput').click(); });
+  document.getElementById('photoDropzone').addEventListener('dragover', function (e) { e.preventDefault(); });
+  document.getElementById('photoDropzone').addEventListener('drop', function (e) {
+    e.preventDefault();
+    handleFiles(e.dataTransfer.files);
+  });
+  document.getElementById('photoInput').addEventListener('change', function () {
+    handleFiles(this.files);
+    this.value = '';
+  });
+
+  document.getElementById('step1NextBtn').addEventListener('click', function () {
+    if (!photos.length) return;
+    goToStep(2);
+  });
+
+  async function loadCategories() {
+    var sel = document.getElementById('categorySelect');
+    var res = await sb.from('categories').select('id,name').not('parent_id', 'is', null).order('sort_order');
+    allCategories = res.data || [];
+    allCategories.forEach(function (c) {
+      var opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      sel.appendChild(opt);
+    });
   }
 
   document.getElementById('sellForm').addEventListener('submit', async function (e) {
@@ -356,11 +656,15 @@
     var region = document.getElementById('regionInput').value.trim();
     var description = document.getElementById('descTextarea').value.trim();
 
-    if (!categoryId) { alert('카테고리를 선택해주세요.'); return; }
-    if (!title) { alert('상품명을 입력해주세요.'); return; }
-    if (!priceRaw) { alert('판매가를 입력해주세요.'); return; }
-    if (!region) { alert('위치를 입력해주세요.'); return; }
-    if (!description) { alert('상품 설명을 입력해주세요.'); return; }
+    if (!photos.length) { alert('사진을 1장 이상 등록해주세요.'); goToStep(1); return; }
+    if (!categoryId) { alert('카테고리를 선택해주세요.'); goToStep(2); return; }
+    if (!title) { alert('상품명을 입력해주세요.'); goToStep(2); return; }
+    if (!priceRaw) { alert('판매가를 입력해주세요.'); goToStep(2); return; }
+    if (!region) { alert('위치를 입력해주세요.'); goToStep(2); return; }
+    if (!description) { alert('상품 설명을 입력해주세요.'); goToStep(3); return; }
+
+    var submitBtn = document.getElementById('sellSubmitBtn');
+    submitBtn.disabled = true;
 
     var payload = {
       seller_profile_id: window.VERSOI.user.id,
@@ -379,19 +683,31 @@
       status: 'selling'
     };
 
-    var submitBtn = document.getElementById('sellSubmitBtn');
-    submitBtn.disabled = true;
-
     var res = await sb.from('products').insert(payload).select('id').single();
-
-    submitBtn.disabled = false;
 
     if (res.error) {
       console.error(res.error);
+      submitBtn.disabled = false;
       alert('상품 등록에 실패했습니다. 다시 시도해주세요.');
       return;
     }
-    location.href = 'product-detail.html?id=' + res.data.id;
+
+    var productId = res.data.id;
+    var uid = window.VERSOI.user.id;
+    for (var i = 0; i < photos.length; i++) {
+      try {
+        var path = uid + '/' + productId + '/' + Date.now() + '-' + i + '.jpg';
+        var up = await sb.storage.from('product-images').upload(path, photos[i].file);
+        if (up.error) throw up.error;
+        var pub = sb.storage.from('product-images').getPublicUrl(path);
+        await sb.from('product_images').insert({ product_id: productId, url: pub.data.publicUrl, sort_order: i });
+      } catch (err) {
+        console.error('[sell-new] photo upload failed', err);
+      }
+    }
+
+    submitBtn.disabled = false;
+    location.href = 'product-detail.html?id=' + productId;
   });
 
   document.addEventListener('versoi:ready', function () { loadCategories(); });
