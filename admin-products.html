@@ -11,6 +11,13 @@
 <link rel="stylesheet" href="styles.css">
 <style>
   @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+  .row-thumb{cursor:pointer;}
+  .pd-gallery{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .pd-gallery img{width:76px;height:76px;object-fit:contain;border-radius:8px;border:1px solid var(--border);background:var(--bg-soft);}
+  .pd-kv{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-bottom:18px;}
+  .pd-kv .item span{display:block;font-size:.74rem;color:var(--text-tertiary);margin-bottom:3px;}
+  .pd-kv .item b{font-size:.86rem;font-weight:700;}
+  .pd-desc{font-size:.85rem;color:var(--text-secondary);line-height:1.6;white-space:pre-wrap;background:var(--bg-soft);border-radius:9px;padding:14px;}
 </style>
 </head>
 <body>
@@ -30,12 +37,15 @@
     </div>
     <div class="admin-nav-group"><p class="admin-nav-group-title">상품/주문 관리</p>
     <a href="admin-products.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>전체 상품</a>
+    <a href="admin-categories.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>카테고리 관리</a>
     <a href="admin-orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>전체 주문</a>
+    <a href="admin-revenue.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>매출 관리</a>
     </div>
     <div class="admin-nav-group"><p class="admin-nav-group-title">콘텐츠 관리</p>
     <a href="admin-notices.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>공지사항 관리</a>
     <a href="admin-coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6M2 7h20M12 3v4M8 3v4M16 3v4"/><circle cx="12" cy="14" r="2"/></svg>쿠폰 관리</a>
     <a href="admin-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1:1 문의</a>
+    <a href="admin-community.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>커뮤니티 관리</a>
     </div>
     </nav>
     </aside>
@@ -79,6 +89,21 @@
     </div>
     </div>
 </div>
+
+<div id="productModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,17,32,.5);z-index:100;align-items:center;justify-content:center;padding:20px;">
+  <div class="admin-card" style="width:100%;max-width:600px;max-height:88vh;overflow-y:auto;">
+    <div class="admin-card-head"><h2 id="pdTitle">상품 상세</h2><button class="icon-btn" id="pdClose" aria-label="닫기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <div class="pd-gallery" id="pdGallery"></div>
+    <div class="pd-kv" id="pdKv"></div>
+    <p style="font-size:.78rem;font-weight:800;color:var(--text-tertiary);margin-bottom:8px;">상품 설명</p>
+    <div class="pd-desc" id="pdDesc"></div>
+    <div class="form-actions">
+      <span></span>
+      <div class="right-group"><button type="button" class="btn btn-ghost" id="pdCloseBtn">닫기</button></div>
+    </div>
+  </div>
+</div>
+
 <script>
   var sidebarToggle = document.getElementById('sidebarToggle');
   var adminSidebar = document.getElementById('adminSidebar');
@@ -91,9 +116,13 @@
 <script>
 var PF = { products: [], activeStatus: 'all' };
 
+var MARKET_LABEL = { new: '신품', used: '중고' };
+var CONDITION_LABEL = { new: '신품', like_new: '거의 새 것', used: '중고', damaged: '파손/하자' };
+var TRADE_LABEL = { delivery: '택배거래', direct: '직거래', both: '택배/직거래' };
+
 function productRowHtml(p) {
   return '<tr>' +
-    '<td><div class="row-thumb"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">' + AC.esc(p.title) + '</div><div class="sub">' + AC.esc(p.model_no || p.manufacturer || '') + '</div></div></div></td>' +
+    '<td><div class="row-thumb" onclick="openProductDetail(\'' + p.id + '\')"><span class="thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></span><div><div class="name">' + AC.esc(p.title) + '</div><div class="sub">' + AC.esc(p.model_no || p.manufacturer || '') + '</div></div></div></td>' +
     '<td>' + AC.esc(p.companies ? p.companies.name : '-') + '</td>' +
     '<td>' + AC.esc(p.categories ? p.categories.name : '-') + '</td>' +
     '<td class="num">' + AC.won(p.price) + '</td>' +
@@ -136,6 +165,42 @@ async function loadProducts() {
   PF.products = res.data || [];
   renderProducts();
 }
+
+window.openProductDetail = async function (id) {
+  var p = PF.products.find(function (x) { return x.id === id; });
+  if (!p) return;
+  document.getElementById('pdTitle').textContent = p.title;
+  document.getElementById('pdDesc').textContent = p.description || '등록된 설명이 없습니다.';
+  document.getElementById('pdKv').innerHTML = [
+    ['판매자', p.companies ? p.companies.name : '-'],
+    ['카테고리', p.categories ? p.categories.name : '-'],
+    ['모델명', p.model_no || '-'],
+    ['제조사', p.manufacturer || '-'],
+    ['판매가', AC.won(p.price)],
+    ['재고수량', p.stock + '개'],
+    ['거래구분', MARKET_LABEL[p.market_type] || p.market_type],
+    ['상품상태', CONDITION_LABEL[p.condition] || p.condition],
+    ['거래방식', TRADE_LABEL[p.trade_type] || p.trade_type],
+    ['지역', p.region || '-'],
+    ['판매상태', AC.label(p.status)],
+    ['조회수', p.view_count + ' · 문의 ' + p.inquiry_count + ' · 찜 ' + p.like_count],
+    ['등록일', AC.dt(p.created_at, true)],
+    ['수정일', AC.dt(p.updated_at, true)]
+  ].map(function (kv) { return '<div class="item"><span>' + kv[0] + '</span><b>' + AC.esc(String(kv[1])) + '</b></div>'; }).join('');
+
+  var galleryEl = document.getElementById('pdGallery');
+  galleryEl.innerHTML = '';
+  var imgRes = await sb.from('product_images').select('url').eq('product_id', id).order('sort_order', { ascending: true });
+  var imgs = imgRes.data || [];
+  galleryEl.innerHTML = imgs.length
+    ? imgs.map(function (img) { return '<img src="' + AC.esc(img.url) + '" alt="">'; }).join('')
+    : '<p style="font-size:.8rem;color:var(--text-tertiary);">등록된 이미지가 없습니다.</p>';
+
+  document.getElementById('productModalOverlay').style.display = 'flex';
+};
+function closeProductModal() { document.getElementById('productModalOverlay').style.display = 'none'; }
+document.getElementById('pdClose').addEventListener('click', closeProductModal);
+document.getElementById('pdCloseBtn').addEventListener('click', closeProductModal);
 
 document.getElementById('statusTabs').addEventListener('click', function (e) {
   var btn = e.target.closest('button[data-status]');

@@ -33,7 +33,7 @@
     if (!session) return null;
     var uid = session.user.id;
     var profRes = await window.sb.from('profiles').select('*').eq('id', uid).maybeSingle();
-    if (profRes.data && profRes.data.status === 'withdrawn') {
+    if (profRes.data && (profRes.data.status === 'withdrawn' || profRes.data.status === 'suspended')) {
       await window.sb.auth.signOut();
       return null;
     }

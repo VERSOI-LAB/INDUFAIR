@@ -30,16 +30,17 @@
     delivered: '배송완료', confirmed: '구매확정', canceled: '취소', refund_requested: '반품요청', refunded: '환불완료',
     pending: '답변 대기', answered: '답변 완료',
     active: '활성', withdrawn: '탈퇴', suspended: '정지',
-    business: '사업자', individual: '개인'
+    business: '사업자', individual: '개인',
+    scheduled: '정산 예정', completed: '정산 완료'
   };
   AC.label = function (status) { return STATUS_LABEL[status] || status; };
 
   var STATUS_BADGE = {
     selling: 'badge-good', paid: 'badge-good', delivered: 'badge-good', confirmed: 'badge-good',
-    answered: 'badge-good', active: 'badge-good',
+    answered: 'badge-good', active: 'badge-good', completed: 'badge-good',
     stopped: 'badge-up', canceled: 'badge-up', suspended: 'badge-up', withdrawn: 'badge-muted', deleted: 'badge-muted',
     soldout: 'badge-warn', pending: 'badge-warn', pending_payment: 'badge-warn',
-    preparing: 'badge-accent', shipping: 'badge-accent', refund_requested: 'badge-warn'
+    preparing: 'badge-accent', shipping: 'badge-accent', refund_requested: 'badge-warn', scheduled: 'badge-accent'
   };
   AC.badgeCls = function (status) { return STATUS_BADGE[status] || 'badge-muted'; };
 

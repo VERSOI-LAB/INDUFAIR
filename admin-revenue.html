@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 어드민 콘솔 | 매출 관리</title>
+<meta name="description" content="플랫폼 전체 거래액과 입점사별 매출, 정산 현황을 확인하는 VERSOI 어드민 콘솔">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="admin-dashboard.html" aria-label="어드민 콘솔 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>ADMIN CONSOLE</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="admin-dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">회원 관리</p>
+    <a href="admin-members.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>전체 회원</a>
+    <a href="admin-members.html?tab=companies"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>입점사 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품/주문 관리</p>
+    <a href="admin-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>전체 상품</a>
+    <a href="admin-categories.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>카테고리 관리</a>
+    <a href="admin-orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>전체 주문</a>
+    <a href="admin-revenue.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>매출 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">콘텐츠 관리</p>
+    <a href="admin-notices.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>공지사항 관리</a>
+    <a href="admin-coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6M2 7h20M12 3v4M8 3v4M16 3v4"/><circle cx="12" cy="14" r="2"/></svg>쿠폰 관리</a>
+    <a href="admin-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1:1 문의</a>
+    </div>
+    </nav>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"></button>어드민 콘솔<span class="sub">상품/주문 관리 · 매출</span></div>
+      <div class="admin-top-actions">
+        <a href="index.html" class="btn btn-ghost btn-sm" style="margin-right:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>사이트 화면</a>
+        <div class="admin-user"><span class="avatar">A</span><span class="lbl"><b>관리자</b><span></span></span></div>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-page-head">
+        <h1>매출 관리</h1>
+        <p>플랫폼 전체 거래액과 입점사별 매출, 정산 현황을 확인하세요.</p>
+      </div>
+
+      <div class="stat-card-row">
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>오늘 매출</span><div class="val" id="v-today">₩0</div><div class="delta" id="v-today-count">0건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>이번 달 매출</span><div class="val" id="v-month">₩0</div><div class="delta" id="v-month-count">0건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>지난 달 매출</span><div class="val" id="v-last-month">₩0</div><div class="delta" id="v-mom">-</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>정산 예정 총액</span><div class="val" id="v-scheduled">₩0</div><div class="delta" id="v-scheduled-count">0건</div></div>
+        <div class="stat-card"><span class="lbl"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg>이번 달 정산 완료</span><div class="val" id="v-completed">₩0</div><div class="delta" id="v-completed-count">0건</div></div>
+      </div>
+
+      <div class="admin-card" style="margin-top:16px;">
+        <div class="admin-card-head"><h2>입점사별 매출</h2></div>
+        <div class="data-table-scroll">
+        <table class="data-table">
+          <thead><tr><th>회사명</th><th class="num">주문건수</th><th class="num">매출액</th><th class="num">수수료율</th><th class="num">예상 수수료</th></tr></thead>
+          <tbody id="byCompanyBody"></tbody>
+        </table>
+        </div>
+      </div>
+
+      <div class="admin-card" style="margin-top:16px;">
+        <div class="admin-card-head"><h2>정산 내역</h2></div>
+        <div class="count-tabs" id="settleTabs">
+          <button class="active" data-status="all">전체 <b id="scnt-all">0</b></button>
+          <button data-status="scheduled">정산 예정 <b id="scnt-scheduled">0</b></button>
+          <button data-status="completed">정산 완료 <b id="scnt-completed">0</b></button>
+        </div>
+        <div class="data-table-scroll">
+        <table class="data-table">
+          <thead><tr><th>정산번호</th><th>회사명</th><th>정산기간</th><th class="num">매출액</th><th class="num">수수료</th><th class="num">정산금액</th><th class="num">정산예정일</th><th>상태</th><th>관리</th></tr></thead>
+          <tbody id="settleTbody"></tbody>
+        </table>
+        </div>
+      </div>
+
+    </div>
+    </div>
+</div>
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){ sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); }); }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/admin-common.js"></script>
+<script>
+var RV = { orderItems: [], settlements: [], activeSettleStatus: 'all' };
+
+function settleRowHtml(s) {
+  var period = s.period_start.slice(0, 10).replace(/-/g, '.') + ' ~ ' + s.period_end.slice(0, 10).replace(/-/g, '.');
+  return '<tr>' +
+    '<td class="num cell-strong">' + AC.esc(s.settlement_no) + '</td>' +
+    '<td>' + AC.esc(s.companies ? s.companies.name : '-') + '</td>' +
+    '<td>' + period + '</td>' +
+    '<td class="num">' + AC.won(s.sales_amount) + '</td>' +
+    '<td class="num">' + AC.won(s.fee_amount) + '</td>' +
+    '<td class="num">' + AC.won(s.settlement_amount) + '</td>' +
+    '<td class="num">' + (s.due_date ? s.due_date.slice(0, 10).replace(/-/g, '.') : '-') + '</td>' +
+    '<td><span class="badge ' + AC.badgeCls(s.status) + '">' + AC.label(s.status) + '</span></td>' +
+    '<td>' + (s.status === 'scheduled' ? '<button class="btn btn-ghost btn-sm" onclick="markSettled(\'' + s.id + '\')">정산 완료 처리</button>' : '') + '</td></tr>';
+}
+
+function renderSettlements() {
+  var list = RV.settlements.filter(function (s) { return RV.activeSettleStatus === 'all' || s.status === RV.activeSettleStatus; });
+  document.getElementById('settleTbody').innerHTML = list.map(settleRowHtml).join('') ||
+    '<tr><td colspan="9" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">정산 내역이 없습니다.</td></tr>';
+  document.getElementById('scnt-all').textContent = RV.settlements.length;
+  document.getElementById('scnt-scheduled').textContent = RV.settlements.filter(function (s) { return s.status === 'scheduled'; }).length;
+  document.getElementById('scnt-completed').textContent = RV.settlements.filter(function (s) { return s.status === 'completed'; }).length;
+}
+
+window.markSettled = async function (id) {
+  if (!confirm('이 정산 건을 완료 처리하시겠습니까?')) return;
+  var res = await sb.from('settlements').update({ status: 'completed', paid_date: new Date().toISOString().slice(0, 10) }).eq('id', id);
+  if (res.error) { alert('처리에 실패했습니다: ' + res.error.message); return; }
+  await loadAll();
+};
+
+document.getElementById('settleTabs').addEventListener('click', function (e) {
+  var btn = e.target.closest('button[data-status]');
+  if (!btn) return;
+  document.querySelectorAll('#settleTabs button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  RV.activeSettleStatus = btn.getAttribute('data-status');
+  renderSettlements();
+});
+
+function renderByCompany() {
+  var byCompany = {};
+  RV.orderItems.forEach(function (oi) {
+    if (oi.status === 'canceled' || oi.status === 'refunded') return;
+    var name = oi.companies ? oi.companies.name : '(직접판매)';
+    var feeRate = oi.companies ? Number(oi.companies.fee_rate) : 0;
+    if (!byCompany[name]) byCompany[name] = { count: 0, amount: 0, feeRate: feeRate };
+    byCompany[name].count++;
+    byCompany[name].amount += oi.line_amount;
+  });
+  var rows = Object.keys(byCompany).sort(function (a, b) { return byCompany[b].amount - byCompany[a].amount; });
+  document.getElementById('byCompanyBody').innerHTML = rows.map(function (name) {
+    var c = byCompany[name];
+    return '<tr><td class="cell-strong">' + AC.esc(name) + '</td>' +
+      '<td class="num">' + c.count + '</td>' +
+      '<td class="num">' + AC.won(c.amount) + '</td>' +
+      '<td class="num">' + c.feeRate.toFixed(1) + '%</td>' +
+      '<td class="num">' + AC.won(Math.round(c.amount * c.feeRate / 100)) + '</td></tr>';
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">매출 데이터가 없습니다.</td></tr>';
+}
+
+function renderStats() {
+  var now = new Date();
+  var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  var monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  var lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+  var valid = RV.orderItems.filter(function (oi) { return oi.status !== 'canceled' && oi.status !== 'refunded'; });
+  var todayItems = valid.filter(function (oi) { return new Date(oi.created_at) >= todayStart; });
+  var monthItems = valid.filter(function (oi) { return new Date(oi.created_at) >= monthStart; });
+  var lastMonthItems = valid.filter(function (oi) { return new Date(oi.created_at) >= lastMonthStart && new Date(oi.created_at) < monthStart; });
+
+  var sum = function (list) { return list.reduce(function (s, oi) { return s + oi.line_amount; }, 0); };
+  var todaySum = sum(todayItems), monthSum = sum(monthItems), lastMonthSum = sum(lastMonthItems);
+
+  document.getElementById('v-today').textContent = AC.won(todaySum);
+  document.getElementById('v-today-count').textContent = todayItems.length + '건';
+  document.getElementById('v-month').textContent = AC.won(monthSum);
+  document.getElementById('v-month-count').textContent = monthItems.length + '건';
+  document.getElementById('v-last-month').textContent = AC.won(lastMonthSum);
+  var mom = lastMonthSum > 0 ? Math.round((monthSum - lastMonthSum) / lastMonthSum * 1000) / 10 : 0;
+  document.getElementById('v-mom').textContent = '전월 대비 ' + (mom >= 0 ? '▲ ' : '▼ ') + Math.abs(mom) + '%';
+
+  var scheduled = RV.settlements.filter(function (s) { return s.status === 'scheduled'; });
+  var completedThisMonth = RV.settlements.filter(function (s) { return s.status === 'completed' && s.paid_date && new Date(s.paid_date) >= monthStart; });
+  document.getElementById('v-scheduled').textContent = AC.won(scheduled.reduce(function (s, x) { return s + x.settlement_amount; }, 0));
+  document.getElementById('v-scheduled-count').textContent = scheduled.length + '건';
+  document.getElementById('v-completed').textContent = AC.won(completedThisMonth.reduce(function (s, x) { return s + x.settlement_amount; }, 0));
+  document.getElementById('v-completed-count').textContent = completedThisMonth.length + '건';
+}
+
+async function loadAll() {
+  var [itemsRes, settleRes] = await Promise.all([
+    sb.from('order_items').select('*, companies(name, fee_rate)').order('created_at', { ascending: false }),
+    sb.from('settlements').select('*, companies(name)').order('due_date', { ascending: false })
+  ]);
+  RV.orderItems = itemsRes.data || [];
+  RV.settlements = settleRes.data || [];
+  renderStats();
+  renderByCompany();
+  renderSettlements();
+}
+
+AC.ready(async function (user) {
+  document.querySelector('.admin-user .lbl b').textContent = (user.profile ? user.profile.name : user.email) || '관리자';
+  document.querySelector('.admin-user .lbl span').textContent = user.email;
+  document.querySelector('.admin-user .avatar').textContent = ((user.profile && user.profile.name) || user.email).charAt(0);
+  await loadAll();
+});
+</script>
+</body>
+</html>

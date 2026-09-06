@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 어드민 콘솔 | 커뮤니티 관리</title>
+<meta name="description" content="자유게시판, 산업뉴스, 정부지원사업, 구해요 게시글을 모니터링하고 관리하는 VERSOI 어드민 콘솔">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+  [data-board-panel]{display:none;}
+  [data-board-panel].active{display:block;}
+  .cell-strong.link{cursor:pointer;}
+  .pv-body{font-size:.85rem;color:var(--text-secondary);line-height:1.6;white-space:pre-wrap;background:var(--bg-soft);border-radius:9px;padding:14px;max-height:50vh;overflow-y:auto;}
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="admin-dashboard.html" aria-label="어드민 콘솔 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>ADMIN CONSOLE</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="admin-dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">회원 관리</p>
+    <a href="admin-members.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>전체 회원</a>
+    <a href="admin-members.html?tab=companies"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>입점사 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품/주문 관리</p>
+    <a href="admin-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>전체 상품</a>
+    <a href="admin-categories.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>카테고리 관리</a>
+    <a href="admin-orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>전체 주문</a>
+    <a href="admin-revenue.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>매출 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">콘텐츠 관리</p>
+    <a href="admin-notices.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>공지사항 관리</a>
+    <a href="admin-coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6M2 7h20M12 3v4M8 3v4M16 3v4"/><circle cx="12" cy="14" r="2"/></svg>쿠폰 관리</a>
+    <a href="admin-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1:1 문의</a>
+    <a href="admin-community.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>커뮤니티 관리</a>
+    </div>
+    </nav>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"></button>어드민 콘솔<span class="sub">콘텐츠 관리 · 커뮤니티</span></div>
+      <div class="admin-top-actions">
+        <a href="index.html" class="btn btn-ghost btn-sm" style="margin-right:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>사이트 화면</a>
+        <div class="admin-user"><span class="avatar">A</span><span class="lbl"><b>관리자</b><span></span></span></div>
+      </div>
+    </div>
+    <div class="admin-content" data-board-group>
+
+      <div class="admin-page-head">
+        <h1>커뮤니티 관리</h1>
+        <p>자유게시판, 산업뉴스, 정부지원사업, Q&amp;A, 구해요 게시글을 모니터링하고 관리하세요.</p>
+      </div>
+
+      <div class="admin-card" style="margin-bottom:16px;">
+        <div class="count-tabs" id="boardTabs">
+          <button class="active" data-board="free">자유게시판 <b id="cnt-free">0</b></button>
+          <button data-board="news">산업뉴스 <b id="cnt-news">0</b></button>
+          <button data-board="gov">정부지원사업 <b id="cnt-gov">0</b></button>
+          <button data-board="qna">Q&amp;A <b id="cnt-qna">0</b></button>
+          <button data-board="wanted">구해요 <b id="cnt-wanted">0</b></button>
+        </div>
+        <div class="admin-filter-bar">
+          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="searchInput" placeholder="제목, 내용, 작성자 검색"></div>
+          <button class="reset-btn" id="resetFilterBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="data-table-scroll">
+        <table class="data-table">
+          <thead><tr><th>제목</th><th>작성자</th><th class="num">조회</th><th class="num">좋아요</th><th class="num">작성일</th><th>관리</th></tr></thead>
+          <tbody id="postsTbody"></tbody>
+        </table>
+        </div>
+        <div style="margin-top:14px;"><span style="font-size:.82rem;color:var(--text-tertiary);" id="totalCountText">총 0건</span></div>
+      </div>
+
+    </div>
+    </div>
+</div>
+
+<div id="postModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,17,32,.5);z-index:100;align-items:center;justify-content:center;padding:20px;">
+  <div class="admin-card" style="width:100%;max-width:600px;max-height:88vh;overflow-y:auto;">
+    <div class="admin-card-head"><h2 id="pvTitle">게시글 상세</h2><button class="icon-btn" id="pvClose" aria-label="닫기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <p style="font-size:.78rem;color:var(--text-tertiary);margin-bottom:10px;" id="pvMeta"></p>
+    <div class="pv-body" id="pvBody"></div>
+    <div class="form-actions">
+      <span></span>
+      <div class="right-group"><button type="button" class="btn btn-ghost" id="pvCloseBtn">닫기</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){ sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); }); }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/admin-common.js"></script>
+<script>
+var BF = { activeBoard: 'free', data: { free: [], news: [], gov: [], qna: [], wanted: [] } };
+
+function postRowHtml(p) {
+  return '<tr>' +
+    '<td class="cell-strong link" onclick="openPostView(\'' + p.id + '\')" style="max-width:320px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + AC.esc(p.title || p.content.slice(0, 40)) + '</td>' +
+    '<td>' + AC.esc(p.profiles ? p.profiles.name : '-') + '</td>' +
+    '<td class="num">' + (p.view_count || 0) + '</td>' +
+    '<td class="num">' + (p.like_count || 0) + '</td>' +
+    '<td class="num">' + AC.dt(p.created_at, true) + '</td>' +
+    '<td><div class="table-actions"><button class="btn btn-ghost btn-sm" style="color:var(--up);" onclick="deletePost(\'' + p.id + '\')">삭제</button></div></td></tr>';
+}
+
+function renderPosts() {
+  var q = document.getElementById('searchInput').value.trim().toLowerCase();
+  var list = (BF.data[BF.activeBoard] || []).filter(function (p) {
+    if (q) {
+      var hay = ((p.title || '') + ' ' + p.content + ' ' + (p.profiles ? p.profiles.name : '')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  document.getElementById('postsTbody').innerHTML = list.map(postRowHtml).join('') ||
+    '<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">게시글이 없습니다.</td></tr>';
+  document.getElementById('totalCountText').textContent = '총 ' + list.length + '건';
+}
+
+window.openPostView = function (id) {
+  var p = (BF.data[BF.activeBoard] || []).find(function (x) { return x.id === id; });
+  if (!p) return;
+  document.getElementById('pvTitle').textContent = p.title || '(제목 없음)';
+  document.getElementById('pvMeta').textContent = (p.profiles ? p.profiles.name : '-') + ' · ' + AC.dt(p.created_at, true) +
+    (p.region ? ' · ' + p.region : '') + (p.budget ? ' · 예산 ' + AC.won(p.budget) : '');
+  document.getElementById('pvBody').textContent = p.content || p.description || '';
+  document.getElementById('postModalOverlay').style.display = 'flex';
+};
+function closePostModal() { document.getElementById('postModalOverlay').style.display = 'none'; }
+document.getElementById('pvClose').addEventListener('click', closePostModal);
+document.getElementById('pvCloseBtn').addEventListener('click', closePostModal);
+
+window.deletePost = async function (id) {
+  if (!confirm('이 게시글을 삭제하시겠습니까? 삭제된 게시글은 복구할 수 없습니다.')) return;
+  var table = BF.activeBoard === 'wanted' ? 'wanted_posts' : 'community_posts';
+  var res = await sb.from(table).delete().eq('id', id);
+  if (res.error) { alert('삭제에 실패했습니다: ' + res.error.message); return; }
+  await loadBoard(BF.activeBoard);
+};
+
+async function loadBoard(board) {
+  if (board === 'wanted') {
+    var res = await sb.from('wanted_posts').select('*, profiles:profile_id(name)').order('created_at', { ascending: false });
+    BF.data.wanted = res.data || [];
+  } else {
+    var res2 = await sb.from('community_posts').select('*, profiles:profile_id(name)').eq('board_type', board).order('created_at', { ascending: false });
+    BF.data[board] = res2.data || [];
+  }
+  document.getElementById('cnt-' + board).textContent = BF.data[board].length;
+  if (BF.activeBoard === board) renderPosts();
+}
+
+async function loadAllBoards() {
+  await Promise.all(['free', 'news', 'gov', 'qna', 'wanted'].map(loadBoard));
+}
+
+document.getElementById('boardTabs').addEventListener('click', function (e) {
+  var btn = e.target.closest('button[data-board]');
+  if (!btn) return;
+  document.querySelectorAll('#boardTabs button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  BF.activeBoard = btn.getAttribute('data-board');
+  renderPosts();
+});
+document.getElementById('searchInput').addEventListener('input', renderPosts);
+document.getElementById('resetFilterBtn').addEventListener('click', function () {
+  document.getElementById('searchInput').value = '';
+  renderPosts();
+});
+
+AC.ready(async function (user) {
+  document.querySelector('.admin-user .lbl b').textContent = (user.profile ? user.profile.name : user.email) || '관리자';
+  document.querySelector('.admin-user .lbl span').textContent = user.email;
+  document.querySelector('.admin-user .avatar').textContent = ((user.profile && user.profile.name) || user.email).charAt(0);
+  await loadAllBoards();
+});
+</script>
+</body>
+</html>
