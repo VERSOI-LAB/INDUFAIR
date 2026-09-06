@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VERSOI 어드민 콘솔 | 공지사항 관리</title>
-<meta name="description" content="플랫폼 공지사항을 등록, 수정, 삭제하는 VERSOI 어드민 콘솔">
+<title>VERSOI 어드민 콘솔 | FAQ 관리</title>
+<meta name="description" content="고객센터 FAQ 문항을 등록, 수정, 삭제하는 VERSOI 어드민 콘솔">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
@@ -36,9 +36,9 @@
     <a href="admin-revenue.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>매출 관리</a>
     </div>
     <div class="admin-nav-group"><p class="admin-nav-group-title">콘텐츠 관리</p>
-    <a href="admin-faq.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>FAQ 관리</a>
+    <a href="admin-faq.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>FAQ 관리</a>
     <a href="admin-pages.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>안내 페이지 관리</a>
-    <a href="admin-notices.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>공지사항 관리</a>
+    <a href="admin-notices.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>공지사항 관리</a>
     <a href="admin-coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6M2 7h20M12 3v4M8 3v4M16 3v4"/><circle cx="12" cy="14" r="2"/></svg>쿠폰 관리</a>
     <a href="admin-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1:1 문의</a>
     <a href="admin-community.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>커뮤니티 관리</a>
@@ -47,9 +47,9 @@
     </aside>
     <div class="admin-main">
     <div class="admin-topbar">
-      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"></button>어드민 콘솔<span class="sub">콘텐츠 관리 · 공지사항</span></div>
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"></button>어드민 콘솔<span class="sub">콘텐츠 관리 · FAQ</span></div>
       <div class="admin-top-actions">
-        <a href="index.html" class="btn btn-ghost btn-sm" style="margin-right:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>사이트 화면</a>
+        <a href="faq.html" class="btn btn-ghost btn-sm" style="margin-right:4px;" target="_blank"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>FAQ 페이지 보기</a>
         <div class="admin-user"><span class="avatar">A</span><span class="lbl"><b>관리자</b><span></span></span></div>
       </div>
     </div>
@@ -57,22 +57,22 @@
 
       <div class="admin-head-row">
         <div class="admin-page-head" style="margin-bottom:0;">
-          <h1>공지사항 관리</h1>
-          <p>사이트 전체에 노출되는 공지사항을 관리하세요.</p>
+          <h1>FAQ 관리</h1>
+          <p>고객센터 FAQ(faq.html)에 노출되는 질문과 답변을 관리하세요.</p>
         </div>
         <div class="right-group">
-          <button class="btn btn-primary" id="newNoticeBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>공지 등록</button>
+          <button class="btn btn-primary" id="newFaqBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>FAQ 등록</button>
         </div>
       </div>
 
       <div class="admin-card">
         <div class="admin-filter-bar">
-          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="searchInput" placeholder="제목, 내용 검색"></div>
+          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="searchInput" placeholder="질문, 답변 검색"></div>
         </div>
         <div class="data-table-scroll">
         <table class="data-table">
-          <thead><tr><th>제목</th><th class="num">등록일</th><th>관리</th></tr></thead>
-          <tbody id="noticesTbody"></tbody>
+          <thead><tr><th>질문</th><th class="num">정렬순서</th><th>관리</th></tr></thead>
+          <tbody id="faqTbody"></tbody>
         </table>
         </div>
         <div style="margin-top:14px;"><span style="font-size:.82rem;color:var(--text-tertiary);" id="totalCountText">총 0건</span></div>
@@ -82,20 +82,21 @@
     </div>
 </div>
 
-<div id="noticeModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,17,32,.5);z-index:100;align-items:center;justify-content:center;padding:20px;">
+<div id="faqModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,17,32,.5);z-index:100;align-items:center;justify-content:center;padding:20px;">
   <div class="admin-card" style="width:100%;max-width:560px;max-height:88vh;overflow-y:auto;">
-    <div class="admin-card-head"><h2 id="noticeModalTitle">공지 등록</h2><button class="icon-btn" id="noticeModalClose" aria-label="닫기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <form id="noticeForm">
-      <input type="hidden" id="nf-id">
+    <div class="admin-card-head"><h2 id="faqModalTitle">FAQ 등록</h2><button class="icon-btn" id="faqModalClose" aria-label="닫기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <form id="faqForm">
+      <input type="hidden" id="ff-id">
       <div class="form-grid">
-        <div class="field full"><label>제목 <span class="req">*</span></label><input type="text" id="nf-title" required></div>
-        <div class="field full"><label>내용 <span class="req">*</span></label><textarea id="nf-content" rows="8" style="border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.9rem;font-family:inherit;width:100%;" required></textarea></div>
+        <div class="field full"><label>질문 <span class="req">*</span></label><input type="text" id="ff-question" required></div>
+        <div class="field full"><label>답변 <span class="req">*</span></label><textarea id="ff-answer" rows="6" style="border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.9rem;font-family:inherit;width:100%;" required></textarea></div>
+        <div class="field"><label>정렬 순서</label><input type="number" id="ff-sort" value="0"></div>
       </div>
       <div class="form-actions">
         <span></span>
         <div class="right-group">
-          <button type="button" class="btn btn-ghost" id="noticeModalCancel">취소</button>
-          <button type="submit" class="btn btn-primary btn-wide" id="noticeSubmitBtn">등록하기</button>
+          <button type="button" class="btn btn-ghost" id="faqModalCancel">취소</button>
+          <button type="submit" class="btn btn-primary btn-wide" id="faqSubmitBtn">등록하기</button>
         </div>
       </div>
     </form>
@@ -112,86 +113,89 @@
 <script src="js/auth.js"></script>
 <script src="js/admin-common.js"></script>
 <script>
-var NF = { notices: [] };
+var FQ = { list: [] };
 
-function noticeRowHtml(n) {
+function faqRowHtml(f) {
   return '<tr>' +
-    '<td class="cell-strong">' + AC.esc(n.title) + '</td>' +
-    '<td class="num">' + AC.dt(n.created_at) + '</td>' +
+    '<td class="cell-strong" style="max-width:420px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + AC.esc(f.question) + '</td>' +
+    '<td class="num">' + f.sort_order + '</td>' +
     '<td><div class="table-actions">' +
-      '<button class="btn btn-ghost btn-sm" onclick="openNoticeEdit(' + n.id + ')">수정</button>' +
-      '<button class="btn btn-ghost btn-sm" style="color:var(--up);" onclick="deleteNotice(' + n.id + ')">삭제</button>' +
+      '<button class="btn btn-ghost btn-sm" onclick="openFaqEdit(' + f.id + ')">수정</button>' +
+      '<button class="btn btn-ghost btn-sm" style="color:var(--up);" onclick="deleteFaq(' + f.id + ')">삭제</button>' +
     '</div></td></tr>';
 }
 
-function renderNotices() {
+function renderFaqs() {
   var q = document.getElementById('searchInput').value.trim().toLowerCase();
-  var list = NF.notices.filter(function (n) {
-    if (q && (n.title + ' ' + n.content).toLowerCase().indexOf(q) === -1) return false;
+  var list = FQ.list.filter(function (f) {
+    if (q && (f.question + ' ' + f.answer).toLowerCase().indexOf(q) === -1) return false;
     return true;
   });
-  document.getElementById('noticesTbody').innerHTML = list.map(noticeRowHtml).join('') ||
-    '<tr><td colspan="3" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">등록된 공지가 없습니다.</td></tr>';
+  document.getElementById('faqTbody').innerHTML = list.map(faqRowHtml).join('') ||
+    '<tr><td colspan="3" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">등록된 FAQ가 없습니다.</td></tr>';
   document.getElementById('totalCountText').textContent = '총 ' + list.length + '건';
 }
 
-async function loadNotices() {
-  var res = await sb.from('notices').select('*').order('created_at', { ascending: false });
-  NF.notices = res.data || [];
-  renderNotices();
+async function loadFaqs() {
+  var res = await sb.from('faqs').select('*').order('sort_order');
+  FQ.list = res.data || [];
+  renderFaqs();
 }
 
-function openNoticeModal() { document.getElementById('noticeModalOverlay').style.display = 'flex'; }
-function closeNoticeModal() { document.getElementById('noticeModalOverlay').style.display = 'none'; }
+function openFaqModal() { document.getElementById('faqModalOverlay').style.display = 'flex'; }
+function closeFaqModal() { document.getElementById('faqModalOverlay').style.display = 'none'; }
 
-document.getElementById('newNoticeBtn').addEventListener('click', function () {
-  document.getElementById('noticeModalTitle').textContent = '공지 등록';
-  document.getElementById('noticeSubmitBtn').textContent = '등록하기';
-  document.getElementById('nf-id').value = '';
-  document.getElementById('nf-title').value = '';
-  document.getElementById('nf-content').value = '';
-  openNoticeModal();
+document.getElementById('newFaqBtn').addEventListener('click', function () {
+  document.getElementById('faqModalTitle').textContent = 'FAQ 등록';
+  document.getElementById('faqSubmitBtn').textContent = '등록하기';
+  document.getElementById('ff-id').value = '';
+  document.getElementById('ff-question').value = '';
+  document.getElementById('ff-answer').value = '';
+  document.getElementById('ff-sort').value = FQ.list.length ? Math.max.apply(null, FQ.list.map(function (f) { return f.sort_order; })) + 1 : 0;
+  openFaqModal();
 });
 
-window.openNoticeEdit = function (id) {
-  var n = NF.notices.find(function (x) { return x.id === id; });
-  if (!n) return;
-  document.getElementById('noticeModalTitle').textContent = '공지 수정';
-  document.getElementById('noticeSubmitBtn').textContent = '저장하기';
-  document.getElementById('nf-id').value = n.id;
-  document.getElementById('nf-title').value = n.title;
-  document.getElementById('nf-content').value = n.content;
-  openNoticeModal();
+window.openFaqEdit = function (id) {
+  var f = FQ.list.find(function (x) { return x.id === id; });
+  if (!f) return;
+  document.getElementById('faqModalTitle').textContent = 'FAQ 수정';
+  document.getElementById('faqSubmitBtn').textContent = '저장하기';
+  document.getElementById('ff-id').value = f.id;
+  document.getElementById('ff-question').value = f.question;
+  document.getElementById('ff-answer').value = f.answer;
+  document.getElementById('ff-sort').value = f.sort_order;
+  openFaqModal();
 };
 
-window.deleteNotice = async function (id) {
-  if (!confirm('이 공지사항을 삭제하시겠습니까?')) return;
-  var res = await sb.from('notices').delete().eq('id', id);
+window.deleteFaq = async function (id) {
+  if (!confirm('이 FAQ 문항을 삭제하시겠습니까?')) return;
+  var res = await sb.from('faqs').delete().eq('id', id);
   if (res.error) { alert('삭제에 실패했습니다: ' + res.error.message); return; }
-  await loadNotices();
+  await loadFaqs();
 };
 
-document.getElementById('noticeModalClose').addEventListener('click', closeNoticeModal);
-document.getElementById('noticeModalCancel').addEventListener('click', closeNoticeModal);
-document.getElementById('noticeForm').addEventListener('submit', async function (e) {
+document.getElementById('faqModalClose').addEventListener('click', closeFaqModal);
+document.getElementById('faqModalCancel').addEventListener('click', closeFaqModal);
+document.getElementById('faqForm').addEventListener('submit', async function (e) {
   e.preventDefault();
-  var id = document.getElementById('nf-id').value;
+  var id = document.getElementById('ff-id').value;
   var payload = {
-    title: document.getElementById('nf-title').value.trim(),
-    content: document.getElementById('nf-content').value.trim()
+    question: document.getElementById('ff-question').value.trim(),
+    answer: document.getElementById('ff-answer').value.trim(),
+    sort_order: Number(document.getElementById('ff-sort').value || 0)
   };
-  var res = id ? await sb.from('notices').update(payload).eq('id', id) : await sb.from('notices').insert(payload);
+  var res = id ? await sb.from('faqs').update(payload).eq('id', id) : await sb.from('faqs').insert(payload);
   if (res.error) { alert('저장에 실패했습니다: ' + res.error.message); return; }
-  closeNoticeModal();
-  await loadNotices();
+  closeFaqModal();
+  await loadFaqs();
 });
-document.getElementById('searchInput').addEventListener('input', renderNotices);
+document.getElementById('searchInput').addEventListener('input', renderFaqs);
 
 AC.ready(async function (user) {
   document.querySelector('.admin-user .lbl b').textContent = (user.profile ? user.profile.name : user.email) || '관리자';
   document.querySelector('.admin-user .lbl span').textContent = user.email;
   document.querySelector('.admin-user .avatar').textContent = ((user.profile && user.profile.name) || user.email).charAt(0);
-  await loadNotices();
+  await loadFaqs();
 });
 </script>
 </body>

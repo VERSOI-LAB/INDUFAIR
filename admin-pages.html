@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 어드민 콘솔 | 안내 페이지 관리</title>
+<meta name="description" content="이용 가이드, 안전거래 가이드, 서비스 정책 페이지 본문을 편집하는 VERSOI 어드민 콘솔">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+  .page-card{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 4px;border-bottom:1px solid var(--border);}
+  .page-card:last-child{border-bottom:none;}
+  .page-card b{display:block;font-size:.94rem;font-weight:800;}
+  .page-card span{font-size:.78rem;color:var(--text-tertiary);margin-top:4px;display:block;}
+  #pf-html{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.8rem;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="admin-dashboard.html" aria-label="어드민 콘솔 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>ADMIN CONSOLE</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="admin-dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">회원 관리</p>
+    <a href="admin-members.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>전체 회원</a>
+    <a href="admin-members.html?tab=companies"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>입점사 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품/주문 관리</p>
+    <a href="admin-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>전체 상품</a>
+    <a href="admin-categories.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>카테고리 관리</a>
+    <a href="admin-brands.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>브랜드관 관리</a>
+    <a href="admin-orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>전체 주문</a>
+    <a href="admin-revenue.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>매출 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">콘텐츠 관리</p>
+    <a href="admin-faq.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>FAQ 관리</a>
+    <a href="admin-pages.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>안내 페이지 관리</a>
+    <a href="admin-notices.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>공지사항 관리</a>
+    <a href="admin-coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6M2 7h20M12 3v4M8 3v4M16 3v4"/><circle cx="12" cy="14" r="2"/></svg>쿠폰 관리</a>
+    <a href="admin-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1:1 문의</a>
+    <a href="admin-community.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>커뮤니티 관리</a>
+    </div>
+    </nav>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"></button>어드민 콘솔<span class="sub">콘텐츠 관리 · 안내 페이지</span></div>
+      <div class="admin-top-actions">
+        <div class="admin-user"><span class="avatar">A</span><span class="lbl"><b>관리자</b><span></span></span></div>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-page-head">
+        <h1>안내 페이지 관리</h1>
+        <p>이용 가이드, 안전거래 가이드, 서비스 정책 페이지의 본문을 직접 편집하세요. HTML 태그를 사용할 수 있습니다.</p>
+      </div>
+
+      <div class="admin-card" id="pagesList">
+        <p style="color:var(--text-tertiary);padding:20px 0;">불러오는 중...</p>
+      </div>
+
+    </div>
+    </div>
+</div>
+
+<div id="pageModalOverlay" style="display:none;position:fixed;inset:0;background:rgba(10,17,32,.5);z-index:100;align-items:center;justify-content:center;padding:20px;">
+  <div class="admin-card" style="width:100%;max-width:760px;max-height:88vh;overflow-y:auto;">
+    <div class="admin-card-head"><h2 id="pageModalTitle">페이지 수정</h2><button class="icon-btn" id="pageModalClose" aria-label="닫기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+    <form id="pageForm">
+      <input type="hidden" id="pf-slug">
+      <div class="form-grid">
+        <div class="field full"><label>페이지 제목</label><input type="text" id="pf-title" required></div>
+        <div class="field full"><label>본문 (HTML) <span class="req">*</span></label><textarea id="pf-html" rows="18" style="border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.9rem;width:100%;" required></textarea></div>
+      </div>
+      <div class="form-actions">
+        <span></span>
+        <div class="right-group">
+          <button type="button" class="btn btn-ghost" id="pageModalCancel">취소</button>
+          <button type="submit" class="btn btn-primary btn-wide">저장하기</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){ sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); }); }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/admin-common.js"></script>
+<script>
+var PGF = { pages: [] };
+var PUBLIC_URL = { guide: 'guide.html', 'safe-trade': 'safe-trade.html', policy: 'policy.html' };
+
+function pageCardHtml(p) {
+  return '<div class="page-card">' +
+    '<div><b>' + AC.esc(p.title) + '</b><span>/' + AC.esc(PUBLIC_URL[p.slug] || p.slug) + ' · 최종 수정 ' + AC.dt(p.updated_at, true) + '</span></div>' +
+    '<div class="table-actions">' +
+      '<a class="btn btn-ghost btn-sm" href="' + AC.esc(PUBLIC_URL[p.slug] || '#') + '" target="_blank">보기</a>' +
+      '<button class="btn btn-primary btn-sm" onclick="openPageEdit(\'' + p.slug + '\')">편집</button>' +
+    '</div></div>';
+}
+
+async function loadPages() {
+  var res = await sb.from('site_pages').select('*').order('slug');
+  PGF.pages = res.data || [];
+  document.getElementById('pagesList').innerHTML = PGF.pages.map(pageCardHtml).join('') ||
+    '<p style="color:var(--text-tertiary);padding:20px 0;">등록된 페이지가 없습니다.</p>';
+}
+
+window.openPageEdit = function (slug) {
+  var p = PGF.pages.find(function (x) { return x.slug === slug; });
+  if (!p) return;
+  document.getElementById('pageModalTitle').textContent = p.title + ' 수정';
+  document.getElementById('pf-slug').value = p.slug;
+  document.getElementById('pf-title').value = p.title;
+  document.getElementById('pf-html').value = p.content_html;
+  document.getElementById('pageModalOverlay').style.display = 'flex';
+};
+function closePageModal() { document.getElementById('pageModalOverlay').style.display = 'none'; }
+document.getElementById('pageModalClose').addEventListener('click', closePageModal);
+document.getElementById('pageModalCancel').addEventListener('click', closePageModal);
+document.getElementById('pageForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var slug = document.getElementById('pf-slug').value;
+  var res = await sb.from('site_pages').update({
+    title: document.getElementById('pf-title').value.trim(),
+    content_html: document.getElementById('pf-html').value,
+    updated_at: new Date().toISOString()
+  }).eq('slug', slug);
+  if (res.error) { alert('저장에 실패했습니다: ' + res.error.message); return; }
+  closePageModal();
+  await loadPages();
+});
+
+AC.ready(async function (user) {
+  document.querySelector('.admin-user .lbl b').textContent = (user.profile ? user.profile.name : user.email) || '관리자';
+  document.querySelector('.admin-user .lbl span').textContent = user.email;
+  document.querySelector('.admin-user .avatar').textContent = ((user.profile && user.profile.name) || user.email).charAt(0);
+  await loadPages();
+});
+</script>
+</body>
+</html>

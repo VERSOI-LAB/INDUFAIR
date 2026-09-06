@@ -10,7 +10,8 @@
   var SELLER_PROTECTED = ['seller-dashboard.html', 'seller-products.html', 'seller-orders.html',
     'seller-inquiries.html', 'seller-settlement.html', 'seller-tax.html', 'seller-account.html'];
   var ADMIN_PROTECTED = ['admin-dashboard.html', 'admin-members.html', 'admin-products.html',
-    'admin-orders.html', 'admin-notices.html', 'admin-coupons.html', 'admin-inquiries.html'];
+    'admin-orders.html', 'admin-notices.html', 'admin-coupons.html', 'admin-inquiries.html',
+    'admin-categories.html', 'admin-revenue.html', 'admin-community.html', 'admin-brands.html', 'admin-faq.html', 'admin-pages.html'];
 
   function byText(root, texts) {
     var els = root.querySelectorAll('button, a');

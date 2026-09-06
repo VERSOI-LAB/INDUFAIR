@@ -50,7 +50,6 @@
           <a href="guide.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>이용 가이드</a>
           <a href="safe-trade.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>안전거래 가이드</a>
           <a href="policy.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>서비스 정책</a>
-          <a href="downloads.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9m18 0H3m18 0l-1.5 3h-15L3 15"/></svg>다운로드 센터</a>
         </nav>
       </div>
     </aside>
@@ -61,40 +60,8 @@
 
       <div class="card-panel" style="margin-top:20px;">
 
-        <article class="legal-content">
-          <p>VERSOI는 산업용품이라는 특성상 고가·대량 거래가 많은 만큼, 안전한 거래를 위한 아래 사항을 꼭 확인해 주세요.</p>
-
-          <h2>1. 사업자 인증 판매자 확인</h2>
-          <p>VERSOI 신품관과 중고장터는 사업자등록증 인증을 완료한 판매자만 상품을 등록할 수 있습니다. 상품 상세페이지의 판매자 정보에서 인증 배지를 확인하세요.</p>
-
-          <h2>2. 중고 거래 시 확인해야 할 것들</h2>
-          <ul>
-            <li>제품의 실제 사용 이력, 상태 등급(A급/B급/C급/리퍼비시/유휴재고)을 판매자에게 자세히 문의하세요.</li>
-            <li>가능하면 실물 사진과 시리얼번호, 작동 영상을 요청해 확인하세요.</li>
-            <li>고가 장비는 가급적 직접 방문하여 실물을 확인한 후 거래하는 것을 권장합니다.</li>
-            <li>판매자의 거래 후기와 응답 속도를 참고하세요.</li>
-          </ul>
-
-          <h2>3. 결제는 반드시 VERSOI 정식 결제 시스템으로</h2>
-          <p>안전한 대금 보호를 위해 결제는 반드시 VERSOI에서 제공하는 정식 결제 수단을 이용해 주세요. 개인 계좌로의 직접 입금을 요구하거나 사이트 외부에서의 거래를 유도하는 경우 사기의 위험이 있으니 즉시 고객센터로 신고해 주세요.</p>
-
-          <h2>4. 견적요청(RFQ) 거래 시 유의사항</h2>
-          <ul>
-            <li>견적을 제출한 업체의 사업자 정보와 과거 거래 이력을 확인하세요.</li>
-            <li>계약 조건(납기, 하자보증, 결제조건)을 문서로 남겨두는 것을 권장합니다.</li>
-            <li>선입금을 과도하게 요구하는 업체는 주의하시기 바랍니다.</li>
-          </ul>
-
-          <h2>5. 분쟁 발생 시</h2>
-          <p>상품 미배송, 상품 하자, 허위 정보 등으로 분쟁이 발생한 경우 <a href="cancel.html" style="color:var(--accent);font-weight:700;">취소/환불</a> 절차를 이용하시거나, 해결이 어려운 경우 <a href="inquiry-new.html" style="color:var(--accent);font-weight:700;">1:1 문의</a>를 통해 고객센터에 중재를 요청해 주세요. VERSOI는 결제 보호 및 분쟁 해결을 지원합니다.</p>
-
-          <h2>6. 사기 의심 거래 신고</h2>
-          <p>다음과 같은 경우 사기 거래를 의심하고 즉시 고객센터에 신고해 주세요.</p>
-          <ul>
-            <li>시세보다 지나치게 저렴한 가격을 제시하며 빠른 입금을 요구하는 경우</li>
-            <li>사이트 밖 메신저나 개인 연락처로만 거래를 유도하는 경우</li>
-            <li>사업자 인증 배지가 없는데 사업자를 사칭하는 경우</li>
-          </ul>
+        <article class="legal-content" id="pageContent">
+          <p style="color:var(--text-tertiary);">불러오는 중...</p>
         </article>
 
       </div>
@@ -109,6 +76,8 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
 <script>
   var navToggle = document.getElementById('navToggle');
   var mainNav = document.getElementById('mainNav');
@@ -116,6 +85,11 @@
     var open = mainNav.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
+
+  (async function () {
+    var res = await sb.from('site_pages').select('content_html').eq('slug', 'safe-trade').maybeSingle();
+    document.getElementById('pageContent').innerHTML = res.data ? res.data.content_html : '<p>페이지를 불러오지 못했습니다.</p>';
+  })();
 </script>
 </body>
 </html>
