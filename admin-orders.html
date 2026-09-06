@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 어드민 콘솔 | 주문 관리</title>
+<meta name="description" content="전체 주문 현황을 통합 조회하는 VERSOI 어드민 콘솔">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="admin-dashboard.html" aria-label="어드민 콘솔 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>ADMIN CONSOLE</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="admin-dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">회원 관리</p>
+    <a href="admin-members.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>전체 회원</a>
+    <a href="admin-members.html?tab=companies"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>입점사 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품/주문 관리</p>
+    <a href="admin-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>전체 상품</a>
+    <a href="admin-orders.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>전체 주문</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">콘텐츠 관리</p>
+    <a href="admin-notices.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>공지사항 관리</a>
+    <a href="admin-coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6M2 7h20M12 3v4M8 3v4M16 3v4"/><circle cx="12" cy="14" r="2"/></svg>쿠폰 관리</a>
+    <a href="admin-inquiries.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1:1 문의</a>
+    </div>
+    </nav>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"></button>어드민 콘솔<span class="sub">상품/주문 관리 · 전체 주문</span></div>
+      <div class="admin-top-actions">
+        <a href="index.html" class="btn btn-ghost btn-sm" style="margin-right:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>사이트 화면</a>
+        <div class="admin-user"><span class="avatar">A</span><span class="lbl"><b>관리자</b><span></span></span></div>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-page-head">
+        <h1>전체 주문</h1>
+        <p>모든 판매자의 주문을 통합 조회하세요.</p>
+      </div>
+
+      <div class="admin-card">
+        <div class="count-tabs" id="statusTabs">
+          <button class="active" data-status="all">전체 <b id="cnt-all">0</b></button>
+          <button data-status="paid">결제완료 <b id="cnt-paid">0</b></button>
+          <button data-status="preparing">배송준비 <b id="cnt-preparing">0</b></button>
+          <button data-status="shipping">배송중 <b id="cnt-shipping">0</b></button>
+          <button data-status="delivered">배송완료 <b id="cnt-delivered">0</b></button>
+          <button data-status="canceled">취소 <b id="cnt-canceled">0</b></button>
+        </div>
+        <div class="admin-filter-bar">
+          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="searchInput" placeholder="주문번호, 구매자 검색"></div>
+          <select id="dateFilter"><option value="0">등록일 전체</option><option value="7">최근 1주일</option><option value="30">최근 1개월</option><option value="90">최근 3개월</option></select>
+          <button class="reset-btn" id="resetFilterBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
+        </div>
+        <div class="data-table-scroll">
+        <table class="data-table">
+          <thead><tr><th>주문번호</th><th>구매자</th><th>판매자</th><th class="num">주문금액</th><th class="num">주문일</th><th>상태</th></tr></thead>
+          <tbody id="ordersTbody"></tbody>
+        </table>
+        </div>
+        <div style="margin-top:14px;"><span style="font-size:.82rem;color:var(--text-tertiary);" id="totalCountText">총 0건</span></div>
+      </div>
+
+    </div>
+    </div>
+</div>
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){ sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); }); }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/admin-common.js"></script>
+<script>
+var OF = { orders: [], activeStatus: 'all' };
+
+function sellerNames(o) {
+  var names = (o.order_items || []).map(function (oi) { return oi.companies ? oi.companies.name : null; }).filter(Boolean);
+  var uniq = names.filter(function (n, i) { return names.indexOf(n) === i; });
+  return uniq.length ? uniq.join(', ') : '-';
+}
+
+function orderRowHtml(o) {
+  return '<tr>' +
+    '<td class="num cell-strong">' + AC.esc(o.order_no) + '</td>' +
+    '<td>' + AC.esc(o.profiles ? o.profiles.name : '-') + '</td>' +
+    '<td>' + AC.esc(sellerNames(o)) + '</td>' +
+    '<td class="num">' + AC.won(o.total_amount) + '</td>' +
+    '<td class="num">' + AC.dt(o.created_at, true) + '</td>' +
+    '<td><span class="badge ' + AC.badgeCls(o.status) + '">' + AC.label(o.status) + '</span></td></tr>';
+}
+
+function renderOrders() {
+  var q = document.getElementById('searchInput').value.trim().toLowerCase();
+  var days = Number(document.getElementById('dateFilter').value);
+  var list = OF.orders.filter(function (o) {
+    if (OF.activeStatus !== 'all' && o.status !== OF.activeStatus) return false;
+    if (days) {
+      var cutoff = new Date(); cutoff.setDate(cutoff.getDate() - days);
+      if (new Date(o.created_at) < cutoff) return false;
+    }
+    if (q && (o.order_no + ' ' + (o.profiles ? o.profiles.name : '')).toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+  document.getElementById('ordersTbody').innerHTML = list.map(orderRowHtml).join('') ||
+    '<tr><td colspan="6" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">주문이 없습니다.</td></tr>';
+  document.getElementById('totalCountText').textContent = '총 ' + list.length + '건';
+  ['all', 'paid', 'preparing', 'shipping', 'delivered', 'canceled'].forEach(function (s) {
+    var n = s === 'all' ? OF.orders.length : OF.orders.filter(function (o) { return o.status === s; }).length;
+    document.getElementById('cnt-' + s).textContent = n;
+  });
+}
+
+async function loadOrders() {
+  var res = await sb.from('orders')
+    .select('*, profiles:buyer_id(name), order_items(companies(name))')
+    .order('created_at', { ascending: false });
+  OF.orders = res.data || [];
+  renderOrders();
+}
+
+document.getElementById('statusTabs').addEventListener('click', function (e) {
+  var btn = e.target.closest('button[data-status]');
+  if (!btn) return;
+  document.querySelectorAll('#statusTabs button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  OF.activeStatus = btn.getAttribute('data-status');
+  renderOrders();
+});
+document.getElementById('searchInput').addEventListener('input', renderOrders);
+document.getElementById('dateFilter').addEventListener('change', renderOrders);
+document.getElementById('resetFilterBtn').addEventListener('click', function () {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('dateFilter').value = '0';
+  OF.activeStatus = 'all';
+  document.querySelectorAll('#statusTabs button').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-status') === 'all'); });
+  renderOrders();
+});
+
+AC.ready(async function (user) {
+  document.querySelector('.admin-user .lbl b').textContent = (user.profile ? user.profile.name : user.email) || '관리자';
+  document.querySelector('.admin-user .lbl span').textContent = user.email;
+  document.querySelector('.admin-user .avatar').textContent = ((user.profile && user.profile.name) || user.email).charAt(0);
+  await loadOrders();
+});
+</script>
+</body>
+</html>

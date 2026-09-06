@@ -9,6 +9,8 @@
     'favorites.html', 'favorite-brands.html', 'coupons.html', 'inquiries.html', 'my-listings.html', 'company-info.html', 'payment-methods.html', 'rfq-templates.html'];
   var SELLER_PROTECTED = ['seller-dashboard.html', 'seller-products.html', 'seller-orders.html',
     'seller-inquiries.html', 'seller-settlement.html', 'seller-tax.html', 'seller-account.html'];
+  var ADMIN_PROTECTED = ['admin-dashboard.html', 'admin-members.html', 'admin-products.html',
+    'admin-orders.html', 'admin-notices.html', 'admin-coupons.html', 'admin-inquiries.html'];
 
   function byText(root, texts) {
     var els = root.querySelectorAll('button, a');
@@ -49,6 +51,14 @@
   function syncHeader(user) {
     var actions = document.querySelector('.header-actions');
     if (!actions) return;
+
+    if (user && user.profile && user.profile.is_admin && !actions.querySelector('.versoi-admin-link')) {
+      var adminLink = document.createElement('a');
+      adminLink.href = 'admin-dashboard.html';
+      adminLink.className = 'btn btn-ghost btn-sm versoi-admin-link';
+      adminLink.textContent = '어드민';
+      actions.insertBefore(adminLink, actions.firstChild);
+    }
 
     var loginBtns = byText(actions, ['로그인']);
     var signupBtns = byText(actions, ['회원가입']);
@@ -275,6 +285,10 @@
     if (SELLER_PROTECTED.indexOf(PATH) !== -1) {
       if (!user) { goLogin(); return; }
       if (!user.company) { location.href = 'seller-apply.html'; return; }
+    }
+    if (ADMIN_PROTECTED.indexOf(PATH) !== -1) {
+      if (!user) { goLogin(); return; }
+      if (!user.profile || !user.profile.is_admin) { alert('관리자만 접근할 수 있는 페이지입니다.'); location.href = 'index.html'; return; }
     }
 
     syncHeader(user);

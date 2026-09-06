@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 어드민 콘솔 | 1:1 문의</title>
+<meta name="description" content="구매자가 플랫폼으로 직접 접수한 1:1 문의를 확인하고 답변하는 VERSOI 어드민 콘솔">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  @media (max-width:900px){ .admin-sidebar-toggle{display:flex !important;} }
+  .inquiry-layout{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;}
+  .inquiry-layout > *{min-width:0;}
+  @media (max-width:900px){ .inquiry-layout{grid-template-columns:1fr;} }
+  .inquiry-buyer{display:flex;align-items:center;gap:10px;}
+  .inquiry-buyer .avatar{width:32px;height:32px;border-radius:50%;background:var(--bg-soft);color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .inquiry-buyer .lbl{display:flex;flex-direction:column;line-height:1.35;}
+  .inquiry-buyer .lbl b{font-size:.84rem;font-weight:700;}
+  .inquiry-buyer .lbl span{font-size:.74rem;color:var(--text-tertiary);}
+  .inquiry-detail .avatar-lg{width:44px;height:44px;border-radius:50%;background:var(--bg-soft);color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;}
+  .idetail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px;}
+  .idetail-head .who{display:flex;align-items:center;gap:10px;}
+  .idetail-head .who b{display:block;font-size:.92rem;font-weight:800;}
+  .idetail-head .who span{font-size:.76rem;color:var(--text-tertiary);}
+  .idetail-block{padding-block:16px;border-top:1px solid var(--border);}
+  .idetail-block:first-of-type{border-top:none;padding-top:0;}
+  .idetail-block-title{font-size:.78rem;font-weight:800;color:var(--text-tertiary);margin-bottom:10px;}
+  .idetail-body{font-size:.86rem;color:var(--text);line-height:1.6;white-space:pre-wrap;}
+  .answer-empty{background:var(--warn-soft);color:var(--warn);border-radius:9px;padding:12px 14px;font-size:.82rem;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+    <a class="admin-logo" href="admin-dashboard.html" aria-label="어드민 콘솔 홈으로 이동">
+      <span class="logo-mark">V</span>
+      <span class="admin-logo-text"><b>VERSOI</b><span>ADMIN CONSOLE</span></span>
+    </a>
+    <nav class="admin-nav">
+    <div class="admin-nav-group"><p class="admin-nav-group-title">메인</p>
+    <a href="admin-dashboard.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">회원 관리</p>
+    <a href="admin-members.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>전체 회원</a>
+    <a href="admin-members.html?tab=companies"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>입점사 관리</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">상품/주문 관리</p>
+    <a href="admin-products.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>전체 상품</a>
+    <a href="admin-orders.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>전체 주문</a>
+    </div>
+    <div class="admin-nav-group"><p class="admin-nav-group-title">콘텐츠 관리</p>
+    <a href="admin-notices.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>공지사항 관리</a>
+    <a href="admin-coupons.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6M2 7h20M12 3v4M8 3v4M16 3v4"/><circle cx="12" cy="14" r="2"/></svg>쿠폰 관리</a>
+    <a href="admin-inquiries.html" class="active"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>1:1 문의</a>
+    </div>
+    </nav>
+    </aside>
+    <div class="admin-main">
+    <div class="admin-topbar">
+      <div class="admin-crumb"><button class="icon-btn admin-sidebar-toggle" id="sidebarToggle" aria-label="메뉴 열기" style="display:none;"></button>어드민 콘솔<span class="sub">콘텐츠 관리 · 1:1 문의</span></div>
+      <div class="admin-top-actions">
+        <a href="index.html" class="btn btn-ghost btn-sm" style="margin-right:4px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>사이트 화면</a>
+        <div class="admin-user"><span class="avatar">A</span><span class="lbl"><b>관리자</b><span></span></span></div>
+      </div>
+    </div>
+    <div class="admin-content">
+
+      <div class="admin-page-head">
+        <h1>1:1 문의</h1>
+        <p>구매자가 플랫폼으로 직접 접수한 문의에 답변하세요.</p>
+      </div>
+
+      <div class="admin-card" style="margin-bottom:16px;">
+        <div class="count-tabs" id="inqTabs">
+          <button class="active" data-status="all">전체 <b id="icnt-all">0</b></button>
+          <button data-status="pending">답변 대기 <b id="icnt-pending">0</b></button>
+          <button data-status="answered">답변 완료 <b id="icnt-answered">0</b></button>
+        </div>
+        <div class="admin-filter-bar">
+          <div class="search-field"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="inqSearchInput" placeholder="제목, 문의 내용, 이름 검색"></div>
+          <button class="reset-btn" id="inqResetBtn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>필터 초기화</button>
+        </div>
+      </div>
+
+      <div class="inquiry-layout">
+        <div class="admin-card">
+          <div class="data-table-scroll">
+          <table class="data-table">
+            <thead><tr><th>문의자</th><th>제목</th><th>유형/상태</th><th class="num">문의일</th></tr></thead>
+            <tbody id="inqTbody"></tbody>
+          </table>
+          </div>
+        </div>
+
+        <div class="admin-card inquiry-detail" id="inqDetailPanel">
+          <div class="admin-card-head"><h2>문의 상세</h2></div>
+          <p id="inqEmptyState" style="font-size:.84rem;color:var(--text-tertiary);padding:20px 0;text-align:center;">왼쪽 목록에서 문의를 선택하세요.</p>
+          <div id="inqDetailBody" style="display:none;">
+            <div class="idetail-head">
+              <div class="who"><span class="avatar-lg"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span><div><b id="id-buyer-name"></b><span id="id-buyer-sub"></span></div></div>
+            </div>
+            <div class="idetail-block">
+              <p class="idetail-block-title">문의 내용</p>
+              <div style="display:flex;gap:16px;font-size:.8rem;color:var(--text-tertiary);margin-bottom:10px;">
+                <span>문의 유형 <b class="badge badge-warn" id="id-type" style="margin-left:4px;"></b></span>
+              </div>
+              <p style="font-size:.76rem;color:var(--text-tertiary);margin-bottom:10px;" id="id-date"></p>
+              <p class="idetail-body" id="id-content"></p>
+            </div>
+            <div class="idetail-block">
+              <p class="idetail-block-title">답변 히스토리</p>
+              <div id="id-messages"></div>
+            </div>
+            <div id="id-reply-form">
+              <textarea id="id-reply-text" rows="3" placeholder="답변을 입력하세요" style="border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.86rem;font-family:inherit;width:100%;margin-top:8px;"></textarea>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:10px;" id="id-reply-submit">답변 작성하기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </div>
+</div>
+<script>
+  var sidebarToggle = document.getElementById('sidebarToggle');
+  var adminSidebar = document.getElementById('adminSidebar');
+  if(sidebarToggle){ sidebarToggle.addEventListener('click', function(){ adminSidebar.classList.toggle('open'); }); }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/admin-common.js"></script>
+<script>
+var QF = { userId: null, list: [], activeStatus: 'all', selectedId: null };
+var TYPE_LABEL = { stock: '재고문의', price: '가격문의', product: '상품문의', shipping: '배송문의', settlement: '정산문의', tax: '세금문의', other: '기타문의' };
+var personIcon = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>';
+
+function inqRowHtml(iq) {
+  var buyerName = (iq.profiles && iq.profiles.name) ? iq.profiles.name : '구매자';
+  var sel = iq.id === QF.selectedId ? ' style="background:var(--accent-soft);"' : '';
+  return '<tr' + sel + ' onclick="selectInquiry(\'' + iq.id + '\')" style="cursor:pointer;">' +
+    '<td><div class="inquiry-buyer"><span class="avatar">' + personIcon + '</span><div class="lbl"><b>' + AC.esc(buyerName) + '</b><span>' + AC.esc(iq.profiles ? iq.profiles.email || '' : '') + '</span></div></div></td>' +
+    '<td style="max-width:280px;"><span class="cell-strong" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + AC.esc(iq.title || iq.content.slice(0, 30)) + '</span></td>' +
+    '<td><span class="badge badge-warn" style="display:block;margin-bottom:6px;">' + (TYPE_LABEL[iq.inquiry_type] || iq.inquiry_type) + '</span><span class="badge ' + AC.badgeCls(iq.status) + '">' + AC.label(iq.status) + '</span></td>' +
+    '<td class="num">' + AC.dt(iq.created_at, true) + '</td></tr>';
+}
+
+function renderInquiries() {
+  var q = document.getElementById('inqSearchInput').value.trim().toLowerCase();
+  var list = QF.list.filter(function (iq) {
+    if (QF.activeStatus !== 'all' && iq.status !== QF.activeStatus) return false;
+    if (q) {
+      var hay = ((iq.title || '') + ' ' + iq.content + ' ' + (iq.profiles ? iq.profiles.name : '')).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  document.getElementById('inqTbody').innerHTML = list.map(inqRowHtml).join('') ||
+    '<tr><td colspan="4" style="text-align:center;color:var(--text-tertiary);padding:24px 0;">문의가 없습니다.</td></tr>';
+  document.getElementById('icnt-all').textContent = QF.list.length;
+  document.getElementById('icnt-pending').textContent = QF.list.filter(function (i) { return i.status === 'pending'; }).length;
+  document.getElementById('icnt-answered').textContent = QF.list.filter(function (i) { return i.status === 'answered'; }).length;
+}
+
+async function loadInquiries() {
+  var res = await sb.from('inquiries').select('*, profiles:buyer_profile_id(name, phone, email)')
+    .is('company_id', null).eq('thread_type', 'etc').order('created_at', { ascending: false });
+  QF.list = res.data || [];
+  renderInquiries();
+  if (QF.selectedId) selectInquiry(QF.selectedId);
+}
+
+window.selectInquiry = async function (id) {
+  QF.selectedId = id;
+  renderInquiries();
+  var iq = QF.list.find(function (x) { return x.id === id; });
+  if (!iq) return;
+
+  document.getElementById('inqEmptyState').style.display = 'none';
+  document.getElementById('inqDetailBody').style.display = 'block';
+  document.getElementById('id-buyer-name').textContent = iq.profiles ? iq.profiles.name : '구매자';
+  document.getElementById('id-buyer-sub').textContent = iq.profiles ? (iq.profiles.email || iq.profiles.phone || '') : '';
+  document.getElementById('id-type').textContent = TYPE_LABEL[iq.inquiry_type] || iq.inquiry_type;
+  document.getElementById('id-date').textContent = '문의일 ' + AC.dt(iq.created_at, true);
+  document.getElementById('id-content').textContent = iq.content;
+
+  var msgRes = await sb.from('inquiry_messages').select('*').eq('inquiry_id', id).order('created_at');
+  var msgs = msgRes.data || [];
+  var msgHtml = msgs.map(function (m) {
+    return '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:.82rem;">' +
+      '<b style="color:' + (m.sender_role === 'admin' ? 'var(--accent)' : 'var(--text)') + ';">' + (m.sender_role === 'admin' ? '관리자' : '구매자') + '</b> ' +
+      '<span style="color:var(--text-tertiary);font-size:.72rem;">' + AC.dt(m.created_at, true) + '</span>' +
+      '<p style="margin-top:4px;white-space:pre-wrap;">' + AC.esc(m.content) + '</p></div>';
+  }).join('');
+  document.getElementById('id-messages').innerHTML = msgHtml || '<div class="answer-empty">아직 답변이 등록되지 않았습니다.</div>';
+};
+
+document.getElementById('id-reply-submit').addEventListener('click', async function () {
+  if (!QF.selectedId) return;
+  var text = document.getElementById('id-reply-text').value.trim();
+  if (!text) return;
+  var res = await sb.from('inquiry_messages').insert({ inquiry_id: QF.selectedId, sender_id: QF.userId, sender_role: 'admin', content: text });
+  if (res.error) { alert('답변 등록에 실패했습니다: ' + res.error.message); return; }
+  await sb.from('inquiries').update({ status: 'answered' }).eq('id', QF.selectedId);
+  document.getElementById('id-reply-text').value = '';
+  await loadInquiries();
+});
+
+document.getElementById('inqTabs').addEventListener('click', function (e) {
+  var btn = e.target.closest('button[data-status]');
+  if (!btn) return;
+  document.querySelectorAll('#inqTabs button').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  QF.activeStatus = btn.getAttribute('data-status');
+  renderInquiries();
+});
+document.getElementById('inqSearchInput').addEventListener('input', renderInquiries);
+document.getElementById('inqResetBtn').addEventListener('click', function () {
+  document.getElementById('inqSearchInput').value = '';
+  QF.activeStatus = 'all';
+  document.querySelectorAll('#inqTabs button').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-status') === 'all'); });
+  renderInquiries();
+});
+
+AC.ready(async function (user) {
+  document.querySelector('.admin-user .lbl b').textContent = (user.profile ? user.profile.name : user.email) || '관리자';
+  document.querySelector('.admin-user .lbl span').textContent = user.email;
+  document.querySelector('.admin-user .avatar').textContent = ((user.profile && user.profile.name) || user.email).charAt(0);
+  QF.userId = user.id;
+  await loadInquiries();
+});
+</script>
+</body>
+</html>
