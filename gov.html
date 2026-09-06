@@ -77,11 +77,14 @@
         <div id="govMatchForm">
           <div class="select-wrap" style="margin-bottom:8px;">
             <select id="govMatchBiz" style="width:100%;">
-              <option value="">업종 선택</option>
-              <option value="제조업">제조업</option>
-              <option value="서비스업">서비스업</option>
-              <option value="도소매업">도소매업</option>
-              <option value="건설업">건설업</option>
+              <option value="">지원분야 선택</option>
+              <option value="금융">금융</option>
+              <option value="기술">기술</option>
+              <option value="인력">인력</option>
+              <option value="수출">수출</option>
+              <option value="내수">내수</option>
+              <option value="창업">창업</option>
+              <option value="경영">경영</option>
               <option value="기타">기타</option>
             </select>
           </div>
@@ -91,6 +94,7 @@
               <option value="소상공인">소상공인</option>
               <option value="중소기업">중소기업</option>
               <option value="중견기업">중견기업</option>
+              <option value="예비창업">예비창업자</option>
             </select>
           </div>
           <button type="button" id="govMatchApply" class="btn btn-primary" style="width:100%;justify-content:center;">맞춤 설정하기</button>
@@ -100,6 +104,7 @@
           <button type="button" id="govMatchReset" class="btn btn-outline" style="width:100%;justify-content:center;">맞춤 설정 초기화</button>
         </div>
       </div>
+      <p style="font-size:.74rem;color:var(--text-tertiary);margin-top:14px;line-height:1.5;">기업마당(bizinfo.go.kr) 공개 데이터를 매일 자동으로 가져옵니다. 신청은 반드시 원문 공고 페이지에서 진행해주세요.</p>
     </aside>
 
     <div>
@@ -144,14 +149,6 @@
 <script src="js/auth.js"></script>
 <script>
 (function () {
-  // NOTE: community_posts has no deadline/subsidy-amount columns, so the tabs below are an
-  // approximation over available fields (created_at / author) rather than real 접수기간 data.
-  var BOARD_TYPE = 'gov';
-  var TAG_META = {
-    new: { cls: 'new', label: '신규모집' },
-    open: { cls: 'open', label: '접수중' },
-    urgent: { cls: 'urgent', label: '마감임박' }
-  };
   var posts = [];
   var currentTab = 'new';
   var searchQ = '';
@@ -166,24 +163,38 @@
     if (!iso) return '';
     return iso.slice(0, 10).replace(/-/g, '.');
   }
+  function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+  function daysUntil(dateStr) {
+    if (!dateStr) return Infinity;
+    var diff = new Date(dateStr) - new Date(todayStr());
+    return Math.round(diff / 86400000);
+  }
 
   async function loadPosts() {
-    var res = await sb.from('community_posts')
-      .select('id,title,content,created_at,profiles(name),gov_target_biz_type,gov_target_size')
-      .eq('board_type', BOARD_TYPE)
-      .order('created_at', { ascending: false });
+    var res = await sb.from('external_gov_programs')
+      .select('id,title,url,excerpt,agency,category,target_biz_type,apply_start,apply_end,created_at')
+      .order('created_at', { ascending: false })
+      .limit(200);
     posts = res.data || [];
     render();
   }
 
   function filtered() {
     var list = posts.slice();
-    if (currentTab === 'urgent') list.reverse(); // proxy for "been open longest / closing soon"
+    var today = todayStr();
+    if (currentTab === 'open') {
+      list = list.filter(function (p) { return (!p.apply_start || p.apply_start <= today) && (!p.apply_end || p.apply_end >= today); });
+    } else if (currentTab === 'urgent') {
+      list = list.filter(function (p) { return p.apply_end && daysUntil(p.apply_end) >= 0 && daysUntil(p.apply_end) <= 7; })
+        .sort(function (a, b) { return daysUntil(a.apply_end) - daysUntil(b.apply_end); });
+    }
     if (searchQ) list = list.filter(function (p) { return p.title.toLowerCase().indexOf(searchQ.toLowerCase()) !== -1; });
     if (myMatch) {
       list = list.filter(function (p) {
-        var bizOk = !p.gov_target_biz_type || !myMatch.biz || p.gov_target_biz_type === myMatch.biz;
-        var sizeOk = !p.gov_target_size || !myMatch.size || p.gov_target_size === myMatch.size;
+        var bizOk = !myMatch.biz || p.category === myMatch.biz;
+        var sizeOk = !myMatch.size || (p.target_biz_type || '').indexOf(myMatch.size) !== -1;
         return bizOk && sizeOk;
       });
     }
@@ -194,22 +205,23 @@
     var wrap = document.getElementById('govCards');
     var list = filtered();
     if (!list.length) {
-      var msg = myMatch ? '조건에 맞는 지원사업이 없습니다. 맞춤 설정을 초기화해보세요.' : '등록된 지원사업이 없습니다.';
+      var msg = myMatch ? '조건에 맞는 지원사업이 없습니다. 맞춤 설정을 초기화해보세요.' : '해당 조건의 지원사업이 없습니다.';
       wrap.innerHTML = '<p style="padding:24px 0;text-align:center;color:var(--text-tertiary);">' + msg + '</p>';
       return;
     }
-    var tag = TAG_META[currentTab];
     wrap.innerHTML = list.map(function (p) {
-      var org = p.profiles && p.profiles.name ? p.profiles.name : 'VERSOI';
-      var desc = (p.content || '').slice(0, 60);
+      var tagCls = 'new', tagLabel = p.category || '지원사업';
+      if (p.apply_end && daysUntil(p.apply_end) >= 0 && daysUntil(p.apply_end) <= 7) { tagCls = 'urgent'; tagLabel = '마감임박'; }
+      else if ((!p.apply_start || p.apply_start <= todayStr()) && (!p.apply_end || p.apply_end >= todayStr())) { tagCls = 'open'; tagLabel = '접수중'; }
+      var period = p.apply_start && p.apply_end ? p.apply_start.replace(/-/g, '.') + ' ~ ' + p.apply_end.replace(/-/g, '.') : '상시/수시 접수';
       return '<div class="gov-card">' +
-        '<span class="gov-tag ' + tag.cls + '">' + tag.label + '</span>' +
+        '<span class="gov-tag ' + tagCls + '">' + escapeHtml(tagLabel) + '</span>' +
         '<div class="gov-main">' +
-        '<a href="community.html?board=gov&post=' + p.id + '" class="gov-title" style="display:block;">' + escapeHtml(p.title) + '</a>' +
-        '<div class="gov-org">' + escapeHtml(org) + '</div>' +
-        '<div class="gov-meta"><span>등록일 <b class="tabular">' + fmtDate(p.created_at) + '</b></span><span>' + escapeHtml(desc) + '</span></div>' +
+        '<a href="' + escapeHtml(p.url) + '" target="_blank" rel="noopener" class="gov-title" style="display:block;">' + escapeHtml(p.title) + '</a>' +
+        '<div class="gov-org">' + escapeHtml(p.agency || '') + '</div>' +
+        '<div class="gov-meta"><span>신청기간 <b class="tabular">' + escapeHtml(period) + '</b></span><span>' + escapeHtml((p.excerpt || '').slice(0, 60)) + '</span></div>' +
         '</div>' +
-        '<a href="community.html?board=gov&post=' + p.id + '" class="btn btn-outline btn-sm">지원사업 보기</a>' +
+        '<a href="' + escapeHtml(p.url) + '" target="_blank" rel="noopener" class="btn btn-outline btn-sm">지원사업 보기</a>' +
         '</div>';
     }).join('');
   }
@@ -236,7 +248,7 @@
       formEl.style.display = 'none';
       activeEl.style.display = '';
       var parts = [];
-      parts.push(myMatch.biz || '전체 업종');
+      parts.push(myMatch.biz || '전체 분야');
       parts.push(myMatch.size || '전체 규모');
       document.getElementById('govMatchSummary').textContent = parts.join(' · ') + ' 맞춤 적용 중';
     } else {
