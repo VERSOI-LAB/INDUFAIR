@@ -31,6 +31,10 @@
     if (!session) return null;
     var uid = session.user.id;
     var profRes = await window.sb.from('profiles').select('*').eq('id', uid).maybeSingle();
+    if (profRes.data && profRes.data.status === 'withdrawn') {
+      await window.sb.auth.signOut();
+      return null;
+    }
     var memberRes = await window.sb.from('company_members')
       .select('company_id, role, is_owner, status, companies(name)')
       .eq('profile_id', uid).eq('status', 'active').order('is_owner', { ascending: false }).limit(1).maybeSingle();

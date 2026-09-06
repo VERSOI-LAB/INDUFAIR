@@ -23,9 +23,6 @@
   .grade-pill{font-size:.72rem;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:3px 10px;border-radius:20px;}
 
   .settings-title{font-size:1.02rem;font-weight:800;margin:24px 0 4px;}
-  .form-actions-simple{display:flex;align-items:center;justify-content:space-between;margin-top:20px;}
-  .link-danger{font-size:.84rem;color:var(--text-tertiary);text-decoration:underline;}
-  .link-danger:hover{color:var(--up);}
 
   .field-wrap{display:flex;align-items:center;gap:12px;flex:1;min-width:0;flex-wrap:wrap;}
   .edit-form{display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;}
@@ -37,6 +34,14 @@
   .field-note{font-size:.78rem;color:var(--text-tertiary);}
   .field-msg{font-size:.78rem;color:var(--accent);font-weight:700;}
   .field-msg.error{color:var(--up);}
+
+  .addr-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 24px;border-bottom:1px solid var(--border);}
+  .addr-row:last-child{border-bottom:none;}
+  .addr-row-main b{font-size:.94rem;font-weight:800;}
+  .addr-tag{font-size:.66rem;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:20px;margin-left:6px;}
+  .addr-row-line{font-size:.84rem;color:var(--text-secondary);margin-top:4px;}
+  .addr-row-actions{display:flex;gap:6px;flex-shrink:0;}
+  .addr-form-card{background:var(--bg-soft);border-radius:var(--radius-m);padding:18px;}
 </style>
 </head>
 <body>
@@ -84,9 +89,9 @@
           <a href="account.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>내 정보 관리</a>
           <a href="company-info.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>회사 정보 관리</a>
           <a href="payment-methods.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>결제수단 관리</a>
-          <a href="account.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>배송지 관리</a>
+          <a href="account.html#t-address"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>배송지 관리</a>
           <a href="account.html#t-notify"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>알림 설정</a>
-          <a href="account.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>회원 탈퇴</a>
+          <a href="account.html#t-delete"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>회원 탈퇴</a>
         </nav>
       </div>
     </aside>
@@ -95,7 +100,7 @@
       <h1 style="font-size:1.5rem;font-weight:900;">회원/계정</h1>
 
       <div class="board-tabs" data-tab-group>
-        <button class="active" data-tab-target="t-info">회원정보</button><button data-tab-target="t-password">비밀번호 변경</button><button data-tab-target="t-notify">알림 설정</button><button data-tab-target="t-login-history">로그인 기록</button>
+        <button class="active" data-tab-target="t-info">회원정보</button><button data-tab-target="t-password">비밀번호 변경</button><button data-tab-target="t-address">배송지 관리</button><button data-tab-target="t-notify">알림 설정</button><button data-tab-target="t-login-history">로그인 기록</button><button data-tab-target="t-delete">회원 탈퇴</button>
       </div>
 
       <div data-tab-panel="t-info" class="settings-panel active">
@@ -106,7 +111,6 @@
         <div class="info-row" id="rowEmail"><span class="lbl">이메일</span><div class="field-wrap" id="emailField"><span class="val" id="acctEmail">-</span><button class="btn btn-outline btn-sm" id="acctEmailBtn">이메일 변경</button></div></div>
         <div class="info-row" id="rowPhone"><span class="lbl">연락처</span><div class="field-wrap" id="phoneField"><span class="val" id="acctPhone">-</span><button class="btn btn-outline btn-sm" id="acctPhoneEditBtn">변경</button></div></div>
         <div class="info-row"><span class="lbl">가입일</span><span class="val" id="acctJoin">-</span></div>
-        <div class="info-row" id="rowAddress"><span class="lbl">주소</span><div class="field-wrap" id="addressField"><span class="val kr" id="acctAddress">-</span><button class="btn btn-outline btn-sm" id="acctAddressEditBtn">주소 변경</button></div></div>
       </div>
 
       <p class="settings-title">마케팅 정보 수신 동의</p>
@@ -121,9 +125,6 @@
         </div>
       </div>
 
-      <div class="form-actions-simple">
-        <a href="#" class="link-danger" id="withdrawLink">회원탈퇴</a>
-      </div>
       </div>
 
       <div data-tab-panel="t-password" class="settings-panel">
@@ -133,6 +134,18 @@
           <div class="field" style="max-width:360px;"><label>새 비밀번호 확인</label><input type="password" id="newPwConfirm" placeholder="새 비밀번호를 다시 입력하세요"></div>
           <button type="button" class="btn btn-primary" id="changePwBtn" style="margin-top:16px;">변경하기</button>
         </div>
+      </div>
+
+      <div data-tab-panel="t-address" class="settings-panel">
+        <div class="info-panel" style="padding:0;overflow:hidden;">
+          <div id="addressListEmpty" style="padding:36px 24px;text-align:center;color:var(--text-tertiary);font-size:.86rem;display:none;">등록된 배송지가 없습니다. 새 배송지를 추가해주세요.</div>
+          <div id="addressList"></div>
+        </div>
+        <button type="button" class="btn btn-outline" id="addAddressBtn" style="margin-top:14px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          새 배송지 추가
+        </button>
+        <div id="addressFormWrap" style="display:none;margin-top:14px;"></div>
       </div>
 
       <div data-tab-panel="t-notify" class="settings-panel">
@@ -155,6 +168,21 @@
           <div class="info-row"><span class="lbl">최근 로그인</span><span class="val" id="lastSignInAt">-</span></div>
           <div class="info-row"><span class="lbl">현재 접속 브라우저</span><span class="val" id="currentDevice">-</span></div>
           <p style="font-size:.78rem;color:var(--text-tertiary);margin-top:14px;">보안을 위해 최근 로그인 정보만 표시합니다. 본인이 아닌 로그인이 의심되면 즉시 비밀번호를 변경해주세요.</p>
+        </div>
+      </div>
+
+      <div data-tab-panel="t-delete" class="settings-panel">
+        <div class="info-panel">
+          <p class="settings-title" style="margin-top:0;color:var(--up);">회원 탈퇴</p>
+          <ul style="font-size:.86rem;color:var(--text-secondary);line-height:1.8;padding-left:18px;list-style:disc;">
+            <li>탈퇴 즉시 로그아웃되며, 같은 계정으로 다시 로그인할 수 없습니다.</li>
+            <li>주문/견적/문의 등 거래 기록은 상대 판매자·구매자 보호를 위해 삭제되지 않고 보존됩니다.</li>
+            <li>탈퇴는 되돌릴 수 없으며, 재가입하더라도 기존 데이터는 복구되지 않습니다.</li>
+          </ul>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:18px;font-size:.86rem;font-weight:700;cursor:pointer;">
+            <input type="checkbox" id="withdrawAgree"> 위 내용을 확인했으며 탈퇴에 동의합니다.
+          </label>
+          <button type="button" class="btn" id="withdrawBtn" disabled style="margin-top:16px;background:var(--up);color:#fff;opacity:.45;cursor:not-allowed;">회원 탈퇴하기</button>
         </div>
       </div>
     </div>
@@ -208,7 +236,7 @@
   }
 
   var currentUser = null;
-  var currentAddress = null;
+  var currentAddresses = [];
 
   document.addEventListener('versoi:ready', function (e) {
     var user = e.detail.user;
@@ -230,13 +258,10 @@
     document.getElementById('toggleNotifyOrder').checked = profile.notify_order !== false;
     document.getElementById('toggleNotifyInquiry').checked = profile.notify_inquiry !== false;
 
-    var addrRes = await window.sb.from('addresses').select('*').eq('profile_id', user.id).order('is_default', { ascending: false }).limit(1).maybeSingle();
-    currentAddress = addrRes.data || null;
-    renderAddress();
+    await loadAddresses();
 
     document.getElementById('acctNameEditBtn').addEventListener('click', openNameEdit);
     document.getElementById('acctPhoneEditBtn').addEventListener('click', openPhoneEdit);
-    document.getElementById('acctAddressEditBtn').addEventListener('click', openAddressEdit);
     document.getElementById('acctEmailBtn').addEventListener('click', function (e) {
       e.preventDefault();
       openEmailEdit();
@@ -245,12 +270,7 @@
     bindNotifyToggle('toggleSmsOptin', 'notify_sms');
     bindNotifyToggle('toggleNotifyOrder', 'notify_order');
     bindNotifyToggle('toggleNotifyInquiry', 'notify_inquiry');
-    document.getElementById('withdrawLink').addEventListener('click', function (e) {
-      e.preventDefault();
-      if (confirm('회원탈퇴를 진행하시겠습니까? 탈퇴 절차는 고객센터를 통해서만 처리됩니다.')) {
-        alert('회원탈퇴는 고객센터 1:1 문의를 통해 접수해 주세요.');
-      }
-    });
+    wireWithdraw();
 
     var sessionRes = await window.sb.auth.getSession();
     var authUser = sessionRes.data.session ? sessionRes.data.session.user : null;
@@ -272,13 +292,6 @@
     document.getElementById('newPwInput').value = '';
     document.getElementById('newPwConfirm').value = '';
   });
-
-  function renderAddress() {
-    var el = document.getElementById('acctAddress');
-    if (!currentAddress) { el.textContent = '등록된 배송지가 없습니다.'; return; }
-    var a = currentAddress;
-    el.textContent = (a.zipcode ? '(' + a.zipcode + ') ' : '') + (a.addr1 || '') + (a.addr2 ? ', ' + a.addr2 : '');
-  }
 
   function bindNotifyToggle(elId, column) {
     document.getElementById(elId).addEventListener('change', async function () {
@@ -387,47 +400,127 @@
     document.getElementById('acctEmailBtn').addEventListener('click', function (e) { e.preventDefault(); openEmailEdit(); });
   }
 
-  function openAddressEdit() {
-    var wrap = document.getElementById('addressField');
-    var a = currentAddress || {};
-    wrap.innerHTML = '<form class="edit-form addr-form" id="addrEditForm">' +
+  // ---- 배송지 관리 ----
+  async function loadAddresses() {
+    var res = await window.sb.from('addresses').select('*').eq('profile_id', currentUser.id)
+      .order('is_default', { ascending: false }).order('created_at', { ascending: true });
+    currentAddresses = res.data || [];
+    renderAddressList();
+    document.getElementById('addAddressBtn').addEventListener('click', function () { openAddressForm(null); });
+  }
+
+  function renderAddressList() {
+    var list = document.getElementById('addressList');
+    var empty = document.getElementById('addressListEmpty');
+    if (!currentAddresses.length) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    list.innerHTML = currentAddresses.map(function (a) {
+      var addrLine = (a.zipcode ? '(' + esc(a.zipcode) + ') ' : '') + esc(a.addr1 || '') + (a.addr2 ? ', ' + esc(a.addr2) : '');
+      return '<div class="addr-row" data-id="' + a.id + '">' +
+        '<div class="addr-row-main">' +
+        '<b>' + esc(a.label || '배송지') + '</b>' + (a.is_default ? '<span class="addr-tag">기본배송지</span>' : '') +
+        '<div class="addr-row-line">' + esc(a.recipient || '') + ' · ' + esc(a.phone || '') + '</div>' +
+        '<div class="addr-row-line">' + addrLine + '</div>' +
+        '</div>' +
+        '<div class="addr-row-actions">' +
+        (a.is_default ? '' : '<button type="button" class="btn btn-outline btn-sm" data-action="default">기본으로 설정</button>') +
+        '<button type="button" class="btn btn-outline btn-sm" data-action="edit">수정</button>' +
+        '<button type="button" class="btn btn-outline btn-sm" data-action="delete">삭제</button>' +
+        '</div></div>';
+    }).join('');
+    list.querySelectorAll('[data-action]').forEach(function (btn) {
+      var row = btn.closest('.addr-row');
+      var id = Number(row.getAttribute('data-id'));
+      var addr = currentAddresses.find(function (a) { return a.id === id; });
+      btn.addEventListener('click', function () {
+        var action = btn.getAttribute('data-action');
+        if (action === 'edit') openAddressForm(addr);
+        else if (action === 'delete') deleteAddress(addr);
+        else if (action === 'default') setDefaultAddress(addr);
+      });
+    });
+  }
+
+  async function setDefaultAddress(addr) {
+    await window.sb.from('addresses').update({ is_default: false }).eq('profile_id', currentUser.id);
+    await window.sb.from('addresses').update({ is_default: true }).eq('id', addr.id);
+    await loadAddresses();
+  }
+
+  async function deleteAddress(addr) {
+    if (!confirm('이 배송지를 삭제하시겠습니까?')) return;
+    var res = await window.sb.from('addresses').delete().eq('id', addr.id);
+    if (res.error) { alert('삭제 실패: ' + res.error.message); return; }
+    await loadAddresses();
+  }
+
+  function openAddressForm(addr) {
+    var wrap = document.getElementById('addressFormWrap');
+    var a = addr || {};
+    wrap.style.display = 'block';
+    wrap.innerHTML = '<div class="addr-form-card"><form class="edit-form addr-form" id="addrEditForm">' +
+      '<input type="text" id="addrLabel" placeholder="배송지 이름 (예: 회사, 집)" value="' + esc(a.label || '') + '" style="grid-column:1 / -1;">' +
       '<input type="text" id="addrRecipient" placeholder="받는 사람" value="' + esc(a.recipient || '') + '">' +
       '<input type="text" id="addrPhone" placeholder="연락처" value="' + esc(a.phone || '') + '">' +
       '<input type="text" id="addrZip" placeholder="우편번호" value="' + esc(a.zipcode || '') + '">' +
       '<input type="text" id="addr1" placeholder="주소" value="' + esc(a.addr1 || '') + '">' +
       '<input type="text" id="addr2" placeholder="상세주소" value="' + esc(a.addr2 || '') + '" style="grid-column:1 / -1;">' +
       '<span class="edit-actions" style="grid-column:1 / -1;"><button type="submit" class="btn btn-primary btn-sm">저장</button> <button type="button" class="btn btn-outline btn-sm" id="addrCancelBtn">취소</button></span>' +
-      '</form>';
-    document.getElementById('addrCancelBtn').addEventListener('click', renderAddressField);
+      '</form></div>';
+    document.getElementById('addrCancelBtn').addEventListener('click', function () {
+      wrap.style.display = 'none';
+      wrap.innerHTML = '';
+    });
     document.getElementById('addrEditForm').addEventListener('submit', async function (e) {
       e.preventDefault();
+      var recipient = document.getElementById('addrRecipient').value.trim();
+      var phone = document.getElementById('addrPhone').value.trim();
+      var addr1 = document.getElementById('addr1').value.trim();
+      if (!recipient || !phone || !addr1) { alert('받는 분, 연락처, 주소를 모두 입력해주세요.'); return; }
       var payload = {
         profile_id: currentUser.id,
-        recipient: document.getElementById('addrRecipient').value.trim(),
-        phone: document.getElementById('addrPhone').value.trim(),
+        label: document.getElementById('addrLabel').value.trim() || '배송지',
+        recipient: recipient,
+        phone: phone,
         zipcode: document.getElementById('addrZip').value.trim(),
-        addr1: document.getElementById('addr1').value.trim(),
-        addr2: document.getElementById('addr2').value.trim(),
-        is_default: true
+        addr1: addr1,
+        addr2: document.getElementById('addr2').value.trim()
       };
+      if (!currentAddresses.length) payload.is_default = true;
       var submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
-      var res;
-      if (currentAddress && currentAddress.id) {
-        res = await window.sb.from('addresses').update(payload).eq('id', currentAddress.id).select().maybeSingle();
-      } else {
-        res = await window.sb.from('addresses').insert(payload).select().maybeSingle();
-      }
-      if (res.error) { console.error('[account] address save failed', res.error); submitBtn.disabled = false; return; }
-      currentAddress = res.data || Object.assign({ id: currentAddress ? currentAddress.id : undefined }, payload);
-      renderAddressField();
+      var res = addr && addr.id
+        ? await window.sb.from('addresses').update(payload).eq('id', addr.id)
+        : await window.sb.from('addresses').insert(payload);
+      if (res.error) { console.error('[account] address save failed', res.error); alert('저장 실패: ' + res.error.message); submitBtn.disabled = false; return; }
+      wrap.style.display = 'none';
+      wrap.innerHTML = '';
+      await loadAddresses();
     });
   }
-  function renderAddressField() {
-    var wrap = document.getElementById('addressField');
-    wrap.innerHTML = '<span class="val kr" id="acctAddress">-</span><button class="btn btn-outline btn-sm" id="acctAddressEditBtn">주소 변경</button>';
-    renderAddress();
-    document.getElementById('acctAddressEditBtn').addEventListener('click', openAddressEdit);
+
+  // ---- 회원 탈퇴 ----
+  function wireWithdraw() {
+    var agree = document.getElementById('withdrawAgree');
+    var btn = document.getElementById('withdrawBtn');
+    agree.addEventListener('change', function () {
+      btn.disabled = !agree.checked;
+      btn.style.opacity = agree.checked ? '1' : '.45';
+      btn.style.cursor = agree.checked ? 'pointer' : 'not-allowed';
+    });
+    btn.addEventListener('click', async function () {
+      if (!confirm('정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+      btn.disabled = true;
+      var res = await window.sb.from('profiles').update({ status: 'withdrawn', withdrawn_at: new Date().toISOString() }).eq('id', currentUser.id);
+      if (res.error) { console.error('[account] withdraw failed', res.error); alert('탈퇴 처리에 실패했습니다: ' + res.error.message); btn.disabled = false; return; }
+      alert('회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.');
+      await window.sb.auth.signOut();
+      location.href = 'index.html';
+    });
   }
 })();
 </script>
