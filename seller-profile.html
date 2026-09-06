@@ -10,18 +10,19 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="styles.css">
 <style>
+  .profile-inner{max-width:66%;margin:0 auto;}
+  @media (max-width:900px){ .profile-inner{max-width:100%;} }
+
   .seller-hero{
     display:flex;flex-direction:column;align-items:center;text-align:center;
-    max-width:66%;margin:6px auto 0;
     padding:40px 16px 28px;
   }
-  @media (max-width:900px){ .seller-hero{max-width:100%;} }
   .seller-hero-logo{
-    height:110px;width:auto;max-width:280px;min-width:110px;border-radius:16px;
+    height:170px;width:auto;max-width:360px;min-width:170px;border-radius:16px;
     display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:18px;
   }
-  .seller-hero-logo img{height:100%;width:auto;max-width:280px;object-fit:contain;}
-  .seller-hero-logo.placeholder{background:var(--bg-soft);width:110px;font-family:var(--font-en);font-weight:900;font-size:2.4rem;color:var(--text-tertiary);}
+  .seller-hero-logo img{height:100%;width:auto;max-width:360px;object-fit:contain;}
+  .seller-hero-logo.placeholder{background:var(--bg-soft);width:170px;font-family:var(--font-en);font-weight:900;font-size:3.6rem;color:var(--text-tertiary);}
   .seller-hero h1{font-size:1.3rem;font-weight:900;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
   .seller-hero p{margin-top:10px;font-size:.9rem;color:var(--text-secondary);line-height:1.6;max-width:640px;}
 
@@ -111,18 +112,20 @@
     </div>
 
     <div id="profileBody" style="display:none;">
-      <div class="seller-hero">
-        <div class="seller-hero-logo placeholder" id="heroLogo">V</div>
-        <h1 id="heroName">-</h1>
-        <p id="heroIntro"></p>
-      </div>
+      <div class="profile-inner">
+        <div class="seller-hero">
+          <div class="seller-hero-logo placeholder" id="heroLogo">V</div>
+          <h1 id="heroName">-</h1>
+          <p id="heroIntro"></p>
+        </div>
 
-      <div class="product-tabs" id="profileTabs" role="tablist">
-        <button class="active" data-cat="">추천상품</button>
-      </div>
+        <div class="product-tabs" id="profileTabs" role="tablist">
+          <button class="active" data-cat="">추천상품</button>
+        </div>
 
-      <p style="font-size:.84rem;color:var(--text-tertiary);margin-bottom:14px;" id="totalCountText">총 0개의 상품이 있습니다.</p>
-      <div class="product-grid" id="productGrid"></div>
+        <p style="font-size:.84rem;color:var(--text-tertiary);margin-bottom:14px;" id="totalCountText">총 0개의 상품이 있습니다.</p>
+        <div class="product-grid" id="productGrid"></div>
+      </div>
     </div>
 
   </div>
