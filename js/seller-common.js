@@ -1,4 +1,4 @@
-// VERSOI Seller Center — shared helpers for seller-*.html pages.
+// INDUFAIR(인더페어) Seller Center — shared helpers for seller-*.html pages.
 // Include after js/auth.js. All seller-*.html pages are SELLER_PROTECTED in auth.js,
 // so by the time `versoi:ready` fires, window.VERSOI.user and .company are guaranteed non-null.
 (function () {

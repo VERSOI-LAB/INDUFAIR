@@ -1,5 +1,5 @@
 /* ============================================================
-   VERSOI shared design system — tokens, base, header, footer
+   INDUFAIR(인더페어) shared design system — tokens, base, header, footer
    Used by every page (index.html, goods.html, ...)
    ============================================================ */
 
@@ -159,7 +159,8 @@ img,svg{display:block;max-width:100%;}
   color:#fff;display:flex;align-items:center;justify-content:center;
   font-family:var(--font-en);font-weight:800;font-size:1.05rem;
 }
-.logo-text{font-family:var(--font-en);font-weight:800;font-size:1.28rem;letter-spacing:-.02em;}
+.logo-text{font-family:var(--font-en);font-weight:900;font-size:1.28rem;letter-spacing:-.02em;}
+.logo-one{color:var(--accent);}
 .logo-tag{
   font-family:var(--font-en);font-size:.56rem;line-height:1.25;font-weight:600;
   color:var(--text-tertiary);letter-spacing:.03em;border-left:1px solid var(--border-strong);

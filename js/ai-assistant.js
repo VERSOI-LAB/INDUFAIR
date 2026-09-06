@@ -1,4 +1,4 @@
-// VERSOI — shared AI assistant chat widget. Include after js/auth.js on any page
+// INDUFAIR(인더페어) — shared AI assistant chat widget. Include after js/auth.js on any page
 // that has an "AI 비서" trigger. Exposes window.VERSOI.openAIChat().
 (function () {
   var FUNCTIONS_URL = 'https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1';
@@ -80,7 +80,7 @@
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
     });
 
-    appendMessage('assistant', '안녕하세요! VERSOI AI 산업 비서입니다.\n제품 검색, 견적요청, 서비스 이용에 대해 무엇이든 물어보세요.');
+    appendMessage('assistant', '안녕하세요! INDUFAIR(인더페어) AI 산업 비서입니다.\n제품 검색, 견적요청, 서비스 이용에 대해 무엇이든 물어보세요.');
   }
 
   async function send() {
