@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERSOI 판매자 프로필</title>
+<meta name="description" content="VERSOI 입점 판매자의 대표 상품과 전체 상품을 확인하는 판매자 프로필 페이지">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .seller-hero{
+    display:flex;align-items:center;gap:22px;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:28px clamp(18px,3vw,32px);margin-top:22px;flex-wrap:wrap;
+  }
+  .seller-hero-logo{
+    width:88px;height:88px;border-radius:16px;background:var(--bg-soft);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:var(--font-en);font-weight:900;font-size:2rem;color:var(--text-tertiary);
+  }
+  .seller-hero-logo img{width:100%;height:100%;object-fit:contain;}
+  .seller-hero-body{flex:1;min-width:220px;}
+  .seller-hero-body h1{font-size:1.35rem;font-weight:900;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .seller-hero-body p{margin-top:8px;font-size:.88rem;color:var(--text-secondary);line-height:1.6;}
+  .seller-hero-stats{display:flex;gap:22px;margin-top:14px;flex-wrap:wrap;}
+  .seller-hero-stats div{font-size:.8rem;color:var(--text-tertiary);}
+  .seller-hero-stats b{display:block;font-family:var(--font-en);font-weight:800;font-size:1.05rem;color:var(--text);}
+
+  .profile-tab-row{display:flex;gap:8px;overflow-x:auto;margin-top:26px;padding-bottom:4px;}
+  .profile-tab{
+    display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:22px;border:1px solid var(--border);
+    font-size:.86rem;font-weight:700;color:var(--text-secondary);flex-shrink:0;background:var(--surface);transition:all .15s ease;
+  }
+  .profile-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .profile-tab b{font-family:var(--font-en);margin-left:2px;}
+
+  .wish-btn{
+    position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);
+    color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;transition:color .15s ease,transform .15s ease;z-index:2;
+  }
+  .wish-btn:hover{color:var(--up);transform:scale(1.08);}
+  .wish-btn.wished{color:var(--up);}
+  .wish-btn.wished svg{fill:currentColor;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="logo" href="index.html" aria-label="VERSOI 홈으로 이동">
+      <span class="logo-mark">V</span><span class="logo-text">VERSOI</span>
+      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <a href="index.html">홈</a><a href="goods.html">산업용품</a><a href="used.html">중고장터</a>
+      <a href="brand.html">브랜드관</a><a href="rfq.html">견적요청(RFQ)</a><a href="community.html">커뮤니티</a><a href="support.html">고객센터</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn" aria-label="검색"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <a href="cart.html" class="icon-btn" aria-label="장바구니"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span class="icon-count">0</span></a>
+      <a href="mypage.html" class="icon-btn" aria-label="마이페이지"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></a>
+      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap" style="padding-block:0 64px;">
+
+    <div id="notFoundBlock" style="display:none;padding:80px 0;text-align:center;color:var(--text-tertiary);">
+      <p style="font-size:.95rem;font-weight:700;">판매자 정보를 찾을 수 없습니다.</p>
+      <a href="goods.html" class="btn btn-outline" style="margin-top:16px;">산업용품 둘러보기</a>
+    </div>
+
+    <div id="profileBody" style="display:none;">
+      <div class="seller-hero">
+        <div class="seller-hero-logo" id="heroLogo">V</div>
+        <div class="seller-hero-body">
+          <h1 id="heroName">-</h1>
+          <p id="heroIntro"></p>
+          <div class="seller-hero-stats">
+            <div><b id="heroTotalCount">0</b>전체 상품</div>
+            <div><b id="heroNewCount">0</b>신품</div>
+            <div><b id="heroUsedCount">0</b>중고</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-tab-row" id="profileTabs">
+        <button class="profile-tab active" data-market="">전체 <b id="tabAllCount">0</b></button>
+        <button class="profile-tab" data-market="new">신품 <b id="tabNewCount">0</b></button>
+        <button class="profile-tab" data-market="used">중고 <b id="tabUsedCount">0</b></button>
+      </div>
+
+      <section style="margin-top:32px;" id="popularSection">
+        <div class="section-head"><h2 style="font-size:1.1rem;">HOT 인기상품</h2></div>
+        <div class="product-grid" id="popularGrid"></div>
+      </section>
+
+      <section style="margin-top:36px;">
+        <div class="section-head"><h2 style="font-size:1.1rem;">전체 상품</h2></div>
+        <p style="font-size:.84rem;color:var(--text-tertiary);margin-bottom:14px;" id="totalCountText">총 0개의 상품이 있습니다.</p>
+        <div class="product-grid" id="allGrid"></div>
+      </section>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>&copy; 2026 VERSOI. 산업 자원의 순환을 연결하다.</p>
+    <div class="footer-links"><a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a><a href="business-info.html">사업자정보확인</a><a href="seller-apply.html">제휴/입점문의</a></div>
+  </div>
+</footer>
+
+<script>
+  var navToggle = document.getElementById('navToggle');
+  var mainNav = document.getElementById('mainNav');
+  navToggle.addEventListener('click', function(){
+    var open = mainNav.classList.toggle('open');
+    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-client.js"></script>
+<script src="js/auth.js"></script>
+<script>
+(function () {
+  var PLACEHOLDER_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="#C9D8F5" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/><line x1="4" y1="9" x2="20" y2="9"/></svg>';
+  var GRADE_LABEL = { a: 'A급', b: 'B급', c: 'C급', refurb: '리퍼비시', idle: '유휴재고', new: '신품' };
+  var state = { market: '', products: [] };
+  var favSet = new Set();
+
+  function escapeHtml(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function fmtWon(n) { return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
+
+  function cardHTML(p) {
+    var img = p.product_images && p.product_images.length ? p.product_images[0].url : null;
+    var media = img ? '<img src="' + img + '" alt="" style="width:100%;height:100%;object-fit:contain;">' : PLACEHOLDER_SVG;
+    var isUsed = p.market_type === 'used';
+    var badges = '<span class="p-badge' + (isUsed ? '' : ' new') + '"' + (isUsed ? ' style="background:var(--accent);"' : '') + '>' + (isUsed ? '중고' : '신품') + '</span>' +
+      (p.stock <= 0 ? '<span class="p-badge" style="background:var(--text-tertiary);">품절</span>' : '');
+    var specParts = [p.model_no];
+    specParts.push(isUsed ? (GRADE_LABEL[p.condition] || p.condition) : (p.categories ? p.categories.name : ''));
+    var specs = specParts.filter(Boolean).map(escapeHtml).join('<br>');
+    return ''
+      + '<article class="product-card">'
+      +   '<a class="product-media" href="product-detail.html?id=' + p.id + '" style="background:' + (img ? 'var(--bg-soft)' : 'var(--bg-soft)') + ';position:relative;">'
+      +     '<div class="product-badges">' + badges + '</div>'
+      +     '<button class="wish-btn' + (favSet.has(p.id) ? ' wished' : '') + '" aria-label="찜하기" data-id="' + p.id + '"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>'
+      +     media
+      +   '</a>'
+      +   '<div class="product-body">'
+      +     '<span class="p-brand">' + escapeHtml(p.manufacturer || '') + '</span>'
+      +     '<span class="p-name">' + escapeHtml(p.title) + '</span>'
+      +     '<span class="p-specs">' + specs + '</span>'
+      +     '<span class="p-stock">' + (p.stock > 0 ? '재고 ' + p.stock + '개' : '품절') + '</span>'
+      +     '<span class="p-price"><span class="won">₩</span>' + Number(p.price).toLocaleString('ko-KR') + '</span>'
+      +     '<div class="p-actions">'
+      +       '<button class="btn btn-primary btn-sm add-cart-btn" data-id="' + p.id + '" data-stock="' + p.stock + '">장바구니</button>'
+      +       '<a class="btn btn-outline btn-sm" href="product-detail.html?id=' + p.id + '">상세보기</a>'
+      +     '</div>'
+      +   '</div>'
+      + '</article>';
+  }
+
+  function render() {
+    var list = state.products.filter(function (p) { return !state.market || p.market_type === state.market; });
+    var grid = document.getElementById('allGrid');
+    grid.innerHTML = list.length ? list.map(cardHTML).join('') : '<p style="padding:40px 0;color:var(--text-tertiary);grid-column:1/-1;text-align:center;">등록된 상품이 없습니다.</p>';
+    document.getElementById('totalCountText').textContent = '총 ' + list.length + '개의 상품이 있습니다.';
+
+    var popular = state.products.slice().sort(function (a, b) { return (b.view_count || 0) - (a.view_count || 0); }).slice(0, 5);
+    var popularSection = document.getElementById('popularSection');
+    if (popular.length) {
+      popularSection.style.display = '';
+      document.getElementById('popularGrid').innerHTML = popular.map(cardHTML).join('');
+    } else {
+      popularSection.style.display = 'none';
+    }
+  }
+
+  async function toggleFavorite(productId, btn) {
+    if (!window.VERSOI.requireAuth()) return;
+    var uid = window.VERSOI.user.id;
+    btn.disabled = true;
+    try {
+      if (favSet.has(productId)) {
+        await sb.from('favorites').delete().eq('profile_id', uid).eq('product_id', productId);
+        favSet.delete(productId);
+        btn.classList.remove('wished');
+      } else {
+        await sb.from('favorites').insert({ profile_id: uid, product_id: productId });
+        favSet.add(productId);
+        btn.classList.add('wished');
+      }
+    } catch (err) { console.error(err); }
+    btn.disabled = false;
+  }
+
+  async function handleAddToCart(productId, btn) {
+    if (!window.VERSOI.requireAuth()) return;
+    var original = btn.textContent;
+    btn.disabled = true;
+    try {
+      var uid = window.VERSOI.user.id;
+      var stock = parseInt(btn.dataset.stock, 10);
+      var max = isNaN(stock) ? Infinity : stock;
+      var existing = await sb.from('cart_items').select('id,qty').eq('profile_id', uid).eq('product_id', productId).maybeSingle();
+      if (existing.data) {
+        await sb.from('cart_items').update({ qty: Math.min(max, existing.data.qty + 1) }).eq('id', existing.data.id);
+      } else {
+        await sb.from('cart_items').insert({ profile_id: uid, product_id: productId, qty: Math.min(max, 1), selected: true });
+      }
+      btn.textContent = '담김';
+    } catch (err) {
+      console.error(err);
+      btn.textContent = '오류';
+    }
+    setTimeout(function () { btn.textContent = original; btn.disabled = false; }, 1000);
+  }
+
+  function wireGridClicks(gridId) {
+    document.getElementById(gridId).addEventListener('click', function (e) {
+      var wishBtn = e.target.closest('.wish-btn');
+      if (wishBtn) { e.preventDefault(); toggleFavorite(wishBtn.dataset.id, wishBtn); return; }
+      var cartBtn = e.target.closest('.add-cart-btn');
+      if (cartBtn) { e.preventDefault(); handleAddToCart(cartBtn.dataset.id, cartBtn); return; }
+    });
+  }
+  wireGridClicks('allGrid');
+  wireGridClicks('popularGrid');
+
+  document.getElementById('profileTabs').addEventListener('click', function (e) {
+    var btn = e.target.closest('.profile-tab');
+    if (!btn) return;
+    document.querySelectorAll('.profile-tab').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    state.market = btn.dataset.market;
+    render();
+  });
+
+  async function init() {
+    var companyId = new URLSearchParams(location.search).get('company_id');
+    if (!companyId) { document.getElementById('notFoundBlock').style.display = 'block'; return; }
+
+    var companyRes = await sb.from('companies').select('id,name,intro,logo_url,biz_verified_at').eq('id', companyId).maybeSingle();
+    if (!companyRes.data) { document.getElementById('notFoundBlock').style.display = 'block'; return; }
+    var company = companyRes.data;
+
+    document.title = 'VERSOI 판매자 프로필 | ' + company.name;
+    document.getElementById('profileBody').style.display = 'block';
+    document.getElementById('heroName').innerHTML = escapeHtml(company.name) +
+      (company.biz_verified_at ? ' <span class="badge badge-good" style="font-size:.7rem;vertical-align:middle;">사업자 인증</span>' : '');
+    document.getElementById('heroIntro').textContent = company.intro || '아직 등록된 회사 소개가 없습니다.';
+    if (company.logo_url) {
+      document.getElementById('heroLogo').innerHTML = '<img src="' + company.logo_url + '" alt="">';
+    } else {
+      document.getElementById('heroLogo').textContent = (company.name || 'V').charAt(0);
+    }
+
+    var productsRes = await sb.from('products')
+      .select('id,title,model_no,manufacturer,price,stock,condition,market_type,view_count,category_id,categories(name),product_images(url,sort_order)')
+      .eq('company_id', companyId).in('status', ['selling', 'soldout'])
+      .order('sort_order', { foreignTable: 'product_images', ascending: true })
+      .order('created_at', { ascending: false });
+    state.products = productsRes.data || [];
+
+    var newCount = state.products.filter(function (p) { return p.market_type === 'new'; }).length;
+    var usedCount = state.products.filter(function (p) { return p.market_type === 'used'; }).length;
+    document.getElementById('heroTotalCount').textContent = state.products.length;
+    document.getElementById('heroNewCount').textContent = newCount;
+    document.getElementById('heroUsedCount').textContent = usedCount;
+    document.getElementById('tabAllCount').textContent = state.products.length;
+    document.getElementById('tabNewCount').textContent = newCount;
+    document.getElementById('tabUsedCount').textContent = usedCount;
+
+    render();
+  }
+
+  document.addEventListener('versoi:ready', async function (e) {
+    var user = e.detail.user;
+    if (user) {
+      var favRes = await sb.from('favorites').select('product_id').eq('profile_id', user.id);
+      (favRes.data || []).forEach(function (f) { favSet.add(f.product_id); });
+    }
+    await init();
+  });
+})();
+</script>
+</body>
+</html>

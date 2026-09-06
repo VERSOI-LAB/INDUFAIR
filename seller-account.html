@@ -106,6 +106,13 @@
             <div class="admin-card">
               <div class="admin-card-head"><h2>회사 기본 정보</h2><span class="badge badge-good">인증 완료</span></div>
               <div class="info-list">
+                <div class="info-row">
+                  <span class="lbl">회사 로고</span>
+                  <div class="val file-row">
+                    <div class="who"><span id="ci-logo-preview" style="width:36px;height:36px;border-radius:8px;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span><span><b id="ci-logo-status">등록된 로고 없음</b></span></div>
+                  </div>
+                  <label class="btn btn-ghost btn-sm" style="cursor:pointer;">이미지 업로드<input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/webp" style="display:none;"></label>
+                </div>
                 <div class="info-row"><span class="lbl">회사명</span><span class="val" id="ci-name">-</span><button class="btn btn-ghost btn-sm" data-edit="name" data-label="회사명">수정</button></div>
                 <div class="info-row"><span class="lbl">사업자등록번호</span><span class="val tabular" id="ci-bizno">-</span></div>
                 <div class="info-row"><span class="lbl">대표자명</span><span class="val" id="ci-ceo">-</span></div>
@@ -457,6 +464,14 @@ function fillEditableRow(field, label) {
 
 function renderCompany() {
   var c = AF.company;
+  var logoPreview = document.getElementById('ci-logo-preview');
+  if (c.logo_url) {
+    logoPreview.innerHTML = '<img src="' + c.logo_url + '" style="width:100%;height:100%;object-fit:contain;">';
+    document.getElementById('ci-logo-status').textContent = '등록됨';
+  } else {
+    logoPreview.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+    document.getElementById('ci-logo-status').textContent = '등록된 로고 없음';
+  }
   document.getElementById('ci-name').textContent = c.name || '-';
   document.getElementById('ci-bizno').textContent = c.biz_reg_no || '-';
   document.getElementById('ci-ceo').textContent = c.ceo_name || '-';
@@ -522,6 +537,18 @@ document.getElementById('ci-bank-edit-btn').addEventListener('click', async func
   if (holder === null) return;
   await sb.from('companies').update({ bank_name: bank, bank_account: num, bank_holder: holder }).eq('id', AF.companyId);
   await loadCompany();
+});
+
+document.getElementById('logoFileInput').addEventListener('change', async function () {
+  var file = this.files[0];
+  if (!file) return;
+  var path = AF.userId + '/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  var up = await sb.storage.from('company-logos').upload(path, file);
+  if (up.error) { alert('업로드 실패: ' + up.error.message); return; }
+  var pub = sb.storage.from('company-logos').getPublicUrl(path);
+  await sb.from('companies').update({ logo_url: pub.data.publicUrl }).eq('id', AF.companyId);
+  await loadCompany();
+  this.value = '';
 });
 
 document.getElementById('certFileInput').addEventListener('change', async function () {
