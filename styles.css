@@ -257,6 +257,11 @@ img,svg{display:block;max-width:100%;}
   background:var(--bg-soft);border-radius:20px;padding:1px 7px;
 }
 .side-nav a.active .count{background:var(--surface);color:var(--accent);}
+.side-nav-group-title{
+  font-size:.7rem;font-weight:800;color:var(--text-tertiary);letter-spacing:.03em;
+  padding:14px 10px 4px;
+}
+.side-nav-group-title:first-child{padding-top:2px;}
 .side-panel{
   background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);
   padding:18px 16px;box-shadow:var(--shadow-1);
