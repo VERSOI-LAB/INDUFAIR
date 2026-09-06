@@ -399,7 +399,7 @@
   function rowHTML(item){
     var p = item.product;
     var img = p.product_images && p.product_images.length ? p.product_images[0].url : null;
-    var thumb = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : PLACEHOLDER_SVG;
+    var thumb = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:contain;">' : PLACEHOLDER_SVG;
     var lineTotal = p.price * item.qty;
     var soldOut = p.status === 'soldout' || p.stock <= 0;
     return ''

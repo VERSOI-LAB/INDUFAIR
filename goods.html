@@ -588,7 +588,7 @@
 
   function productCardHTML(p){
     var img = p.product_images && p.product_images.length ? p.product_images[0].url : null;
-    var media = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : PLACEHOLDER_SVG;
+    var media = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:contain;">' : PLACEHOLDER_SVG;
     var badges = '<span class="p-badge new">신품</span>' + (p.stock <= 0 ? '<span class="p-badge" style="background:var(--text-tertiary);">품절</span>' : '');
     var specs = [p.model_no, p.categories ? p.categories.name : ''].filter(Boolean).map(escapeHtml).join('<br>');
     return ''

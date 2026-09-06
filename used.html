@@ -453,7 +453,7 @@
 
   function cardHTML(p){
     var img = p.product_images && p.product_images.length ? p.product_images[0].url : null;
-    var media = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:cover;">' : PLACEHOLDER_SVG;
+    var media = img ? '<img src="'+img+'" alt="" style="width:100%;height:100%;object-fit:contain;">' : PLACEHOLDER_SVG;
     var gClass = GRADE_CLASS[p.condition] || 'grade-b';
     var gLabel = GRADE_LABEL[p.condition] || p.condition;
     var metaParts = [];
