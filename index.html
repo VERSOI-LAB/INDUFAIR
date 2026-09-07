@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>INDUFAIR(인더페어)</title>
-<meta name="description" content="산업 자원의 순환을 연결하는 B2B 플랫폼 INDUFAIR(인더페어) 홈페이지">
+<title>PANDA SANDA(판다산다)</title>
+<meta name="description" content="산업 자원의 순환을 연결하는 B2B 플랫폼 PANDA SANDA(판다산다) 홈페이지">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
@@ -238,8 +238,8 @@
 
 <header class="site-header">
   <div class="header-inner">
-    <a class="logo" href="#top" aria-label="INDUFAIR 홈으로 이동">
-      <span class="logo-text"><span class="logo-one">1</span>NDUFAIR</span>
+    <a class="logo" href="#top" aria-label="PANDA SANDA 홈으로 이동">
+      <span class="logo-text"><span class="logo-one">P</span>ANDA <span class="logo-one">S</span>ANDA</span>
       <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
     </a>
     <nav class="main-nav" id="mainNav">
@@ -275,7 +275,7 @@
     <div class="hero-inner">
       <div class="hero-copy">
         <h1>산업 자원의 순환을<br><span>연결하다</span></h1>
-        <p>신품부터 중고, 유휴재고, 견적, 커뮤니티까지<br>산업 자원의 모든 연결, INDUFAIR(인더페어)에서 시작하세요.</p>
+        <p>신품부터 중고, 유휴재고, 견적, 커뮤니티까지<br>산업 자원의 모든 연결, PANDA SANDA(판다산다)에서 시작하세요.</p>
       </div>
       <div class="search-card">
         <div class="search-tabs" role="tablist">
@@ -447,21 +447,15 @@
           <button data-ctab="used">중고 시세</button>
         </div>
         <ul class="comm-list" id="commList">
-          <li><a href="news.html">2024년 산업 자동화 트랜드 리포트</a><span class="tag-new">NEW</span></li>
-          <li><a href="news.html">스마트팩토리 구축 성공 사례 5가지</a></li>
-          <li><a href="qna.html">PLC 프로그래밍 팁 공유</a></li>
-          <li><a href="qna.html">협동로봇 도입 시 고려사항은?</a></li>
+          <li style="color:var(--text-tertiary);">불러오는 중...</li>
         </ul>
         <a href="community.html" class="more-link">더보기 ›</a>
       </div>
 
       <div class="comm-panel" id="support">
         <p class="notice-title">공지사항</p>
-        <ul class="comm-list">
-          <li><a href="support.html">INDUFAIR(인더페어) 플랫폼 정식 오픈 안내</a><span class="tag-new">NEW</span><span class="comm-date">04.29</span></li>
-          <li><a href="support.html">브랜드관 신규 입점 브랜드 안내</a><span class="comm-date">04.28</span></li>
-          <li><a href="support.html">RFQ 기능 업데이트 안내</a><span class="comm-date">04.27</span></li>
-          <li><a href="support.html">AI 상품 등록 기능 업데이트</a><span class="comm-date">04.25</span></li>
+        <ul class="comm-list" id="noticeList">
+          <li style="color:var(--text-tertiary);">불러오는 중...</li>
         </ul>
         <a href="support.html" class="more-link">더보기 ›</a>
       </div>
@@ -485,12 +479,6 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8A2 2 0 1 1 8 18l-.4-3"/></svg>
             광고문의
           </a>
-        </div>
-        <div class="cs-phone">
-          <div>
-            <div class="num">1800-1234</div>
-            <div class="hours">평일 09:00 - 18:00 (주말/공휴일 휴무)</div>
-          </div>
         </div>
       </div>
     </div>
@@ -516,7 +504,7 @@
 
 <footer class="site-footer">
   <div class="wrap footer-inner">
-    <p>&copy; 2026 INDUFAIR(인더페어). 산업 자원의 순환을 연결하다.</p>
+    <p>&copy; 2026 PANDA SANDA(판다산다). 산업 자원의 순환을 연결하다.</p>
     <div class="footer-links">
       <a href="terms.html">이용약관</a>
       <a href="privacy.html">개인정보처리방침</a>
@@ -571,38 +559,12 @@
     if (q) location.href = 'goods.html?q=' + encodeURIComponent(q);
   });
 
-  // Community tabs (demo content swap)
-  var commData = {
-    info: [
-      ['2024년 산업 자동화 트랜드 리포트', true],
-      ['스마트팩토리 구축 성공 사례 5가지', false],
-      ['PLC 프로그래밍 팁 공유', false],
-      ['협동로봇 도입 시 고려사항은?', false]
-    ],
-    qna: [
-      ['PLC 래더 로직 질문 있습니다', true],
-      ['협동로봇 티칭 관련 문의', false],
-      ['서보 알람 A.32 원인이 뭘까요', false],
-      ['CNC 스핀들 소음 문의', false]
-    ],
-    used: [
-      ['서보모터 HG-KR73 시세 문의', true],
-      ['미쓰비시 Q시리즈 PLC 중고 시세', false],
-      ['THK 리니어가이드 시세 공유', false],
-      ['FANUC 로봇암 매입가 문의', false]
-    ]
-  };
-  var commList = document.getElementById('commList');
+  // Community tabs — active tab styling only; content is loaded from Supabase below.
   document.querySelectorAll('.comm-tabs button').forEach(function(btn){
     btn.addEventListener('click', function(){
       document.querySelectorAll('.comm-tabs button').forEach(function(b){ b.classList.remove('active'); });
       btn.classList.add('active');
-      var data = commData[btn.dataset.ctab] || commData.info;
-      var hrefs = { info: 'news.html', qna: 'qna.html', used: 'price.html' };
-      var href = hrefs[btn.dataset.ctab] || 'community.html';
-      commList.innerHTML = data.map(function(row){
-        return '<li><a href="'+href+'">'+row[0]+'</a>'+(row[1] ? '<span class="tag-new">NEW</span>' : '')+'</li>';
-      }).join('');
+      if (window.renderCommTab) window.renderCommTab(btn.dataset.ctab);
     });
   });
 </script>
@@ -620,7 +582,61 @@
       if (cats[i]) a.href = 'goods.html?category=' + cats[i].id;
     });
   }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function isRecent(iso) {
+    if (!iso) return false;
+    return (Date.now() - new Date(iso).getTime()) < 3 * 24 * 60 * 60 * 1000;
+  }
+  function fmtDateMD(iso) {
+    if (!iso) return '';
+    return iso.slice(5, 10).replace('-', '.');
+  }
+
+  var COMM_HREFS = { info: 'news.html', qna: 'qna.html', used: 'price.html' };
+  var commData = { info: [], qna: [], used: [] };
+  var commList = document.getElementById('commList');
+  var noticeList = document.getElementById('noticeList');
+
+  window.renderCommTab = function (tab) {
+    var data = commData[tab] || [];
+    var href = COMM_HREFS[tab] || 'community.html';
+    if (!data.length) { commList.innerHTML = '<li style="color:var(--text-tertiary);">등록된 게시글이 없습니다.</li>'; return; }
+    commList.innerHTML = data.map(function (row) {
+      return '<li><a href="' + href + '">' + escapeHtml(row.title) + '</a>' + (row.isNew ? '<span class="tag-new">NEW</span>' : '') + '</li>';
+    }).join('');
+  };
+
+  async function loadCommData() {
+    var newsRes = await sb.from('external_news').select('title,published_at').order('published_at', { ascending: false }).limit(4);
+    commData.info = (newsRes.data || []).map(function (r) { return { title: r.title, isNew: isRecent(r.published_at) }; });
+
+    var qnaRes = await sb.from('community_posts').select('title,created_at').eq('board_type', 'qna').order('created_at', { ascending: false }).limit(4);
+    commData.qna = (qnaRes.data || []).map(function (r) { return { title: r.title, isNew: isRecent(r.created_at) }; });
+
+    var priceRes = await sb.from('price_references').select('manufacturer,model_no,created_at').order('sample_count', { ascending: false }).limit(4);
+    commData.used = (priceRes.data || []).map(function (r) { return { title: [r.manufacturer, r.model_no].filter(Boolean).join(' ') + ' 시세', isNew: isRecent(r.created_at) }; });
+
+    var activeBtn = document.querySelector('.comm-tabs button.active');
+    window.renderCommTab(activeBtn ? activeBtn.dataset.ctab : 'info');
+  }
+
+  async function loadHomeNotices() {
+    var res = await sb.from('notices').select('title,created_at').order('created_at', { ascending: false }).limit(4);
+    var rows = res.data || [];
+    if (!rows.length) { noticeList.innerHTML = '<li style="color:var(--text-tertiary);">등록된 공지사항이 없습니다.</li>'; return; }
+    noticeList.innerHTML = rows.map(function (n) {
+      return '<li><a href="support.html">' + escapeHtml(n.title) + '</a>' + (isRecent(n.created_at) ? '<span class="tag-new">NEW</span>' : '') + '<span class="comm-date">' + fmtDateMD(n.created_at) + '</span></li>';
+    }).join('');
+  }
+
   document.addEventListener('versoi:ready', wireQuickCategories, { once: true });
+  document.addEventListener('versoi:ready', loadCommData, { once: true });
+  document.addEventListener('versoi:ready', loadHomeNotices, { once: true });
 })();
 </script>
 </body>

@@ -1,4 +1,4 @@
-// INDUFAIR(인더페어) Admin Console — shared helpers for admin-*.html pages.
+// PANDA SANDA(판다산다) Admin Console — shared helpers for admin-*.html pages.
 // Include after js/auth.js. All admin-*.html pages are ADMIN_PROTECTED in auth.js,
 // so by the time `versoi:ready` fires, window.VERSOI.user.profile.is_admin is guaranteed true.
 (function () {

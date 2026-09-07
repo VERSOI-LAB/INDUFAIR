@@ -1,7 +1,7 @@
-// INDUFAIR(인더페어) — shared auth/session layer. Include after supabase-client.js on every page.
+// PANDA SANDA(판다산다) — shared auth/session layer. Include after supabase-client.js on every page.
 // Syncs the header login state, guards protected pages, and exposes window.VERSOI.
 (function () {
-  if (!window.sb) { console.error('[INDUFAIR(인더페어)] sb client missing — include supabase-client.js first'); return; }
+  if (!window.sb) { console.error('[PANDA SANDA(판다산다)] sb client missing — include supabase-client.js first'); return; }
 
   var PATH = location.pathname.split('/').pop() || 'index.html';
 

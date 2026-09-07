@@ -1,5 +1,5 @@
 /* ============================================================
-   INDUFAIR(인더페어) shared design system — tokens, base, header, footer
+   PANDA SANDA(판다산다) shared design system — tokens, base, header, footer
    Used by every page (index.html, goods.html, ...)
    ============================================================ */
 
@@ -18,6 +18,7 @@
   --accent-hover:#1746B8;
   --accent-soft:#E9F0FE;
   --accent-soft-strong:#D6E4FD;
+  --logo-accent:#7A2E22;
   --navy-900:#0A1530;
   --navy-800:#101F42;
   --navy-700:#16295A;
@@ -52,6 +53,7 @@
     --accent-hover:#7A9EFF;
     --accent-soft:#152342;
     --accent-soft-strong:#1B2C52;
+    --logo-accent:#D9836A;
     --navy-900:#050A18;
     --navy-800:#0A1226;
     --navy-700:#101B36;
@@ -81,6 +83,7 @@
   --accent-hover:#7A9EFF;
   --accent-soft:#152342;
   --accent-soft-strong:#1B2C52;
+  --logo-accent:#D9836A;
   --navy-900:#050A18;
   --navy-800:#0A1226;
   --navy-700:#101B36;
@@ -155,12 +158,12 @@ img,svg{display:block;max-width:100%;}
 }
 .logo{display:flex;align-items:center;gap:10px;flex-shrink:0;}
 .logo-mark{
-  width:34px;height:34px;border-radius:9px;background:var(--accent);
+  width:34px;height:34px;border-radius:9px;background:var(--logo-accent);
   color:#fff;display:flex;align-items:center;justify-content:center;
   font-family:var(--font-en);font-weight:800;font-size:1.05rem;
 }
 .logo-text{font-family:var(--font-en);font-weight:900;font-size:1.28rem;letter-spacing:-.02em;}
-.logo-one{color:var(--accent);}
+.logo-one{color:var(--logo-accent);}
 .logo-tag{
   font-family:var(--font-en);font-size:.56rem;line-height:1.25;font-weight:600;
   color:var(--text-tertiary);letter-spacing:.03em;border-left:1px solid var(--border-strong);
