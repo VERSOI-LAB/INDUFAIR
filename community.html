@@ -236,8 +236,8 @@
             <button class="filter-chip on" data-board="all">전체</button>
             <button class="filter-chip" data-board="free">자유</button>
             <button class="filter-chip" data-board="qna">Q&amp;A</button>
-            <button class="filter-chip" data-board="news">뉴스</button>
-            <button class="filter-chip" data-board="gov">정부지원</button>
+            <a class="filter-chip" href="news.html">뉴스</a>
+            <a class="filter-chip" href="gov.html">정부지원</a>
             <button class="filter-chip" data-board="event">이벤트/프로모션</button>
             <button class="filter-chip" data-board="success">성공 사례</button>
           </div>
@@ -426,14 +426,6 @@
       var govIcon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>';
       var eventIcon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/><path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>';
 
-      if (commNavDrill === 'news') {
-        nav.innerHTML = '<a href="#" data-comm-back="1">' + CHEV_LEFT + ' 커뮤니티 홈</a>' +
-          '<a href="#" data-comm-board="news" class="cat-parent' + (currentFilter === 'news' && !currentNewsCategory ? ' active' : '') + '">산업 뉴스 전체</a>' +
-          NEWS_CATEGORIES.map(function (c) {
-            return '<a href="#" data-comm-news-cat="' + escapeHtml(c) + '" class="cat-child' + (currentFilter === 'news' && currentNewsCategory === c ? ' active' : '') + '">' + escapeHtml(c) + '</a>';
-          }).join('');
-        return;
-      }
       if (commNavDrill === 'price') {
         nav.innerHTML = '<a href="#" data-comm-back="1">' + CHEV_LEFT + ' 커뮤니티 홈</a>' +
           '<a href="price.html" class="cat-parent">중고 시세 게시판 전체</a>' +
@@ -445,13 +437,13 @@
 
       nav.innerHTML =
         '<a href="community.html" class="' + (currentFilter === 'all' ? 'active' : '') + '">' + homeIcon + '커뮤니티 홈</a>' +
-        '<a href="#" data-comm-drill="news">' + newsIcon + '산업 뉴스 ' + CHEV_RIGHT + '</a>' +
+        '<a href="news.html">' + newsIcon + '산업 뉴스</a>' +
         '<a href="qna.html" style="display:none;">' + qnaIcon + '기술 Q&amp;A</a>' +
         '<a href="free.html" style="display:none;">' + freeIcon + '자유 게시판</a>' +
         '<a href="#" data-comm-drill="price">' + priceIcon + '중고 시세 게시판 ' + CHEV_RIGHT + '</a>' +
         '<a href="goomrq-board.html" style="display:none;">' + goomrqIcon + '구해요 게시판</a>' +
         '<a href="relocation.html" style="display:none;">' + relocIcon + '공장 이전·폐업 센터</a>' +
-        '<a href="#" data-comm-board="gov" class="' + (currentFilter === 'gov' ? 'active' : '') + '">' + govIcon + '정부 지원사업</a>' +
+        '<a href="gov.html">' + govIcon + '정부 지원사업</a>' +
         '<a href="#" data-comm-board="event" class="' + (currentFilter === 'event' ? 'active' : '') + '">' + eventIcon + '이벤트/프로모션</a>';
     }
 
