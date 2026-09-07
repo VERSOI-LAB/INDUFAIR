@@ -236,10 +236,9 @@
             <button class="filter-chip on" data-board="all">전체</button>
             <button class="filter-chip" data-board="free">자유</button>
             <button class="filter-chip" data-board="qna">Q&amp;A</button>
-            <a class="filter-chip" href="news.html">뉴스</a>
-            <a class="filter-chip" href="gov.html">정부지원</a>
+            <button class="filter-chip" data-board="news">뉴스</button>
+            <button class="filter-chip" data-board="gov">정부지원</button>
             <button class="filter-chip" data-board="event">이벤트/프로모션</button>
-            <button class="filter-chip" data-board="success">성공 사례</button>
           </div>
 
           <div id="postList"><p class="comment-empty">게시글을 불러오는 중입니다...</p></div>
@@ -344,6 +343,7 @@
     var EYE_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
     var CMT_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
     var HEART_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+    var EXTERNAL_ICON = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-1px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
 
     var BOARD_LABEL = { free: '자유 게시판', qna: '기술 Q&amp;A', news: '산업 뉴스', gov: '정부 지원사업', event: '이벤트/프로모션', success: '성공 사례' };
     var BOARD_CLASS = { free: 'free', qna: 'qna', news: '', gov: 'gov', event: 'gov', success: 'qna' };
@@ -378,14 +378,38 @@
       var res = await sb.from('community_posts')
         .select('id, profile_id, board_type, title, content, attachments, view_count, like_count, created_at, news_category, profiles(name)')
         .order('created_at', { ascending: false });
-      posts = (res.data || []).map(function (p) {
+      var communityPosts = (res.data || []).map(function (p) {
         var att = p.attachments;
         if (typeof att === 'string') { try { att = JSON.parse(att); } catch (e) { att = []; } }
         p.attachments = Array.isArray(att) ? att : [];
         return p;
       });
+
+      // "전체"/"뉴스"/"정부지원" 탭에는 자체 작성 게시글뿐 아니라 이미 연동된
+      // 외부 뉴스·정부지원사업 데이터도 최신순으로 함께 섞여 보여야 하므로 병합한다.
+      var newsRes = await sb.from('external_news')
+        .select('id,title,url,excerpt,source,published_at')
+        .order('published_at', { ascending: false }).limit(30);
+      var externalNews = (newsRes.data || []).map(function (n) {
+        return {
+          id: 'news-' + n.id, board_type: 'news', title: n.title, content: n.excerpt,
+          created_at: n.published_at, isExternal: true, url: n.url, sourceLabel: n.source
+        };
+      });
+
+      var govRes = await sb.from('external_gov_programs')
+        .select('id,title,url,excerpt,agency,created_at')
+        .order('created_at', { ascending: false }).limit(30);
+      var externalGov = (govRes.data || []).map(function (g) {
+        return {
+          id: 'gov-' + g.id, board_type: 'gov', title: g.title, content: g.excerpt,
+          created_at: g.created_at, isExternal: true, url: g.url, sourceLabel: g.agency
+        };
+      });
+
+      posts = communityPosts.concat(externalNews, externalGov);
       commentCounts = {};
-      var ids = posts.map(function (p) { return p.id; });
+      var ids = communityPosts.map(function (p) { return p.id; });
       if (ids.length) {
         var cRes = await sb.from('community_comments').select('post_id').in('post_id', ids);
         (cRes.data || []).forEach(function (c) { commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1; });
@@ -437,13 +461,13 @@
 
       nav.innerHTML =
         '<a href="community.html" class="' + (currentFilter === 'all' ? 'active' : '') + '">' + homeIcon + '커뮤니티 홈</a>' +
-        '<a href="news.html">' + newsIcon + '산업 뉴스</a>' +
+        '<a href="#" data-comm-board="news" class="' + (currentFilter === 'news' ? 'active' : '') + '">' + newsIcon + '산업 뉴스</a>' +
         '<a href="qna.html" style="display:none;">' + qnaIcon + '기술 Q&amp;A</a>' +
         '<a href="free.html" style="display:none;">' + freeIcon + '자유 게시판</a>' +
         '<a href="#" data-comm-drill="price">' + priceIcon + '중고 시세 게시판 ' + CHEV_RIGHT + '</a>' +
         '<a href="goomrq-board.html" style="display:none;">' + goomrqIcon + '구해요 게시판</a>' +
         '<a href="relocation.html" style="display:none;">' + relocIcon + '공장 이전·폐업 센터</a>' +
-        '<a href="gov.html">' + govIcon + '정부 지원사업</a>' +
+        '<a href="#" data-comm-board="gov" class="' + (currentFilter === 'gov' ? 'active' : '') + '">' + govIcon + '정부 지원사업</a>' +
         '<a href="#" data-comm-board="event" class="' + (currentFilter === 'event' ? 'active' : '') + '">' + eventIcon + '이벤트/프로모션</a>';
     }
 
@@ -479,10 +503,21 @@
     }
 
     function renderRow(p) {
-      var authorName = p.profiles && p.profiles.name ? p.profiles.name : '익명';
       var cls = BOARD_CLASS[p.board_type] || '';
       var label = BOARD_LABEL[p.board_type] || p.board_type;
       var isOpen = expandedId === p.id;
+
+      if (p.isExternal) {
+        var srcLabel = p.sourceLabel || (p.board_type === 'gov' ? '정부 지원사업' : '외부 뉴스');
+        return '<div class="post-row" data-id="' + p.id + '">' +
+          '<span class="post-cat' + (cls ? ' ' + cls : '') + '">' + label + '</span>' +
+          '<div class="post-main">' +
+          '<a href="' + escapeHtml(p.url) + '" target="_blank" rel="noopener" class="post-title">' + escapeHtml(p.title) + ' ' + EXTERNAL_ICON + '</a>' +
+          '<div class="post-meta"><b>' + escapeHtml(srcLabel) + '</b><span>' + fmtDate(p.created_at) + '</span></div>' +
+          '</div></div>';
+      }
+
+      var authorName = p.profiles && p.profiles.name ? p.profiles.name : '익명';
       var icons = '<span class="icn">' + EYE_SVG + '<span class="tabular">' + (p.view_count || 0).toLocaleString('ko-KR') + '</span></span>' +
         '<span class="icn">' + CMT_SVG + '<span class="tabular">' + (commentCounts[p.id] || 0) + '</span></span>' +
         '<span class="icn">' + HEART_SVG + '<span class="tabular">' + (p.like_count || 0) + '</span></span>';
@@ -540,8 +575,9 @@
       }
       var titleEl = e.target.closest('.post-title');
       if (!titleEl) return;
-      e.preventDefault();
       var id = titleEl.getAttribute('data-id');
+      if (!id) return; // 외부 뉴스/정부지원 항목은 target="_blank" 원문 링크로 기본 동작에 맡긴다
+      e.preventDefault();
       if (expandedId === id) { expandedId = null; render(); return; }
       expandedId = id;
       render();
