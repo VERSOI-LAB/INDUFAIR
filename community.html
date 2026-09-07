@@ -355,6 +355,8 @@
     var expandedId = null;
     var currentFilter = 'all';
     var currentSort = 'latest';
+    var VISIBLE_STEP = 5;
+    var showAllPosts = false;
     var currentNewsCategory = '';
     var commNavDrill = ''; // '' | 'news' | 'price'
     var priceTopCategories = [];
@@ -431,6 +433,7 @@
     function setBoardFilter(board, scroll) {
       currentFilter = board;
       currentNewsCategory = '';
+      showAllPosts = false;
       document.querySelectorAll('#boardFilterRow .filter-chip').forEach(function (b) {
         b.classList.toggle('on', b.getAttribute('data-board') === board);
       });
@@ -532,11 +535,15 @@
 
     function render() {
       var list = sortedFiltered();
+      var moreBtn = document.getElementById('commMoreBtn');
       if (!list.length) {
         postList.innerHTML = '<p class="comment-empty" style="padding:24px 0;text-align:center;">게시글이 없습니다.</p>';
+        moreBtn.style.display = 'none';
         return;
       }
-      postList.innerHTML = list.map(renderRow).join('');
+      var visibleList = showAllPosts ? list : list.slice(0, VISIBLE_STEP);
+      postList.innerHTML = visibleList.map(renderRow).join('');
+      moreBtn.style.display = (!showAllPosts && list.length > VISIBLE_STEP) ? 'flex' : 'none';
     }
 
     async function loadDetail(id) {
@@ -633,8 +640,14 @@
         document.querySelectorAll('.comm-sort button').forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
         currentSort = btn.getAttribute('data-sort');
+        showAllPosts = false;
         render();
       });
+    });
+
+    document.getElementById('commMoreBtn').addEventListener('click', function () {
+      showAllPosts = true;
+      render();
     });
 
     function applyQueryParams() {
