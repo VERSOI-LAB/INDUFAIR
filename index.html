@@ -619,7 +619,7 @@
     var qnaRes = await sb.from('community_posts').select('title,created_at').eq('board_type', 'qna').order('created_at', { ascending: false }).limit(4);
     commData.qna = (qnaRes.data || []).map(function (r) { return { title: r.title, isNew: isRecent(r.created_at) }; });
 
-    var priceRes = await sb.from('price_references').select('manufacturer,model_no,created_at').order('sample_count', { ascending: false }).limit(4);
+    var priceRes = await sb.from('price_references_live').select('manufacturer,model_no,created_at').order('sample_count', { ascending: false }).limit(4);
     commData.used = (priceRes.data || []).map(function (r) { return { title: [r.manufacturer, r.model_no].filter(Boolean).join(' ') + ' 시세', isNew: isRecent(r.created_at) }; });
 
     var activeBtn = document.querySelector('.comm-tabs button.active');

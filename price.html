@@ -169,7 +169,7 @@
   }
 
   async function loadPrices() {
-    var q = sb.from('price_references').select('*, categories(id,name)').order('sample_count', { ascending: false });
+    var q = sb.from('price_references_live').select('*, categories(id,name)').order('sample_count', { ascending: false });
     if (state.category) {
       var isLeaf = allCategories.some(function (c) { return String(c.id) === String(state.category); });
       if (isLeaf) {

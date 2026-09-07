@@ -674,7 +674,7 @@
 
     async function loadPriceWidget() {
       var wrap = document.getElementById('priceWidgetList');
-      var res = await sb.from('price_references').select('category_id,manufacturer,model_no,price_min,price_max').order('sample_count', { ascending: false }).limit(3);
+      var res = await sb.from('price_references_live').select('category_id,manufacturer,model_no,price_min,price_max').order('sample_count', { ascending: false }).limit(3);
       var rows = res.data || [];
       if (!rows.length) { wrap.innerHTML = '<p style="font-size:.82rem;color:var(--text-tertiary);">등록된 시세 정보가 없습니다.</p>'; return; }
       wrap.innerHTML = rows.map(function (p) {
