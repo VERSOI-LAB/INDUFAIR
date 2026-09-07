@@ -124,7 +124,11 @@
   }
 
   async function updateBadges(user) {
-    if (!user) return;
+    if (!user) {
+      // 로그인 전에는 정적 HTML에 남아있는 더미 배지 숫자를 실제 상태(0)로 되돌린다.
+      document.querySelectorAll('[aria-label="장바구니"] .icon-count, [aria-label="알림"] .icon-count').forEach(function (el) { el.textContent = '0'; });
+      return;
+    }
     try {
       var cartRes = await window.sb.from('cart_items').select('id', { count: 'exact', head: true }).eq('profile_id', user.id);
       var cartBtn = document.querySelector('a[aria-label="장바구니"] .icon-count');
