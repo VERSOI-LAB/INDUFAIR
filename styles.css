@@ -42,8 +42,10 @@
 
 /* ============ Base ============ */
 *{box-sizing:border-box;}
+html{overflow-x:hidden;}
 body{
   margin:0;
+  overflow-x:hidden;
   background:var(--bg);
   color:var(--text);
   font-family:var(--font-kr);
@@ -511,6 +513,15 @@ img,svg{display:block;max-width:100%;}
   .logo-tag{display:none;}
   .category-row{grid-template-columns:repeat(3,1fr);}
 
+  /* Logo image is a wide 1850x250 lockup — at the desktop 26px height it
+     renders ~192px wide, which alone ate half of a 375px viewport and
+     pushed header-actions off-screen (the whole page then rendered at
+     the overflowed width instead of the device width, i.e. the page
+     "밀림"/shifting the user saw). Shrink it, and the gap next to it,
+     so the header actually fits at phone widths. */
+  .header-inner{gap:14px;}
+  .logo-img{height:20px;}
+
   /* Header-actions: search + notification-bell + cart + login/user-chip + hamburger
      no longer fit on one line at phone widths and were pushing the header into
      horizontal overflow. Drop the least-essential icons (search has its own bar
@@ -521,6 +532,12 @@ img,svg{display:block;max-width:100%;}
   .header-actions .icon-btn[aria-label="알림"]{display:none;}
   .user-chip{gap:0;padding:4px;}
   .user-chip .lbl, .user-chip > svg{display:none;}
+}
+@media (max-width:400px){
+  /* Even the shrunk logo + cart/signup/hamburger cluster is tight below
+     ~400px (e.g. 320px devices) — trim further. */
+  .header-inner{gap:8px;padding-inline:12px;}
+  .logo-img{height:17px;}
 }
 
 /* ============ Two-column page layout (sidebar + main) shared shell ============ */
