@@ -507,7 +507,6 @@ img,svg{display:block;max-width:100%;}
   .main-nav a{padding:14px 24px;}
   .main-nav a.active::after{display:none;}
   .nav-toggle{display:flex;}
-  .header-actions .btn-ghost{display:none;}
 }
 @media (max-width:560px){
   .logo-tag{display:none;}
@@ -522,14 +521,22 @@ img,svg{display:block;max-width:100%;}
   .header-inner{gap:14px;}
   .logo-img{height:20px;}
 
-  /* Header-actions: search + notification-bell + cart + login/user-chip + hamburger
-     no longer fit on one line at phone widths and were pushing the header into
-     horizontal overflow. Drop the least-essential icons (search has its own bar
-     on every listing page; notifications are reachable from 마이페이지) and
-     collapse the logged-in user-chip down to just its avatar. */
+  /* Header-actions: search + notification-bell + cart + login-or-username +
+     signup/logout + hamburger no longer fit on one line at phone widths and
+     were pushing the header into horizontal overflow. Drop the least-essential
+     icons (search has its own bar on every listing page; notifications are
+     reachable from 마이페이지) and drop the signup/logout button — it was
+     previously the login button (.btn-ghost) that got hidden here, which left
+     logged-out mobile visitors with no visible way to log in at all. Signup is
+     still one tap away from the login page itself. */
   .header-actions{gap:6px;}
   .header-actions .icon-btn[aria-label="검색"],
   .header-actions .icon-btn[aria-label="알림"]{display:none;}
+  .header-actions .btn-primary{display:none;}
+  .header-actions .btn-ghost{
+    display:inline-block;padding:7px 12px;font-size:.8rem;max-width:104px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
   .user-chip{gap:0;padding:4px;}
   .user-chip .lbl, .user-chip > svg{display:none;}
 }
