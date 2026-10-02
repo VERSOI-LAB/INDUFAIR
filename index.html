@@ -47,7 +47,7 @@
     </div>
 
     <h2 class="sec-title">방금 올라온 물건</h2>
-    <div class="grid" id="recentGrid"></div>
+    <div class="list" id="recentGrid"></div>
     <div class="more" id="moreWrap" hidden><button class="btn white small" id="moreBtn">더 보기</button></div>
   </main>
 </div>
@@ -64,7 +64,7 @@
   var moreWrap = document.getElementById('moreWrap');
 
   grid.innerHTML = Array(4).join('.').split('.').map(function () {
-    return '<div><div class="skeleton" style="aspect-ratio:1/1"></div><div class="skeleton" style="height:18px;margin-top:8px"></div></div>';
+    return '<div class="row"><div class="skeleton" style="width:108px;height:108px;flex-shrink:0"></div><div style="flex:1"><div class="skeleton" style="height:20px"></div><div class="skeleton" style="height:16px;width:60%;margin-top:8px"></div></div></div>';
   }).join('');
 
   async function load() {
@@ -78,7 +78,7 @@
       grid.outerHTML = '<div class="empty">' + PS.icon3d('sell', 96) + '<b>아직 올라온 물건이 없어요</b>첫 번째로 판매해 보세요!</div>';
       return;
     }
-    grid.insertAdjacentHTML('beforeend', rows.map(PS.cardHtml).join(''));
+    grid.insertAdjacentHTML('beforeend', rows.map(PS.rowHtml).join(''));
     offset += rows.length;
     moreWrap.hidden = rows.length < PAGE;
   }
