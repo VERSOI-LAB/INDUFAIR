@@ -176,11 +176,11 @@
       var fav = await sb.from('favorites').select('id').eq('product_id', id).eq('profile_id', PS.user.id).maybeSingle();
       liked = !!fav.data;
     }
-    var canBuy = product.status === 'selling';
+    var canBuy = product.status === 'selling' && product.price > 0; // 가격 협의(0원)는 문의로
     bar.innerHTML =
       '<button class="heart' + (liked ? ' on' : '') + '" id="heartBtn" aria-label="찜하기" aria-pressed="' + liked + '">' + PS.icon3d('heart', 34) + '</button>' +
       '<button class="btn white" id="chatBtn"' + (product.status === 'sold' ? ' disabled' : '') + '>' + PS.icon3d('chat', 28) + ' 문의하기</button>' +
-      '<button class="btn" id="buyBtn"' + (canBuy ? '' : ' disabled') + '>' + (canBuy ? PS.icon3d('buy', 28) + ' 구매하기' : PS.STATUS[product.status] || '구매 불가') + '</button>';
+      '<button class="btn" id="buyBtn"' + (canBuy ? '' : ' disabled') + '>' + (canBuy ? PS.icon3d('buy', 28) + ' 구매하기' : product.status === 'selling' ? '가격 협의' : PS.STATUS[product.status] || '구매 불가') + '</button>';
     document.getElementById('heartBtn').addEventListener('click', toggleLike);
     document.getElementById('chatBtn').addEventListener('click', startChat);
     document.getElementById('buyBtn').addEventListener('click', function () {

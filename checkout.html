@@ -92,6 +92,7 @@
     product = pr.data;
     if (!product) return fail('물건을 찾을 수 없어요');
     if (product.seller_profile_id === user.id) return fail('내가 올린 물건은 살 수 없어요');
+    if (!(product.price > 0)) return fail('가격 협의 물건이에요. 문의하기로 가격을 먼저 물어보세요');
     if (product.status !== 'selling') return fail('지금은 살 수 없는 물건이에요 (' + (PS.STATUS[product.status] || '판매 종료') + ')');
     await loadAddresses();
     go(addresses.length ? 'list' : 'form');
