@@ -122,7 +122,7 @@
   async function openRoom(id) {
     app.classList.add('no-tabbar');
     app.innerHTML = '<div class="room">' +
-      '<header class="topbar"><a class="back" href="/chat" aria-label="채팅 목록">' + PS.icon('back', 24) + '</a><h1 id="otherName">채팅</h1></header>' +
+      '<header class="topbar"><a class="back" href="/chat" aria-label="채팅 목록">' + PS.icon('back', 24) + '</a><h1><a id="otherName" href="#">채팅</a></h1></header>' +
       '<a class="prod-strip" id="strip" href="#"></a>' +
       '<div class="msgs" id="msgs"></div>' +
       '<div class="quick" id="quick"></div>' +
@@ -140,7 +140,8 @@
     var chat = res.data;
     var otherId = chat.buyer_id === me ? chat.seller_id : chat.buyer_id;
     var names = await PS.publicProfiles([otherId]);
-    document.getElementById('otherName').textContent = (names[otherId] && names[otherId].name) || '이웃';
+    document.getElementById('otherName').textContent = ((names[otherId] && names[otherId].name) || '이웃') + ' ›';
+    document.getElementById('otherName').href = PS.profileUrl(otherId);
 
     var p = chat.products || {};
     var img = PS.firstImage(p);

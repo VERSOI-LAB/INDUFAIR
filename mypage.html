@@ -85,8 +85,8 @@
     var pr = PS.profile || {};
     main.innerHTML =
       '<section class="me">' +
-        '<div class="avatar">' + PS.avatarHtml(pr.avatar_url) + '</div>' +
-        '<div style="min-width:0"><b>' + PS.esc(pr.name || '이웃') + '</b><span>' + PS.esc(pr.phone || '전화번호 없음') + '</span></div>' +
+        '<a class="avatar" href="' + PS.profileUrl(PS.user.id) + '">' + PS.avatarHtml(pr.avatar_url) + '</a>' +
+        '<a href="' + PS.profileUrl(PS.user.id) + '" style="min-width:0"><b>' + PS.esc(pr.name || '이웃') + '</b><span>내 프로필 보기 ›</span></a>' +
         '<button class="edit" id="editBtn">수정</button>' +
       '</section>' +
       '<div class="stats" id="stats"><div><b>-</b><span>조회수</span></div><div><b>-</b><span>찜수</span></div><div><b>-</b><span>채팅수</span></div></div>' +
