@@ -180,6 +180,18 @@
     var min = Math.min.apply(null, prices), max = Math.max.apply(null, prices);
     return PS.won(min) + (max > min ? '~' : '');
   };
+  // 배송비: 0이면 포함(무료), 아니면 별도
+  PS.shipLabel = function (p) {
+    var f = Number(p && p.shipping_fee) || 0;
+    return f > 0 ? '배송비 ' + f.toLocaleString('ko-KR') + '원 별도' : '배송비 포함';
+  };
+  // 새로 추가된 컬럼(SQL 실행 전일 수 있음)을 빼 가며 한 건 조회
+  PS.selectProduct = async function (cols, extras, id) {
+    for (var n = extras.length; n >= 0; n--) {
+      var r = await sb.from('products').select(cols + (n ? ',' + extras.slice(0, n).join(',') : '')).eq('id', id).maybeSingle();
+      if (!r.error || n === 0) { r.extras = extras.slice(0, n); return r; }
+    }
+  };
   // "품명 (규격)" → { name, spec }
   PS.splitTitle = function (t) {
     var m = String(t || '').match(/^(.+?)\s*[(\[]([^()\[\]]+)[)\]]\s*$/);

@@ -44,6 +44,7 @@
   .heart.on{border-color:#FFD3D0;background:#FFF5F4;}
   .heart.on .i3d{filter:none;opacity:1;transform:scale(1.1);}
   .bar .btn{flex:1;}
+  .ship{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:14px;font-weight:600;color:var(--sub);background:var(--bg);border-radius:8px;padding:4px 10px;}
   .opts{margin-top:14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
   .opts b{display:block;font-size:14px;padding:10px 14px;background:var(--bg);}
   .opts span{display:flex;justify-content:space-between;gap:12px;padding:10px 14px;border-top:1px solid var(--line);font-size:16px;}
@@ -107,8 +108,7 @@
   async function load() {
     if (!id) return notFound();
     var cols = 'id,title,price,description,brand,condition,usage_period,region,status,seller_profile_id,category_id,created_at,view_count,like_count,inquiry_count,categories(name),product_images(url,sort_order)';
-    var res = await sb.from('products').select(cols + ',options').eq('id', id).maybeSingle();
-    if (res.error) res = await sb.from('products').select(cols).eq('id', id).maybeSingle(); // 옵션 SQL 실행 전
+    var res = await PS.selectProduct(cols, ['options', 'shipping_fee'], id);
     if (res.error || !res.data || res.data.status === 'deleted') return notFound();
     product = res.data;
     PS.addRecent(product.id);
@@ -167,6 +167,7 @@
         (PS.splitTitle(p.title).spec ? '<span class="spec">' + PS.esc(PS.splitTitle(p.title).spec) + '</span>' : '') + '</h1>' +
       '<div class="meta">' + PS.esc(p.categories ? p.categories.name : '') + (p.categories ? ' · ' : '') + PS.ago(p.created_at) + '</div>' +
       '<div class="price">' + PS.priceLabel(p) + '</div>' +
+      '<div class="ship">' + PS.icon('bag', 16) + ' ' + PS.shipLabel(p) + '</div>' +
       (PS.options(p).length ? '<div class="opts"><b>규격 ' + PS.options(p).length + '가지</b>' + PS.options(p).map(function (o, i) {
         return '<span>' + PS.esc(o.name) + '<em>' + PS.won(PS.optionPrice(p, i)) + '</em></span>';
       }).join('') + '</div>' : '') +
