@@ -132,6 +132,14 @@
       <button type="button" data-add="10000000">+1000만</button>
       <button type="button" data-add="0" style="background:none;color:var(--sub)">지우기</button>
     </div>
+    <div class="field" style="margin-top:28px"><span>배송비</span>
+      <div class="chip-grid" id="shipChips">
+        <button type="button" class="chip on" data-sep="0">배송비 포함</button>
+        <button type="button" class="chip" data-sep="1">배송비 별도</button>
+      </div>
+      <div class="price-row" id="shipRow" hidden style="display:flex;gap:8px;align-items:center;margin-top:8px"><input class="input" id="shipInput" inputmode="numeric" placeholder="예) 3,000" autocomplete="off" style="flex:1"><b>원</b></div>
+      <p class="bg-hint" style="text-align:left" id="shipHint">물건 가격에 배송비가 들어 있어요</p>
+    </div>
     <div class="field" style="margin-top:28px"><span>규격 <small style="color:var(--hint);font-weight:500">(안 써도 돼요)</small></span>
       <div id="specBox"></div>
       <button type="button" class="btn white small" id="addSpec" style="margin-top:8px"><i data-icon="plus" data-size="18"></i> 규격 추가</button>
@@ -231,7 +239,7 @@
   function validate() {
     var ok = false;
     if (step === 1) ok = photos.length > 0 && !!form.title.trim() && !!form.category;
-    if (step === 2) ok = form.price > 0 || allSpecsPriced();
+    if (step === 2) ok = (form.price > 0 || allSpecsPriced()) && (!form.shipSep || form.ship > 0);
     if (step === 3) ok = true;
     if (step === 4) ok = !!$('regionInput').value.trim() || !!form.region;
     $('nextBtn').disabled = !ok;
@@ -503,6 +511,25 @@
   });
 
 
+  // ---------- 배송비 (포함 / 별도) ----------
+  form.shipSep = false; form.ship = 0;
+  $('shipChips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    form.shipSep = b.dataset.sep === '1';
+    $('shipChips').querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('on', c === b); });
+    $('shipRow').hidden = !form.shipSep;
+    $('shipHint').textContent = form.shipSep ? '사는 사람이 결제할 때 물건 가격에 더해져요' : '물건 가격에 배송비가 들어 있어요';
+    if (form.shipSep) $('shipInput').focus();
+    validate();
+  });
+  $('shipInput').addEventListener('input', function () {
+    var n = Number(this.value.replace(/[^0-9]/g, '').slice(0, 7)) || 0;
+    this.value = n ? n.toLocaleString('ko-KR') : '';
+    form.ship = n;
+    validate();
+  });
+
   // ---------- 규격 (여러 개면 구매할 때 고름) ----------
   form.specs = [{ name: '', price: 0 }];
   function specNames() { return form.specs.map(function (sp) { return sp.name.trim().replace(/[()]/g, ''); }).filter(Boolean); }
@@ -699,12 +726,18 @@
       lng: coords ? coords.lng : null,
       status: 'selling'
     };
+    if (form.shipSep && form.ship > 0) payload.shipping_fee = form.ship;
     var optList = form.specs.filter(function (sp) { return sp.name.trim(); });
     if (optList.length > 1) {
       payload.options = optList.map(function (sp) { var nm = sp.name.trim().replace(/[()]/g, ''); return sp.price ? { name: nm, price: sp.price } : { name: nm }; });
       if (!payload.price) payload.price = Math.min.apply(null, optList.map(function (sp) { return sp.price; })); // 목록에는 가장 싼 값
     }
     var res = await sb.from('products').insert(payload).select('id').single();
+    // 배송비·규격 컬럼이 아직 없을 때(SQL 실행 전)는 빼고 다시
+    if (res.error && (res.error.code === 'PGRST204' || res.error.code === '42703')) {
+      delete payload.shipping_fee; delete payload.options;
+      res = await sb.from('products').insert(payload).select('id').single();
+    }
     // 상태를 안 고른 경우: DB가 아직 빈 값을 막고 있으면(23502) 예전처럼 '괜찮아요'로 저장
     if (res.error && res.error.code === '23502' && !payload.condition) {
       payload.condition = 'good';

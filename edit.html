@@ -63,9 +63,9 @@
   PS.ready.then(async function (user) {
     if (!user) return PS.goLogin();
     var cols = 'id,title,price,description,condition,usage_period,category_id,status,seller_profile_id,product_images(id,url,sort_order)';
-    var r = await sb.from('products').select(cols + ',options').eq('id', id).maybeSingle();
-    form.hasOptions = !r.error;
-    if (r.error) r = await sb.from('products').select(cols).eq('id', id).maybeSingle(); // 옵션 SQL 실행 전
+    var r = await PS.selectProduct(cols, ['options', 'shipping_fee'], id);
+    form.hasOptions = r.extras.indexOf('options') >= 0;
+    form.hasShip = r.extras.indexOf('shipping_fee') >= 0;
     product = r.data;
     if (!product || product.status === 'deleted') return fail('물건을 찾을 수 없어요');
     if (product.seller_profile_id !== user.id) return fail('내가 올린 물건만 고칠 수 있어요');
@@ -77,6 +77,8 @@
     form.specs = opts.length ? opts.map(function (o) { return { name: o.name || '', price: Number(o.price) || 0 }; })
       : [{ name: t.spec, price: 0 }];
     form.price = product.price || 0;
+    form.ship = Number(product.shipping_fee) || 0;
+    form.shipSep = form.ship > 0;
     form.desc = product.description || '';
     form.usage = product.usage_period || '';
     form.condition = product.condition || '';
@@ -112,6 +114,11 @@
         '<div class="price-row"><input class="input" id="fPrice" inputmode="numeric" placeholder="숫자만 써 주세요" value="' + (form.price ? form.price.toLocaleString('ko-KR') : '') + '"' + (form.price ? '' : ' disabled') + '><span>원</span></div>' +
         '<p class="hint" id="priceHint"></p>' +
         '<label class="chk"><input type="checkbox" id="fNego"' + (form.price ? '' : ' checked') + '> 가격 협의 (가격을 정하지 않고 문의 받기)</label></div>' +
+      '<div class="field"><span>배송비</span><div class="chip-grid">' +
+        '<button type="button" class="chip ship-opt' + (form.shipSep ? '' : ' on') + '" data-sep="0">배송비 포함</button>' +
+        '<button type="button" class="chip ship-opt' + (form.shipSep ? ' on' : '') + '" data-sep="1">배송비 별도</button></div>' +
+        (form.shipSep ? '<div class="price-row" style="margin-top:8px"><input class="input" id="fShip" inputmode="numeric" placeholder="예) 3,000" value="' + (form.ship ? form.ship.toLocaleString('ko-KR') : '') + '"><span>원</span></div>' +
+          '<p class="hint">사는 사람이 결제할 때 물건 가격에 더해져요</p>' : '<p class="hint">물건 가격에 배송비가 들어 있어요</p>') + '</div>' +
       '<label class="field"><span>설명</span><textarea class="textarea" id="fDesc" maxlength="3000" placeholder="물건 설명, 사양, 규격을 자유롭게 써 주세요">' + PS.esc(form.desc) + '</textarea></label>' +
       '<div class="field"><span>분류</span><div class="chip-grid">' + chips(catMap, 'category') + '</div></div>' +
       '<div class="field"><span>얼마나 썼나요?</span><div class="chip-grid">' + chips(PS.USAGE, 'usage') + '</div></div>' +
@@ -138,7 +145,15 @@
       else $('fPrice').focus();
       priceHint();
     });
-    $('main').querySelectorAll('.chip').forEach(function (b) {
+    $('main').querySelectorAll('.ship-opt').forEach(function (b) {
+      b.addEventListener('click', function () { syncText(); form.shipSep = b.dataset.sep === '1'; render(); if (form.shipSep && $('fShip')) $('fShip').focus(); });
+    });
+    if ($('fShip')) $('fShip').addEventListener('input', function (e) {
+      var n = Number(e.target.value.replace(/[^0-9]/g, '').slice(0, 7)) || 0;
+      e.target.value = n ? n.toLocaleString('ko-KR') : '';
+      form.ship = n;
+    });
+    $('main').querySelectorAll('.chip[data-key]').forEach(function (b) {
       b.addEventListener('click', function () {
         syncText();
         var k = b.dataset.key, v = b.dataset.v;
@@ -260,6 +275,8 @@
     var allPriced = options.length && options.every(function (o) { return o.price > 0; });
     if (!nego && !form.price && allPriced) form.price = Math.min.apply(null, options.map(function (o) { return o.price; })); // 목록에는 가장 싼 값
     if (!nego && !form.price) return PS.toast('가격을 쓰거나 "가격 협의"를 눌러 주세요');
+    if (form.shipSep && !form.ship) return PS.toast('배송비를 써 주세요 (없으면 "배송비 포함")');
+    if (form.shipSep && !form.hasShip) PS.toast('배송비 별도는 SQL을 실행한 뒤부터 적용돼요');
     if (options.length && !form.hasOptions) PS.toast('규격 고르기는 SQL을 실행한 뒤부터 적용돼요');
     var btn = $('saveBtn');
     btn.disabled = true; btn.textContent = '저장하는 중…';
@@ -299,6 +316,7 @@
         condition: form.usage && form.usage !== 'new' ? form.condition || null : null
       };
       if (form.hasOptions) payload.options = options;
+      if (form.hasShip) payload.shipping_fee = form.shipSep ? form.ship : 0;
       var r = await sb.from('products').update(payload).eq('id', id);
       if (r.error) throw r.error;
       PS.toast('저장했어요!');
