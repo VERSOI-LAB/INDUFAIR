@@ -136,8 +136,14 @@
     loading = (async function () {
       if (PS.KAKAO_JS_KEY) {
         try {
-          await loadScript('https://dapi.kakao.com/v2/maps/sdk.js?appkey=' + encodeURIComponent(PS.KAKAO_JS_KEY) + '&autoload=false&libraries=services');
-          await new Promise(function (resolve) { window.kakao.maps.load(resolve); });
+          // 도메인 미등록·카카오맵 미사용 설정이면 응답이 안 올 수 있어 8초 안에 안 되면 기본 지도로
+          await Promise.race([
+            (async function () {
+              await loadScript('https://dapi.kakao.com/v2/maps/sdk.js?appkey=' + encodeURIComponent(PS.KAKAO_JS_KEY) + '&autoload=false&libraries=services');
+              await new Promise(function (resolve) { window.kakao.maps.load(resolve); });
+            })(),
+            new Promise(function (_, reject) { setTimeout(function () { reject(new Error('카카오맵 응답 없음')); }, 8000); })
+          ]);
           return kakaoAdapter();
         } catch (e) {
           console.warn('[판다산다] 카카오맵을 불러오지 못해 기본 지도로 보여줘요', e);
