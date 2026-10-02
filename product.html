@@ -167,7 +167,8 @@
     var mine = PS.user && PS.user.id === product.seller_profile_id;
 
     if (mine) {
-      bar.innerHTML = '<button class="btn white" id="statusBtn">' + (PS.STATUS[product.status] || '판매중') + ' · 상태 바꾸기</button>';
+      bar.innerHTML = '<a class="btn white" href="/edit?id=' + encodeURIComponent(id) + '" style="flex:0 0 40%">' + PS.icon('gear', 20) + ' 고치기</a>' +
+        '<button class="btn white" id="statusBtn">' + (PS.STATUS[product.status] || '판매중') + ' · 상태 바꾸기</button>';
       document.getElementById('statusBtn').addEventListener('click', openSheet);
       return;
     }
