@@ -360,6 +360,7 @@
   ];
 
   PS.renderTabbar = function (active) {
+    if (document.querySelector('nav.tabbar')) return; // 한 번만
     var nav = document.createElement('nav');
     nav.className = 'tabbar';
     nav.setAttribute('aria-label', '메뉴');
@@ -378,4 +379,18 @@
     var dot = document.getElementById('chatDot');
     if (dot) dot.classList.toggle('show', (res.count || 0) > 0);
   }
+
+  // 하단 탭바는 모든 페이지에 항상 고정 (페이지가 직접 그리지 않으면 주소로 판단해 자동으로)
+  function autoTabbar() {
+    if (document.querySelector('nav.tabbar')) return;
+    var path = location.pathname;
+    var key = path === '/' || path === '/index' ? 'home'
+      : /^\/sell/.test(path) ? 'sell'
+      : /^\/(buy|product|checkout|pay-|biz\/(?!new|verify)|business)/.test(path) ? 'buy'
+      : /^\/chat/.test(path) ? 'chat'
+      : /^\/(mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|my-biz|biz\/new|biz\/verify|biz-new|biz-verify)/.test(path) ? 'my' : '';
+    PS.renderTabbar(key);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(autoTabbar, 0); });
+  else setTimeout(autoTabbar, 0);
 })();

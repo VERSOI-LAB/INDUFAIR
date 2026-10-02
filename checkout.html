@@ -8,7 +8,7 @@
 <link rel="icon" href="/이미지/web/logo.jpg">
 <link rel="stylesheet" href="/app.css">
 <style>
-  .app{background:#F2F3F5;padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+  .app,.app.no-tabbar{background:#F2F3F5;padding-bottom:calc(var(--tabbar-h) + 104px + env(safe-area-inset-bottom));}
   .topbar{background:#F2F3F5;}
   .topbar .act{font-size:16px;font-weight:600;color:var(--sub);padding:8px 0 8px 8px;}
   .head{margin:4px 0 20px;}
@@ -55,7 +55,7 @@
   </header>
   <main class="page" id="main"><div class="skeleton" style="height:120px;border-radius:18px"></div></main>
 </div>
-<div class="foot" id="foot" hidden><button class="btn" id="nextBtn"></button></div>
+<div class="foot over-tabbar" id="foot" hidden><button class="btn" id="nextBtn"></button></div>
 <div class="post-layer" id="postLayer" hidden>
   <header>주소 찾기<button id="postClose" aria-label="닫기"><i data-icon="close" data-size="24"></i></button></header>
   <div id="postBox"></div>

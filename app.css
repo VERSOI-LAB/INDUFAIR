@@ -38,8 +38,7 @@ p{margin:0;}
 
 /* 레이아웃: 휴대폰 폭 한 컬럼 */
 .app{max-width:var(--app-w);margin:0 auto;min-height:100vh;background:var(--surface);position:relative;
-  padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));}
-.app.no-tabbar{padding-bottom:0;}
+  padding-bottom:calc(var(--tabbar-h) + 24px + env(safe-area-inset-bottom));} /* 탭바에 마지막 내용이 가리지 않게 여유 */
 .page{padding:0 16px;}
 
 /* 상단 바 */
@@ -49,6 +48,8 @@ p{margin:0;}
 .topbar .back{width:44px;height:44px;margin-left:-12px;display:flex;align-items:center;justify-content:center;border-radius:50%;}
 .topbar .back:active{background:var(--bg);}
 
+/* 하단 탭바: 모든 페이지 공통. 페이지 전용 버튼줄은 탭바 바로 위에 */
+.over-tabbar{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom)) !important;padding-bottom:12px !important;}
 /* 하단 탭바 */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;max-width:var(--app-w);margin:0 auto;
   height:calc(var(--tabbar-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
