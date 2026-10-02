@@ -115,7 +115,7 @@
       '<label class="field"><span>설명</span><textarea class="textarea" id="fDesc" maxlength="3000" placeholder="물건 설명, 사양, 규격을 자유롭게 써 주세요">' + PS.esc(form.desc) + '</textarea></label>' +
       '<div class="field"><span>분류</span><div class="chip-grid">' + chips(catMap, 'category') + '</div></div>' +
       '<div class="field"><span>얼마나 썼나요?</span><div class="chip-grid">' + chips(PS.USAGE, 'usage') + '</div></div>' +
-      '<div class="field"><span>상태는 어때요?</span><div class="chip-grid">' + chips(PS.CONDITIONS, 'condition') + '</div></div>' +
+      (form.usage && form.usage !== 'new' ? '<div class="field"><span>상태는 어때요?</span><div class="chip-grid">' + chips(PS.CONDITIONS, 'condition') + '</div></div>' : '') +
       '<button type="button" class="btn danger" id="delBtn" style="margin-top:32px">' + PS.icon('trash', 20) + ' 이 물건 삭제하기</button>';
     renderPhotos();
     priceHint();
@@ -144,6 +144,7 @@
         var k = b.dataset.key, v = b.dataset.v;
         if (k === 'category') form.category = Number(v);
         else form[k] = form[k] === v ? '' : v; // 한 번 더 누르면 해제
+        if (!form.usage || form.usage === 'new') form.condition = ''; // 상태는 써 본 물건만
         render();
       });
     });
@@ -295,7 +296,7 @@
         description: form.desc.trim(),
         category_id: form.category || null,
         usage_period: form.usage || null,
-        condition: form.condition || null
+        condition: form.usage && form.usage !== 'new' ? form.condition || null : null
       };
       if (form.hasOptions) payload.options = options;
       var r = await sb.from('products').update(payload).eq('id', id);
