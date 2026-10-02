@@ -109,9 +109,11 @@
       '<label class="field"><span>설명</span><textarea class="textarea" id="fDesc" maxlength="3000" placeholder="물건 설명, 사양, 규격을 자유롭게 써 주세요">' + PS.esc(form.desc) + '</textarea></label>' +
       '<div class="field"><span>분류</span><div class="chip-grid">' + chips(catMap, 'category') + '</div></div>' +
       '<div class="field"><span>얼마나 썼나요?</span><div class="chip-grid">' + chips(PS.USAGE, 'usage') + '</div></div>' +
-      '<div class="field"><span>상태는 어때요?</span><div class="chip-grid">' + chips(PS.CONDITIONS, 'condition') + '</div></div>';
+      '<div class="field"><span>상태는 어때요?</span><div class="chip-grid">' + chips(PS.CONDITIONS, 'condition') + '</div></div>' +
+      '<button type="button" class="btn danger" id="delBtn" style="margin-top:32px">' + PS.icon('trash', 20) + ' 이 물건 삭제하기</button>';
     renderPhotos();
     priceHint();
+    $('delBtn').addEventListener('click', removeProduct);
     $('fPrice').addEventListener('input', function (e) {
       var n = Number(e.target.value.replace(/[^0-9]/g, '').slice(0, 11)) || 0;
       e.target.value = n ? n.toLocaleString('ko-KR') : '';
@@ -206,6 +208,16 @@
   function storagePath(url) {
     var m = String(url || '').match(/\/storage\/v1\/object\/public\/product-images\/(.+)$/);
     return m ? decodeURIComponent(m[1]) : null;
+  }
+
+  async function removeProduct() {
+    if (!confirm('이 물건을 삭제할까요?\n삭제하면 목록과 검색에서 사라져요.')) return;
+    var btn = $('delBtn');
+    btn.disabled = true;
+    var r = await sb.from('products').update({ status: 'deleted' }).eq('id', id);
+    if (r.error) { btn.disabled = false; return PS.toast('삭제하지 못했어요. 다시 해 주세요'); }
+    PS.toast('삭제했어요');
+    setTimeout(function () { location.href = '/sales'; }, 600);
   }
 
   $('saveBtn').addEventListener('click', async function () {
