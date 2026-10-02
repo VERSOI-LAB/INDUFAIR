@@ -20,7 +20,8 @@
   // 토스페이먼츠 결제창 → 성공 → 서버(toss-confirm)에서 금액 검증 후 승인
   var box = document.getElementById('box');
   var pid = PS.param('pid');
-  var back = pid ? PS.productUrl(pid) : '/';
+  var seller = PS.param('seller');
+  var back = seller ? '/cart' : pid ? PS.productUrl(pid) : '/';
   function show(ok, title, sub) {
     box.innerHTML = PS.sticker(ok ? 'thanks' : 'sorry', 140) + '<b>' + PS.esc(title) + '</b>' + PS.esc(sub || '') +
       '<div style="margin-top:24px;display:grid;gap:8px">' +
@@ -35,6 +36,10 @@
       body: JSON.stringify({ paymentKey: PS.param('paymentKey'), orderId: PS.param('orderId'), amount: Number(PS.param('amount')) })
     });
     var d = await res.json().catch(function () { return {}; });
+    if (res.ok && d.ok) {
+      // 장바구니에서 결제한 물건 빼기
+      try { var keys = JSON.parse(sessionStorage.getItem('ps_paid_cart') || '[]'); if (keys.length) PS.cart.removeMany(keys); sessionStorage.removeItem('ps_paid_cart'); } catch (e) {}
+    }
     if (res.ok && d.ok) show(true, '결제가 끝났어요!', '판매자에게 알려 드릴게요. 물건을 받으면 거래가 마무리돼요.');
     else show(false, '결제를 마치지 못했어요', d.message || '돈은 빠져나가지 않았어요. 다시 시도해 주세요.');
   } catch (e) {

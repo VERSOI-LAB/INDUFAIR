@@ -21,7 +21,7 @@
   var cancel = PS.param('code') === 'PAY_PROCESS_CANCELED' || PS.param('code') === 'USER_CANCEL';
   document.getElementById('box').innerHTML = PS.sticker('sorry', 140) +
     '<b>' + (cancel ? '결제를 취소했어요' : '결제하지 못했어요') + '</b>' + PS.esc(cancel ? '' : (PS.param('message') || '잠시 후 다시 해 주세요')) +
-    '<div style="margin-top:24px"><a class="btn" href="' + (pid ? '/checkout?id=' + encodeURIComponent(pid) : '/') + '">다시 결제하기</a></div>';
+    '<div style="margin-top:24px"><a class="btn" href="' + (PS.param('seller') ? '/checkout?seller=' + encodeURIComponent(PS.param('seller')) : pid ? '/checkout?id=' + encodeURIComponent(pid) : '/') + '">다시 결제하기</a></div>';
 })();
 </script>
 </body>
