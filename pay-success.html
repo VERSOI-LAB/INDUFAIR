@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>결제 확인 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="app no-tabbar">
+  <main class="page"><div class="empty" id="box" style="padding-top:80px"><div class="skeleton" style="width:140px;height:140px;border-radius:50%;margin:0 auto"></div><b>결제를 확인하고 있어요</b>잠시만 기다려 주세요</div></main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(async function () {
+  // 토스페이먼츠 결제창 → 성공 → 서버(toss-confirm)에서 금액 검증 후 승인
+  var box = document.getElementById('box');
+  var pid = PS.param('pid');
+  var back = pid ? PS.productUrl(pid) : '/';
+  function show(ok, title, sub) {
+    box.innerHTML = PS.sticker(ok ? 'thanks' : 'sorry', 140) + '<b>' + PS.esc(title) + '</b>' + PS.esc(sub || '') +
+      '<div style="margin-top:24px;display:grid;gap:8px">' +
+      (ok ? '<a class="btn" href="/purchases">구매내역 보기</a><a class="btn white" href="/">홈으로</a>' : '<a class="btn" href="' + back + '">물건으로 돌아가기</a>') + '</div>';
+  }
+  await PS.ready;
+  try {
+    var token = await PS.accessToken();
+    var res = await fetch(PS.FUNCTIONS_URL + '/toss-confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ paymentKey: PS.param('paymentKey'), orderId: PS.param('orderId'), amount: Number(PS.param('amount')) })
+    });
+    var d = await res.json().catch(function () { return {}; });
+    if (res.ok && d.ok) show(true, '결제가 끝났어요!', '판매자에게 알려 드릴게요. 물건을 받으면 거래가 마무리돼요.');
+    else show(false, '결제를 마치지 못했어요', d.message || '돈은 빠져나가지 않았어요. 다시 시도해 주세요.');
+  } catch (e) {
+    console.error(e);
+    show(false, '결제를 확인하지 못했어요', '잠시 후 구매내역에서 확인해 주세요.');
+  }
+})();
+</script>
+</body>
+</html>

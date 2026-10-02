@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>결제 실패 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="app no-tabbar">
+  <main class="page"><div class="empty" id="box" style="padding-top:80px"></div></main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  var pid = PS.param('pid');
+  var cancel = PS.param('code') === 'PAY_PROCESS_CANCELED' || PS.param('code') === 'USER_CANCEL';
+  document.getElementById('box').innerHTML = PS.sticker('sorry', 140) +
+    '<b>' + (cancel ? '결제를 취소했어요' : '결제하지 못했어요') + '</b>' + PS.esc(cancel ? '' : (PS.param('message') || '잠시 후 다시 해 주세요')) +
+    '<div style="margin-top:24px"><a class="btn" href="' + (pid ? '/checkout?id=' + encodeURIComponent(pid) : '/') + '">다시 결제하기</a></div>';
+})();
+</script>
+</body>
+</html>

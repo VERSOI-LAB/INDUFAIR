@@ -8,6 +8,8 @@
 
   // 카카오맵 JavaScript 키 (Kakao Developers > 앱 키). 비어 있으면 무료 지도(OpenStreetMap)로 보여준다.
   PS.KAKAO_JS_KEY = 'eed04d223c75e55f7d445b88ca168023';
+  // 토스페이먼츠 클라이언트 키 (공개용, test_ck_... 또는 live_ck_...). 비어 있으면 결제 버튼이 '준비 중'으로 안내
+  PS.TOSS_CLIENT_KEY = '';
 
   // 대분류 5개 (중·소분류는 나중에 categories.parent_id 로 추가)
   PS.CATEGORIES = ['중고장터', '산업기계', '공구·부품', '자동화·전기', '물류·창고'];
@@ -164,6 +166,11 @@
   PS.profileUrl = function (id) { return '/profile/' + encodeURIComponent(id); };
 
   // 홈: 2열 카드
+  // "품명 (규격)" → { name, spec }
+  PS.splitTitle = function (t) {
+    var m = String(t || '').match(/^(.+?)\s*[(\[]([^()\[\]]+)[)\]]\s*$/);
+    return m ? { name: m[1], spec: m[2] } : { name: String(t || ''), spec: '' };
+  };
   PS.cardHtml = function (p) {
     return '<a class="card" href="' + PS.productUrl(p.id) + '">' +
       '<div class="ph">' + photoHtml(p) + '</div>' +

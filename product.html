@@ -28,8 +28,9 @@
   .seller:active{background:var(--bg);}
   .seller .more-link{font-size:14px;color:var(--sub);flex-shrink:0;}
   .title{font-size:22px;font-weight:700;margin-top:20px;line-height:1.35;}
+  .title .spec{display:block;margin-top:4px;font-size:16px;font-weight:500;color:var(--sub);line-height:1.4;}
   .meta{font-size:14px;color:var(--hint);margin-top:6px;}
-  .price{font-size:30px;font-weight:800;margin-top:10px;}
+  .price{font-size:25px;font-weight:800;margin-top:10px;}
   .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
   .fact{background:var(--bg);border-radius:10px;padding:8px 12px;font-size:15px;}
   .fact em{font-style:normal;color:var(--sub);margin-right:6px;}
@@ -43,6 +44,13 @@
   .heart.on{border-color:#FFD3D0;background:#FFF5F4;}
   .heart.on .i3d{filter:none;opacity:1;transform:scale(1.1);}
   .bar .btn{flex:1;}
+  .rec{margin-top:28px;padding-top:24px;border-top:8px solid var(--bg);margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;}
+  .rec h2{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:19px;font-weight:800;margin-bottom:14px;}
+  .rec h2 small{font-size:15px;font-weight:600;color:var(--hint);}
+  .rec h2 a{color:#BBB;display:flex;}
+  .hscroll{display:grid;grid-auto-flow:column;grid-auto-columns:38%;gap:12px;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px;}
+  .hscroll::-webkit-scrollbar{display:none;}
+  @media (min-width:600px){ .hscroll{grid-auto-columns:23%;} }
 </style>
 </head>
 <body>
@@ -87,7 +95,7 @@
   async function load() {
     if (!id) return notFound();
     var res = await sb.from('products')
-      .select('id,title,price,description,brand,condition,usage_period,region,status,seller_profile_id,created_at,view_count,like_count,inquiry_count,categories(name),product_images(url,sort_order)')
+      .select('id,title,price,description,brand,condition,usage_period,region,status,seller_profile_id,category_id,created_at,view_count,like_count,inquiry_count,categories(name),product_images(url,sort_order)')
       .eq('id', id).maybeSingle();
     if (res.error || !res.data || res.data.status === 'deleted') return notFound();
     product = res.data;
@@ -105,6 +113,7 @@
     renderSlider();
     renderBody(sellerMap[product.seller_profile_id] || {});
     await renderBar();
+    renderRecs(sellerMap[product.seller_profile_id] || {});
     if (countView) {
       PS.fire(sb.rpc('increment_product_view', { p_product_id: id }));
       try { sessionStorage.setItem(viewKey, '1'); } catch (e) {}
@@ -142,12 +151,14 @@
         '<div style="flex:1;min-width:0"><b>' + PS.esc(seller.name || '판매자') + '</b><span>' + PS.esc(p.region || '지역 정보 없음') + '</span></div>' +
         '<span class="more-link">다른 물건 보기 ›</span>' +
       '</a>' +
-      '<h1 class="title">' + badge + PS.esc(p.title) + '</h1>' +
+      '<h1 class="title">' + badge + PS.esc(PS.splitTitle(p.title).name) +
+        (PS.splitTitle(p.title).spec ? '<span class="spec">' + PS.esc(PS.splitTitle(p.title).spec) + '</span>' : '') + '</h1>' +
       '<div class="meta">' + PS.esc(p.categories ? p.categories.name : '') + (p.categories ? ' · ' : '') + PS.ago(p.created_at) + '</div>' +
       '<div class="price">' + PS.won(p.price) + '</div>' +
       (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
       (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
-      '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) + '</div>';
+      '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) + '</div>' +
+      '<div id="recs"></div>';
   }
 
   async function renderBar() {
@@ -165,14 +176,17 @@
       var fav = await sb.from('favorites').select('id').eq('product_id', id).eq('profile_id', PS.user.id).maybeSingle();
       liked = !!fav.data;
     }
-    var disabled = product.status === 'sold';
+    var canBuy = product.status === 'selling';
     bar.innerHTML =
       '<button class="heart' + (liked ? ' on' : '') + '" id="heartBtn" aria-label="찜하기" aria-pressed="' + liked + '">' + PS.icon3d('heart', 34) + '</button>' +
-      '<button class="btn white" id="callBtn"' + (disabled ? ' disabled' : '') + '>' + PS.icon('phone', 20) + ' 전화하기</button>' +
-      '<button class="btn" id="chatBtn"' + (disabled ? ' disabled' : '') + '>' + PS.icon3d('chat', 28) + ' 채팅하기</button>';
+      '<button class="btn white" id="chatBtn"' + (product.status === 'sold' ? ' disabled' : '') + '>' + PS.icon3d('chat', 28) + ' 문의하기</button>' +
+      '<button class="btn" id="buyBtn"' + (canBuy ? '' : ' disabled') + '>' + (canBuy ? PS.icon3d('buy', 28) + ' 구매하기' : PS.STATUS[product.status] || '구매 불가') + '</button>';
     document.getElementById('heartBtn').addEventListener('click', toggleLike);
-    document.getElementById('callBtn').addEventListener('click', call);
     document.getElementById('chatBtn').addEventListener('click', startChat);
+    document.getElementById('buyBtn').addEventListener('click', function () {
+      if (!PS.requireLogin()) return;
+      location.href = '/checkout?id=' + encodeURIComponent(id);
+    });
   }
 
   async function toggleLike() {
@@ -188,13 +202,6 @@
     PS.toast(liked ? '찜했어요!' : '찜을 취소했어요');
   }
 
-  async function call() {
-    if (!PS.requireLogin()) return;
-    var res = await sb.rpc('get_seller_phone', { p_product_id: id });
-    if (res.data) location.href = 'tel:' + String(res.data).replace(/[^0-9+]/g, '');
-    else PS.toast('전화번호가 없어요. 채팅으로 물어보세요!');
-  }
-
   async function startChat() {
     if (!PS.requireLogin()) return;
     var btn = document.getElementById('chatBtn');
@@ -207,6 +214,40 @@
       chatId = ins.data.id;
     }
     location.href = '/chat/' + chatId;
+  }
+
+  // 아래로 내리면: 추천 · 비슷한 물품 · 판매자의 다른 물품
+  async function renderRecs(seller) {
+    var p = product;
+    var base = function () {
+      return sb.from('products').select(PS.PRODUCT_LIST_COLUMNS).eq('status', 'selling').neq('id', p.id);
+    };
+    var jobs = [
+      (PS.user ? base().neq('seller_profile_id', PS.user.id) : base()).order('like_count', { ascending: false }).order('view_count', { ascending: false }).limit(10),
+      p.category_id ? base().eq('category_id', p.category_id).order('created_at', { ascending: false }).limit(6) : Promise.resolve({ data: [] }),
+      base().eq('seller_profile_id', p.seller_profile_id).order('created_at', { ascending: false }).limit(6)
+    ];
+    var r = await Promise.all(jobs);
+    var similar = r[1].data || [];
+    var sellerItems = r[2].data || [];
+    var used = {};
+    similar.concat(sellerItems).forEach(function (x) { used[x.id] = 1; });
+    // 추천은 아래 두 목록과 겹치지 않게 (내 물건은 쿼리에서 이미 뺌)
+    var all = r[0].data || [];
+    var picks = all.filter(function (x) { return !used[x.id]; });
+    if (picks.length < 4) picks = all; // 물건이 적을 땐 겹쳐도 보여줌
+    picks = picks.slice(0, 8);
+    var me = PS.user ? ((PS.profile && PS.profile.name) || '회원') : '회원';
+    var html = '';
+    if (picks.length) html += '<section class="rec"><h2><span>' + PS.esc(me) + '님을 위한 추천 <small>· 광고</small></span></h2>' +
+      '<div class="hscroll">' + picks.map(PS.cardHtml).join('') + '</div></section>';
+    if (similar.length) html += '<section class="rec"><h2>보고 있는 물품과 비슷한 물품</h2>' +
+      '<div class="grid">' + similar.map(PS.cardHtml).join('') + '</div></section>';
+    if (sellerItems.length) html += '<section class="rec"><h2><span>' + PS.esc(seller.name || '판매자') + '님의 판매 물품</span>' +
+      '<a href="' + PS.profileUrl(p.seller_profile_id) + '" aria-label="전체 보기">' + PS.icon('chevron', 22) + '</a></h2>' +
+      '<div class="grid">' + sellerItems.map(PS.cardHtml).join('') + '</div></section>';
+    var box = document.getElementById('recs');
+    if (box) box.innerHTML = html;
   }
 
   var sheet = document.getElementById('sheet');
