@@ -7,7 +7,7 @@
   PS.FUNCTIONS_URL = 'https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1';
 
   // 카카오맵 JavaScript 키 (Kakao Developers > 앱 키). 비어 있으면 무료 지도(OpenStreetMap)로 보여준다.
-  PS.KAKAO_JS_KEY = '';
+  PS.KAKAO_JS_KEY = 'eed04d223c75e55f7d445b88ca168023';
 
   // 대분류 5개 (중·소분류는 나중에 categories.parent_id 로 추가)
   PS.CATEGORIES = ['중고장터', '산업기계', '공구·부품', '자동화·전기', '물류·창고'];
