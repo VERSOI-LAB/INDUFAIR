@@ -70,7 +70,7 @@
     var signup = m === 'signup';
     $('nameField').hidden = !signup;
     var stk = document.querySelector('#loginStk img');
-    if (stk) stk.src = signup ? '/이미지/icons/user.webp' : '/이미지/stickers/hello.webp';
+    if (stk) stk.src = '/이미지/stickers/' + (signup ? 'fighting' : 'hello') + '.webp';
     $('heading').textContent = signup ? '처음 오셨군요!' : '반가워요!';
     $('subheading').textContent = signup ? '이름, 이메일, 비밀번호만 쓰면 끝' : '이메일로 바로 시작해요';
     $('submit').textContent = signup ? '가입하고 시작하기' : '로그인';
