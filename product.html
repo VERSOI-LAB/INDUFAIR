@@ -8,7 +8,7 @@
 <link rel="icon" href="/이미지/web/logo.jpg">
 <link rel="stylesheet" href="/app.css">
 <style>
-  .app{padding-bottom:calc(88px + env(safe-area-inset-bottom));}
+  .app,.app.no-tabbar{padding-bottom:calc(var(--tabbar-h) + 104px + env(safe-area-inset-bottom));}
   .slider-wrap{position:relative;background:#fff;}
   .slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;width:100%;aspect-ratio:1/1;max-height:70vh;}
   .slider::-webkit-scrollbar{display:none;}
@@ -62,7 +62,7 @@
   </div>
   <main class="page" id="body"></main>
 </div>
-<div class="bar" id="bar" hidden></div>
+<div class="bar over-tabbar" id="bar" hidden></div>
 
 <div class="sheet-bg" id="sheetBg"></div>
 <div class="sheet" id="sheet" role="dialog" aria-label="판매 상태 바꾸기">

@@ -8,7 +8,7 @@
 <link rel="icon" href="/이미지/web/logo.jpg">
 <link rel="stylesheet" href="/app.css">
 <style>
-  .app{padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+  .app,.app.no-tabbar{padding-bottom:calc(var(--tabbar-h) + 104px + env(safe-area-inset-bottom));}
   .progress{height:4px;background:var(--line);}
   .progress i{display:block;height:100%;background:var(--primary);width:20%;transition:width .3s ease;}
   .step{display:none;padding:24px 16px 0;}
@@ -177,7 +177,7 @@
     </div>
   </section>
 
-  <div class="footer" id="footer">
+  <div class="footer over-tabbar" id="footer">
     <button type="button" class="btn gray" id="prevBtn" hidden>이전</button>
     <button type="button" class="btn" id="nextBtn" disabled>다음</button>
   </div>
