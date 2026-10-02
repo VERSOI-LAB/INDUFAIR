@@ -166,6 +166,20 @@
   PS.profileUrl = function (id) { return '/profile/' + encodeURIComponent(id); };
 
   // 홈: 2열 카드
+  // 규격(옵션)이 2개 이상이면 구매할 때 고름. 옵션 가격이 없으면 기본 가격
+  PS.options = function (p) { return Array.isArray(p && p.options) && p.options.length > 1 ? p.options : []; };
+  PS.optionPrice = function (p, i) {
+    var o = PS.options(p)[i];
+    return o && Number(o.price) > 0 ? Number(o.price) : Number(p.price) || 0;
+  };
+  PS.priceLabel = function (p) {
+    var opts = PS.options(p);
+    if (!opts.length) return PS.won(p.price);
+    var prices = opts.map(function (_, i) { return PS.optionPrice(p, i); }).filter(function (n) { return n > 0; });
+    if (!prices.length) return PS.won(0);
+    var min = Math.min.apply(null, prices), max = Math.max.apply(null, prices);
+    return PS.won(min) + (max > min ? '~' : '');
+  };
   // "품명 (규격)" → { name, spec }
   PS.splitTitle = function (t) {
     var m = String(t || '').match(/^(.+?)\s*[(\[]([^()\[\]]+)[)\]]\s*$/);

@@ -75,6 +75,9 @@
   var manage = false;      // 주소 관리(삭제) 모드
   var editing = null;      // 고치는 주소
   var payMethod = 'CARD';
+  var optIdx = null;     // 고른 규격 (규격이 여러 개일 때)
+  function itemPrice() { return optIdx == null ? product.price : PS.optionPrice(product, optIdx); }
+  function optName() { return optIdx == null ? '' : PS.options(product)[optIdx].name; }
 
   function go(v) { view = v; render(); window.scrollTo(0, 0); }
 
@@ -88,11 +91,19 @@
   async function init() {
     var user = await PS.ready;
     if (!user) { location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search); return; }
-    var pr = await sb.from('products').select('id,title,price,status,seller_profile_id,product_images(url,sort_order)').eq('id', productId).maybeSingle();
+    var cols = 'id,title,price,status,seller_profile_id,product_images(url,sort_order)';
+    var pr = await sb.from('products').select(cols + ',options').eq('id', productId).maybeSingle();
+    if (pr.error) pr = await sb.from('products').select(cols).eq('id', productId).maybeSingle(); // 옵션 SQL 실행 전
     product = pr.data;
     if (!product) return fail('물건을 찾을 수 없어요');
     if (product.seller_profile_id === user.id) return fail('내가 올린 물건은 살 수 없어요');
-    if (!(product.price > 0)) return fail('가격 협의 물건이에요. 문의하기로 가격을 먼저 물어보세요');
+    var opts = PS.options(product);
+    if (opts.length) {
+      var rawOpt = PS.param('opt');
+      optIdx = rawOpt == null || rawOpt === '' ? NaN : Number(rawOpt);
+      if (!(optIdx >= 0 && optIdx < opts.length)) { location.replace(PS.productUrl(productId)); return; } // 규격을 안 골랐으면 상세로
+    }
+    if (!(itemPrice() > 0)) return fail('가격 협의 물건이에요. 문의하기로 가격을 먼저 물어보세요');
     if (product.status !== 'selling') return fail('지금은 살 수 없는 물건이에요 (' + (PS.STATUS[product.status] || '판매 종료') + ')');
     await loadAddresses();
     go(addresses.length ? 'list' : 'form');
@@ -247,20 +258,23 @@
     var img = PS.firstImage(product);
     var t = PS.splitTitle(product.title);
     var fee = 0; // 배송비: 서버(create_market_order)와 같은 값
-    var total = product.price + fee;
+    var price = itemPrice();
+    var total = price + fee;
     $('main').innerHTML =
       '<section class="card2"><h3>배송지<button id="chgAddr">변경</button></h3>' +
         '<div style="font-size:16px;line-height:1.5">' + PS.esc(addrText(a)) + '</div>' +
         '<div style="font-size:14px;color:var(--hint);margin-top:4px">' + PS.esc(a.recipient) + ' ' + PS.esc(a.phone) + '</div></section>' +
       '<section class="card2"><div class="item">' + (img ? '<img src="' + PS.esc(img) + '" alt="">' : '<div class="noimg"></div>') +
-        '<div style="min-width:0"><div class="nm">' + PS.esc(t.name) + (t.spec ? '<br><span style="color:var(--hint);font-size:13px">' + PS.esc(t.spec) + '</span>' : '') + '</div>' +
+        '<div style="min-width:0"><div class="nm">' + PS.esc(t.name) +
+          (optIdx != null ? '<br><span class="toss" style="margin:4px 0 0;color:var(--text);background:var(--primary-light)">규격: ' + PS.esc(optName()) + '</span>'
+            : t.spec ? '<br><span style="color:var(--hint);font-size:13px">' + PS.esc(t.spec) + '</span>' : '') + '</div>' +
         '<div class="pr">' + PS.won(total) + '</div></div></div></section>' +
       '<section class="card2"><h3>결제수단</h3>' +
         '<button class="pm' + (payMethod === 'CARD' ? ' on' : '') + '" data-m="CARD"><span class="radio"></span><span>카드 · 간편결제<span class="toss">토스페이먼츠</span><small>신용·체크카드, 토스페이, 카카오페이 등</small></span></button>' +
         '<button class="pm' + (payMethod === 'TRANSFER' ? ' on' : '') + '" data-m="TRANSFER"><span class="radio"></span><span>계좌이체<small>내 은행 계좌에서 바로 보내요</small></span></button>' +
       '</section>' +
       '<section class="card2"><h3>결제 금액</h3>' +
-        '<div class="rowp"><span>물품 금액</span><span>' + product.price.toLocaleString('ko-KR') + '원</span></div>' +
+        '<div class="rowp"><span>물품 금액' + (optIdx != null ? ' (' + PS.esc(optName()) + ')' : '') + '</span><span>' + price.toLocaleString('ko-KR') + '원</span></div>' +
         '<div class="rowp"><span>배송비</span><span>' + (fee ? fee.toLocaleString('ko-KR') + '원' : '무료') + '</span></div>' +
         '<div class="rowp total"><span>최종 결제 금액</span><span>' + total.toLocaleString('ko-KR') + '원</span></div>' +
       '</section>' +
@@ -295,7 +309,9 @@
     btn.disabled = true;
     try {
       await loadToss();
-      var r = await sb.rpc('create_market_order', { p_product_id: product.id, p_address_id: selectedId });
+      var args = { p_product_id: product.id, p_address_id: selectedId };
+      if (optIdx != null) args.p_option = optIdx;
+      var r = await sb.rpc('create_market_order', args);
       if (r.error || !r.data || !r.data[0]) throw r.error || new Error('no order');
       var o = r.data[0];
       var a = selected();

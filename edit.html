@@ -62,16 +62,20 @@
 
   PS.ready.then(async function (user) {
     if (!user) return PS.goLogin();
-    var r = await sb.from('products')
-      .select('id,title,price,description,condition,usage_period,category_id,status,seller_profile_id,product_images(id,url,sort_order)')
-      .eq('id', id).maybeSingle();
+    var cols = 'id,title,price,description,condition,usage_period,category_id,status,seller_profile_id,product_images(id,url,sort_order)';
+    var r = await sb.from('products').select(cols + ',options').eq('id', id).maybeSingle();
+    form.hasOptions = !r.error;
+    if (r.error) r = await sb.from('products').select(cols).eq('id', id).maybeSingle(); // 옵션 SQL 실행 전
     product = r.data;
     if (!product || product.status === 'deleted') return fail('물건을 찾을 수 없어요');
     if (product.seller_profile_id !== user.id) return fail('내가 올린 물건만 고칠 수 있어요');
     var cats = await sb.from('categories').select('id,name').is('parent_id', null);
     form.cats = cats.data || [];
     var t = PS.splitTitle(product.title);
-    form.name = t.name; form.spec = t.spec;
+    form.name = t.name;
+    var opts = PS.options(product);
+    form.specs = opts.length ? opts.map(function (o) { return { name: o.name || '', price: Number(o.price) || 0 }; })
+      : [{ name: t.spec, price: 0 }];
     form.price = product.price || 0;
     form.desc = product.description || '';
     form.usage = product.usage_period || '';
@@ -101,8 +105,10 @@
       '<div class="field" style="margin-top:8px"><span>사진 <small style="color:var(--hint);font-weight:500">(' + photos.length + '/' + MAX + ', 첫 사진이 대표)</small></span>' +
         '<div class="photos" id="photos"></div><p class="hint">사진을 누르면 대표 사진으로 바꿀 수 있어요</p></div>' +
       '<label class="field"><span>품명</span><input class="input" id="fName" maxlength="80" placeholder="예) 직압식 샌딩건 P1 SET" value="' + PS.esc(form.name) + '"></label>' +
-      '<label class="field"><span>규격 <small style="color:var(--hint);font-weight:500">(안 써도 돼요)</small></span><input class="input" id="fSpec" maxlength="80" placeholder="예) Φ6.3/Φ7.9/Φ9.5" value="' + PS.esc(form.spec) + '"></label>' +
-      '<div class="field"><span>가격</span>' +
+      '<div class="field"><span>규격 <small style="color:var(--hint);font-weight:500">(안 써도 돼요)</small></span>' + specRows() +
+        '<button type="button" class="btn white small" id="addSpec" style="margin-top:8px">' + PS.icon('plus', 18) + ' 규격 추가</button>' +
+        '<p class="hint">규격을 2개 이상 쓰면 사는 사람이 골라서 구매해요. 규격별 가격을 비워 두면 아래 기본 가격으로 팔아요.</p></div>' +
+      '<div class="field"><span>' + (form.specs.length > 1 ? '기본 가격' : '가격') + '</span>' +
         '<div class="price-row"><input class="input" id="fPrice" inputmode="numeric" placeholder="숫자만 써 주세요" value="' + (form.price ? form.price.toLocaleString('ko-KR') : '') + '"' + (form.price ? '' : ' disabled') + '><span>원</span></div>' +
         '<p class="hint" id="priceHint"></p>' +
         '<label class="chk"><input type="checkbox" id="fNego"' + (form.price ? '' : ' checked') + '> 가격 협의 (가격을 정하지 않고 문의 받기)</label></div>' +
@@ -113,6 +119,13 @@
       '<button type="button" class="btn danger" id="delBtn" style="margin-top:32px">' + PS.icon('trash', 20) + ' 이 물건 삭제하기</button>';
     renderPhotos();
     priceHint();
+    $('addSpec').addEventListener('click', function () { syncText(); form.specs.push({ name: '', price: 0 }); render(); var ins = $('main').querySelectorAll('.spec-name'); ins[ins.length - 1].focus(); });
+    $('main').querySelectorAll('[data-spec-x]').forEach(function (b) {
+      b.addEventListener('click', function () { syncText(); form.specs.splice(Number(b.dataset.specX), 1); if (!form.specs.length) form.specs.push({ name: '', price: 0 }); render(); });
+    });
+    $('main').querySelectorAll('.spec-price').forEach(function (el) {
+      el.addEventListener('input', function () { var n = Number(el.value.replace(/[^0-9]/g, '').slice(0, 11)) || 0; el.value = n ? n.toLocaleString('ko-KR') : ''; });
+    });
     $('delBtn').addEventListener('click', removeProduct);
     $('fPrice').addEventListener('input', function (e) {
       var n = Number(e.target.value.replace(/[^0-9]/g, '').slice(0, 11)) || 0;
@@ -136,6 +149,17 @@
     });
   }
 
+  function specRows() {
+    var many = form.specs.length > 1;
+    return form.specs.map(function (sp, i) {
+      return '<div style="display:flex;gap:6px;align-items:center;margin-top:' + (i ? 8 : 0) + 'px">' +
+        '<input class="input spec-name" data-i="' + i + '" maxlength="40" placeholder="' + (i ? '예) Φ7.9' : '예) Φ6.3') + '" value="' + PS.esc(sp.name) + '" style="flex:1.3">' +
+        (many ? '<input class="input spec-price" data-i="' + i + '" inputmode="numeric" placeholder="가격(선택)" value="' + (sp.price ? sp.price.toLocaleString('ko-KR') : '') + '" style="flex:1">' +
+          '<button type="button" data-spec-x="' + i + '" aria-label="규격 빼기" style="width:36px;height:36px;border-radius:50%;background:#F2F2F2;flex-shrink:0">×</button>' : '') +
+        '</div>';
+    }).join('');
+  }
+
   function priceHint() {
     var el = $('priceHint');
     if (el) el.textContent = $('fNego') && $('fNego').checked ? '화면에 "가격 협의"로 보이고, 구매하기 대신 문의를 받아요' : form.price ? '화면에는 ' + PS.won(form.price) + '으로 보여요' : '';
@@ -143,7 +167,9 @@
 
   function syncText() {
     if (!$('fName')) return;
-    form.name = $('fName').value; form.spec = $('fSpec').value; form.desc = $('fDesc').value;
+    form.name = $('fName').value; form.desc = $('fDesc').value;
+    $('main').querySelectorAll('.spec-name').forEach(function (el) { form.specs[Number(el.dataset.i)].name = el.value; });
+    $('main').querySelectorAll('.spec-price').forEach(function (el) { form.specs[Number(el.dataset.i)].price = Number(el.value.replace(/[^0-9]/g, '')) || 0; });
   }
 
   function renderPhotos() {
@@ -222,11 +248,18 @@
 
   $('saveBtn').addEventListener('click', async function () {
     syncText();
-    var name = form.name.trim(), spec = form.spec.trim().replace(/[()]/g, '');
+    var name = form.name.trim();
+    var specs = form.specs.map(function (sp) { return { name: sp.name.trim().replace(/[()]/g, ''), price: sp.price }; })
+      .filter(function (sp) { return sp.name; });
+    var spec = specs.map(function (sp) { return sp.name; }).join('/');
+    var options = specs.length > 1 ? specs.map(function (sp) { return sp.price ? { name: sp.name, price: sp.price } : { name: sp.name }; }) : [];
     if (!name) return PS.toast('품명을 써 주세요');
     if (!photos.length) return PS.toast('사진을 1장 이상 넣어 주세요');
     var nego = $('fNego').checked;
+    var allPriced = options.length && options.every(function (o) { return o.price > 0; });
+    if (!nego && !form.price && allPriced) form.price = Math.min.apply(null, options.map(function (o) { return o.price; })); // 목록에는 가장 싼 값
     if (!nego && !form.price) return PS.toast('가격을 쓰거나 "가격 협의"를 눌러 주세요');
+    if (options.length && !form.hasOptions) PS.toast('규격 고르기는 SQL을 실행한 뒤부터 적용돼요');
     var btn = $('saveBtn');
     btn.disabled = true; btn.textContent = '저장하는 중…';
     try {
@@ -256,14 +289,16 @@
         if (o.error) throw o.error;
       }
       // 4) 내용·가격
-      var r = await sb.from('products').update({
+      var payload = {
         title: (spec ? name + ' (' + spec + ')' : name).slice(0, 100),
         price: nego ? 0 : form.price,
         description: form.desc.trim(),
         category_id: form.category || null,
         usage_period: form.usage || null,
         condition: form.condition || null
-      }).eq('id', id);
+      };
+      if (form.hasOptions) payload.options = options;
+      var r = await sb.from('products').update(payload).eq('id', id);
       if (r.error) throw r.error;
       PS.toast('저장했어요!');
       setTimeout(function () { location.href = '/sales'; }, 600);

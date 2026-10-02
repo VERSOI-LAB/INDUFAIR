@@ -44,6 +44,13 @@
   .heart.on{border-color:#FFD3D0;background:#FFF5F4;}
   .heart.on .i3d{filter:none;opacity:1;transform:scale(1.1);}
   .bar .btn{flex:1;}
+  .opts{margin-top:14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;}
+  .opts b{display:block;font-size:14px;padding:10px 14px;background:var(--bg);}
+  .opts span{display:flex;justify-content:space-between;gap:12px;padding:10px 14px;border-top:1px solid var(--line);font-size:16px;}
+  .opts em{font-style:normal;font-weight:700;}
+  .optsheet .opt{justify-content:space-between;}
+  .optsheet .opt em{font-style:normal;font-weight:800;}
+  .optsheet .opt:disabled{color:var(--hint);}
   .rec{margin-top:28px;padding-top:24px;border-top:8px solid var(--bg);margin-left:-16px;margin-right:-16px;padding-left:16px;padding-right:16px;}
   .rec h2{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:19px;font-weight:800;margin-bottom:14px;}
   .rec h2 small{font-size:15px;font-weight:600;color:var(--hint);}
@@ -65,6 +72,11 @@
 <div class="bar over-tabbar" id="bar" hidden></div>
 
 <div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet optsheet" id="optSheet" role="dialog" aria-label="규격 고르기">
+  <div class="handle"></div>
+  <h3 style="font-size:18px;font-weight:800;padding:4px 4px 10px">어떤 규격으로 살까요?</h3>
+  <div id="optList"></div>
+</div>
 <div class="sheet" id="sheet" role="dialog" aria-label="판매 상태 바꾸기">
   <div class="handle"></div>
   <button class="opt" data-s="selling"><i data-icon3d="sell" data-size="30"></i>판매중</button>
@@ -94,9 +106,9 @@
 
   async function load() {
     if (!id) return notFound();
-    var res = await sb.from('products')
-      .select('id,title,price,description,brand,condition,usage_period,region,status,seller_profile_id,category_id,created_at,view_count,like_count,inquiry_count,categories(name),product_images(url,sort_order)')
-      .eq('id', id).maybeSingle();
+    var cols = 'id,title,price,description,brand,condition,usage_period,region,status,seller_profile_id,category_id,created_at,view_count,like_count,inquiry_count,categories(name),product_images(url,sort_order)';
+    var res = await sb.from('products').select(cols + ',options').eq('id', id).maybeSingle();
+    if (res.error) res = await sb.from('products').select(cols).eq('id', id).maybeSingle(); // 옵션 SQL 실행 전
     if (res.error || !res.data || res.data.status === 'deleted') return notFound();
     product = res.data;
     PS.addRecent(product.id);
@@ -154,7 +166,10 @@
       '<h1 class="title">' + badge + PS.esc(PS.splitTitle(p.title).name) +
         (PS.splitTitle(p.title).spec ? '<span class="spec">' + PS.esc(PS.splitTitle(p.title).spec) + '</span>' : '') + '</h1>' +
       '<div class="meta">' + PS.esc(p.categories ? p.categories.name : '') + (p.categories ? ' · ' : '') + PS.ago(p.created_at) + '</div>' +
-      '<div class="price">' + PS.won(p.price) + '</div>' +
+      '<div class="price">' + PS.priceLabel(p) + '</div>' +
+      (PS.options(p).length ? '<div class="opts"><b>규격 ' + PS.options(p).length + '가지</b>' + PS.options(p).map(function (o, i) {
+        return '<span>' + PS.esc(o.name) + '<em>' + PS.won(PS.optionPrice(p, i)) + '</em></span>';
+      }).join('') + '</div>' : '') +
       (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
       (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
       '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) + '</div>' +
@@ -177,7 +192,7 @@
       var fav = await sb.from('favorites').select('id').eq('product_id', id).eq('profile_id', PS.user.id).maybeSingle();
       liked = !!fav.data;
     }
-    var canBuy = product.status === 'selling' && product.price > 0; // 가격 협의(0원)는 문의로
+    var canBuy = product.status === 'selling' && (product.price > 0 || PS.options(product).some(function (_, i) { return PS.optionPrice(product, i) > 0; })); // 가격 협의(0원)는 문의로
     bar.innerHTML =
       '<button class="heart' + (liked ? ' on' : '') + '" id="heartBtn" aria-label="찜하기" aria-pressed="' + liked + '">' + PS.icon3d('heart', 34) + '</button>' +
       '<button class="btn white" id="chatBtn"' + (product.status === 'sold' ? ' disabled' : '') + '>' + PS.icon3d('chat', 28) + ' 문의하기</button>' +
@@ -186,7 +201,16 @@
     document.getElementById('chatBtn').addEventListener('click', startChat);
     document.getElementById('buyBtn').addEventListener('click', function () {
       if (!PS.requireLogin()) return;
-      location.href = '/checkout?id=' + encodeURIComponent(id);
+      var opts = PS.options(product);
+      if (!opts.length) { location.href = '/checkout?id=' + encodeURIComponent(id); return; }
+      // 규격이 여러 개면 먼저 고르기
+      var list = document.getElementById('optList');
+      list.innerHTML = opts.map(function (o, i) {
+        var pr = PS.optionPrice(product, i);
+        return '<button class="opt" data-i="' + i + '"' + (pr > 0 ? '' : ' disabled') + '><span>' + PS.esc(o.name) + '</span><em>' + PS.won(pr) + '</em></button>';
+      }).join('');
+      document.getElementById('optSheet').classList.add('show');
+      sheetBg.classList.add('show');
     });
   }
 
@@ -254,7 +278,12 @@
   var sheet = document.getElementById('sheet');
   var sheetBg = document.getElementById('sheetBg');
   function openSheet() { sheet.classList.add('show'); sheetBg.classList.add('show'); }
-  function closeSheet() { sheet.classList.remove('show'); sheetBg.classList.remove('show'); }
+  function closeSheet() { sheet.classList.remove('show'); document.getElementById('optSheet').classList.remove('show'); sheetBg.classList.remove('show'); }
+  document.getElementById('optSheet').addEventListener('click', function (e) {
+    var b = e.target.closest('.opt');
+    if (!b || b.disabled) return;
+    location.href = '/checkout?id=' + encodeURIComponent(id) + '&opt=' + b.dataset.i;
+  });
   sheetBg.addEventListener('click', closeSheet);
   sheet.addEventListener('click', async function (e) {
     var opt = e.target.closest('.opt');
