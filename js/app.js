@@ -8,7 +8,7 @@
 
   PS.CATEGORIES = ['기계장비', '집진기', '에어콤프레샤', '모터', '펌프', '전기부품', '공구', '중고부품', '기타'];
   PS.CONDITIONS = { great: '아주 좋아요', good: '괜찮아요', broken: '고장 있어요' };
-  PS.USAGE = { lt1: '1년 미만', '1to3': '1~3년', gt3: '3년 이상' };
+  PS.USAGE = { new: '신품', lt1: '1년 미만', '1to3': '1~3년', gt3: '3년 이상' };
   PS.STATUS = { selling: '판매중', reserved: '예약중', sold: '판매완료' };
 
   PS.esc = function (s) {
@@ -187,8 +187,18 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { PS.hydrate(); });
   else PS.hydrate();
 
+  // 메일 링크(가입 확인·비밀번호 재설정)로 들어오면 주소의 #access_token 으로 로그인시킨다
+  PS.hashParams = new URLSearchParams(location.hash.replace(/^#/, ''));
+  if (PS.hashParams.get('type') === 'recovery' && !/^\/reset-password/.test(location.pathname)) {
+    location.replace('/reset-password' + location.hash);
+  }
+
   PS.ready = (async function () {
     try {
+      if (PS.hashParams.get('access_token') && PS.hashParams.get('refresh_token')) {
+        await sb.auth.setSession({ access_token: PS.hashParams.get('access_token'), refresh_token: PS.hashParams.get('refresh_token') });
+        history.replaceState(null, '', location.pathname + location.search);
+      }
       var res = await sb.auth.getSession();
       var session = res.data.session;
       if (session) {
