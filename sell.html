@@ -22,6 +22,12 @@
   .photos .ph img{width:100%;height:100%;object-fit:cover;}
   .photos .ph .x{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:16px;line-height:28px;text-align:center;}
   .photos .ph .first{position:absolute;left:4px;bottom:4px;background:var(--text);color:#fff;font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;}
+  .photos .ph .working{position:absolute;inset:0;background:rgba(255,255,255,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:700;color:var(--sub);}
+  .photos .ph .working .spinner{margin:0;}
+  .photos .ph .done-mark{position:absolute;right:4px;bottom:4px;background:var(--success);color:#fff;font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;}
+  .bg-btn{margin-top:10px;width:100%;height:48px;border-radius:12px;background:#F2F2F2;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .bg-btn:disabled{opacity:.6;}
+  .bg-hint{font-size:13px;color:var(--hint);text-align:center;margin-top:6px;}
   .photos .add{aspect-ratio:1/1;border-radius:12px;border:2px dashed #DDD;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sub);font-size:13px;font-weight:600;gap:2px;}
   .photos .add b{font-size:26px;line-height:1;}
   .ai-box{margin-top:20px;padding:20px;border-radius:var(--radius);background:var(--primary-light);}
@@ -57,6 +63,10 @@
   .done h2{font-size:26px;font-weight:800;margin-top:12px;}
   .done p{color:var(--sub);margin-top:6px;}
 </style>
+<!-- 배경 지우기(@imgly)가 쓰는 onnxruntime-web 위치. 버튼을 누를 때만 내려받는다 -->
+<script type="importmap">
+{ "imports": { "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0-dev.20250206-d981b153d3/dist/ort.min.mjs" } }
+</script>
 </head>
 <body>
 <div class="app no-tabbar">
@@ -86,6 +96,8 @@
       <h2 class="q">사진을 올렸어요</h2>
       <p class="q-sub">여러 각도로 찍을수록 잘 팔려요 (최대 10장)</p>
       <div class="photos" id="photos"></div>
+      <button type="button" class="bg-btn" id="bgBtn"></button>
+      <p class="bg-hint" id="bgHint">배경을 지우면 물건이 더 잘 보여요. 처음 한 번은 30초쯤 걸려요.</p>
 
       <div class="ai-box" id="aiBox"></div>
 
@@ -280,13 +292,99 @@
     var html = photos.map(function (p, i) {
       return '<div class="ph"><img src="' + p.url + '" alt="사진 ' + (i + 1) + '">' +
         (i === 0 ? '<span class="first">대표</span>' : '') +
+        (p.bg === 'working' ? '<div class="working"><span class="spinner"></span>지우는 중</div>' : '') +
+        (p.bg === 'done' ? '<span class="done-mark">흰 배경</span>' : '') +
         '<button type="button" class="x" data-del="' + p.id + '" aria-label="사진 빼기">' + PS.icon('close', 16) + '</button></div>';
     }).join('');
     if (photos.length < MAX_PHOTOS) html += '<button type="button" class="add" id="addMore"><b>+</b>' + photos.length + '/' + MAX_PHOTOS + '</button>';
     $('photos').innerHTML = html;
     var add = $('addMore');
     if (add) add.addEventListener('click', function () { $('galInput').click(); });
+    renderBgBtn();
   }
+
+  // ---------- 배경 지우기 (버튼을 눌렀을 때만) ----------
+  var BG_LIB = 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/dist/index.mjs';
+  var bgLib = null;
+  var bgBusy = false;
+
+  function renderBgBtn() {
+    var btn = $('bgBtn');
+    if (!btn) return;
+    var todo = photos.filter(function (p) { return !p.bg; }).length;
+    var done = photos.filter(function (p) { return p.bg === 'done'; }).length;
+    btn.disabled = bgBusy;
+    if (bgBusy) btn.innerHTML = '<span class="spinner"></span>배경 지우는 중…';
+    else if (todo) btn.innerHTML = PS.icon3d('idea', 26) + (done ? '새 사진도 배경 지우기' : '배경 지우고 흰 배경으로');
+    else btn.innerHTML = '원래 사진으로 되돌리기';
+    $('bgHint').hidden = !todo || bgBusy || !!bgLib;
+  }
+
+  function whiten(fgBlob) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(fgBlob);
+      img.onload = function () {
+        var c = document.createElement('canvas');
+        c.width = img.naturalWidth;
+        c.height = img.naturalHeight;
+        var ctx = c.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { b ? resolve(b) : reject(new Error('toBlob failed')); }, 'image/jpeg', 0.9);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('배경 지운 사진을 읽지 못했어요')); };
+      img.src = url;
+    });
+  }
+
+  $('bgBtn').addEventListener('click', async function () {
+    if (bgBusy) return;
+    var todo = photos.filter(function (p) { return !p.bg; });
+    if (!todo.length) {
+      // 되돌리기
+      photos.forEach(function (p) {
+        if (p.orig) { p.blob = p.orig; p.url = URL.createObjectURL(p.orig); }
+        p.bg = null;
+      });
+      renderPhotos();
+      return;
+    }
+    bgBusy = true;
+    todo.forEach(function (p) { p.bg = 'working'; });
+    renderPhotos();
+    var failed = 0;
+    try {
+      if (!bgLib) bgLib = await import(BG_LIB);
+      for (var i = 0; i < todo.length; i++) {
+        var p = todo[i];
+        if (photos.indexOf(p) === -1) continue; // 그 사이 지운 사진
+        try {
+          var fg = await bgLib.removeBackground(p.blob);
+          var white = await whiten(fg);
+          p.orig = p.orig || p.blob;
+          p.blob = white;
+          p.url = URL.createObjectURL(white);
+          p.bg = 'done';
+        } catch (err) {
+          console.warn('[판다] 배경 지우기 실패', err);
+          p.bg = null;
+          failed++;
+        }
+        renderPhotos();
+      }
+    } catch (err) {
+      console.error('[판다] 배경 지우기 도구를 불러오지 못했어요', err);
+      todo.forEach(function (p) { if (p.bg === 'working') p.bg = null; });
+      failed = todo.length;
+    }
+    bgBusy = false;
+    renderPhotos();
+    if (failed) PS.toast(failed === todo.length ? '배경을 지우지 못했어요. 원래 사진으로 올라가요' : '사진 ' + failed + '장은 배경을 못 지웠어요');
+    else PS.toast('배경을 지웠어요!');
+  });
 
   $('photos').addEventListener('click', function (e) {
     var del = e.target.closest('[data-del]');
@@ -521,6 +619,12 @@
     var btn = $('nextBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>올리는 중…';
+    // 배경 지우기가 아직 돌고 있으면 끝날 때까지 기다린다
+    if (bgBusy) {
+      btn.innerHTML = '<span class="spinner"></span>배경 지우는 중…';
+      while (bgBusy) await new Promise(function (r) { setTimeout(r, 300); });
+      btn.innerHTML = '<span class="spinner"></span>올리는 중…';
+    }
     form.region = $('regionInput').value.trim() || form.region;
     try { localStorage.setItem('ps_region', form.region); } catch (e) {}
 
