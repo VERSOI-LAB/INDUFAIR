@@ -147,7 +147,7 @@
     <div class="field"><span>얼마나 썼나요?</span>
       <div class="chip-grid" id="usageChips"></div>
     </div>
-    <div class="field"><span>상태는 어때요?</span>
+    <div class="field" id="condField" hidden><span>상태는 어때요?</span>
       <div class="chip-grid" id="condChips"></div>
     </div>
     <label class="field"><span>더 알려줄 것 (특이사항)</span>
@@ -222,7 +222,7 @@
     window.scrollTo(0, 0);
     if (n === 2) enterPrice();
     if (n === 4) enterRegion();
-    if (n === 3) { renderChoice('usageChips', PS.USAGE, 'usage'); renderChoice('condChips', PS.CONDITIONS, 'condition'); }
+    if (n === 3) { renderChoice('usageChips', PS.USAGE, 'usage'); syncCond(); }
     validate();
   }
 
@@ -565,6 +565,13 @@
       return '<button type="button" class="chip' + (form[key] === k ? ' on' : '') + '" data-v="' + k + '">' + map[k] + '</button>';
     }).join('');
   }
+  // 상태는 써 본 물건(1년 미만·1~3년·3년 이상)일 때만 고름. 신품이거나 안 고르면 숨기고 비움
+  function usedItem() { return !!form.usage && form.usage !== 'new'; }
+  function syncCond() {
+    $('condField').hidden = !usedItem();
+    if (!usedItem()) form.condition = '';
+    renderChoice('condChips', PS.CONDITIONS, 'condition');
+  }
   function bindChoice(elId, map, key) {
     renderChoice(elId, map, key);
     $(elId).addEventListener('click', function (e) {
@@ -572,6 +579,7 @@
       if (!b) return;
       form[key] = form[key] === b.dataset.v ? '' : b.dataset.v;
       renderChoice(elId, map, key);
+      if (key === 'usage') syncCond();
       $('nextBtn').textContent = hasExtra() ? '다음' : '건너뛰기';
     });
   }
@@ -597,7 +605,7 @@
     var ta = $('descInput');
     if (ta.value.trim() && !confirm('지금 쓴 내용을 AI 설명으로 바꿀까요?')) return;
     ta.value = d;
-    renderChoice('condChips', PS.CONDITIONS, 'condition');
+    syncCond();
     $('nextBtn').textContent = '다음';
     PS.toast('AI가 설명을 써줬어요. 고쳐도 돼요!');
   });
@@ -685,7 +693,7 @@
       price: form.price,
       description: $('descInput').value.trim(),
       usage_period: form.usage || null,
-      condition: form.condition || null,
+      condition: usedItem() ? form.condition || null : null,
       region: form.region,
       lat: coords ? coords.lat : null,
       lng: coords ? coords.lng : null,
