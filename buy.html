@@ -345,18 +345,10 @@
 
   function drawPins(refit) {
     if (!map) return;
-    var searching = !!state.q;
-    var pins = [];
-    if (!searching || state.tab === 'prod') {
-      lastRows.filter(function (p) { return p._plat != null; }).forEach(function (p) {
-        pins.push({ id: 'p:' + p.id, lat: p._plat, lng: p._plng, label: PS.won(p.price), active: isSel('prod', p.id) });
-      });
-    }
-    if (!searching || state.tab === 'biz') {
-      lastBiz.filter(function (b) { return b._plat != null; }).forEach(function (b) {
-        pins.push({ id: 'b:' + b.id, kind: 'biz', lat: b._plat, lng: b._plng, label: b.name.length > 8 ? b.name.slice(0, 8) + '…' : b.name, active: isSel('biz', b.id) });
-      });
-    }
+    // 지도에는 업체 위치만 (물건은 아래 목록에서)
+    var pins = lastBiz.filter(function (b) { return b._plat != null; }).map(function (b) {
+      return { id: 'b:' + b.id, kind: 'biz', lat: b._plat, lng: b._plng, label: b.name.length > 8 ? b.name.slice(0, 8) + '…' : b.name, active: isSel('biz', b.id) };
+    });
     map.setMarkers(pins, onPin);
     if (refit && pins.length) map.fit(pins);
   }
@@ -424,7 +416,7 @@
         if (bp) { b.lat = bp.lat; b.lng = bp.lng; }
       }
     }
-    var withPos = all.concat(bizAll).filter(function (p) { return p.lat != null; });
+    var withPos = bizAll.filter(function (b) { return b.lat != null; }); // 지도 핀은 업체만
     var spread = PS.spreadPins(withPos.map(function (p) { return { id: p.id, lat: p.lat, lng: p.lng }; }));
     spread.forEach(function (s, i) { withPos[i]._plat = s.lat; withPos[i]._plng = s.lng; });
   }
