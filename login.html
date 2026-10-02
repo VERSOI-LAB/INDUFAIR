@@ -2,138 +2,142 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>PANDA SANDA(판다산다) 로그인</title>
-<meta name="description" content="PANDA SANDA(판다산다) 계정으로 로그인하고 구매, 판매, 견적 서비스를 이용하세요">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="styles.css">
+<title>시작하기 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
 <style>
-  .auth-wrap{max-width:420px;margin:0 auto;padding:56px 16px 80px;}
-  .auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px;}
-  .auth-logo .logo-mark{width:38px;height:38px;border-radius:10px;font-size:1.1rem;}
-  .auth-logo b{font-family:var(--font-en);font-weight:800;font-size:1.4rem;}
-  .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:32px 28px;}
-  .auth-card h1{font-size:1.15rem;font-weight:900;text-align:center;margin-bottom:24px;}
-  .auth-field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
-  .auth-field label{font-size:.85rem;font-weight:700;}
-  .auth-field input{border:1px solid var(--border);border-radius:9px;padding:12px 14px;font-size:.9rem;font-family:inherit;width:100%;}
-  .auth-field input:focus{outline:none;border-color:var(--accent);}
-  .auth-error{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:10px 12px;font-size:.82rem;font-weight:700;margin-bottom:14px;display:none;}
-  .auth-links{display:flex;justify-content:space-between;font-size:.82rem;color:var(--text-tertiary);margin-top:16px;}
-  .auth-links a{color:var(--accent);font-weight:700;}
-  .demo-card{margin-top:16px;background:var(--bg-soft);border-radius:var(--radius-m);padding:16px;font-size:.78rem;color:var(--text-secondary);line-height:1.7;}
-  .demo-card b{color:var(--text);}
-  .demo-card button{color:var(--accent);font-weight:700;text-decoration:underline;}
+  .hello{text-align:center;padding:40px 0 8px;}
+  .hello .panda{font-size:64px;line-height:1;}
+  .hello h1{font-size:26px;font-weight:800;margin-top:12px;}
+  .hello p{color:var(--sub);margin-top:4px;}
+  .err{margin-top:14px;padding:12px 14px;border-radius:12px;background:#FFF0EF;color:var(--danger);font-size:15px;font-weight:600;}
+  .info{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--primary-light);font-size:15px;font-weight:600;}
+  .switch{text-align:center;margin-top:16px;font-size:15px;color:var(--sub);}
+  .switch button{color:var(--text);font-weight:800;text-decoration:underline;padding:8px;}
+  .legal{text-align:center;font-size:13px;color:var(--hint);margin-top:24px;}
+  .legal a{text-decoration:underline;}
 </style>
 </head>
 <body>
+<div class="app no-tabbar">
+  <header class="topbar"><a class="back" href="/" aria-label="홈으로"><i data-icon="back" data-size="24"></i></a><h1></h1></header>
+  <main class="page">
+    <section class="hello">
+      <div class="panda" aria-hidden="true" id="loginStk"><i data-sticker="hello" data-size="140"></i></div>
+      <h1 id="heading">반가워요!</h1>
+      <p id="subheading">이메일로 바로 시작해요</p>
+    </section>
 
-<header class="site-header">
-  <div class="header-inner">
-    <a class="logo" href="index.html" aria-label="PANDA SANDA 홈으로 이동">
-      <img src="이미지/web/logo.jpg" alt="PANDA SANDA" class="logo-img">
-      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
-    </a>
-    <nav class="main-nav" id="mainNav">
-      <a href="index.html">홈</a><a href="goods.html">산업용품</a><a href="used.html">중고장터</a>
-      <a href="brand.html">브랜드관</a><a href="rfq.html">견적요청(RFQ)</a><a href="community.html">커뮤니티</a><a href="support.html">고객센터</a>
-    </nav>
-    <div class="header-actions">
-      <button class="btn btn-ghost">로그인</button>
-      <button class="btn btn-primary">회원가입</button>
-      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-    </div>
-  </div>
-</header>
+    <form id="form" novalidate>
+      <label class="field" id="nameField" hidden><span>이름 (다른 사람에게 보여요)</span>
+        <input class="input" id="name" maxlength="20" autocomplete="nickname" placeholder="예) 김판다">
+      </label>
+      <label class="field"><span>이메일</span>
+        <input class="input" id="email" type="email" inputmode="email" autocomplete="email" placeholder="panda@example.com">
+      </label>
+      <label class="field"><span>비밀번호</span>
+        <input class="input" id="password" type="password" autocomplete="current-password" placeholder="6자 이상">
+      </label>
+      <div class="err" id="err" hidden></div>
+      <div class="info" id="info" hidden></div>
+      <button class="btn" id="submit" type="submit" style="margin-top:24px">로그인</button>
+    </form>
 
-<main>
-  <div class="auth-wrap">
-    <div class="auth-card">
-      <h1>로그인</h1>
-      <div class="auth-error" id="authError"></div>
-      <form id="loginForm">
-        <div class="auth-field"><label>이메일</label><input type="email" id="email" required placeholder="example@company.co.kr"></div>
-        <div class="auth-field"><label>비밀번호</label><input type="password" id="password" required placeholder="비밀번호"></div>
-        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" id="submitBtn">로그인</button>
-      </form>
-      <div class="auth-links">
-        <a href="signup.html">회원가입</a>
-        <a href="seller.html">판매자로 시작하기</a>
-      </div>
-      <div class="demo-card">
-        <b>체험용 데모 계정</b><br>
-        판매자: seller@kblast.co.kr<br>
-        구매자: buyer@smartfactory.co.kr<br>
-        공통 비밀번호: versoi1234!<br>
-        <button type="button" id="fillSeller">판매자 계정 자동입력</button> · <button type="button" id="fillBuyer">구매자 계정 자동입력</button>
-      </div>
-    </div>
-  </div>
-</main>
-
-<footer class="site-footer">
-  <div class="wrap footer-inner">
-    <p>&copy; 2026 PANDA SANDA(판다산다). 산업 자원의 순환을 연결하다.</p>
-    <div class="footer-links"><a href="terms.html">이용약관</a><a href="privacy.html">개인정보처리방침</a><a href="business-info.html">사업자정보확인</a><a href="seller-apply.html">제휴/입점문의</a></div>
-  </div>
-</footer>
+    <div class="switch" id="switch"></div>
+    <p class="legal">시작하면 <a href="/terms">이용약관</a>과 <a href="/privacy">개인정보처리방침</a>에 동의하는 거예요</p>
+  </main>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-client.js"></script>
-<script src="js/auth.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
 <script>
-  var navToggle = document.getElementById('navToggle');
-  var mainNav = document.getElementById('mainNav');
-  navToggle.addEventListener('click', function(){
-    var open = mainNav.classList.toggle('open');
-    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
+(function () {
+  var mode = PS.param('mode') === 'signup' ? 'signup' : 'login';
+  var $ = function (id) { return document.getElementById(id); };
 
-  document.getElementById('fillSeller').addEventListener('click', function(){
-    document.getElementById('email').value = 'seller@kblast.co.kr';
-    document.getElementById('password').value = 'versoi1234!';
-  });
-  document.getElementById('fillBuyer').addEventListener('click', function(){
-    document.getElementById('email').value = 'buyer@smartfactory.co.kr';
-    document.getElementById('password').value = 'versoi1234!';
-  });
-
-  function getParam(name){
-    var m = new RegExp('[?&]'+name+'=([^&]*)').exec(location.search);
-    return m ? decodeURIComponent(m[1]) : null;
+  function nextUrl() {
+    var n = PS.param('next') || '/';
+    return n.charAt(0) === '/' && n.charAt(1) !== '/' ? n : '/';
   }
 
-  document.getElementById('loginForm').addEventListener('submit', async function(e){
-    e.preventDefault();
-    var errEl = document.getElementById('authError');
-    var btn = document.getElementById('submitBtn');
-    errEl.style.display = 'none';
-    btn.textContent = '로그인 중...';
-    btn.disabled = true;
-    var email = document.getElementById('email').value.trim();
-    var password = document.getElementById('password').value;
-    var res = await sb.auth.signInWithPassword({ email: email, password: password });
-    if (res.error) {
-      errEl.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.';
-      errEl.style.display = 'block';
-      btn.textContent = '로그인';
-      btn.disabled = false;
-      return;
-    }
-    var redirect = getParam('redirect');
-    location.href = redirect || 'mypage.html';
+  PS.ready.then(function (user) { if (user) location.replace(nextUrl()); });
+
+  function setMode(m) {
+    mode = m;
+    var signup = m === 'signup';
+    $('nameField').hidden = !signup;
+    var stk = document.querySelector('#loginStk img');
+    if (stk) stk.src = signup ? '/이미지/icons/user.webp' : '/이미지/stickers/hello.webp';
+    $('heading').textContent = signup ? '처음 오셨군요!' : '반가워요!';
+    $('subheading').textContent = signup ? '이름, 이메일, 비밀번호만 쓰면 끝' : '이메일로 바로 시작해요';
+    $('submit').textContent = signup ? '가입하고 시작하기' : '로그인';
+    $('password').autocomplete = signup ? 'new-password' : 'current-password';
+    $('switch').innerHTML = signup
+      ? '이미 가입했나요? <button type="button" data-m="login">로그인</button>'
+      : '처음이에요? <button type="button" data-m="signup">새로 가입하기</button>';
+    $('err').hidden = true;
+    $('info').hidden = true;
+    (signup ? $('name') : $('email')).focus();
+  }
+
+  $('switch').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (b) setMode(b.dataset.m);
   });
 
-  (async function(){
-    var res = await sb.auth.getSession();
-    if (res.data.session) {
-      var redirect = getParam('redirect');
-      location.href = redirect || 'mypage.html';
+  function showErr(msg) { $('err').textContent = msg; $('err').hidden = false; }
+
+  $('form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    $('err').hidden = true;
+    $('info').hidden = true;
+    var name = $('name').value.trim();
+    var email = $('email').value.trim();
+    var password = $('password').value;
+    if (mode === 'signup' && !name) return showErr('이름을 써 주세요');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr('이메일을 다시 확인해 주세요');
+    if (password.length < 6) return showErr('비밀번호는 6자 이상이에요');
+
+    var btn = $('submit');
+    var label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '잠깐만요…';
+
+    if (mode === 'login') {
+      var res = await sb.auth.signInWithPassword({ email: email, password: password });
+      btn.disabled = false;
+      btn.textContent = label;
+      if (res.error) {
+        if (/confirm/i.test(res.error.message)) return showErr('메일함에서 확인 버튼을 먼저 눌러 주세요');
+        return showErr('이메일이나 비밀번호가 맞지 않아요. 처음이라면 아래 "새로 가입하기"를 눌러요');
+      }
+      location.replace(nextUrl());
+      return;
     }
-  })();
+
+    var su = await sb.auth.signUp({
+      email: email,
+      password: password,
+      options: { data: { name: name }, emailRedirectTo: location.origin + '/login?next=' + encodeURIComponent(nextUrl()) }
+    });
+    btn.disabled = false;
+    btn.textContent = label;
+    if (su.error) {
+      if (/registered|already/i.test(su.error.message)) { setMode('login'); return showErr('이미 가입한 이메일이에요. 비밀번호를 넣고 로그인해 주세요'); }
+      if (/password/i.test(su.error.message)) return showErr('비밀번호가 너무 쉬워요. 더 길게 써 주세요');
+      return showErr('가입하지 못했어요. 잠시 후 다시 해 주세요');
+    }
+    if (su.data.session) { location.replace(nextUrl()); return; }
+    $('info').textContent = email + ' 메일함에서 확인 버튼을 누르면 가입이 끝나요!';
+    $('info').hidden = false;
+    setTimeout(function () { mode = 'login'; $('nameField').hidden = true; $('submit').textContent = '로그인'; $('switch').innerHTML = '처음이에요? <button type="button" data-m="signup">새로 가입하기</button>'; }, 0);
+  });
+
+  setMode(mode);
+})();
 </script>
 </body>
 </html>

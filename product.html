@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>물건 보기 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .app{padding-bottom:calc(88px + env(safe-area-inset-bottom));}
+  .slider-wrap{position:relative;background:#F2F2F2;}
+  .slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;aspect-ratio:1/1;}
+  .slider::-webkit-scrollbar{display:none;}
+  .slider img,.slider .noimg{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:start;}
+  .slide-count{position:absolute;right:12px;bottom:12px;background:rgba(0,0,0,.55);color:#fff;font-size:13px;font-weight:700;padding:4px 10px;border-radius:12px;}
+  .dots{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:6px;pointer-events:none;}
+  .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.6);}
+  .dots i.on{background:#fff;}
+  .float-back{position:absolute;top:calc(10px + env(safe-area-inset-top));left:10px;width:44px;height:44px;border-radius:50%;
+    background:rgba(0,0,0,.35);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;z-index:2;}
+  .seller{display:flex;align-items:center;gap:12px;padding:16px 0;border-bottom:1px solid var(--line);}
+  .avatar{width:44px;height:44px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;flex-shrink:0;}
+  .avatar img{width:100%;height:100%;object-fit:cover;}
+  .seller b{display:block;font-size:17px;}
+  .seller span{font-size:14px;color:var(--sub);}
+  .title{font-size:22px;font-weight:700;margin-top:20px;line-height:1.35;}
+  .meta{font-size:14px;color:var(--hint);margin-top:6px;}
+  .price{font-size:30px;font-weight:800;margin-top:10px;}
+  .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .fact{background:var(--bg);border-radius:10px;padding:8px 12px;font-size:15px;}
+  .fact em{font-style:normal;color:var(--sub);margin-right:6px;}
+  .desc{margin-top:20px;font-size:17px;line-height:1.7;white-space:pre-wrap;}
+  .stats{margin:20px 0 8px;font-size:14px;color:var(--hint);}
+  .extra-photos img{width:100%;border-radius:12px;margin-top:12px;}
+  .bar{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;z-index:30;background:var(--surface);border-top:1px solid var(--line);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center;}
+  .heart{width:56px;height:56px;flex-shrink:0;border-radius:14px;border:1.5px solid var(--line);font-size:26px;display:flex;align-items:center;justify-content:center;}
+  .heart .i3d{filter:grayscale(1);opacity:.35;transition:all .2s ease;}
+  .heart.on{border-color:#FFD3D0;background:#FFF5F4;}
+  .heart.on .i3d{filter:none;opacity:1;transform:scale(1.1);}
+  .bar .btn{flex:1;}
+</style>
+</head>
+<body>
+<div class="app no-tabbar" id="app">
+  <div class="slider-wrap">
+    <button class="float-back" id="backBtn" aria-label="뒤로"><i data-icon="back" data-size="24"></i></button>
+    <div class="slider" id="slider"><div class="skeleton" style="flex:0 0 100%;border-radius:0"></div></div>
+    <div class="dots" id="dots"></div>
+  </div>
+  <main class="page" id="body"></main>
+</div>
+<div class="bar" id="bar" hidden></div>
+
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="판매 상태 바꾸기">
+  <div class="handle"></div>
+  <button class="opt" data-s="selling"><i data-icon3d="sell" data-size="30"></i>판매중</button>
+  <button class="opt" data-s="reserved"><i data-icon3d="calendar" data-size="30"></i>예약중</button>
+  <button class="opt" data-s="sold"><i data-icon3d="handshake" data-size="30"></i>판매완료</button>
+  <button class="opt" data-s="delete" style="color:var(--danger)"><i data-icon3d="trash" data-size="30"></i>삭제하기</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  var id = PS.idFromUrl('product');
+  var product = null;
+  var liked = false;
+
+  document.getElementById('backBtn').addEventListener('click', function () {
+    if (history.length > 1 && document.referrer.indexOf(location.host) !== -1) history.back();
+    else location.href = '/buy';
+  });
+
+  function notFound() {
+    document.getElementById('slider').innerHTML = '<div class="noimg">' + PS.icon3d('sell', 120) + '</div>';
+    document.getElementById('body').innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>물건을 찾을 수 없어요</b>이미 삭제된 물건일 수 있어요<div style="margin-top:20px"><a class="btn" href="/buy">다른 물건 보기</a></div></div>';
+  }
+
+  async function load() {
+    if (!id) return notFound();
+    var res = await sb.from('products')
+      .select('id,title,price,description,brand,condition,usage_period,region,status,seller_profile_id,created_at,view_count,like_count,inquiry_count,categories(name),product_images(url,sort_order)')
+      .eq('id', id).maybeSingle();
+    if (res.error || !res.data || res.data.status === 'deleted') return notFound();
+    product = res.data;
+    document.title = product.title + ' - 판다산다';
+    await PS.ready;
+
+    var sellerMap = await PS.publicProfiles([product.seller_profile_id]);
+    renderSlider();
+    renderBody(sellerMap[product.seller_profile_id] || {});
+    await renderBar();
+    sb.rpc('increment_product_view', { p_product_id: id });
+  }
+
+  function renderSlider() {
+    var imgs = (product.product_images || []).slice().sort(function (a, b) { return a.sort_order - b.sort_order; });
+    var slider = document.getElementById('slider');
+    var dots = document.getElementById('dots');
+    if (!imgs.length) { slider.innerHTML = '<div class="noimg">' + PS.icon3d('sell', 120) + '</div>'; return; }
+    slider.innerHTML = imgs.map(function (im, i) {
+      return '<img src="' + PS.esc(im.url) + '" alt="사진 ' + (i + 1) + '"' + (i ? ' loading="lazy"' : '') + '>';
+    }).join('');
+    if (imgs.length > 1) {
+      dots.innerHTML = imgs.map(function (_, i) { return '<i class="' + (i ? '' : 'on') + '"></i>'; }).join('');
+      slider.addEventListener('scroll', function () {
+        var idx = Math.round(slider.scrollLeft / slider.clientWidth);
+        dots.querySelectorAll('i').forEach(function (d, i) { d.classList.toggle('on', i === idx); });
+      }, { passive: true });
+    }
+  }
+
+  function renderBody(seller) {
+    var p = product;
+    var facts = [];
+    if (p.condition && PS.CONDITIONS[p.condition]) facts.push('<span class="fact"><em>상태</em>' + PS.CONDITIONS[p.condition] + '</span>');
+    if (p.usage_period && PS.USAGE[p.usage_period]) facts.push('<span class="fact"><em>사용기간</em>' + PS.USAGE[p.usage_period] + '</span>');
+    if (p.brand) facts.push('<span class="fact"><em>만든 곳</em>' + PS.esc(p.brand) + '</span>');
+    var badge = p.status === 'reserved' ? '<span class="badge reserved">예약중</span>' : p.status === 'sold' ? '<span class="badge sold">판매완료</span>' : '';
+
+    document.getElementById('body').innerHTML =
+      '<div class="seller">' +
+        '<div class="avatar">' + PS.avatarHtml(seller.avatar_url) + '</div>' +
+        '<div><b>' + PS.esc(seller.name || '판매자') + '</b><span>' + PS.esc(p.region || '지역 정보 없음') + '</span></div>' +
+      '</div>' +
+      '<h1 class="title">' + badge + PS.esc(p.title) + '</h1>' +
+      '<div class="meta">' + PS.esc(p.categories ? p.categories.name : '') + (p.categories ? ' · ' : '') + PS.ago(p.created_at) + '</div>' +
+      '<div class="price">' + PS.won(p.price) + '</div>' +
+      (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
+      (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
+      '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + ((p.view_count || 0) + 1) + '</div>';
+  }
+
+  async function renderBar() {
+    var bar = document.getElementById('bar');
+    bar.hidden = false;
+    var mine = PS.user && PS.user.id === product.seller_profile_id;
+
+    if (mine) {
+      bar.innerHTML = '<button class="btn white" id="statusBtn">' + (PS.STATUS[product.status] || '판매중') + ' · 상태 바꾸기</button>';
+      document.getElementById('statusBtn').addEventListener('click', openSheet);
+      return;
+    }
+
+    if (PS.user) {
+      var fav = await sb.from('favorites').select('id').eq('product_id', id).eq('profile_id', PS.user.id).maybeSingle();
+      liked = !!fav.data;
+    }
+    var disabled = product.status === 'sold';
+    bar.innerHTML =
+      '<button class="heart' + (liked ? ' on' : '') + '" id="heartBtn" aria-label="찜하기" aria-pressed="' + liked + '">' + PS.icon3d('heart', 34) + '</button>' +
+      '<button class="btn white" id="callBtn"' + (disabled ? ' disabled' : '') + '>' + PS.icon('phone', 20) + ' 전화하기</button>' +
+      '<button class="btn" id="chatBtn"' + (disabled ? ' disabled' : '') + '>' + PS.icon3d('chat', 28) + ' 채팅하기</button>';
+    document.getElementById('heartBtn').addEventListener('click', toggleLike);
+    document.getElementById('callBtn').addEventListener('click', call);
+    document.getElementById('chatBtn').addEventListener('click', startChat);
+  }
+
+  async function toggleLike() {
+    if (!PS.requireLogin()) return;
+    var btn = document.getElementById('heartBtn');
+    liked = !liked;
+    btn.classList.toggle('on', liked);
+    btn.setAttribute('aria-pressed', liked);
+    var res = liked
+      ? await sb.from('favorites').insert({ profile_id: PS.user.id, product_id: id })
+      : await sb.from('favorites').delete().eq('profile_id', PS.user.id).eq('product_id', id);
+    if (res.error && res.error.code !== '23505') { PS.toast('잠시 후 다시 해 주세요'); return; }
+    PS.toast(liked ? '찜했어요!' : '찜을 취소했어요');
+  }
+
+  async function call() {
+    if (!PS.requireLogin()) return;
+    var res = await sb.rpc('get_seller_phone', { p_product_id: id });
+    if (res.data) location.href = 'tel:' + String(res.data).replace(/[^0-9+]/g, '');
+    else PS.toast('전화번호가 없어요. 채팅으로 물어보세요!');
+  }
+
+  async function startChat() {
+    if (!PS.requireLogin()) return;
+    var btn = document.getElementById('chatBtn');
+    btn.disabled = true;
+    var found = await sb.from('chats').select('id').eq('product_id', id).eq('buyer_id', PS.user.id).maybeSingle();
+    var chatId = found.data && found.data.id;
+    if (!chatId) {
+      var ins = await sb.from('chats').insert({ product_id: id, buyer_id: PS.user.id, seller_id: product.seller_profile_id }).select('id').single();
+      if (ins.error) { btn.disabled = false; PS.toast('채팅을 열지 못했어요. 다시 해 주세요'); return; }
+      chatId = ins.data.id;
+    }
+    location.href = '/chat/' + chatId;
+  }
+
+  var sheet = document.getElementById('sheet');
+  var sheetBg = document.getElementById('sheetBg');
+  function openSheet() { sheet.classList.add('show'); sheetBg.classList.add('show'); }
+  function closeSheet() { sheet.classList.remove('show'); sheetBg.classList.remove('show'); }
+  sheetBg.addEventListener('click', closeSheet);
+  sheet.addEventListener('click', async function (e) {
+    var opt = e.target.closest('.opt');
+    if (!opt) return;
+    var s = opt.dataset.s;
+    closeSheet();
+    if (s === 'delete') {
+      if (!confirm('정말 삭제할까요?')) return;
+      var del = await sb.from('products').update({ status: 'deleted' }).eq('id', id);
+      if (del.error) { PS.toast('삭제하지 못했어요'); return; }
+      location.href = '/mypage';
+      return;
+    }
+    var res = await sb.from('products').update({ status: s }).eq('id', id);
+    if (res.error) { PS.toast('바꾸지 못했어요'); return; }
+    product.status = s;
+    document.getElementById('statusBtn').textContent = PS.STATUS[s] + ' · 상태 바꾸기';
+    PS.toast(PS.STATUS[s] + '(으)로 바꿨어요');
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

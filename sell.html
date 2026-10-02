@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>판다 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .app{padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+  .progress{height:4px;background:var(--line);}
+  .progress i{display:block;height:100%;background:var(--primary);width:20%;transition:width .3s ease;}
+  .step{display:none;padding:24px 16px 0;}
+  .step.on{display:block;}
+  .q{font-size:26px;font-weight:800;line-height:1.3;}
+  .q-sub{margin-top:6px;font-size:16px;color:var(--sub);}
+  .pick{display:flex;flex-direction:column;gap:12px;margin-top:28px;}
+  .pick .big-btn{height:88px;}
+  .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:20px;}
+  .photos .ph{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#F2F2F2;}
+  .photos .ph img{width:100%;height:100%;object-fit:cover;}
+  .photos .ph .x{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:16px;line-height:28px;text-align:center;}
+  .photos .ph .first{position:absolute;left:4px;bottom:4px;background:var(--text);color:#fff;font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;}
+  .photos .add{aspect-ratio:1/1;border-radius:12px;border:2px dashed #DDD;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sub);font-size:13px;font-weight:600;gap:2px;}
+  .photos .add b{font-size:26px;line-height:1;}
+  .ai-box{margin-top:20px;padding:20px;border-radius:var(--radius);background:var(--primary-light);}
+  .ai-box .lbl{font-size:14px;font-weight:700;color:#8A6400;}
+  .ai-box .name{font-size:24px;font-weight:800;margin-top:6px;line-height:1.3;}
+  .ai-box .cat{font-size:15px;color:var(--sub);margin-top:2px;}
+  .ai-box .ask{font-size:18px;font-weight:700;margin-top:14px;}
+  .ai-box .yn{display:flex;gap:8px;margin-top:12px;}
+  .ai-box .yn .btn{height:52px;}
+  .spinner{width:22px;height:22px;border:3px solid rgba(0,0,0,.1);border-top-color:var(--primary-press);border-radius:50%;animation:spin .8s linear infinite;display:inline-block;vertical-align:-5px;margin-right:8px;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .price-input{display:flex;align-items:center;gap:8px;margin-top:28px;border-bottom:3px solid var(--primary);padding-bottom:8px;}
+  .price-input input{flex:1;min-width:0;border:none;font-size:34px;font-weight:800;background:none;}
+  .price-input input:focus{outline:none;}
+  .price-input span{font-size:26px;font-weight:700;}
+  .price-read{margin-top:10px;font-size:18px;font-weight:700;color:var(--primary-press);min-height:27px;}
+  .plus{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+  .plus button{height:44px;padding:0 14px;border-radius:12px;background:#F2F2F2;font-size:15px;font-weight:700;}
+  .suggest{margin-top:24px;padding:16px;border-radius:var(--radius);background:#F4FBF6;border:1px solid #D4F0DC;}
+  .suggest b{display:block;font-size:17px;}
+  .suggest p{font-size:15px;color:var(--sub);margin-top:2px;}
+  .suggest button{margin-top:10px;}
+  .ai-write{margin-top:10px;width:100%;height:48px;border-radius:12px;background:var(--primary-light);font-weight:700;font-size:16px;}
+  .loc{margin-top:28px;padding:24px;border-radius:var(--radius);background:var(--bg);text-align:center;}
+  .loc .pin{font-size:40px;}
+  .loc .where{font-size:24px;font-weight:800;margin-top:6px;}
+  .loc .hint{font-size:15px;color:var(--sub);margin-top:4px;}
+  .footer{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;z-index:30;background:var(--surface);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:8px;border-top:1px solid var(--line);}
+  .footer .btn.gray{flex:0 0 33%;}
+  .done{text-align:center;padding-top:60px;}
+  .done .big{font-size:72px;}
+  .done h2{font-size:26px;font-weight:800;margin-top:12px;}
+  .done p{color:var(--sub);margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="app no-tabbar">
+  <header class="topbar">
+    <a class="back" href="/" aria-label="닫기"><i data-icon="close" data-size="24"></i></a>
+    <h1>판다 · 판매하기</h1>
+  </header>
+  <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+
+  <!-- 1. 사진 -->
+  <section class="step on" data-step="1">
+    <div id="pickView">
+      <img src="/이미지/web/panda-sell.jpg" alt="" width="600" height="800" style="width:132px;margin:0 auto 16px;border-radius:16px">
+      <h2 class="q">무엇을 팔까요?</h2>
+      <p class="q-sub">사진만 찍으면 AI가 무슨 물건인지 알아봐요</p>
+      <div class="pick">
+        <button type="button" class="big-btn sell" id="camBtn">
+          <span class="bi" aria-hidden="true"><i data-icon3d="camera" data-size="44"></i></span><div><b>사진 찍기</b><span>카메라로 바로 찍어요</span></div>
+        </button>
+        <button type="button" class="big-btn buy" id="galBtn">
+          <span class="bi" aria-hidden="true"><i data-icon="image" data-size="34"></i></span><div><b>앨범에서 고르기</b><span>찍어둔 사진을 골라요</span></div>
+        </button>
+      </div>
+    </div>
+
+    <div id="photoView" hidden>
+      <h2 class="q">사진을 올렸어요</h2>
+      <p class="q-sub">여러 각도로 찍을수록 잘 팔려요 (최대 10장)</p>
+      <div class="photos" id="photos"></div>
+
+      <div class="ai-box" id="aiBox"></div>
+
+      <div id="editBox" hidden>
+        <label class="field"><span>물건 이름</span>
+          <input class="input" id="titleInput" maxlength="60" placeholder="예) 쇼트블라스트기" autocomplete="off">
+        </label>
+        <div class="field"><span>어떤 종류인가요?</span>
+          <div class="chip-grid" id="catChips"></div>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+    <input type="file" id="galInput" accept="image/*" multiple hidden>
+  </section>
+
+  <!-- 2. 가격 -->
+  <section class="step" data-step="2">
+    <h2 class="q">얼마에 팔까요?</h2>
+    <p class="q-sub" id="priceFor"></p>
+    <div class="price-input">
+      <input id="priceInput" inputmode="numeric" placeholder="0" autocomplete="off" aria-label="판매 가격">
+      <span>원</span>
+    </div>
+    <div class="price-read" id="priceRead"></div>
+    <div class="plus">
+      <button type="button" data-add="10000">+1만</button>
+      <button type="button" data-add="100000">+10만</button>
+      <button type="button" data-add="1000000">+100만</button>
+      <button type="button" data-add="10000000">+1000만</button>
+      <button type="button" data-add="0" style="background:none;color:var(--sub)">지우기</button>
+    </div>
+    <div class="suggest" id="suggest" hidden></div>
+  </section>
+
+  <!-- 3. 설명 (선택) -->
+  <section class="step" data-step="3">
+    <h2 class="q">조금만 더 알려주세요</h2>
+    <p class="q-sub">안 써도 괜찮아요. 쓰면 더 빨리 팔려요!</p>
+    <div class="field"><span>얼마나 썼나요?</span>
+      <div class="chip-grid" id="usageChips"></div>
+    </div>
+    <div class="field"><span>상태는 어때요?</span>
+      <div class="chip-grid" id="condChips"></div>
+    </div>
+    <label class="field"><span>더 알려줄 것 (특이사항)</span>
+      <textarea class="textarea" id="descInput" maxlength="2000" placeholder="예) 작년까지 공장에서 잘 쓰던 기계예요. 직접 와서 보셔도 돼요."></textarea>
+    </label>
+    <button type="button" class="ai-write" id="aiWriteBtn"><i data-icon3d="idea" data-size="30"></i> AI가 써드릴까요?</button>
+  </section>
+
+  <!-- 4. 지역 -->
+  <section class="step" data-step="4">
+    <h2 class="q">어디서 거래할까요?</h2>
+    <p class="q-sub">동네까지만 보여요. 자세한 주소는 안 보여요</p>
+    <div class="loc">
+      <div class="pin" aria-hidden="true"><i data-icon3d="location" data-size="96"></i></div>
+      <div class="where" id="where">찾는 중…</div>
+      <div class="hint" id="whereHint">내 위치로 동네를 찾고 있어요</div>
+    </div>
+    <label class="field"><span>직접 쓰기</span>
+      <input class="input" id="regionInput" maxlength="40" placeholder="예) 성남시 분당구" autocomplete="off">
+    </label>
+    <button type="button" class="link-btn" id="relocBtn"><i data-icon3d="location" data-size="22"></i> 내 위치 다시 찾기</button>
+  </section>
+
+  <!-- 완료 -->
+  <section class="step done" data-step="5">
+    <div class="big" aria-hidden="true"><i data-sticker="done" data-size="160"></i></div>
+    <h2>등록 완료!</h2>
+    <p>이제 사려는 사람이 채팅으로 연락할 거예요</p>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:32px">
+      <a class="btn" id="viewBtn" href="/">내 물건 보기</a>
+      <a class="btn white" href="/sell">하나 더 팔기</a>
+    </div>
+  </section>
+
+  <div class="footer" id="footer">
+    <button type="button" class="btn gray" id="prevBtn" hidden>이전</button>
+    <button type="button" class="btn" id="nextBtn" disabled>다음</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  var MAX_PHOTOS = 10;
+  var step = 1;
+  var photos = [];          // { id, blob, url }
+  var photoSeq = 0;
+  var ai = { state: 'idle', result: null };   // idle | loading | done | failed
+  var editing = false;
+  var form = { title: '', category: '', brand: '', price: 0, usage: '', condition: '', desc: '', region: '' };
+  var categoryIds = {};
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  PS.ready.then(function (user) { if (!user) PS.goLogin(); });
+  sb.from('categories').select('id,name').then(function (res) {
+    (res.data || []).forEach(function (c) { categoryIds[c.name] = c.id; });
+  });
+
+  // ---------- 공통: 스텝 이동 ----------
+  function go(n) {
+    step = n;
+    document.querySelectorAll('.step').forEach(function (s) { s.classList.toggle('on', Number(s.dataset.step) === n); });
+    $('bar').style.width = Math.min(n, 5) * 20 + '%';
+    $('prevBtn').hidden = n === 1 || n === 5;
+    $('footer').hidden = n === 5;
+    $('nextBtn').textContent = n === 3 ? (hasExtra() ? '다음' : '건너뛰기') : n === 4 ? '등록하기' : '다음';
+    window.scrollTo(0, 0);
+    if (n === 2) enterPrice();
+    if (n === 4) enterRegion();
+    validate();
+  }
+
+  function hasExtra() { return !!(form.usage || form.condition || $('descInput').value.trim()); }
+
+  function validate() {
+    var ok = false;
+    if (step === 1) ok = photos.length > 0 && !!form.title.trim() && !!form.category;
+    if (step === 2) ok = form.price > 0;
+    if (step === 3) ok = true;
+    if (step === 4) ok = !!$('regionInput').value.trim() || !!form.region;
+    $('nextBtn').disabled = !ok;
+  }
+
+  $('prevBtn').addEventListener('click', function () { go(step - 1); });
+  $('nextBtn').addEventListener('click', function () {
+    if (step === 4) return submit();
+    go(step + 1);
+  });
+
+  // ---------- 1. 사진 + AI ----------
+  $('camBtn').addEventListener('click', function () { $('camInput').click(); });
+  $('galBtn').addEventListener('click', function () { $('galInput').click(); });
+  ['camInput', 'galInput'].forEach(function (id) {
+    $(id).addEventListener('change', function () { addFiles(this.files); this.value = ''; });
+  });
+
+  function resize(file, max, quality) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function () {
+        var scale = Math.min(1, max / Math.max(img.width, img.height));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
+        var ctx = c.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { b ? resolve(b) : reject(new Error('toBlob failed')); }, 'image/jpeg', quality);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('이미지를 읽지 못했어요')); };
+      img.src = url;
+    });
+  }
+
+  function blobToBase64(blob) {
+    return new Promise(function (resolve) {
+      var r = new FileReader();
+      r.onload = function () { resolve(String(r.result).split(',')[1]); };
+      r.readAsDataURL(blob);
+    });
+  }
+
+  async function addFiles(fileList) {
+    var files = Array.prototype.slice.call(fileList || []).filter(function (f) { return /^image\//.test(f.type); });
+    files = files.slice(0, MAX_PHOTOS - photos.length);
+    if (!files.length) return;
+    var firstBatch = photos.length === 0;
+    for (var i = 0; i < files.length; i++) {
+      try {
+        var blob = await resize(files[i], 1600, 0.85);
+        photos.push({ id: 'p' + (++photoSeq), blob: blob, url: URL.createObjectURL(blob) });
+      } catch (e) { PS.toast('사진 한 장을 읽지 못했어요'); }
+    }
+    $('pickView').hidden = true;
+    $('photoView').hidden = false;
+    renderPhotos();
+    if (firstBatch && photos.length) analyze();
+    validate();
+  }
+
+  function renderPhotos() {
+    var html = photos.map(function (p, i) {
+      return '<div class="ph"><img src="' + p.url + '" alt="사진 ' + (i + 1) + '">' +
+        (i === 0 ? '<span class="first">대표</span>' : '') +
+        '<button type="button" class="x" data-del="' + p.id + '" aria-label="사진 빼기">' + PS.icon('close', 16) + '</button></div>';
+    }).join('');
+    if (photos.length < MAX_PHOTOS) html += '<button type="button" class="add" id="addMore"><b>+</b>' + photos.length + '/' + MAX_PHOTOS + '</button>';
+    $('photos').innerHTML = html;
+    var add = $('addMore');
+    if (add) add.addEventListener('click', function () { $('galInput').click(); });
+  }
+
+  $('photos').addEventListener('click', function (e) {
+    var del = e.target.closest('[data-del]');
+    if (!del) return;
+    photos = photos.filter(function (p) { return p.id !== del.dataset.del; });
+    if (!photos.length) { $('pickView').hidden = false; $('photoView').hidden = true; }
+    renderPhotos();
+    validate();
+  });
+
+  async function analyze() {
+    ai.state = 'loading';
+    renderAi();
+    try {
+      var images = await Promise.all(photos.slice(0, 3).map(async function (p) {
+        var small = await resize(p.blob, 1024, 0.85);
+        return { data: await blobToBase64(small), mimeType: 'image/jpeg' };
+      }));
+      var token = await PS.accessToken();
+      var res = await fetch(PS.FUNCTIONS_URL + '/ai-product-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ images: images, categories: PS.CATEGORIES })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error || !data.title || data.title === '식별할 수 없습니다') throw new Error(data.error || 'unknown');
+      ai.state = 'done';
+      ai.result = data;
+      if (!editing) {
+        form.title = data.title;
+        form.category = PS.CATEGORIES.indexOf(data.category) !== -1 ? data.category : '기타';
+      }
+      form.brand = data.manufacturer || '';
+      if (!form.condition && data.condition) form.condition = data.condition === 'new' || data.condition === 'a' ? 'great' : 'good';
+    } catch (e) {
+      console.warn('[판다] AI 인식 실패', e);
+      ai.state = 'failed';
+      startEditing();
+    }
+    renderAi();
+    validate();
+  }
+
+  function renderAi() {
+    var box = $('aiBox');
+    if (editing && ai.state !== 'loading') { box.hidden = true; return; }
+    box.hidden = false;
+    if (ai.state === 'loading') {
+      box.innerHTML = '<div class="lbl" style="display:flex;align-items:center;gap:8px">' + PS.icon3d('request', 48) + '<span><span class="spinner"></span>AI가 사진을 보고 있어요…</span></div>' +
+        '<p class="cat" style="margin-top:8px">10초 정도 걸려요. 기다리기 싫으면 직접 써도 돼요.</p>' +
+        '<div class="yn"><button type="button" class="btn white small" id="selfBtn">직접 쓸게요</button></div>';
+      $('selfBtn').addEventListener('click', startEditing);
+      if (editing) box.hidden = true;
+      return;
+    }
+    if (ai.state === 'done') {
+      box.innerHTML = '<div class="lbl" style="display:flex;align-items:center;gap:6px">' + PS.sticker('best', 40) + 'AI가 제품을 알아봤어요</div>' +
+        '<div class="name">' + PS.esc(form.title) + '</div>' +
+        '<div class="cat">' + PS.esc(form.category) + (form.brand ? ' · ' + PS.esc(form.brand) : '') + '</div>' +
+        '<div class="ask">맞나요?</div>' +
+        '<div class="yn"><button type="button" class="btn" id="yesBtn">네, 맞아요</button>' +
+        '<button type="button" class="btn white" id="fixBtn">고칠게요</button></div>';
+      $('yesBtn').addEventListener('click', function () { go(2); });
+      $('fixBtn').addEventListener('click', startEditing);
+    }
+  }
+
+  function startEditing() {
+    editing = true;
+    $('editBox').hidden = false;
+    $('titleInput').value = form.title;
+    renderCatChips();
+    renderAi();
+    if (ai.state === 'failed' && step === 1) PS.toast('물건 이름을 직접 써 주세요');
+    $('titleInput').focus();
+    validate();
+  }
+
+  function renderCatChips() {
+    $('catChips').innerHTML = PS.CATEGORIES.map(function (c) {
+      return '<button type="button" class="chip' + (form.category === c ? ' on' : '') + '" data-v="' + PS.esc(c) + '">' + PS.esc(c) + '</button>';
+    }).join('');
+  }
+  $('catChips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    form.category = b.dataset.v;
+    renderCatChips();
+    validate();
+  });
+  $('titleInput').addEventListener('input', function () { form.title = this.value; validate(); });
+
+  // ---------- 2. 가격 ----------
+  function setPrice(n) {
+    form.price = Math.max(0, Math.min(Number(n) || 0, 2000000000));
+    $('priceInput').value = form.price ? form.price.toLocaleString('ko-KR') : '';
+    $('priceRead').textContent = form.price ? PS.won(form.price) : '';
+    validate();
+  }
+  $('priceInput').addEventListener('input', function () { setPrice(this.value.replace(/[^0-9]/g, '')); });
+  document.querySelector('.plus').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    var add = Number(b.dataset.add);
+    setPrice(add ? form.price + add : 0);
+  });
+
+  function roundMan(n) { return Math.max(10000, Math.round(n / 10000) * 10000); }
+
+  async function enterPrice() {
+    $('priceFor').textContent = form.title ? '"' + form.title + '"' : '';
+    if (!form.price) setTimeout(function () { $('priceInput').focus(); }, 50);
+    var box = $('suggest');
+    box.hidden = true;
+    // 시세 추천: 비슷한 이름 → 같은 종류 순으로, 최근 등록 가격의 중간값 ±10%
+    var prices = [];
+    var keyword = (form.title || '').split(/\s+/).filter(function (w) { return w.length >= 2; })[0];
+    if (keyword) {
+      var r1 = await sb.from('products').select('price').neq('status', 'deleted').gt('price', 0)
+        .ilike('title', '%' + keyword.replace(/[%_]/g, '') + '%').order('created_at', { ascending: false }).limit(50);
+      prices = (r1.data || []).map(function (r) { return r.price; });
+    }
+    if (prices.length < 3 && categoryIds[form.category]) {
+      var r2 = await sb.from('products').select('price').neq('status', 'deleted').gt('price', 0)
+        .eq('category_id', categoryIds[form.category]).order('created_at', { ascending: false }).limit(50);
+      prices = (r2.data || []).map(function (r) { return r.price; });
+    }
+    if (prices.length < 3) return;
+    prices.sort(function (a, b) { return a - b; });
+    var mid = prices[Math.floor(prices.length / 2)];
+    var lo = roundMan(mid * 0.9), hi = roundMan(mid * 1.1), rec = roundMan(mid);
+    box.innerHTML = '<b style="display:flex;align-items:center;gap:6px">' + PS.icon3d('chart', 36) + '비슷한 물건은 ' + PS.won(lo) + ' ~ ' + PS.won(hi) + '</b>' +
+      '<p>최근 ' + prices.length + '개 거래를 보고 추천했어요</p>' +
+      '<button type="button" class="btn small white" id="useRec">' + PS.won(rec) + '으로 할게요</button>';
+    box.hidden = false;
+    $('useRec').addEventListener('click', function () { setPrice(rec); });
+  }
+
+  // ---------- 3. 설명 ----------
+  function renderChoice(elId, map, key) {
+    $(elId).innerHTML = Object.keys(map).map(function (k) {
+      return '<button type="button" class="chip' + (form[key] === k ? ' on' : '') + '" data-v="' + k + '">' + map[k] + '</button>';
+    }).join('');
+  }
+  function bindChoice(elId, map, key) {
+    renderChoice(elId, map, key);
+    $(elId).addEventListener('click', function (e) {
+      var b = e.target.closest('.chip');
+      if (!b) return;
+      form[key] = form[key] === b.dataset.v ? '' : b.dataset.v;
+      renderChoice(elId, map, key);
+      $('nextBtn').textContent = hasExtra() ? '다음' : '건너뛰기';
+    });
+  }
+  bindChoice('usageChips', PS.USAGE, 'usage');
+  bindChoice('condChips', PS.CONDITIONS, 'condition');
+  $('descInput').addEventListener('input', function () {
+    $('nextBtn').textContent = hasExtra() ? '다음' : '건너뛰기';
+  });
+
+  $('aiWriteBtn').addEventListener('click', async function () {
+    var btn = this;
+    if (ai.state === 'loading') { PS.toast('AI가 아직 사진을 보고 있어요. 잠깐만요!'); return; }
+    if (ai.state !== 'done') {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>AI가 쓰는 중…';
+      editing = true;
+      await analyze();
+      btn.disabled = false;
+      btn.innerHTML = PS.icon3d('idea', 30) + ' AI가 써드릴까요?';
+    }
+    var d = ai.result && ai.result.description;
+    if (!d) { PS.toast('AI가 설명을 못 썼어요. 직접 써 주세요'); return; }
+    var ta = $('descInput');
+    if (ta.value.trim() && !confirm('지금 쓴 내용을 AI 설명으로 바꿀까요?')) return;
+    ta.value = d;
+    renderChoice('condChips', PS.CONDITIONS, 'condition');
+    $('nextBtn').textContent = '다음';
+    PS.toast('AI가 설명을 써줬어요. 고쳐도 돼요!');
+  });
+
+  // ---------- 4. 지역 ----------
+  var located = false;
+  function enterRegion() {
+    var saved = null;
+    try { saved = localStorage.getItem('ps_region'); } catch (e) {}
+    if (!located) locate(saved);
+  }
+
+  function showRegion(text, hint) {
+    $('where').textContent = text || '동네를 써 주세요';
+    $('whereHint').textContent = hint;
+    if (text) { form.region = text; $('regionInput').value = text; }
+    validate();
+  }
+
+  function locate(fallback) {
+    located = true;
+    $('where').textContent = '찾는 중…';
+    $('whereHint').textContent = '내 위치로 동네를 찾고 있어요';
+    if (!navigator.geolocation) return showRegion(fallback, '아래에 직접 써 주세요');
+    navigator.geolocation.getCurrentPosition(async function (pos) {
+      try {
+        var url = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&accept-language=ko&lat=' +
+          pos.coords.latitude + '&lon=' + pos.coords.longitude;
+        var r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        var a = (await r.json()).address || {};
+        var big = a.city || a.county || a.state || '';
+        var small = a.borough || a.city_district || a.district || a.suburb || a.town || '';
+        if (big === small) small = '';
+        var text = [big, small].filter(Boolean).join(' ');
+        showRegion(text || fallback, text ? '맞으면 등록하기를 눌러요' : '아래에 직접 써 주세요');
+      } catch (e) {
+        showRegion(fallback, '아래에 직접 써 주세요');
+      }
+    }, function () {
+      showRegion(fallback, fallback ? '지난번 동네예요. 다르면 고쳐 주세요' : '위치를 못 찾았어요. 아래에 써 주세요');
+    }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
+  }
+
+  $('relocBtn').addEventListener('click', function () { locate(form.region); });
+  $('regionInput').addEventListener('input', function () {
+    form.region = this.value.trim();
+    $('where').textContent = form.region || '동네를 써 주세요';
+    validate();
+  });
+
+  // ---------- 5. 등록 ----------
+  async function submit() {
+    if (!PS.requireLogin()) return;
+    var btn = $('nextBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>올리는 중…';
+    form.region = $('regionInput').value.trim() || form.region;
+    try { localStorage.setItem('ps_region', form.region); } catch (e) {}
+
+    var payload = {
+      seller_profile_id: PS.user.id,
+      title: form.title.trim().slice(0, 100),
+      category_id: categoryIds[form.category] || null,
+      brand: form.brand || null,
+      price: form.price,
+      description: $('descInput').value.trim(),
+      usage_period: form.usage || null,
+      condition: form.condition || 'good',
+      region: form.region,
+      status: 'selling'
+    };
+    var res = await sb.from('products').insert(payload).select('id').single();
+    if (res.error) {
+      console.error(res.error);
+      btn.disabled = false;
+      btn.textContent = '등록하기';
+      PS.toast('등록하지 못했어요. 다시 눌러 주세요');
+      return;
+    }
+    var productId = res.data.id;
+    var failed = 0;
+    for (var i = 0; i < photos.length; i++) {
+      try {
+        var path = PS.user.id + '/' + productId + '/' + Date.now() + '-' + i + '.jpg';
+        var up = await sb.storage.from('product-images').upload(path, photos[i].blob, { contentType: 'image/jpeg' });
+        if (up.error) throw up.error;
+        var pub = sb.storage.from('product-images').getPublicUrl(path);
+        var ins = await sb.from('product_images').insert({ product_id: productId, url: pub.data.publicUrl, sort_order: i });
+        if (ins.error) throw ins.error;
+      } catch (e) {
+        failed++;
+        console.error('[판다] 사진 올리기 실패', e);
+      }
+    }
+    if (failed) PS.toast('사진 ' + failed + '장을 못 올렸어요');
+    $('viewBtn').href = PS.productUrl(productId);
+    go(5);
+  }
+
+  go(1);
+})();
+</script>
+</body>
+</html>
