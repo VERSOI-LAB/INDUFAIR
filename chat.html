@@ -78,7 +78,7 @@
   // ---------- 채팅 목록 ----------
   async function openList() {
     PS.renderTabbar('chat');
-    app.innerHTML = '<header class="topbar"><h1>💬 채팅</h1></header><div id="list"><div class="skeleton" style="height:64px;margin:16px"></div><div class="skeleton" style="height:64px;margin:16px"></div></div>';
+    app.innerHTML = '<header class="topbar"><h1>채팅</h1></header><div id="list"><div class="skeleton" style="height:64px;margin:16px"></div><div class="skeleton" style="height:64px;margin:16px"></div></div>';
     var me = PS.user.id;
     var res = await sb.from('chats')
       .select('id,buyer_id,seller_id,last_message,last_message_at,created_at,products(id,title,status,product_images(url,sort_order))')
@@ -87,7 +87,7 @@
     var chats = (res.data || []).filter(function (c) { return c.last_message || c.buyer_id === me; });
     var list = document.getElementById('list');
     if (!chats.length) {
-      list.innerHTML = '<div class="empty"><div class="ei">💬</div><b>아직 채팅이 없어요</b>마음에 드는 물건에서 채팅하기를 눌러 보세요<div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div></div>';
+      list.innerHTML = '<div class="empty">' + PS.icon3d('chat', 96) + '<b>아직 채팅이 없어요</b>마음에 드는 물건에서 채팅하기를 눌러 보세요<div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div></div>';
       return;
     }
     var others = chats.map(function (c) { return c.buyer_id === me ? c.seller_id : c.buyer_id; });
@@ -104,7 +104,7 @@
       var img = PS.firstImage(p);
       var n = unread[c.id] || 0;
       return '<a class="chat-item" href="/chat/' + c.id + '">' +
-        '<div class="avatar">' + (o.avatar_url ? '<img src="' + PS.esc(o.avatar_url) + '" alt="">' : '🐼') + '</div>' +
+        '<div class="avatar">' + PS.avatarHtml(o.avatar_url) + '</div>' +
         '<div class="mid">' +
           '<div class="top"><span class="who">' + PS.esc(o.name || '이웃') + '</span><span class="when">' + (c.last_message_at ? PS.ago(c.last_message_at) : '') + '</span></div>' +
           '<div class="prod">' + PS.esc(p.title || '삭제된 물건') + '</div>' +
@@ -122,18 +122,18 @@
   async function openRoom(id) {
     app.classList.add('no-tabbar');
     app.innerHTML = '<div class="room">' +
-      '<header class="topbar"><a class="back" href="/chat" aria-label="채팅 목록">‹</a><h1 id="otherName">채팅</h1></header>' +
+      '<header class="topbar"><a class="back" href="/chat" aria-label="채팅 목록">' + PS.icon('back', 24) + '</a><h1 id="otherName">채팅</h1></header>' +
       '<a class="prod-strip" id="strip" href="#"></a>' +
       '<div class="msgs" id="msgs"></div>' +
       '<div class="quick" id="quick"></div>' +
-      '<form class="composer" id="composer"><textarea id="text" rows="1" placeholder="메시지 보내기" aria-label="메시지"></textarea><button type="submit" id="send" aria-label="보내기" disabled>➤</button></form>' +
+      '<form class="composer" id="composer"><textarea id="text" rows="1" placeholder="메시지 보내기" aria-label="메시지"></textarea><button type="submit" id="send" aria-label="보내기" disabled>' + PS.icon('send', 22) + '</button></form>' +
       '</div>';
     document.querySelector('.room .back').style.fontSize = '28px';
 
     var me = PS.user.id;
     var res = await sb.from('chats').select('id,buyer_id,seller_id,products(id,title,price,status,product_images(url,sort_order))').eq('id', id).maybeSingle();
     if (!res.data) {
-      document.getElementById('msgs').innerHTML = '<div class="empty"><div class="ei">😢</div><b>채팅방을 찾을 수 없어요</b></div>';
+      document.getElementById('msgs').innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>채팅방을 찾을 수 없어요</b></div>';
       document.getElementById('composer').hidden = true;
       return;
     }
@@ -220,7 +220,7 @@
     var me = PS.user.id;
     var box = document.getElementById('msgs');
     if (!messages.length) {
-      box.innerHTML = '<div class="empty" style="padding:40px 0"><div class="ei">👋</div><b>먼저 인사해 보세요</b>아래 버튼을 눌러도 돼요</div>';
+      box.innerHTML = '<div class="empty" style="padding:40px 0">' + PS.sticker('hello', 120) + '<b>먼저 인사해 보세요</b>아래 버튼을 눌러도 돼요</div>';
       return;
     }
     var lastReadMine = -1;

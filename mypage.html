@@ -41,10 +41,10 @@
 <div class="sheet-bg" id="sheetBg"></div>
 <div class="sheet" id="statusSheet" role="dialog" aria-label="판매 상태 바꾸기">
   <div class="handle"></div>
-  <button class="opt" data-s="selling">🟡 판매중</button>
-  <button class="opt" data-s="reserved">🟢 예약중</button>
-  <button class="opt" data-s="sold">✅ 판매완료</button>
-  <button class="opt" data-s="delete" style="color:var(--danger)">🗑️ 삭제하기</button>
+  <button class="opt" data-s="selling"><i data-icon3d="sell" data-size="30"></i>판매중</button>
+  <button class="opt" data-s="reserved"><i data-icon3d="calendar" data-size="30"></i>예약중</button>
+  <button class="opt" data-s="sold"><i data-icon3d="handshake" data-size="30"></i>판매완료</button>
+  <button class="opt" data-s="delete" style="color:var(--danger)"><i data-icon3d="trash" data-size="30"></i>삭제하기</button>
 </div>
 <div class="sheet" id="editSheet" role="dialog" aria-label="내 정보 바꾸기">
   <div class="handle"></div>
@@ -74,7 +74,7 @@
 
   PS.ready.then(function (user) {
     if (!user) {
-      main.innerHTML = '<div class="guest"><div class="big">🐼</div><h1>판다산다에 오신 걸 환영해요</h1><p>로그인하면 내 물건과 채팅을 볼 수 있어요</p><a class="btn" href="/login?next=/mypage">로그인 / 가입하기</a></div>';
+      main.innerHTML = '<div class="guest"><div class="big">' + PS.sticker('hello', 160) + '</div><h1>판다산다에 오신 걸 환영해요</h1><p>로그인하면 내 물건과 채팅을 볼 수 있어요</p><a class="btn" href="/login?next=/mypage">로그인 / 가입하기</a></div>';
       return;
     }
     render();
@@ -85,15 +85,15 @@
     var pr = PS.profile || {};
     main.innerHTML =
       '<section class="me">' +
-        '<div class="avatar">' + (pr.avatar_url ? '<img src="' + PS.esc(pr.avatar_url) + '" alt="">' : '🐼') + '</div>' +
+        '<div class="avatar">' + PS.avatarHtml(pr.avatar_url) + '</div>' +
         '<div style="min-width:0"><b>' + PS.esc(pr.name || '이웃') + '</b><span>' + PS.esc(pr.phone || '전화번호 없음') + '</span></div>' +
         '<button class="edit" id="editBtn">수정</button>' +
       '</section>' +
       '<div class="stats" id="stats"><div><b>-</b><span>조회수</span></div><div><b>-</b><span>찜수</span></div><div><b>-</b><span>채팅수</span></div></div>' +
-      '<a class="btn" href="/sell" style="margin-top:16px">📷 판다 · 새 물건 팔기</a>' +
+      '<a class="btn" href="/sell" style="margin-top:16px">' + PS.icon3d('camera', 32) + ' 판다 · 새 물건 팔기</a>' +
       '<div class="tabs" id="tabs" role="tablist"></div>' +
       '<div class="list" id="list"></div>' +
-      '<h2 class="sec-title">♥ 찜한 물건</h2><div class="list" id="favList"></div>' +
+      '<h2 class="sec-title" style="display:flex;align-items:center;gap:6px">' + PS.icon3d('heart', 34) + '찜한 물건</h2><div class="list" id="favList"></div>' +
       '<nav class="menu">' +
         '<a href="/terms">이용약관</a><a href="/privacy">개인정보처리방침</a>' +
         '<button id="logoutBtn" style="color:var(--sub)">로그아웃</button>' +
@@ -133,7 +133,7 @@
     var list = document.getElementById('list');
     if (!rows.length) {
       var msg = { selling: '판매중인 물건이 없어요', reserved: '예약중인 물건이 없어요', sold: '아직 판매완료된 물건이 없어요' }[tab];
-      list.innerHTML = '<div class="empty" style="padding:40px 0"><div class="ei">📦</div>' + msg + '</div>';
+      list.innerHTML = '<div class="empty" style="padding:40px 0">' + PS.icon3d('sell', 80) + msg + '</div>';
       return;
     }
     list.innerHTML = rows.map(function (p) {
@@ -154,7 +154,7 @@
     var rows = (res.data || []).map(function (f) { return f.products; }).filter(function (p) { return p && p.status !== 'deleted'; });
     document.getElementById('favList').innerHTML = rows.length
       ? rows.map(PS.rowHtml).join('')
-      : '<div class="empty" style="padding:24px 0">마음에 드는 물건에 ♡를 눌러 보세요</div>';
+      : '<div class="empty" style="padding:24px 0">마음에 드는 물건에 하트를 눌러 보세요</div>';
   }
 
   // ---------- 바텀시트 ----------

@@ -61,7 +61,7 @@
 <body>
 <div class="app no-tabbar">
   <header class="topbar">
-    <a class="back" href="/" aria-label="닫기">✕</a>
+    <a class="back" href="/" aria-label="닫기"><i data-icon="close" data-size="24"></i></a>
     <h1>판다 · 판매하기</h1>
   </header>
   <div class="progress" aria-hidden="true"><i id="bar"></i></div>
@@ -74,10 +74,10 @@
       <p class="q-sub">사진만 찍으면 AI가 무슨 물건인지 알아봐요</p>
       <div class="pick">
         <button type="button" class="big-btn sell" id="camBtn">
-          <span class="bi" aria-hidden="true">📷</span><div><b>사진 찍기</b><span>카메라로 바로 찍어요</span></div>
+          <span class="bi" aria-hidden="true"><i data-icon3d="camera" data-size="44"></i></span><div><b>사진 찍기</b><span>카메라로 바로 찍어요</span></div>
         </button>
         <button type="button" class="big-btn buy" id="galBtn">
-          <span class="bi" aria-hidden="true">🖼️</span><div><b>앨범에서 고르기</b><span>찍어둔 사진을 골라요</span></div>
+          <span class="bi" aria-hidden="true"><i data-icon="image" data-size="34"></i></span><div><b>앨범에서 고르기</b><span>찍어둔 사진을 골라요</span></div>
         </button>
       </div>
     </div>
@@ -134,7 +134,7 @@
     <label class="field"><span>더 알려줄 것 (특이사항)</span>
       <textarea class="textarea" id="descInput" maxlength="2000" placeholder="예) 작년까지 공장에서 잘 쓰던 기계예요. 직접 와서 보셔도 돼요."></textarea>
     </label>
-    <button type="button" class="ai-write" id="aiWriteBtn">✨ AI가 써드릴까요?</button>
+    <button type="button" class="ai-write" id="aiWriteBtn"><i data-icon3d="idea" data-size="30"></i> AI가 써드릴까요?</button>
   </section>
 
   <!-- 4. 지역 -->
@@ -142,19 +142,19 @@
     <h2 class="q">어디서 거래할까요?</h2>
     <p class="q-sub">동네까지만 보여요. 자세한 주소는 안 보여요</p>
     <div class="loc">
-      <div class="pin" aria-hidden="true">📍</div>
+      <div class="pin" aria-hidden="true"><i data-icon3d="location" data-size="96"></i></div>
       <div class="where" id="where">찾는 중…</div>
       <div class="hint" id="whereHint">내 위치로 동네를 찾고 있어요</div>
     </div>
     <label class="field"><span>직접 쓰기</span>
       <input class="input" id="regionInput" maxlength="40" placeholder="예) 성남시 분당구" autocomplete="off">
     </label>
-    <button type="button" class="link-btn" id="relocBtn">📍 내 위치 다시 찾기</button>
+    <button type="button" class="link-btn" id="relocBtn"><i data-icon3d="location" data-size="22"></i> 내 위치 다시 찾기</button>
   </section>
 
   <!-- 완료 -->
   <section class="step done" data-step="5">
-    <div class="big" aria-hidden="true">🎉</div>
+    <div class="big" aria-hidden="true"><i data-sticker="done" data-size="160"></i></div>
     <h2>등록 완료!</h2>
     <p>이제 사려는 사람이 채팅으로 연락할 거예요</p>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:32px">
@@ -279,7 +279,7 @@
     var html = photos.map(function (p, i) {
       return '<div class="ph"><img src="' + p.url + '" alt="사진 ' + (i + 1) + '">' +
         (i === 0 ? '<span class="first">대표</span>' : '') +
-        '<button type="button" class="x" data-del="' + p.id + '" aria-label="사진 빼기">✕</button></div>';
+        '<button type="button" class="x" data-del="' + p.id + '" aria-label="사진 빼기">' + PS.icon('close', 16) + '</button></div>';
     }).join('');
     if (photos.length < MAX_PHOTOS) html += '<button type="button" class="add" id="addMore"><b>+</b>' + photos.length + '/' + MAX_PHOTOS + '</button>';
     $('photos').innerHTML = html;
@@ -334,7 +334,7 @@
     if (editing && ai.state !== 'loading') { box.hidden = true; return; }
     box.hidden = false;
     if (ai.state === 'loading') {
-      box.innerHTML = '<div class="lbl"><span class="spinner"></span>AI가 사진을 보고 있어요…</div>' +
+      box.innerHTML = '<div class="lbl" style="display:flex;align-items:center;gap:8px">' + PS.icon3d('request', 48) + '<span><span class="spinner"></span>AI가 사진을 보고 있어요…</span></div>' +
         '<p class="cat" style="margin-top:8px">10초 정도 걸려요. 기다리기 싫으면 직접 써도 돼요.</p>' +
         '<div class="yn"><button type="button" class="btn white small" id="selfBtn">직접 쓸게요</button></div>';
       $('selfBtn').addEventListener('click', startEditing);
@@ -342,7 +342,7 @@
       return;
     }
     if (ai.state === 'done') {
-      box.innerHTML = '<div class="lbl">🤖 AI가 제품을 알아봤어요</div>' +
+      box.innerHTML = '<div class="lbl" style="display:flex;align-items:center;gap:6px">' + PS.sticker('best', 40) + 'AI가 제품을 알아봤어요</div>' +
         '<div class="name">' + PS.esc(form.title) + '</div>' +
         '<div class="cat">' + PS.esc(form.category) + (form.brand ? ' · ' + PS.esc(form.brand) : '') + '</div>' +
         '<div class="ask">맞나요?</div>' +
@@ -417,7 +417,7 @@
     prices.sort(function (a, b) { return a - b; });
     var mid = prices[Math.floor(prices.length / 2)];
     var lo = roundMan(mid * 0.9), hi = roundMan(mid * 1.1), rec = roundMan(mid);
-    box.innerHTML = '<b>💡 비슷한 물건은 ' + PS.won(lo) + ' ~ ' + PS.won(hi) + '</b>' +
+    box.innerHTML = '<b style="display:flex;align-items:center;gap:6px">' + PS.icon3d('chart', 36) + '비슷한 물건은 ' + PS.won(lo) + ' ~ ' + PS.won(hi) + '</b>' +
       '<p>최근 ' + prices.length + '개 거래를 보고 추천했어요</p>' +
       '<button type="button" class="btn small white" id="useRec">' + PS.won(rec) + '으로 할게요</button>';
     box.hidden = false;
@@ -455,7 +455,7 @@
       editing = true;
       await analyze();
       btn.disabled = false;
-      btn.textContent = '✨ AI가 써드릴까요?';
+      btn.innerHTML = PS.icon3d('idea', 30) + ' AI가 써드릴까요?';
     }
     var d = ai.result && ai.result.description;
     if (!d) { PS.toast('AI가 설명을 못 썼어요. 직접 써 주세요'); return; }

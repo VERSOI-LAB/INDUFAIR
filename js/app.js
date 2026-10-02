@@ -69,6 +69,55 @@
     PS._toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2200);
   };
 
+  // ---- 판다 스티커 / 선 아이콘 ----
+  // 스티커: /이미지/stickers/{name}.webp (sell, buy, ready, delivery, inquiry, checking, best, good,
+  // curious, thanks, carry, searching, working, factory, fighting, happy, sorry, hello, done)
+  PS.sticker = function (name, size, cls) {
+    return '<img class="stk' + (cls ? ' ' + cls : '') + '" src="/이미지/stickers/' + name + '.webp" alt="" width="' + size + '" height="' + size + '" style="width:' + size + 'px;height:' + size + 'px">';
+  };
+
+  // 3D 아이콘: /이미지/icons/{name}.webp (home, sell, buy, search, chat, user, heart, request, camera,
+  // idea, location, delivery, chart, support, trash, calendar, globe, handshake)
+  PS.icon3d = function (name, size, cls) {
+    return '<img class="i3d' + (cls ? ' ' + cls : '') + '" src="/이미지/icons/' + name + '.webp" alt="" width="' + size + '" height="' + size + '" style="width:' + size + 'px;height:' + size + 'px">';
+  };
+
+  var ICON_PATHS = {
+    camera: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
+    image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+    chat: '<path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-5 4V6a1 1 0 0 1 1-1z"/>',
+    heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+    phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/>',
+    send: '<path d="M4 12l16-8-6 16-2-7-8-1z"/>',
+    close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    back: '<path d="M15 5l-7 7 7 7"/>',
+    trash: '<path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>'
+  };
+  PS.icon = function (name, size, fill) {
+    size = size || 22;
+    return '<svg class="ico" width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + (fill ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICON_PATHS[name] || '') + '</svg>';
+  };
+
+  // 정적 HTML의 <i data-icon="camera" data-size="22"></i>, <i data-sticker="hello" data-size="96"></i> 를 실제 그림으로 바꾼다
+  PS.hydrate = function (root) {
+    (root || document).querySelectorAll('[data-icon]').forEach(function (el) {
+      el.outerHTML = PS.icon(el.dataset.icon, Number(el.dataset.size) || 22, el.hasAttribute('data-fill'));
+    });
+    (root || document).querySelectorAll('[data-icon3d]').forEach(function (el) {
+      el.outerHTML = PS.icon3d(el.dataset.icon3d, Number(el.dataset.size) || 28, el.className);
+    });
+    (root || document).querySelectorAll('[data-sticker]').forEach(function (el) {
+      el.outerHTML = PS.sticker(el.dataset.sticker, Number(el.dataset.size) || 96, el.className);
+    });
+  };
+
+  PS.avatarHtml = function (url) {
+    return url ? '<img src="' + PS.esc(url) + '" alt="">' : PS.sticker('good', 64, 'avatar-stk');
+  };
+
   PS.firstImage = function (p) {
     var imgs = (p.product_images || []).slice().sort(function (a, b) { return a.sort_order - b.sort_order; });
     return imgs.length ? imgs[0].url : null;
@@ -76,7 +125,7 @@
 
   function photoHtml(p) {
     var url = PS.firstImage(p);
-    var img = url ? '<img src="' + PS.esc(url) + '" alt="" loading="lazy">' : '<div class="noimg">📦</div>';
+    var img = url ? '<img src="' + PS.esc(url) + '" alt="" loading="lazy">' : '<div class="noimg">' + PS.icon3d('sell', 64) + '</div>';
     if (p.status === 'sold') img += '<div class="sold-cover">판매완료</div>';
     return img;
   }
@@ -102,8 +151,8 @@
   // 산다/마이: 당근식 한 줄
   PS.rowHtml = function (p) {
     var stats = [];
-    if (p.inquiry_count) stats.push('💬 ' + p.inquiry_count);
-    if (p.like_count) stats.push('♡ ' + p.like_count);
+    if (p.inquiry_count) stats.push('<span>' + PS.icon('chat', 14) + ' ' + p.inquiry_count + '</span>');
+    if (p.like_count) stats.push('<span>' + PS.icon('heart', 14) + ' ' + p.like_count + '</span>');
     return '<a class="row" href="' + PS.productUrl(p.id) + '">' +
       '<div class="ph">' + photoHtml(p) + '</div>' +
       '<div class="info">' +
@@ -134,6 +183,9 @@
     await sb.auth.signOut();
     location.href = '/';
   };
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { PS.hydrate(); });
+  else PS.hydrate();
 
   PS.ready = (async function () {
     try {
@@ -167,11 +219,11 @@
 
   // ---- 하단 탭바 ----
   var TABS = [
-    { key: 'home', href: '/', icon: '🏠', label: '홈' },
-    { key: 'sell', href: '/sell', icon: '📷', label: '판다' },
-    { key: 'buy', href: '/buy', icon: '🔍', label: '산다' },
-    { key: 'chat', href: '/chat', icon: '💬', label: '채팅' },
-    { key: 'my', href: '/mypage', icon: '🐼', label: '마이' }
+    { key: 'home', href: '/', icon: 'home', label: '홈' },
+    { key: 'sell', href: '/sell', icon: 'sell', label: '판다' },
+    { key: 'buy', href: '/buy', icon: 'buy', label: '산다' },
+    { key: 'chat', href: '/chat', icon: 'chat', label: '채팅' },
+    { key: 'my', href: '/mypage', icon: 'user', label: '마이' }
   ];
 
   PS.renderTabbar = function (active) {
@@ -180,7 +232,7 @@
     nav.setAttribute('aria-label', '메뉴');
     nav.innerHTML = TABS.map(function (t) {
       return '<a href="' + t.href + '" class="' + (t.key === active ? 'on' : '') + '"' + (t.key === active ? ' aria-current="page"' : '') + '>' +
-        '<span class="ti" aria-hidden="true">' + t.icon + '</span>' + t.label +
+        '<span class="ti" aria-hidden="true">' + PS.icon3d(t.icon, 30) + '</span>' + t.label +
         (t.key === 'chat' ? '<span class="dot" id="chatDot"></span>' : '') + '</a>';
     }).join('');
     document.body.appendChild(nav);

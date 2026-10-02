@@ -16,9 +16,9 @@
 <body>
 <div class="app">
   <div class="head">
-    <h1>🔍 산다</h1>
+    <h1 style="display:flex;align-items:center;gap:6px"><i data-icon3d="search" data-size="34"></i>산다</h1>
     <form class="search" id="searchForm" role="search">
-      <span class="si" aria-hidden="true">🔍</span>
+      <span class="si" aria-hidden="true" style="display:flex"><i data-icon3d="search" data-size="26"></i></span>
       <input id="q" type="search" placeholder="무엇을 찾으시나요?" enterkeyhint="search" autocomplete="off" aria-label="검색어">
     </form>
     <div class="chips" id="chips" style="margin-top:12px"></div>
@@ -93,7 +93,7 @@
       list.innerHTML = '';
       document.getElementById('count').textContent = res.count ? '물건 ' + res.count.toLocaleString('ko-KR') + '개' : '';
       if (!rows.length) {
-        list.innerHTML = '<div class="empty"><div class="ei">🤔</div><b>찾는 물건이 없어요</b>다른 말로 검색해 보세요</div>';
+        list.innerHTML = '<div class="empty">' + PS.sticker('curious', 120) + '<b>찾는 물건이 없어요</b>다른 말로 검색해 보세요</div>';
       }
     }
     list.insertAdjacentHTML('beforeend', rows.map(PS.rowHtml).join(''));

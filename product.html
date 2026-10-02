@@ -36,14 +36,16 @@
   .bar{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;z-index:30;background:var(--surface);border-top:1px solid var(--line);
     padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:8px;align-items:center;}
   .heart{width:56px;height:56px;flex-shrink:0;border-radius:14px;border:1.5px solid var(--line);font-size:26px;display:flex;align-items:center;justify-content:center;}
-  .heart.on{color:var(--danger);border-color:#FFD3D0;background:#FFF5F4;}
+  .heart .i3d{filter:grayscale(1);opacity:.35;transition:all .2s ease;}
+  .heart.on{border-color:#FFD3D0;background:#FFF5F4;}
+  .heart.on .i3d{filter:none;opacity:1;transform:scale(1.1);}
   .bar .btn{flex:1;}
 </style>
 </head>
 <body>
 <div class="app no-tabbar" id="app">
   <div class="slider-wrap">
-    <button class="float-back" id="backBtn" aria-label="뒤로">‹</button>
+    <button class="float-back" id="backBtn" aria-label="뒤로"><i data-icon="back" data-size="24"></i></button>
     <div class="slider" id="slider"><div class="skeleton" style="flex:0 0 100%;border-radius:0"></div></div>
     <div class="dots" id="dots"></div>
   </div>
@@ -54,10 +56,10 @@
 <div class="sheet-bg" id="sheetBg"></div>
 <div class="sheet" id="sheet" role="dialog" aria-label="판매 상태 바꾸기">
   <div class="handle"></div>
-  <button class="opt" data-s="selling">🟡 판매중</button>
-  <button class="opt" data-s="reserved">🟢 예약중</button>
-  <button class="opt" data-s="sold">✅ 판매완료</button>
-  <button class="opt" data-s="delete" style="color:var(--danger)">🗑️ 삭제하기</button>
+  <button class="opt" data-s="selling"><i data-icon3d="sell" data-size="30"></i>판매중</button>
+  <button class="opt" data-s="reserved"><i data-icon3d="calendar" data-size="30"></i>예약중</button>
+  <button class="opt" data-s="sold"><i data-icon3d="handshake" data-size="30"></i>판매완료</button>
+  <button class="opt" data-s="delete" style="color:var(--danger)"><i data-icon3d="trash" data-size="30"></i>삭제하기</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -75,8 +77,8 @@
   });
 
   function notFound() {
-    document.getElementById('slider').innerHTML = '<div class="noimg">📦</div>';
-    document.getElementById('body').innerHTML = '<div class="empty"><div class="ei">😢</div><b>물건을 찾을 수 없어요</b>이미 삭제된 물건일 수 있어요<div style="margin-top:20px"><a class="btn" href="/buy">다른 물건 보기</a></div></div>';
+    document.getElementById('slider').innerHTML = '<div class="noimg">' + PS.icon3d('sell', 120) + '</div>';
+    document.getElementById('body').innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>물건을 찾을 수 없어요</b>이미 삭제된 물건일 수 있어요<div style="margin-top:20px"><a class="btn" href="/buy">다른 물건 보기</a></div></div>';
   }
 
   async function load() {
@@ -100,7 +102,7 @@
     var imgs = (product.product_images || []).slice().sort(function (a, b) { return a.sort_order - b.sort_order; });
     var slider = document.getElementById('slider');
     var dots = document.getElementById('dots');
-    if (!imgs.length) { slider.innerHTML = '<div class="noimg">📦</div>'; return; }
+    if (!imgs.length) { slider.innerHTML = '<div class="noimg">' + PS.icon3d('sell', 120) + '</div>'; return; }
     slider.innerHTML = imgs.map(function (im, i) {
       return '<img src="' + PS.esc(im.url) + '" alt="사진 ' + (i + 1) + '"' + (i ? ' loading="lazy"' : '') + '>';
     }).join('');
@@ -123,7 +125,7 @@
 
     document.getElementById('body').innerHTML =
       '<div class="seller">' +
-        '<div class="avatar">' + (seller.avatar_url ? '<img src="' + PS.esc(seller.avatar_url) + '" alt="">' : '🐼') + '</div>' +
+        '<div class="avatar">' + PS.avatarHtml(seller.avatar_url) + '</div>' +
         '<div><b>' + PS.esc(seller.name || '판매자') + '</b><span>' + PS.esc(p.region || '지역 정보 없음') + '</span></div>' +
       '</div>' +
       '<h1 class="title">' + badge + PS.esc(p.title) + '</h1>' +
@@ -140,7 +142,7 @@
     var mine = PS.user && PS.user.id === product.seller_profile_id;
 
     if (mine) {
-      bar.innerHTML = '<button class="btn white" id="statusBtn">' + (PS.STATUS[product.status] || '판매중') + ' ▾ 상태 바꾸기</button>';
+      bar.innerHTML = '<button class="btn white" id="statusBtn">' + (PS.STATUS[product.status] || '판매중') + ' · 상태 바꾸기</button>';
       document.getElementById('statusBtn').addEventListener('click', openSheet);
       return;
     }
@@ -151,9 +153,9 @@
     }
     var disabled = product.status === 'sold';
     bar.innerHTML =
-      '<button class="heart' + (liked ? ' on' : '') + '" id="heartBtn" aria-label="찜하기" aria-pressed="' + liked + '">' + (liked ? '♥' : '♡') + '</button>' +
-      '<button class="btn white" id="callBtn"' + (disabled ? ' disabled' : '') + '>📞 전화하기</button>' +
-      '<button class="btn" id="chatBtn"' + (disabled ? ' disabled' : '') + '>💬 채팅하기</button>';
+      '<button class="heart' + (liked ? ' on' : '') + '" id="heartBtn" aria-label="찜하기" aria-pressed="' + liked + '">' + PS.icon3d('heart', 34) + '</button>' +
+      '<button class="btn white" id="callBtn"' + (disabled ? ' disabled' : '') + '>' + PS.icon('phone', 20) + ' 전화하기</button>' +
+      '<button class="btn" id="chatBtn"' + (disabled ? ' disabled' : '') + '>' + PS.icon3d('chat', 28) + ' 채팅하기</button>';
     document.getElementById('heartBtn').addEventListener('click', toggleLike);
     document.getElementById('callBtn').addEventListener('click', call);
     document.getElementById('chatBtn').addEventListener('click', startChat);
@@ -164,13 +166,12 @@
     var btn = document.getElementById('heartBtn');
     liked = !liked;
     btn.classList.toggle('on', liked);
-    btn.textContent = liked ? '♥' : '♡';
     btn.setAttribute('aria-pressed', liked);
     var res = liked
       ? await sb.from('favorites').insert({ profile_id: PS.user.id, product_id: id })
       : await sb.from('favorites').delete().eq('profile_id', PS.user.id).eq('product_id', id);
     if (res.error && res.error.code !== '23505') { PS.toast('잠시 후 다시 해 주세요'); return; }
-    PS.toast(liked ? '찜했어요 ♥' : '찜을 취소했어요');
+    PS.toast(liked ? '찜했어요!' : '찜을 취소했어요');
   }
 
   async function call() {
@@ -214,7 +215,7 @@
     var res = await sb.from('products').update({ status: s }).eq('id', id);
     if (res.error) { PS.toast('바꾸지 못했어요'); return; }
     product.status = s;
-    document.getElementById('statusBtn').textContent = PS.STATUS[s] + ' ▾ 상태 바꾸기';
+    document.getElementById('statusBtn').textContent = PS.STATUS[s] + ' · 상태 바꾸기';
     PS.toast(PS.STATUS[s] + '(으)로 바꿨어요');
   });
 

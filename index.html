@@ -38,11 +38,11 @@
     <div class="actions">
       <a class="pick-card sell" href="/sell">
         <img src="/이미지/web/panda-sell.jpg" alt="판다 - 필요한 산업용품, 판매하세요!" width="600" height="800">
-        <span class="go">📷 판매하기</span>
+        <span class="go"><i data-icon3d="camera" data-size="30"></i> 판매하기</span>
       </a>
       <a class="pick-card buy" href="/buy">
         <img src="/이미지/web/panda-buy.jpg" alt="산다 - 원하는 산업용품, 구매하세요!" width="600" height="800">
-        <span class="go">🔍 구매하기</span>
+        <span class="go"><i data-icon3d="buy" data-size="30"></i> 구매하기</span>
       </a>
     </div>
 
@@ -75,7 +75,7 @@
     var rows = res.data || [];
     if (offset === 0) grid.innerHTML = '';
     if (offset === 0 && !rows.length) {
-      grid.outerHTML = '<div class="empty"><div class="ei">📦</div><b>아직 올라온 물건이 없어요</b>첫 번째로 판매해 보세요!</div>';
+      grid.outerHTML = '<div class="empty">' + PS.icon3d('sell', 96) + '<b>아직 올라온 물건이 없어요</b>첫 번째로 판매해 보세요!</div>';
       return;
     }
     grid.insertAdjacentHTML('beforeend', rows.map(PS.cardHtml).join(''));
