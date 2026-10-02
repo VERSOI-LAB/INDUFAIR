@@ -163,7 +163,7 @@
     var msgRes = await sb.from('messages').select('id,sender_id,message,read_at,created_at').eq('chat_id', id).order('created_at', { ascending: true }).limit(500);
     messages = msgRes.data || [];
     renderMessages(true);
-    sb.rpc('mark_chat_read', { p_chat_id: id });
+    PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id }));
 
     sb.channel('chat-' + id)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: 'chat_id=eq.' + id }, function (payload) {
@@ -171,7 +171,7 @@
         if (messages.some(function (x) { return x.id === m.id; })) return;
         messages.push(m);
         renderMessages(true);
-        if (m.sender_id !== me && document.visibilityState === 'visible') sb.rpc('mark_chat_read', { p_chat_id: id });
+        if (m.sender_id !== me && document.visibilityState === 'visible') PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id }));
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: 'chat_id=eq.' + id }, function (payload) {
         var m = payload.new;
@@ -181,7 +181,7 @@
       .subscribe();
 
     document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'visible') sb.rpc('mark_chat_read', { p_chat_id: id });
+      if (document.visibilityState === 'visible') PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id }));
     });
 
     var ta = document.getElementById('text');
