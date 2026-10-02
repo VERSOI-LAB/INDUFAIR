@@ -141,7 +141,7 @@
 
   // ---------- 시트 끌어올리기 ----------
   var sheet = $('sheet');
-  var sheetState = 'peek';
+  var sheetState = 'half';
   function visibleFor(s) {
     var H = sheet.offsetHeight;
     var headH = $('sheetHead').offsetHeight;
@@ -443,7 +443,7 @@
 
   (async function init() {
     sheet.classList.add('dragging'); // 처음엔 애니메이션 없이 바로 자리 잡기
-    setSheet('peek');
+    setSheet('half'); // 처음엔 한 단계 올린 상태(지도 + 분류 + 목록 시작)
     sheet.offsetHeight;
     sheet.classList.remove('dragging');
     var catRes = await sb.from('categories').select('id,name').is('parent_id', null);
