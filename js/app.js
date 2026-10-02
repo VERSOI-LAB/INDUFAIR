@@ -203,8 +203,8 @@
     var img = PS.firstImage({ product_images: b.business_images });
     var meta = [opts.categoryName, b.like_count ? '찜 ' + b.like_count : '', PS.distLabel(opts.km)].filter(Boolean).join(' · ');
     return '<a class="bizcard' + (opts.active ? ' hl' : '') + '" href="' + PS.bizUrl(b.id) + '" data-biz="' + PS.esc(b.id) + '">' +
-      '<div class="bz-ph">' + (img ? '<img src="' + PS.esc(img) + '" alt="" loading="lazy">' : '<div class="noimg">' + PS.icon3d('home', 64) + '</div>') +
-        '<div class="bz-quote"><span>“</span>' + PS.esc(b.tagline) + '</div></div>' +
+      '<div class="bz-ph">' + (img ? '<img src="' + PS.esc(img) + '" alt="" loading="lazy">' : '<div class="noimg">' + PS.icon3d('home', 64) + '</div>') + '</div>' +
+      (b.tagline ? '<div class="bz-quote"><span>“</span>' + PS.esc(b.tagline) + '</div>' : '') +
       '<div class="bz-name">' + PS.esc(b.name) + '</div>' +
       '<div class="bz-meta">' + PS.esc(meta) + '</div></a>';
   };
