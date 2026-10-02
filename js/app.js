@@ -180,10 +180,48 @@
     var min = Math.min.apply(null, prices), max = Math.max.apply(null, prices);
     return PS.won(min) + (max > min ? '~' : '');
   };
-  // 배송비: 0이면 포함(무료), 아니면 별도
-  PS.shipLabel = function (p) {
+  // 배송비: 0이면 포함(무료), 아니면 별도. 판매자가 정한 기준 금액(min) 이상 같이 사면 무료
+  PS.shipLabel = function (p, min) {
     var f = Number(p && p.shipping_fee) || 0;
-    return f > 0 ? '배송비 ' + f.toLocaleString('ko-KR') + '원 별도' : '배송비 포함';
+    if (!f) return '배송비 포함';
+    return '배송비 ' + f.toLocaleString('ko-KR') + '원 별도' + (min > 0 ? ' · ' + PS.won(min) + ' 이상 무료' : '');
+  };
+  // 판매자별 배송비 무료 기준 금액 { sellerId: 300000 }
+  PS.freeShipMins = async function (ids) {
+    ids = ids.filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+    if (!ids.length) return {};
+    var r = await sb.rpc('get_free_ship_min', { p_ids: ids });
+    var m = {};
+    (r.data || []).forEach(function (x) { if (x.free_ship_min > 0) m[x.id] = x.free_ship_min; });
+    return m;
+  };
+  // 한 판매자 묶음: 상품 합계와 배송비 (가장 큰 배송비 한 번, 기준 이상이면 0) — 서버 create_market_order_cart와 같은 규칙
+  PS.groupShip = function (lines, min) {
+    var sub = 0, fee = 0;
+    lines.forEach(function (l) { sub += l.price * l.qty; fee = Math.max(fee, Number(l.fee) || 0); });
+    if (min > 0 && sub >= min) fee = 0;
+    return { sub: sub, fee: fee, left: min > 0 && fee > 0 ? min - sub : 0 };
+  };
+
+  // 장바구니 (이 기기에 저장) [{ pid, opt, qty }]
+  PS.cart = {
+    key: function () { return 'ps_cart_' + (PS.user ? PS.user.id : 'guest'); },
+    items: function () { try { return JSON.parse(localStorage.getItem(PS.cart.key()) || '[]'); } catch (e) { return []; } },
+    save: function (arr) { try { localStorage.setItem(PS.cart.key(), JSON.stringify(arr)); } catch (e) {} },
+    add: function (pid, opt, qty) {
+      var arr = PS.cart.items();
+      var hit = arr.filter(function (x) { return x.pid === pid && x.opt === opt; })[0];
+      if (hit) hit.qty = Math.min(999, hit.qty + qty); else arr.push({ pid: pid, opt: opt, qty: qty });
+      PS.cart.save(arr);
+    },
+    setQty: function (pid, opt, qty) {
+      var arr = PS.cart.items().map(function (x) { if (x.pid === pid && x.opt === opt) x.qty = qty; return x; });
+      PS.cart.save(arr.filter(function (x) { return x.qty > 0; }));
+    },
+    removeMany: function (keys) { // keys: ['pid|opt', ...]
+      PS.cart.save(PS.cart.items().filter(function (x) { return keys.indexOf(x.pid + '|' + x.opt) < 0; }));
+    },
+    count: function () { return PS.cart.items().length; }
   };
   // 새로 추가된 컬럼(SQL 실행 전일 수 있음)을 빼 가며 한 건 조회
   PS.selectProduct = async function (cols, extras, id) {

@@ -67,49 +67,63 @@
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
-  var productId = PS.param('id');
-  var product = null;
+  var productId = PS.param('id');      // 바로 구매: 물건 하나
+  var sellerId = PS.param('seller');   // 장바구니: 이 판매자 물건 묶음
+  var lines = [];                      // [{ p, opt, qty, price, fee }]
+  var freeMin = 0;
   var addresses = [];
   var selectedId = null;
   var view = 'list';       // list | form | pay
   var manage = false;      // 주소 관리(삭제) 모드
   var editing = null;      // 고치는 주소
   var payMethod = 'CARD';
-  var optIdx = null;     // 고른 규격 (규격이 여러 개일 때)
-  function itemPrice() { return optIdx == null ? product.price : PS.optionPrice(product, optIdx); }
-  function optName() { return optIdx == null ? '' : PS.options(product)[optIdx].name; }
+  function optName(l) { return l.opt == null ? '' : PS.options(l.p)[l.opt].name; }
+  function backUrl() { return sellerId ? '/cart' : productId ? PS.productUrl(productId) : '/'; }
 
   function go(v) { view = v; render(); window.scrollTo(0, 0); }
 
   $('backBtn').addEventListener('click', function () {
     if (view === 'form' && addresses.length) return go('list');
     if (view === 'pay') return go('list');
-    location.href = productId ? PS.productUrl(productId) : '/';
+    location.href = backUrl();
   });
   $('manageBtn').addEventListener('click', function () { manage = !manage; render(); });
 
   async function init() {
     var user = await PS.ready;
     if (!user) { location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search); return; }
-    var cols = 'id,title,price,status,seller_profile_id,product_images(url,sort_order)';
-    var pr = await PS.selectProduct(cols, ['options', 'shipping_fee'], productId);
-    product = pr.data;
-    if (!product) return fail('물건을 찾을 수 없어요');
-    if (product.seller_profile_id === user.id) return fail('내가 올린 물건은 살 수 없어요');
-    var opts = PS.options(product);
-    if (opts.length) {
+    var cols = 'id,title,price,status,seller_profile_id,options,shipping_fee,product_images(url,sort_order)';
+    var want = [];
+    if (sellerId) want = PS.cart.items();
+    else if (productId) {
       var rawOpt = PS.param('opt');
-      optIdx = rawOpt == null || rawOpt === '' ? NaN : Number(rawOpt);
-      if (!(optIdx >= 0 && optIdx < opts.length)) { location.replace(PS.productUrl(productId)); return; } // 규격을 안 골랐으면 상세로
+      want = [{ pid: productId, opt: rawOpt == null || rawOpt === '' ? null : Number(rawOpt), qty: Math.max(1, Math.min(999, Number(PS.param('qty')) || 1)) }];
     }
-    if (!(itemPrice() > 0)) return fail('가격 협의 물건이에요. 문의하기로 가격을 먼저 물어보세요');
-    if (product.status !== 'selling') return fail('지금은 살 수 없는 물건이에요 (' + (PS.STATUS[product.status] || '판매 종료') + ')');
+    if (!want.length) return fail('주문할 물건이 없어요');
+    var r = await sb.from('products').select(cols).in('id', want.map(function (x) { return x.pid; }));
+    var map = {};
+    (r.data || []).forEach(function (p) { map[p.id] = p; });
+    for (var i = 0; i < want.length; i++) {
+      var x = want[i], p = map[x.pid];
+      if (!p) { if (!sellerId) return fail('물건을 찾을 수 없어요'); continue; }
+      if (sellerId && p.seller_profile_id !== sellerId) continue;
+      var opts = PS.options(p);
+      if (opts.length && !(x.opt >= 0 && x.opt < opts.length)) { if (!sellerId) { location.replace(PS.productUrl(p.id)); return; } continue; }
+      var price = opts.length ? PS.optionPrice(p, x.opt) : p.price;
+      if (p.seller_profile_id === user.id) { if (!sellerId) return fail('내가 올린 물건은 살 수 없어요'); continue; }
+      if (p.status !== 'selling') { if (!sellerId) return fail('지금은 살 수 없는 물건이에요 (' + (PS.STATUS[p.status] || '판매 종료') + ')'); continue; }
+      if (!(price > 0)) { if (!sellerId) return fail('가격 협의 물건이에요. 문의하기로 가격을 먼저 물어보세요'); continue; }
+      lines.push({ p: p, opt: opts.length ? x.opt : null, qty: x.qty, price: price, fee: p.shipping_fee || 0 });
+    }
+    if (!lines.length) return fail('주문할 수 있는 물건이 없어요');
+    var sid = lines[0].p.seller_profile_id;
+    freeMin = (await PS.freeShipMins([sid]))[sid] || 0;
     await loadAddresses();
     go(addresses.length ? 'list' : 'form');
   }
 
   function fail(msg) {
-    $('main').innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>' + PS.esc(msg) + '</b><div style="margin-top:20px"><a class="btn" href="' + (productId ? PS.productUrl(productId) : '/buy') + '">돌아가기</a></div></div>';
+    $('main').innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>' + PS.esc(msg) + '</b><div style="margin-top:20px"><a class="btn" href="' + backUrl() + '">돌아가기</a></div></div>';
     $('foot').hidden = true;
   }
 
@@ -254,27 +268,27 @@
   function renderPay() {
     var a = selected();
     if (!a) return go('list');
-    var img = PS.firstImage(product);
-    var t = PS.splitTitle(product.title);
-    var fee = Number(product.shipping_fee) || 0; // 배송비: 서버(create_market_order)도 같은 값으로 계산
-    var price = itemPrice();
-    var total = price + fee;
+    var g = PS.groupShip(lines, freeMin);   // 서버(create_market_order_cart)도 같은 규칙으로 계산
+    var fee = g.fee, total = g.sub + g.fee;
     $('main').innerHTML =
       '<section class="card2"><h3>배송지<button id="chgAddr">변경</button></h3>' +
         '<div style="font-size:16px;line-height:1.5">' + PS.esc(addrText(a)) + '</div>' +
         '<div style="font-size:14px;color:var(--hint);margin-top:4px">' + PS.esc(a.recipient) + ' ' + PS.esc(a.phone) + '</div></section>' +
-      '<section class="card2"><div class="item">' + (img ? '<img src="' + PS.esc(img) + '" alt="">' : '<div class="noimg"></div>') +
-        '<div style="min-width:0"><div class="nm">' + PS.esc(t.name) +
-          (optIdx != null ? '<br><span class="toss" style="margin:4px 0 0;color:var(--text);background:var(--primary-light)">규격: ' + PS.esc(optName()) + '</span>'
-            : t.spec ? '<br><span style="color:var(--hint);font-size:13px">' + PS.esc(t.spec) + '</span>' : '') + '</div>' +
-        '<div class="pr">' + PS.won(price) + '</div></div></div></section>' +
+      '<section class="card2"><h3>주문 물건 ' + lines.length + '개</h3>' + lines.map(function (l, i) {
+        var img = PS.firstImage(l.p), t = PS.splitTitle(l.p.title);
+        return '<div class="item"' + (i ? ' style="margin-top:12px"' : '') + '>' + (img ? '<img src="' + PS.esc(img) + '" alt="">' : '<div class="noimg"></div>') +
+          '<div style="min-width:0"><div class="nm">' + PS.esc(t.name) +
+            (l.opt != null ? '<br><span class="toss" style="margin:4px 0 0;color:var(--text);background:var(--primary-light)">규격: ' + PS.esc(optName(l)) + '</span>'
+              : t.spec ? '<br><span style="color:var(--hint);font-size:13px">' + PS.esc(t.spec) + '</span>' : '') + '</div>' +
+          '<div class="pr">' + (l.price * l.qty).toLocaleString('ko-KR') + '원 <small style="font-size:13px;font-weight:600;color:var(--hint)">' + l.qty + '개</small></div></div></div>';
+      }).join('') + '</section>' +
       '<section class="card2"><h3>결제수단</h3>' +
         '<button class="pm' + (payMethod === 'CARD' ? ' on' : '') + '" data-m="CARD"><span class="radio"></span><span>카드 · 간편결제<span class="toss">토스페이먼츠</span><small>신용·체크카드, 토스페이, 카카오페이 등</small></span></button>' +
         '<button class="pm' + (payMethod === 'TRANSFER' ? ' on' : '') + '" data-m="TRANSFER"><span class="radio"></span><span>계좌이체<small>내 은행 계좌에서 바로 보내요</small></span></button>' +
       '</section>' +
       '<section class="card2"><h3>결제 금액</h3>' +
-        '<div class="rowp"><span>물품 금액' + (optIdx != null ? ' (' + PS.esc(optName()) + ')' : '') + '</span><span>' + price.toLocaleString('ko-KR') + '원</span></div>' +
-        '<div class="rowp"><span>배송비</span><span>' + (fee ? fee.toLocaleString('ko-KR') + '원' : '포함') + '</span></div>' +
+        '<div class="rowp"><span>물품 금액</span><span>' + g.sub.toLocaleString('ko-KR') + '원</span></div>' +
+        '<div class="rowp"><span>배송비' + (freeMin > 0 ? ' <small>(' + PS.won(freeMin) + ' 이상 무료)</small>' : '') + '</span><span>' + (fee ? fee.toLocaleString('ko-KR') + '원' : '무료') + '</span></div>' +
         '<div class="rowp total"><span>최종 결제 금액</span><span>' + total.toLocaleString('ko-KR') + '원</span></div>' +
       '</section>' +
       '<p class="note">결제는 토스페이먼츠로 안전하게 처리돼요. 결제한 돈은 물건을 받은 뒤 판매자에게 전달돼요.</p>';
@@ -308,15 +322,19 @@
     btn.disabled = true;
     try {
       await loadToss();
-      var args = { p_product_id: product.id, p_address_id: selectedId };
-      if (optIdx != null) args.p_option = optIdx;
-      var r = await sb.rpc('create_market_order', args);
+      var r = await sb.rpc('create_market_order_cart', {
+        p_items: lines.map(function (l) { return { product_id: l.p.id, option: l.opt, qty: l.qty }; }),
+        p_address_id: selectedId
+      });
       if (r.error || !r.data || !r.data[0]) throw r.error || new Error('no order');
       var o = r.data[0];
       var a = selected();
       var toss = window.TossPayments(PS.TOSS_CLIENT_KEY);
       var payment = toss.payment({ customerKey: PS.user.id });
       var origin = location.origin;
+      var back = sellerId ? 'seller=' + encodeURIComponent(sellerId) : 'pid=' + encodeURIComponent(lines[0].p.id);
+      // 결제가 끝나면 장바구니에서 뺄 물건
+      try { sessionStorage.setItem('ps_paid_cart', JSON.stringify(sellerId ? lines.map(function (l) { return l.p.id + '|' + l.opt; }) : [])); } catch (e) {}
       await payment.requestPayment({
         method: payMethod,
         amount: { currency: 'KRW', value: o.total_amount },
@@ -324,8 +342,8 @@
         orderName: o.order_name,
         customerName: a.recipient,
         customerMobilePhone: a.phone.replace(/\D/g, ''),
-        successUrl: origin + '/pay-success?pid=' + encodeURIComponent(product.id),
-        failUrl: origin + '/pay-fail?pid=' + encodeURIComponent(product.id)
+        successUrl: origin + '/pay-success?' + back,
+        failUrl: origin + '/pay-fail?' + back
       });
     } catch (e) {
       console.error(e);

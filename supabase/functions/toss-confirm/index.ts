@@ -54,7 +54,6 @@ Deno.serve(async (req) => {
   await admin.from("market_orders").update({
     status: "paid", payment_key: paymentKey, payment_method: pay?.method || null, paid_at: pay?.approvedAt || new Date().toISOString(),
   }).eq("id", order.id);
-  // 결제되면 물건은 예약중으로
-  if (order.product_id) await admin.from("products").update({ status: "reserved" }).eq("id", order.product_id).eq("status", "selling");
+  // 물건 상태는 바꾸지 않음 (소모품처럼 계속 파는 물건이 많아서, 판매자가 판매관리에서 직접 바꿈)
   return json({ ok: true });
 });
