@@ -1,8 +1,29 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/product/:id", "destination": "/product?id=:id" },
-    { "source": "/chat/:id", "destination": "/chat?id=:id" },
-    { "source": "/profile/:id", "destination": "/profile?id=:id" }
+    {
+      "source": "/biz/new",
+      "destination": "/biz-new"
+    },
+    {
+      "source": "/biz/verify",
+      "destination": "/biz-verify"
+    },
+    {
+      "source": "/biz/:id",
+      "destination": "/business?id=:id"
+    },
+    {
+      "source": "/product/:id",
+      "destination": "/product?id=:id"
+    },
+    {
+      "source": "/chat/:id",
+      "destination": "/chat?id=:id"
+    },
+    {
+      "source": "/profile/:id",
+      "destination": "/profile?id=:id"
+    }
   ]
 }
