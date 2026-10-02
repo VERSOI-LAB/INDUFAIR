@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>구매하기 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .app{background:#F2F3F5;padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+  .topbar{background:#F2F3F5;}
+  .topbar .act{font-size:16px;font-weight:600;color:var(--sub);padding:8px 0 8px 8px;}
+  .head{margin:4px 0 20px;}
+  .head h2{font-size:24px;font-weight:800;line-height:1.35;}
+  .head p{margin-top:6px;font-size:15px;color:var(--sub);}
+  .addr{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:2px solid transparent;border-radius:18px;padding:18px;margin-bottom:12px;}
+  .addr.on{border-color:var(--text);}
+  .addr .tx{flex:1;min-width:0;font-size:16px;line-height:1.45;}
+  .addr .tag{display:inline-block;font-size:12px;font-weight:700;color:#D9480F;background:#FFF0E8;border-radius:6px;padding:2px 8px;margin-bottom:6px;}
+  .addr .who{font-size:14px;color:var(--hint);margin-top:4px;}
+  .radio{width:24px;height:24px;border-radius:50%;border:2px solid #D5D8DC;flex-shrink:0;}
+  .on > .radio,.pm.on .radio{border:7px solid var(--text);}
+  .addr-actions{display:flex;justify-content:flex-end;gap:14px;margin:-4px 4px 12px;font-size:13px;color:var(--hint);}
+  .add-link{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:16px;font-size:16px;font-weight:700;}
+  .card2{background:var(--surface);border-radius:18px;padding:20px;margin-bottom:12px;}
+  .card2 h3{font-size:17px;font-weight:800;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;}
+  .card2 h3 button{font-size:14px;font-weight:600;color:var(--sub);}
+  .item{display:flex;gap:14px;align-items:center;}
+  .item img,.item .noimg{width:64px;height:64px;border-radius:12px;object-fit:cover;background:#F2F2F2;flex-shrink:0;}
+  .item .nm{font-size:15px;line-height:1.4;}
+  .item .pr{font-size:18px;font-weight:800;margin-top:2px;}
+  .pm{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 0;font-size:16px;font-weight:700;}
+  .pm small{display:block;font-size:13px;font-weight:500;color:var(--hint);margin-top:2px;}
+  .toss{display:inline-block;font-size:12px;font-weight:700;color:#0064FF;background:#EAF2FE;border-radius:6px;padding:2px 8px;margin-left:6px;vertical-align:1px;}
+  .rowp{display:flex;justify-content:space-between;font-size:15px;color:var(--sub);margin-top:8px;}
+  .rowp.total{color:var(--text);font-size:17px;font-weight:800;border-top:1px solid var(--line);padding-top:14px;margin-top:14px;}
+  .note{font-size:13px;color:var(--hint);line-height:1.5;margin:4px 4px 0;}
+  .foot{position:fixed;left:0;right:0;bottom:0;max-width:var(--app-w);margin:0 auto;z-index:30;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,#F2F3F5 30%);}
+  .zip{display:flex;gap:8px;}
+  .zip .input{flex:1;}
+  .zip .btn{width:auto;padding:0 18px;flex-shrink:0;}
+  .chk{display:flex;align-items:center;gap:8px;margin-top:18px;font-size:16px;}
+  .chk input{width:20px;height:20px;accent-color:var(--primary);}
+  .post-layer{position:fixed;inset:0;z-index:100;background:var(--surface);display:flex;flex-direction:column;}
+  .post-layer header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-weight:800;font-size:18px;border-bottom:1px solid var(--line);}
+  .post-layer #postBox{flex:1;}
+</style>
+</head>
+<body>
+<div class="app no-tabbar">
+  <header class="topbar">
+    <button class="back" id="backBtn" aria-label="뒤로"><i data-icon="back" data-size="24"></i></button><h1></h1>
+    <button class="act" id="manageBtn" hidden>주소 관리</button>
+  </header>
+  <main class="page" id="main"><div class="skeleton" style="height:120px;border-radius:18px"></div></main>
+</div>
+<div class="foot" id="foot" hidden><button class="btn" id="nextBtn"></button></div>
+<div class="post-layer" id="postLayer" hidden>
+  <header>주소 찾기<button id="postClose" aria-label="닫기"><i data-icon="close" data-size="24"></i></button></header>
+  <div id="postBox"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var productId = PS.param('id');
+  var product = null;
+  var addresses = [];
+  var selectedId = null;
+  var view = 'list';       // list | form | pay
+  var manage = false;      // 주소 관리(삭제) 모드
+  var editing = null;      // 고치는 주소
+  var payMethod = 'CARD';
+
+  function go(v) { view = v; render(); window.scrollTo(0, 0); }
+
+  $('backBtn').addEventListener('click', function () {
+    if (view === 'form' && addresses.length) return go('list');
+    if (view === 'pay') return go('list');
+    location.href = productId ? PS.productUrl(productId) : '/';
+  });
+  $('manageBtn').addEventListener('click', function () { manage = !manage; render(); });
+
+  async function init() {
+    var user = await PS.ready;
+    if (!user) { location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search); return; }
+    var pr = await sb.from('products').select('id,title,price,status,seller_profile_id,product_images(url,sort_order)').eq('id', productId).maybeSingle();
+    product = pr.data;
+    if (!product) return fail('물건을 찾을 수 없어요');
+    if (product.seller_profile_id === user.id) return fail('내가 올린 물건은 살 수 없어요');
+    if (product.status !== 'selling') return fail('지금은 살 수 없는 물건이에요 (' + (PS.STATUS[product.status] || '판매 종료') + ')');
+    await loadAddresses();
+    go(addresses.length ? 'list' : 'form');
+  }
+
+  function fail(msg) {
+    $('main').innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>' + PS.esc(msg) + '</b><div style="margin-top:20px"><a class="btn" href="' + (productId ? PS.productUrl(productId) : '/buy') + '">돌아가기</a></div></div>';
+    $('foot').hidden = true;
+  }
+
+  async function loadAddresses() {
+    var r = await sb.from('addresses').select('id,label,recipient,phone,zipcode,addr1,addr2,is_default,created_at')
+      .eq('profile_id', PS.user.id).order('is_default', { ascending: false }).order('created_at', { ascending: false });
+    addresses = r.data || [];
+    if (!addresses.some(function (a) { return a.id === selectedId; })) selectedId = addresses.length ? addresses[0].id : null;
+  }
+
+  function addrText(a) { return (a.zipcode ? '[' + a.zipcode + '] ' : '') + a.addr1 + (a.addr2 ? ' ' + a.addr2 : ''); }
+  function selected() { return addresses.filter(function (a) { return a.id === selectedId; })[0]; }
+
+  function render() {
+    $('manageBtn').hidden = view !== 'list';
+    $('manageBtn').textContent = manage ? '완료' : '주소 관리';
+    $('foot').hidden = false;
+    if (view === 'list') renderList();
+    else if (view === 'form') renderForm();
+    else renderPay();
+    PS.hydrate && PS.hydrate($('main'));
+  }
+
+  // ---------- 1) 배송지 고르기 ----------
+  function renderList() {
+    $('main').innerHTML =
+      '<div class="head"><h2>배송받을 주소를 선택해 주세요</h2><p>결제한 돈은 물건을 받은 뒤 판매자에게 전달돼요.</p></div>' +
+      addresses.map(function (a) {
+        return '<button class="addr' + (a.id === selectedId ? ' on' : '') + '" data-id="' + a.id + '">' +
+          '<span class="tx">' + (a.is_default ? '<span class="tag">기본주소</span><br>' : '') + PS.esc(addrText(a)) +
+          '<span class="who" style="display:block">' + PS.esc(a.recipient) + ' ' + PS.esc(a.phone) + '</span></span>' +
+          '<span class="radio"></span></button>' +
+          (manage ? '<div class="addr-actions"><button data-edit="' + a.id + '">고치기</button><button data-del="' + a.id + '" style="color:var(--danger)">삭제</button></div>' : '');
+      }).join('') +
+      '<button class="add-link" id="addBtn">' + PS.icon('plus', 20) + ' 주소 추가</button>';
+    $('main').querySelectorAll('.addr').forEach(function (b) {
+      b.addEventListener('click', function () { selectedId = Number(b.dataset.id); render(); });
+    });
+    $('main').querySelectorAll('[data-edit]').forEach(function (b) {
+      b.addEventListener('click', function () { editing = addresses.filter(function (a) { return a.id === Number(b.dataset.edit); })[0]; go('form'); });
+    });
+    $('main').querySelectorAll('[data-del]').forEach(function (b) {
+      b.addEventListener('click', async function () {
+        if (!confirm('이 주소를 지울까요?')) return;
+        var r = await sb.from('addresses').delete().eq('id', Number(b.dataset.del)).eq('profile_id', PS.user.id);
+        if (r.error) return PS.toast('지우지 못했어요');
+        await loadAddresses();
+        if (!addresses.length) { manage = false; return go('form'); }
+        render();
+      });
+    });
+    $('addBtn').addEventListener('click', function () { editing = null; go('form'); });
+    $('nextBtn').textContent = '다음';
+    $('nextBtn').disabled = !selectedId;
+    $('nextBtn').onclick = function () { manage = false; go('pay'); };
+  }
+
+  // ---------- 2) 배송지 등록 ----------
+  function renderForm() {
+    var a = editing || { recipient: (PS.profile && PS.profile.name) || '', phone: (PS.profile && PS.profile.phone) || '', zipcode: '', addr1: '', addr2: '', is_default: !addresses.length };
+    $('main').innerHTML =
+      '<div class="head"><h2>' + (editing ? '배송지 고치기' : '배송지를 등록해 주세요') + '</h2><p>물건을 받을 곳을 알려주세요.</p></div>' +
+      '<div class="card2">' +
+        '<label class="field" style="margin-top:0"><span>받는 분</span><input class="input" id="fName" maxlength="20" autocomplete="name" placeholder="예) 김판다" value="' + PS.esc(a.recipient) + '"></label>' +
+        '<label class="field"><span>연락처</span><input class="input" id="fPhone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" placeholder="010-0000-0000" value="' + PS.esc(a.phone) + '"></label>' +
+        '<div class="field"><span>주소</span>' +
+          '<div class="zip"><input class="input" id="fZip" placeholder="우편번호" readonly value="' + PS.esc(a.zipcode || '') + '"><button class="btn white small" id="findBtn" type="button">주소 찾기</button></div>' +
+          '<input class="input" id="fAddr1" style="margin-top:8px" maxlength="200" placeholder="주소 찾기를 눌러 주세요" value="' + PS.esc(a.addr1) + '">' +
+          '<input class="input" id="fAddr2" style="margin-top:8px" maxlength="100" placeholder="상세 주소 (동·호수)" value="' + PS.esc(a.addr2 || '') + '">' +
+        '</div>' +
+        '<label class="chk"><input type="checkbox" id="fDefault"' + (a.is_default ? ' checked' : '') + '> 기본 배송지로 저장</label>' +
+      '</div>';
+    $('findBtn').addEventListener('click', openPostcode);
+    $('fPhone').addEventListener('input', function (e) {
+      var d = e.target.value.replace(/\D/g, '').slice(0, 11);
+      e.target.value = d.length < 4 ? d : d.length < 8 ? d.slice(0, 3) + '-' + d.slice(3) : d.slice(0, 3) + '-' + d.slice(3, d.length - 4) + '-' + d.slice(-4);
+    });
+    $('nextBtn').textContent = editing ? '저장하기' : '저장하고 선택하기';
+    $('nextBtn').disabled = false;
+    $('nextBtn').onclick = saveAddress;
+  }
+
+  var postLoaded = null;
+  function loadPostcode() {
+    if (window.daum && window.daum.Postcode) return Promise.resolve();
+    if (postLoaded) return postLoaded;
+    postLoaded = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
+      s.onload = resolve;
+      s.onerror = function () { postLoaded = null; reject(); };
+      document.head.appendChild(s);
+    });
+    return postLoaded;
+  }
+  async function openPostcode() {
+    try { await loadPostcode(); } catch (e) { PS.toast('주소 찾기를 열지 못했어요. 주소를 직접 써 주세요'); $('fAddr1').focus(); return; }
+    $('postLayer').hidden = false;
+    $('postBox').innerHTML = '';
+    new daum.Postcode({
+      width: '100%', height: '100%',
+      oncomplete: function (d) {
+        var addr = d.roadAddress || d.jibunAddress || d.address;
+        if (d.buildingName && d.apartment === 'Y') addr += ' (' + d.buildingName + ')';
+        $('fZip').value = d.zonecode || '';
+        $('fAddr1').value = addr;
+        $('postLayer').hidden = true;
+        $('fAddr2').focus();
+      }
+    }).embed($('postBox'));
+  }
+  $('postClose').addEventListener('click', function () { $('postLayer').hidden = true; });
+
+  async function saveAddress() {
+    var row = {
+      profile_id: PS.user.id,
+      recipient: $('fName').value.trim(),
+      phone: $('fPhone').value.trim(),
+      zipcode: $('fZip').value.trim() || null,
+      addr1: $('fAddr1').value.trim(),
+      addr2: $('fAddr2').value.trim() || null,
+      is_default: $('fDefault').checked
+    };
+    if (!row.recipient) return PS.toast('받는 분 이름을 써 주세요');
+    if (row.phone.replace(/\D/g, '').length < 9) return PS.toast('연락처를 확인해 주세요');
+    if (!row.addr1) return PS.toast('주소를 입력해 주세요');
+    var btn = $('nextBtn');
+    btn.disabled = true;
+    if (row.is_default) await sb.from('addresses').update({ is_default: false }).eq('profile_id', PS.user.id).eq('is_default', true);
+    var r = editing
+      ? await sb.from('addresses').update(row).eq('id', editing.id).eq('profile_id', PS.user.id).select('id').single()
+      : await sb.from('addresses').insert(row).select('id').single();
+    btn.disabled = false;
+    if (r.error) { console.error(r.error); return PS.toast('저장하지 못했어요. 다시 해 주세요'); }
+    selectedId = r.data.id;
+    editing = null;
+    await loadAddresses();
+    go('list');
+  }
+
+  // ---------- 3) 결제 ----------
+  function renderPay() {
+    var a = selected();
+    if (!a) return go('list');
+    var img = PS.firstImage(product);
+    var t = PS.splitTitle(product.title);
+    var fee = 0; // 배송비: 서버(create_market_order)와 같은 값
+    var total = product.price + fee;
+    $('main').innerHTML =
+      '<section class="card2"><h3>배송지<button id="chgAddr">변경</button></h3>' +
+        '<div style="font-size:16px;line-height:1.5">' + PS.esc(addrText(a)) + '</div>' +
+        '<div style="font-size:14px;color:var(--hint);margin-top:4px">' + PS.esc(a.recipient) + ' ' + PS.esc(a.phone) + '</div></section>' +
+      '<section class="card2"><div class="item">' + (img ? '<img src="' + PS.esc(img) + '" alt="">' : '<div class="noimg"></div>') +
+        '<div style="min-width:0"><div class="nm">' + PS.esc(t.name) + (t.spec ? '<br><span style="color:var(--hint);font-size:13px">' + PS.esc(t.spec) + '</span>' : '') + '</div>' +
+        '<div class="pr">' + PS.won(total) + '</div></div></div></section>' +
+      '<section class="card2"><h3>결제수단</h3>' +
+        '<button class="pm' + (payMethod === 'CARD' ? ' on' : '') + '" data-m="CARD"><span class="radio"></span><span>카드 · 간편결제<span class="toss">토스페이먼츠</span><small>신용·체크카드, 토스페이, 카카오페이 등</small></span></button>' +
+        '<button class="pm' + (payMethod === 'TRANSFER' ? ' on' : '') + '" data-m="TRANSFER"><span class="radio"></span><span>계좌이체<small>내 은행 계좌에서 바로 보내요</small></span></button>' +
+      '</section>' +
+      '<section class="card2"><h3>결제 금액</h3>' +
+        '<div class="rowp"><span>물품 금액</span><span>' + product.price.toLocaleString('ko-KR') + '원</span></div>' +
+        '<div class="rowp"><span>배송비</span><span>' + (fee ? fee.toLocaleString('ko-KR') + '원' : '무료') + '</span></div>' +
+        '<div class="rowp total"><span>최종 결제 금액</span><span>' + total.toLocaleString('ko-KR') + '원</span></div>' +
+      '</section>' +
+      '<p class="note">결제는 토스페이먼츠로 안전하게 처리돼요. 결제한 돈은 물건을 받은 뒤 판매자에게 전달돼요.</p>';
+    $('chgAddr').addEventListener('click', function () { go('list'); });
+    $('main').querySelectorAll('.pm').forEach(function (b) {
+      b.addEventListener('click', function () { payMethod = b.dataset.m; render(); });
+    });
+    $('nextBtn').textContent = total.toLocaleString('ko-KR') + '원 결제하기';
+    $('nextBtn').disabled = false;
+    $('nextBtn').onclick = pay;
+  }
+
+  var tossLoaded = null;
+  function loadToss() {
+    if (window.TossPayments) return Promise.resolve();
+    if (tossLoaded) return tossLoaded;
+    tossLoaded = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://js.tosspayments.com/v2/standard';
+      s.onload = resolve;
+      s.onerror = function () { tossLoaded = null; reject(); };
+      document.head.appendChild(s);
+    });
+    return tossLoaded;
+  }
+
+  async function pay() {
+    // 토스페이먼츠 키를 넣기 전에는 주문을 만들지 않고 안내만
+    if (!PS.TOSS_CLIENT_KEY) { PS.toast('결제는 곧 열려요! 지금은 문의하기로 판매자와 이야기해 주세요'); return; }
+    var btn = $('nextBtn');
+    btn.disabled = true;
+    try {
+      await loadToss();
+      var r = await sb.rpc('create_market_order', { p_product_id: product.id, p_address_id: selectedId });
+      if (r.error || !r.data || !r.data[0]) throw r.error || new Error('no order');
+      var o = r.data[0];
+      var a = selected();
+      var toss = window.TossPayments(PS.TOSS_CLIENT_KEY);
+      var payment = toss.payment({ customerKey: PS.user.id });
+      var origin = location.origin;
+      await payment.requestPayment({
+        method: payMethod,
+        amount: { currency: 'KRW', value: o.total_amount },
+        orderId: o.order_no,
+        orderName: o.order_name,
+        customerName: a.recipient,
+        customerMobilePhone: a.phone.replace(/\D/g, ''),
+        successUrl: origin + '/pay-success?pid=' + encodeURIComponent(product.id),
+        failUrl: origin + '/pay-fail?pid=' + encodeURIComponent(product.id)
+      });
+    } catch (e) {
+      console.error(e);
+      btn.disabled = false;
+      var msg = String((e && e.message) || '');
+      if (/not for sale/.test(msg)) PS.toast('방금 다른 분이 먼저 구매했어요');
+      else if (e && e.code === 'USER_CANCEL') PS.toast('결제를 취소했어요');
+      else PS.toast('결제를 시작하지 못했어요. 다시 해 주세요');
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
