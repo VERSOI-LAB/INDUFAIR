@@ -6,7 +6,16 @@
 
   PS.FUNCTIONS_URL = 'https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1';
 
-  PS.CATEGORIES = ['기계장비', '집진기', '에어콤프레샤', '모터', '펌프', '전기부품', '공구', '중고부품', '기타'];
+  // 카카오맵 JavaScript 키 (Kakao Developers > 앱 키). 비어 있으면 무료 지도(OpenStreetMap)로 보여준다.
+  PS.KAKAO_JS_KEY = '';
+
+  // 대분류 5개 (중·소분류는 나중에 categories.parent_id 로 추가)
+  PS.CATEGORIES = ['중고장터', '산업기계', '공구·부품', '자동화·전기', '물류·창고'];
+  PS.CATEGORY_ICON = { '중고장터': 'used', '산업기계': 'machine', '공구·부품': 'tools', '자동화·전기': 'electric', '물류·창고': 'logistics' };
+  PS.categoryIcon = function (name, size) {
+    var key = PS.CATEGORY_ICON[name] || 'used';
+    return '<img class="i3d" src="/이미지/categories/' + key + '.webp" alt="" width="' + size + '" height="' + size + '" style="width:' + size + 'px;height:' + size + 'px">';
+  };
   PS.CONDITIONS = { great: '아주 좋아요', good: '괜찮아요', broken: '고장 있어요' };
   PS.USAGE = { new: '신품', lt1: '1년 미만', '1to3': '1~3년', gt3: '3년 이상' };
   PS.STATUS = { selling: '판매중', reserved: '예약중', sold: '판매완료' };
