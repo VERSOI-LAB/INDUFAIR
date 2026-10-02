@@ -184,6 +184,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/js/supabase-client.js"></script>
 <script src="/js/app.js"></script>
+<script src="/js/map.js"></script>
 <script>
 (function () {
   var MAX_PHOTOS = 10;
@@ -193,6 +194,7 @@
   var ai = { state: 'idle', result: null };   // idle | loading | done | failed
   var editing = false;
   var form = { title: '', category: '', brand: '', price: 0, usage: '', condition: '', desc: '', region: '' };
+  var gps = null; // { lat, lng, region } — GPS 로 찾은 동네
   var categoryIds = {};
 
   var $ = function (id) { return document.getElementById(id); };
@@ -415,7 +417,7 @@
       ai.result = data;
       if (!editing) {
         form.title = data.title;
-        form.category = PS.CATEGORIES.indexOf(data.category) !== -1 ? data.category : '기타';
+        form.category = PS.CATEGORIES.indexOf(data.category) !== -1 ? data.category : '중고장터';
       }
       form.brand = data.manufacturer || '';
       if (!form.condition && data.condition) form.condition = data.condition === 'new' || data.condition === 'a' ? 'great' : 'good';
@@ -466,7 +468,7 @@
 
   function renderCatChips() {
     $('catChips').innerHTML = PS.CATEGORIES.map(function (c) {
-      return '<button type="button" class="chip' + (form.category === c ? ' on' : '') + '" data-v="' + PS.esc(c) + '">' + PS.esc(c) + '</button>';
+      return '<button type="button" class="chip' + (form.category === c ? ' on' : '') + '" data-v="' + PS.esc(c) + '">' + PS.categoryIcon(c, 22) + ' ' + PS.esc(c) + '</button>';
     }).join('');
   }
   $('catChips').addEventListener('click', function (e) {
@@ -597,6 +599,7 @@
         var small = a.borough || a.city_district || a.district || a.suburb || a.town || '';
         if (big === small) small = '';
         var text = [big, small].filter(Boolean).join(' ');
+        if (text) gps = { lat: pos.coords.latitude, lng: pos.coords.longitude, region: text };
         showRegion(text || fallback, text ? '맞으면 등록하기를 눌러요' : '아래에 직접 써 주세요');
       } catch (e) {
         showRegion(fallback, '아래에 직접 써 주세요');
@@ -628,6 +631,17 @@
     form.region = $('regionInput').value.trim() || form.region;
     try { localStorage.setItem('ps_region', form.region); } catch (e) {}
 
+    // 지도용 좌표: GPS 동네 그대로면 GPS 좌표, 직접 쓴 동네면 주소로 찾기. 소수점 3자리(약 100m)로 줄여 저장
+    var coords = null;
+    if (gps && gps.region === form.region) coords = gps;
+    else {
+      try {
+        var adapter = await Promise.race([PS.loadMap(), new Promise(function (r) { setTimeout(r, 4000); })]);
+        if (adapter) coords = await Promise.race([PS.geocodeRegion(adapter, form.region), new Promise(function (r) { setTimeout(r, 4000); })]);
+      } catch (e) { coords = null; }
+    }
+    if (coords) coords = { lat: Math.round(coords.lat * 1000) / 1000, lng: Math.round(coords.lng * 1000) / 1000 };
+
     var payload = {
       seller_profile_id: PS.user.id,
       title: form.title.trim().slice(0, 100),
@@ -638,6 +652,8 @@
       usage_period: form.usage || null,
       condition: form.condition || 'good',
       region: form.region,
+      lat: coords ? coords.lat : null,
+      lng: coords ? coords.lng : null,
       status: 'selling'
     };
     var res = await sb.from('products').insert(payload).select('id').single();

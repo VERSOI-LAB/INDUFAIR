@@ -8,59 +8,193 @@
 <link rel="icon" href="/이미지/web/logo.jpg">
 <link rel="stylesheet" href="/app.css">
 <style>
-  .head{position:sticky;top:0;z-index:20;background:var(--surface);padding:16px 16px 0;}
-  .head h1{font-size:24px;font-weight:800;margin-bottom:12px;}
-  .count{font-size:14px;color:var(--sub);margin:4px 0 0;}
+  html,body{height:100%;overflow:hidden;}
+  .app{min-height:0;height:100%;padding-bottom:0;}
+  #map{position:fixed;top:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));left:0;right:0;max-width:480px;margin:0 auto;background:#EEF0F2;z-index:1;}
+
+  /* 상단 검색 */
+  .top{position:fixed;top:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:30;padding:calc(12px + env(safe-area-inset-top)) 16px 0;pointer-events:none;}
+  .top .search{pointer-events:auto;background:var(--surface);box-shadow:0 4px 16px rgba(0,0,0,.12);}
+  .top .clear{width:32px;height:32px;border-radius:50%;background:#E5E5E5;color:var(--sub);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+  /* 지도 핀 */
+  .map-pin{position:relative;display:inline-flex;align-items:center;height:32px;padding:0 10px;border-radius:16px;background:#fff;border:2px solid var(--primary);
+    font:700 13px/1 "Pretendard Variable",Pretendard,sans-serif;color:var(--text);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;}
+  .map-pin::after{content:"";position:absolute;left:50%;bottom:-7px;width:10px;height:10px;background:#fff;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:translateX(-50%) rotate(45deg);}
+  .map-pin.on{background:var(--primary);transform:scale(1.12);}
+  .map-pin.on::after{background:var(--primary);}
+  .map-pin-wrap{background:none;border:none;}
+  .map-pin-wrap .map-pin{transform:translate(-50%, calc(-100% - 8px));}
+  .map-pin-wrap .map-pin.on{transform:translate(-50%, calc(-100% - 8px)) scale(1.12);}
+  .map-me{width:18px;height:18px;border-radius:50%;background:#2F7CF6;border:3px solid #fff;box-shadow:0 0 0 6px rgba(47,124,246,.2);}
+  .leaflet-control-attribution{font-size:10px;}
+
+  /* 아래 시트(목차바) */
+  .sheet2{position:fixed;left:0;right:0;max-width:480px;margin:0 auto;z-index:20;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+    height:calc(100dvh - var(--tabbar-h) - env(safe-area-inset-bottom) - 80px);background:var(--surface);border-radius:20px 20px 0 0;
+    box-shadow:0 -4px 20px rgba(0,0,0,.10);display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.2,.8,.2,1);will-change:transform;}
+  .sheet2.dragging{transition:none;}
+  .sheet-head{flex-shrink:0;touch-action:none;cursor:grab;padding:10px 16px 0;user-select:none;-webkit-user-select:none;}
+  .sheet-head img{-webkit-user-drag:none;user-drag:none;pointer-events:none;}
+  .sheet-head .handle{width:44px;height:5px;border-radius:3px;background:#DDD;margin:0 auto 14px;}
+  .cats{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+  .cat{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px 10px;border-radius:16px;font-size:14px;font-weight:600;color:var(--text);word-break:keep-all;line-height:1.2;text-align:center;}
+  .cat .i3d{transition:transform .15s ease;}
+  .cat:active .i3d{transform:scale(.92);}
+  .cat.on{background:var(--primary-light);box-shadow:inset 0 0 0 2px var(--primary);}
+  .list-head{display:flex;align-items:center;justify-content:space-between;padding:12px 0 4px;border-top:1px solid var(--line);margin-top:8px;font-size:15px;font-weight:700;}
+  .list-head span{font-size:13px;color:var(--hint);font-weight:500;}
+  .sheet-body{flex:1;overflow-y:auto;padding:0 16px 24px;overscroll-behavior:contain;}
+  .row.hl{background:var(--primary-light);margin:0 -16px;padding-left:16px;padding-right:16px;border-radius:0;}
+
+  /* 떠 있는 버튼 (시트와 같이 움직임) */
+  .floats{position:absolute;right:16px;top:-72px;display:flex;gap:10px;transition:opacity .2s ease;}
+  .sheet2.full .floats{opacity:0;pointer-events:none;}
+  .fbtn{width:56px;height:56px;border-radius:50%;background:var(--surface);box-shadow:0 3px 12px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;}
+  .fbtn.add{background:var(--primary);font-size:30px;font-weight:400;color:var(--text);}
+  .map-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;color:var(--sub);font-size:15px;text-align:center;}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="head">
-    <h1 style="display:flex;align-items:center;gap:6px"><i data-icon3d="search" data-size="34"></i>산다</h1>
+  <div id="map"></div>
+  <div class="map-msg" id="mapMsg">지도를 불러오는 중…</div>
+
+  <div class="top">
     <form class="search" id="searchForm" role="search">
       <span class="si" aria-hidden="true" style="display:flex"><i data-icon3d="search" data-size="26"></i></span>
       <input id="q" type="search" placeholder="무엇을 찾으시나요?" enterkeyhint="search" autocomplete="off" aria-label="검색어">
+      <button type="button" class="clear" id="clearQ" hidden aria-label="검색어 지우기"><i data-icon="close" data-size="16"></i></button>
     </form>
-    <div class="chips" id="chips" style="margin-top:12px"></div>
   </div>
-  <main class="page">
-    <p class="count" id="count"></p>
-    <div class="list" id="list"></div>
-    <div style="margin:16px 0" id="moreWrap" hidden><button class="btn white small" id="moreBtn">더 보기</button></div>
-  </main>
+
+  <section class="sheet2" id="sheet" aria-label="물건 목록">
+    <div class="floats">
+      <button type="button" class="fbtn" id="locBtn" aria-label="내 위치"><i data-icon3d="location" data-size="34"></i></button>
+      <a class="fbtn add" href="/sell" aria-label="판매하기">+</a>
+    </div>
+    <div class="sheet-head" id="sheetHead">
+      <div class="handle" aria-hidden="true"></div>
+      <div class="cats" id="cats" role="tablist"></div>
+      <div class="list-head"><b id="countLabel">물건</b><span id="sortLabel">가까운 순</span></div>
+    </div>
+    <div class="sheet-body" id="sheetBody">
+      <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
+    </div>
+  </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/js/supabase-client.js"></script>
 <script src="/js/app.js"></script>
+<script src="/js/map.js"></script>
 <script>
 (function () {
   PS.renderTabbar('buy');
-  var PAGE = 20;
-  var state = { q: PS.param('q') || '', cat: PS.param('c') || '', offset: 0 };
-  var categoryIds = {};
-  var list = document.getElementById('list');
-  var qInput = document.getElementById('q');
-  qInput.value = state.q;
+  var state = { q: PS.param('q') || '', cat: PS.param('c') || '', selected: null };
+  var categoryIds = {}, categoryNames = {};
+  var all = [];          // 모든 물건 (좌표 포함)
+  var map = null, adapter = null;
+  var origin = null;     // 거리 기준점 (내 위치 또는 지도 중심)
 
-  var chips = document.getElementById('chips');
-  chips.innerHTML = ['전체'].concat(PS.CATEGORIES).map(function (c) {
-    var val = c === '전체' ? '' : c;
-    return '<button type="button" class="chip' + (val === state.cat ? ' on' : '') + '" data-c="' + PS.esc(val) + '">' + PS.esc(c) + '</button>';
-  }).join('');
-  chips.addEventListener('click', function (e) {
-    var b = e.target.closest('.chip');
+  var $ = function (id) { return document.getElementById(id); };
+  var qInput = $('q');
+  qInput.value = state.q;
+  $('clearQ').hidden = !state.q;
+
+  // ---------- 목차바(대분류) ----------
+  function renderCats() {
+    $('cats').innerHTML = PS.CATEGORIES.map(function (c) {
+      var on = state.cat === c;
+      return '<button type="button" role="tab" aria-selected="' + on + '" class="cat' + (on ? ' on' : '') + '" data-c="' + PS.esc(c) + '">' +
+        PS.categoryIcon(c, 48) + '<span>' + PS.esc(c) + '</span></button>';
+    }).join('');
+  }
+  renderCats();
+
+  // ---------- 시트 끌어올리기 ----------
+  var sheet = $('sheet');
+  var sheetState = 'peek';
+  function visibleFor(s) {
+    var H = sheet.offsetHeight;
+    var headH = $('sheetHead').offsetHeight;
+    if (s === 'full') return H;
+    if (s === 'half') return Math.max(headH + 160, Math.round(H * 0.55));
+    return headH + 8;
+  }
+  function setSheet(s) {
+    sheetState = s;
+    sheet.classList.toggle('full', s === 'full');
+    sheet.style.transform = 'translateY(' + (sheet.offsetHeight - visibleFor(s)) + 'px)';
+  }
+  var drag = null;
+  $('sheetHead').addEventListener('pointerdown', function (e) {
+    drag = { y: e.clientY, start: sheet.offsetHeight - visibleFor(sheetState), moved: false, id: e.pointerId };
+  });
+  window.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    var dy = e.clientY - drag.y;
+    if (!drag.moved && Math.abs(dy) < 6) return;
+    if (!drag.moved) { drag.moved = true; sheet.classList.add('dragging'); }
+    var H = sheet.offsetHeight;
+    var y = Math.min(H - visibleFor('peek'), Math.max(0, drag.start + dy));
+    sheet.style.transform = 'translateY(' + y + 'px)';
+  });
+  window.addEventListener('pointercancel', function () {
+    if (!drag) return;
+    sheet.classList.remove('dragging');
+    setSheet(sheetState);
+    drag = null;
+  });
+  window.addEventListener('pointerup', function (e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    var wasMoved = drag.moved;
+    sheet.classList.remove('dragging');
+    if (wasMoved) {
+      var m = /translateY\(([-\d.]+)px\)/.exec(sheet.style.transform);
+      var shown = sheet.offsetHeight - (m ? Number(m[1]) : 0);
+      var best = ['peek', 'half', 'full'].reduce(function (a, s) {
+        return Math.abs(visibleFor(s) - shown) < Math.abs(visibleFor(a) - shown) ? s : a;
+      }, 'peek');
+      setSheet(best);
+      // 끌어서 놓은 직후 생기는 클릭은 무시
+      $('sheetHead').addEventListener('click', function stop(ev) { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true });
+    } else if (e.target.closest('.handle')) {
+      setSheet(sheetState === 'peek' ? 'half' : sheetState === 'half' ? 'full' : 'peek');
+    }
+    drag = null;
+  });
+  window.addEventListener('resize', function () { setSheet(sheetState); if (map) map.relayout(); });
+
+  $('cats').addEventListener('click', function (e) {
+    var b = e.target.closest('.cat');
     if (!b) return;
-    state.cat = b.dataset.c;
-    chips.querySelectorAll('.chip').forEach(function (x) { x.classList.toggle('on', x === b); });
-    reload();
+    state.cat = state.cat === b.dataset.c ? '' : b.dataset.c;
+    state.selected = null;
+    renderCats();
+    syncUrl();
+    render(true);
+    if (sheetState === 'peek') setSheet('half');
   });
 
-  document.getElementById('searchForm').addEventListener('submit', function (e) {
+  // ---------- 검색 ----------
+  $('searchForm').addEventListener('submit', function (e) {
     e.preventDefault();
     state.q = qInput.value.trim();
+    state.selected = null;
     qInput.blur();
-    reload();
+    $('clearQ').hidden = !state.q;
+    syncUrl();
+    render(true);
+    if (sheetState === 'peek') setSheet('half');
+  });
+  qInput.addEventListener('input', function () { $('clearQ').hidden = !qInput.value; });
+  $('clearQ').addEventListener('click', function () {
+    qInput.value = '';
+    state.q = '';
+    $('clearQ').hidden = true;
+    syncUrl();
+    render(true);
   });
 
   function syncUrl() {
@@ -70,43 +204,116 @@
     history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : ''));
   }
 
-  function reload() {
-    state.offset = 0;
-    syncUrl();
-    list.innerHTML = '<div class="skeleton" style="height:108px;margin:16px 0"></div><div class="skeleton" style="height:108px;margin:16px 0"></div>';
-    load();
+  // ---------- 목록 + 지도 그리기 ----------
+  function filtered() {
+    var q = state.q.toLowerCase();
+    var catId = state.cat ? categoryIds[state.cat] : null;
+    return all.filter(function (p) {
+      if (state.cat && p.category_id !== catId) return false;
+      if (q && (p.title + ' ' + (p.brand || '')).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
   }
 
-  async function load() {
-    var q = sb.from('products').select(PS.PRODUCT_LIST_COLUMNS, { count: 'exact' })
-      .in('status', ['selling', 'reserved'])
-      .order('created_at', { ascending: false })
-      .range(state.offset, state.offset + PAGE - 1);
-    if (state.q) {
-      var term = state.q.replace(/[%_,()]/g, ' ');
-      q = q.or('title.ilike.%' + term + '%,brand.ilike.%' + term + '%');
+  function render(refit) {
+    var rows = filtered();
+    var base = origin || (map ? map.center() : null);
+    if (base) {
+      rows.forEach(function (p) { p._km = p.lat != null ? PS.distanceKm(base, p) : 9999; });
+      rows.sort(function (a, b) { return a._km - b._km; });
     }
-    if (state.cat && categoryIds[state.cat]) q = q.eq('category_id', categoryIds[state.cat]);
-    var res = await q;
-    var rows = res.data || [];
-    if (state.offset === 0) {
-      list.innerHTML = '';
-      document.getElementById('count').textContent = res.count ? '물건 ' + res.count.toLocaleString('ko-KR') + '개' : '';
-      if (!rows.length) {
-        list.innerHTML = '<div class="empty">' + PS.sticker('curious', 120) + '<b>찾는 물건이 없어요</b>다른 말로 검색해 보세요</div>';
+    var label = state.cat || (state.q ? '"' + state.q + '"' : '근처 물건');
+    $('countLabel').textContent = label + ' ' + rows.length + '개';
+    $('list').innerHTML = rows.length
+      ? rows.map(function (p) {
+          return PS.rowHtml(p).replace('<a class="row"', '<a class="row' + (p.id === state.selected ? ' hl' : '') + '" data-id="' + PS.esc(p.id) + '"');
+        }).join('')
+      : '<div class="empty" style="padding:32px 0">' + PS.sticker('curious', 100) + '<b>' + (all.length ? '찾는 물건이 없어요' : '아직 올라온 물건이 없어요') + '</b>' +
+        (all.length ? '다른 분류나 검색어로 찾아보세요' : '첫 번째로 판매해 보세요!') + '</div>';
+
+    if (!map) return;
+    var pins = rows.filter(function (p) { return p.lat != null; }).map(function (p) {
+      return { id: p.id, lat: p._plat, lng: p._plng, label: PS.won(p.price), active: p.id === state.selected };
+    });
+    map.setMarkers(pins, selectProduct);
+    if (refit && pins.length) map.fit(pins);
+  }
+
+  function selectProduct(id) {
+    state.selected = id;
+    render(false);
+    if (sheetState === 'peek') setSheet('half');
+    var row = $('list').querySelector('[data-id="' + CSS.escape(id) + '"]');
+    if (row) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // ---------- 데이터 ----------
+  async function loadProducts() {
+    var cols = PS.PRODUCT_LIST_COLUMNS + ',brand,category_id';
+    var res = await sb.from('products').select(cols + ',lat,lng').in('status', ['selling', 'reserved'])
+      .order('created_at', { ascending: false }).limit(300);
+    if (res.error) {
+      // 좌표 컬럼이 아직 없을 때(마이그레이션 전)도 목록은 보이게
+      res = await sb.from('products').select(cols).in('status', ['selling', 'reserved'])
+        .order('created_at', { ascending: false }).limit(300);
+    }
+    all = res.data || [];
+  }
+
+  async function placePins() {
+    // 좌표 없는 물건은 지역 이름으로 동네 중심을 찾는다
+    for (var i = 0; i < all.length; i++) {
+      var p = all[i];
+      if (p.lat == null && p.region) {
+        var pos = await PS.geocodeRegion(adapter, p.region);
+        if (pos) { p.lat = pos.lat; p.lng = pos.lng; }
       }
     }
-    list.insertAdjacentHTML('beforeend', rows.map(PS.rowHtml).join(''));
-    state.offset += rows.length;
-    document.getElementById('moreWrap').hidden = rows.length < PAGE;
+    var withPos = all.filter(function (p) { return p.lat != null; });
+    var spread = PS.spreadPins(withPos.map(function (p) { return { id: p.id, lat: p.lat, lng: p.lng }; }));
+    spread.forEach(function (s, i) { withPos[i]._plat = s.lat; withPos[i]._plng = s.lng; });
   }
 
-  document.getElementById('moreBtn').addEventListener('click', load);
+  function locateMe(silent) {
+    if (!navigator.geolocation) { if (!silent) PS.toast('이 기기에서는 위치를 찾을 수 없어요'); return; }
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      if (map) { map.showMe(origin.lat, origin.lng); map.panTo(origin.lat, origin.lng); }
+      render(false);
+    }, function () {
+      if (!silent) PS.toast('위치 권한을 허용하면 가까운 물건부터 보여드려요');
+    }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
+  }
+  $('locBtn').addEventListener('click', function () { locateMe(false); });
 
-  sb.from('categories').select('id,name').then(function (res) {
-    (res.data || []).forEach(function (c) { categoryIds[c.name] = c.id; });
-    reload();
-  });
+  (async function init() {
+    sheet.classList.add('dragging'); // 처음엔 애니메이션 없이 바로 자리 잡기
+    setSheet('peek');
+    sheet.offsetHeight;
+    sheet.classList.remove('dragging');
+    var catRes = await sb.from('categories').select('id,name').is('parent_id', null);
+    (catRes.data || []).forEach(function (c) { categoryIds[c.name] = c.id; categoryNames[c.id] = c.name; });
+    await loadProducts();
+    render(false);
+
+    try {
+      adapter = await PS.loadMap();
+      map = adapter.create($('map'), PS.DEFAULT_CENTER);
+      $('mapMsg').hidden = true;
+      await placePins();
+      render(true);
+      var t = null;
+      map.onMove(function () {
+        if (origin) return;
+        clearTimeout(t);
+        t = setTimeout(function () { render(false); }, 400);
+      });
+    } catch (e) {
+      console.error('[판다산다] 지도를 불러오지 못했어요', e);
+      $('mapMsg').textContent = '지도를 불러오지 못했어요. 아래 목록에서 골라 주세요';
+      setSheet('half');
+    }
+  })();
 })();
 </script>
 </body>

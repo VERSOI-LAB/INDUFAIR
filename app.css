@@ -85,7 +85,7 @@ p{margin:0;}
 /* 칩 */
 .chips{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 12px;margin:0 -16px;scrollbar-width:none;}
 .chips::-webkit-scrollbar{display:none;}
-.chip{flex-shrink:0;height:40px;padding:0 16px;border-radius:20px;border:1.5px solid var(--line);background:var(--surface);
+.chip{display:inline-flex;align-items:center;justify-content:center;gap:4px;flex-shrink:0;height:40px;padding:0 16px;border-radius:20px;border:1.5px solid var(--line);background:var(--surface);
   font-size:15px;font-weight:600;color:var(--sub);white-space:nowrap;}
 .chip.on{background:var(--text);border-color:var(--text);color:#fff;}
 .chip-grid{display:flex;flex-wrap:wrap;gap:8px;}
