@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>설정 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .pf{display:flex;justify-content:center;margin:8px 0 4px;}
+  .ava{position:relative;width:96px;height:96px;border-radius:50%;background:var(--primary-light);overflow:hidden;cursor:pointer;display:block;}
+  .ava span{display:flex;width:100%;height:100%;align-items:center;justify-content:center;}
+  .ava img{width:100%;height:100%;object-fit:cover;}
+  .ava em{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);color:#fff;font-style:normal;font-size:12px;font-weight:700;text-align:center;padding:3px 0;}
+</style>
+</head>
+<body class="gray-page">
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>설정</h1>
+  </header>
+  <main class="page">
+    <section class="mcard" style="padding:8px 20px 20px">
+      <h3 style="padding:14px 0 4px">내 정보</h3>
+      <div class="pf">
+        <label class="ava" for="avatarInput"><span id="ava"></span><em>바꾸기</em></label>
+        <input type="file" id="avatarInput" accept="image/*" hidden>
+      </div>
+      <label class="field"><span>이름 (다른 사람에게 보여요)</span><input class="input" id="nameInput" maxlength="20"></label>
+      <label class="field"><span>전화번호 (전화하기 버튼에 쓰여요, 안 써도 돼요)</span><input class="input" id="phoneInput" inputmode="tel" maxlength="20" placeholder="010-0000-0000"></label>
+      <button class="btn" id="saveBtn" style="margin-top:20px">저장하기</button>
+    </section>
+    <section class="mcard">
+      <a class="mrow" href="/reset-password"><span>비밀번호 바꾸기</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
+      <a class="mrow" href="/terms"><span>이용약관</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
+      <a class="mrow" href="/privacy"><span>개인정보처리방침</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
+      <button class="mrow" id="logoutBtn" style="color:var(--sub)"><span>로그아웃</span></button>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  var file = null;
+  PS.ready.then(function (user) {
+    if (!user) return PS.goLogin();
+    var pr = PS.profile || {};
+    $('ava').innerHTML = PS.avatarHtml(pr.avatar_url);
+    $('nameInput').value = pr.name || '';
+    $('phoneInput').value = pr.phone || '';
+  });
+  $('avatarInput').addEventListener('change', function () {
+    file = this.files[0] || null;
+    if (file) $('ava').innerHTML = '<img src="' + URL.createObjectURL(file) + '" alt="">';
+  });
+  $('saveBtn').addEventListener('click', async function () {
+    var btn = this;
+    var name = $('nameInput').value.trim();
+    if (!name) { PS.toast('이름을 써 주세요'); return; }
+    btn.disabled = true;
+    var update = { name: name, phone: $('phoneInput').value.trim() || null };
+    if (file) {
+      var path = PS.user.id + '/avatar-' + Date.now() + '.' + ((file.name.split('.').pop() || 'jpg').toLowerCase());
+      var up = await sb.storage.from('avatars').upload(path, file, { contentType: file.type });
+      if (!up.error) update.avatar_url = sb.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+      else PS.toast('사진을 올리지 못했어요');
+    }
+    var res = await sb.from('profiles').update(update).eq('id', PS.user.id);
+    btn.disabled = false;
+    if (res.error) { PS.toast('저장하지 못했어요'); return; }
+    Object.assign(PS.profile, update);
+    file = null;
+    PS.toast('저장했어요');
+  });
+  $('logoutBtn').addEventListener('click', function () { if (confirm('로그아웃할까요?')) PS.signOut(); });
+})();
+</script>
+</body>
+</html>

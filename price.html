@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>내 물건 가격 찾기 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .pcard{margin-top:24px;padding:20px;border-radius:20px;background:#F4FBF6;border:1px solid #D4F0DC;}
+  .pcard span{display:block;font-size:14px;color:var(--sub);}
+  .pcard b{display:block;font-size:26px;font-weight:800;margin:4px 0 6px;}
+  .pcard p{font-size:15px;color:var(--sub);margin-bottom:14px;}
+  .pcard strong{color:var(--text);}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>내 물건 가격 찾기</h1>
+  </header>
+  <main class="page">
+    <h2 class="q" style="font-size:24px;font-weight:800;margin-top:20px">얼마에 팔 수 있을까요?</h2>
+    <p style="color:var(--sub);margin-top:4px">물건 이름을 쓰거나 사진을 올리면 비슷한 물건 가격을 알려드려요</p>
+    <form id="form" style="margin-top:20px">
+      <div class="search"><span class="si" style="display:flex"><i data-icon="search" data-size="22"></i></span>
+        <input id="name" placeholder="예) 공압 레귤레이터" autocomplete="off" aria-label="물건 이름"></div>
+      <div class="chip-grid" id="cats" style="margin-top:12px"></div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button type="button" class="btn white" id="photoBtn" style="flex:1"><i data-icon="camera" data-size="22"></i> 사진으로 찾기</button>
+        <button type="submit" class="btn" style="flex:1">가격 보기</button>
+      </div>
+      <input type="file" id="photoInput" accept="image/*" hidden>
+    </form>
+    <div id="result"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  var cat = '';
+  var categoryIds = {};
+  sb.from('categories').select('id,name').is('parent_id', null).then(function (r) { (r.data || []).forEach(function (c) { categoryIds[c.name] = c.id; }); });
+  function renderCats() {
+    $('cats').innerHTML = PS.CATEGORIES.map(function (c) {
+      return '<button type="button" class="chip' + (cat === c ? ' on' : '') + '" data-v="' + PS.esc(c) + '">' + PS.categoryIcon(c, 22) + ' ' + PS.esc(c) + '</button>';
+    }).join('');
+  }
+  renderCats();
+  $('cats').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    cat = cat === b.dataset.v ? '' : b.dataset.v;
+    renderCats();
+  });
+
+  async function search() {
+    var name = $('name').value.trim();
+    if (!name && !cat) { PS.toast('물건 이름을 쓰거나 종류를 골라 주세요'); return; }
+    $('result').innerHTML = '<div class="skeleton" style="height:140px;margin-top:24px"></div>';
+    var mp = await PS.marketPrice(name, categoryIds[cat]);
+    var head = mp.rec
+      ? '<div class="pcard"><span>비슷한 물건 ' + mp.count + '개를 보고 계산했어요</span><b>' + PS.won(mp.lo) + ' ~ ' + PS.won(mp.hi) + '</b>' +
+        '<p>이 가격이면 잘 팔릴 거예요. 추천 가격 <strong>' + PS.won(mp.rec) + '</strong></p>' +
+        '<a class="btn" href="/sell">이 가격으로 팔러 가기</a></div>'
+      : '<div class="pcard"><span>아직 비슷한 물건이 ' + (mp.count ? mp.count + '개뿐' : '없') + '이에요</span><b style="font-size:20px">가격을 정하기엔 정보가 부족해요</b>' +
+        '<p>먼저 올려서 판다산다 첫 시세를 만들어 보세요!</p><a class="btn" href="/sell">판매하러 가기</a></div>';
+    $('result').innerHTML = head + (mp.items.length ? '<h3 class="sec-title" style="font-size:18px">비슷한 물건</h3><div class="list">' + mp.items.slice(0, 10).map(PS.rowHtml).join('') + '</div>' : '');
+  }
+  $('form').addEventListener('submit', function (e) { e.preventDefault(); $('name').blur(); search(); });
+
+  // 사진 → AI 가 이름·종류를 알아내서 바로 검색
+  $('photoBtn').addEventListener('click', function () {
+    if (!PS.requireLogin()) return;
+    $('photoInput').click();
+  });
+  $('photoInput').addEventListener('change', async function () {
+    var file = this.files[0];
+    this.value = '';
+    if (!file) return;
+    var btn = $('photoBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>AI가 보는 중…';
+    try {
+      var data64 = await new Promise(function (resolve, reject) {
+        var img = new Image(), url = URL.createObjectURL(file);
+        img.onload = function () {
+          var s = Math.min(1, 1024 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+          c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+          var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(url);
+          resolve(c.toDataURL('image/jpeg', 0.85).split(',')[1]);
+        };
+        img.onerror = function () { reject(new Error('사진을 읽지 못했어요')); };
+        img.src = url;
+      });
+      var token = await PS.accessToken();
+      var res = await fetch(PS.FUNCTIONS_URL + '/ai-product-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ images: [{ data: data64, mimeType: 'image/jpeg' }], categories: PS.CATEGORIES })
+      });
+      var d = await res.json();
+      if (!res.ok || !d.title || d.title === '식별할 수 없습니다') throw new Error('unknown');
+      $('name').value = d.title;
+      if (PS.CATEGORIES.indexOf(d.category) !== -1) { cat = d.category; renderCats(); }
+      PS.toast('AI가 "' + d.title + '"(으)로 알아봤어요');
+      search();
+    } catch (e) {
+      PS.toast('사진 속 물건을 못 알아봤어요. 이름을 써 주세요');
+    }
+    btn.disabled = false;
+    btn.innerHTML = PS.icon('camera', 22) + ' 사진으로 찾기';
+  });
+})();
+</script>
+</body>
+</html>

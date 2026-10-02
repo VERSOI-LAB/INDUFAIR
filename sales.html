@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>판매관리 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:16px;border-radius:var(--radius);background:var(--bg);}
+  .stats div{text-align:center;padding:16px 4px;}
+  .stats b{display:block;font-size:24px;font-weight:800;}
+  .stats span{font-size:14px;color:var(--sub);}
+  .row-wrap{position:relative;}
+  .row-wrap .row .s{justify-content:flex-start;}
+  .row-wrap .chg{position:absolute;right:0;bottom:16px;height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>판매관리</h1>
+  </header>
+  <main class="page">
+    <div class="stats" id="stats"><div><b>-</b><span>조회수</span></div><div><b>-</b><span>찜수</span></div><div><b>-</b><span>채팅수</span></div></div>
+    <a class="btn" href="/sell" style="margin-top:12px"><i data-icon3d="camera" data-size="32"></i> 판다 · 새 물건 팔기</a>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
+  </main>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="statusSheet" role="dialog" aria-label="판매 상태 바꾸기">
+  <div class="handle"></div>
+  <button class="opt" data-s="selling"><i data-icon3d="sell" data-size="30"></i>판매중</button>
+  <button class="opt" data-s="reserved"><i data-icon3d="calendar" data-size="30"></i>예약중</button>
+  <button class="opt" data-s="sold"><i data-icon3d="handshake" data-size="30"></i>판매완료</button>
+  <button class="opt" data-s="delete" style="color:var(--danger)"><i data-icon3d="trash" data-size="30"></i>삭제하기</button>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  var products = [];
+  var tab = PS.param('tab') || 'selling';
+  var targetId = null;
+
+  PS.ready.then(function (user) { if (!user) return PS.goLogin(); load(); });
+
+  async function load() {
+    var res = await sb.from('products').select(PS.PRODUCT_LIST_COLUMNS)
+      .eq('seller_profile_id', PS.user.id).neq('status', 'deleted').order('created_at', { ascending: false });
+    products = res.data || [];
+    var sum = function (k) { return products.reduce(function (a, p) { return a + (p[k] || 0); }, 0).toLocaleString('ko-KR'); };
+    $('stats').innerHTML = '<div><b>' + sum('view_count') + '</b><span>조회수</span></div><div><b>' + sum('like_count') + '</b><span>찜수</span></div><div><b>' + sum('inquiry_count') + '</b><span>채팅수</span></div>';
+    renderTabs();
+  }
+
+  function renderTabs() {
+    var count = function (s) { return products.filter(function (p) { return p.status === s; }).length; };
+    $('tabs').innerHTML = Object.keys(PS.STATUS).map(function (s) {
+      return '<button role="tab" aria-selected="' + (s === tab) + '" class="' + (s === tab ? 'on' : '') + '" data-s="' + s + '">' + PS.STATUS[s] + '<em>' + count(s) + '</em></button>';
+    }).join('');
+    $('tabs').onclick = function (e) {
+      var b = e.target.closest('button');
+      if (!b) return;
+      tab = b.dataset.s;
+      history.replaceState(null, '', '?tab=' + tab);
+      renderTabs();
+    };
+    var rows = products.filter(function (p) { return p.status === tab; });
+    if (!rows.length) {
+      var msg = { selling: '판매중인 물건이 없어요', reserved: '예약중인 물건이 없어요', sold: '아직 판매완료된 물건이 없어요' }[tab];
+      $('list').innerHTML = '<div class="empty" style="padding:40px 0">' + PS.icon3d('sell', 80) + msg + '</div>';
+      return;
+    }
+    $('list').innerHTML = rows.map(function (p) {
+      return '<div class="row-wrap">' + PS.rowHtml(p) + '<button class="chg" data-id="' + p.id + '">상태 바꾸기</button></div>';
+    }).join('');
+  }
+
+  $('list').addEventListener('click', function (e) {
+    var b = e.target.closest('.chg');
+    if (!b) return;
+    e.preventDefault();
+    targetId = b.dataset.id;
+    $('statusSheet').classList.add('show');
+    $('sheetBg').classList.add('show');
+  });
+  function closeSheet() { $('statusSheet').classList.remove('show'); $('sheetBg').classList.remove('show'); }
+  $('sheetBg').addEventListener('click', closeSheet);
+  $('statusSheet').addEventListener('click', async function (e) {
+    var opt = e.target.closest('.opt');
+    if (!opt || !targetId) return;
+    var s = opt.dataset.s;
+    closeSheet();
+    if (s === 'delete' && !confirm('정말 삭제할까요?')) return;
+    var next = s === 'delete' ? 'deleted' : s;
+    var res = await sb.from('products').update({ status: next }).eq('id', targetId);
+    if (res.error) { PS.toast('바꾸지 못했어요'); return; }
+    PS.toast(s === 'delete' ? '삭제했어요' : PS.STATUS[s] + '(으)로 바꿨어요');
+    if (next !== 'deleted') tab = next;
+    load();
+  });
+})();
+</script>
+</body>
+</html>

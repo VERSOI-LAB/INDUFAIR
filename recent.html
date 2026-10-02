@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>최근 본 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>최근 본 물건</h1>
+  </header>
+  <main class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0 0">
+      <span style="font-size:14px;color:var(--sub)">이 기기에서 본 물건이에요</span>
+      <button class="link-btn" id="clearBtn" style="padding:6px 0" hidden>전체 지우기</button>
+    </div>
+    <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  async function load() {
+    var ids = PS.recentIds();
+    if (!ids.length) {
+      $('list').innerHTML = '<div class="empty">' + PS.icon('clock', 64) + '<b style="margin-top:12px">아직 본 물건이 없어요</b>물건을 보면 여기에 차곡차곡 쌓여요<div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div></div>';
+      $('clearBtn').hidden = true;
+      return;
+    }
+    var res = await sb.from('products').select(PS.PRODUCT_LIST_COLUMNS).in('id', ids).neq('status', 'deleted');
+    var map = {};
+    (res.data || []).forEach(function (p) { map[p.id] = p; });
+    var rows = ids.map(function (id) { return map[id]; }).filter(Boolean);
+    $('list').innerHTML = rows.length ? rows.map(PS.rowHtml).join('') : '<div class="empty">' + PS.icon('clock', 64) + '<b style="margin-top:12px">본 물건이 모두 삭제됐어요</b></div>';
+    $('clearBtn').hidden = !rows.length;
+  }
+  $('clearBtn').addEventListener('click', function () {
+    if (!confirm('최근 본 물건을 모두 지울까요?')) return;
+    try { localStorage.removeItem('ps_recent'); } catch (e) {}
+    load();
+  });
+  load();
+})();
+</script>
+</body>
+</html>

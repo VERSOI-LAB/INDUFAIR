@@ -8,57 +8,29 @@
 <link rel="icon" href="/이미지/web/logo.jpg">
 <link rel="stylesheet" href="/app.css">
 <style>
-  .me{display:flex;align-items:center;gap:14px;padding:24px 0 8px;}
-  .me .avatar{width:64px;height:64px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0;}
+  .gear{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  .gear:active{background:#E8E9EB;}
+  .me{display:flex;align-items:center;gap:14px;background:var(--surface);border-radius:20px;padding:16px 20px;margin-bottom:12px;}
+  .me .avatar{width:56px;height:56px;border-radius:50%;background:var(--primary-light);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
   .me .avatar img{width:100%;height:100%;object-fit:cover;}
-  .me b{display:block;font-size:22px;font-weight:800;}
+  .me b{display:block;font-size:20px;font-weight:800;}
   .me span{font-size:14px;color:var(--sub);}
-  .me .edit{margin-left:auto;height:40px;padding:0 14px;border-radius:12px;background:#F2F2F2;font-size:15px;font-weight:700;flex-shrink:0;}
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:16px;border-radius:var(--radius);background:var(--bg);}
-  .stats div{text-align:center;padding:16px 4px;}
-  .stats b{display:block;font-size:24px;font-weight:800;}
-  .stats span{font-size:14px;color:var(--sub);}
-  .tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line);margin-top:28px;}
-  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
-  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
-  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
-  .row-wrap{position:relative;}
-  .row-wrap .row .s{justify-content:flex-start;}
-  .row-wrap .chg{position:absolute;right:0;bottom:16px;height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:700;}
-  .menu{margin:32px 0 16px;border-top:8px solid var(--bg);margin-left:-16px;margin-right:-16px;}
-  .menu a,.menu button{display:flex;width:100%;align-items:center;padding:18px 16px;font-size:17px;border-bottom:1px solid var(--line);text-align:left;}
-  .guest{text-align:center;padding:80px 0 40px;}
-  .guest .big{font-size:72px;}
+  .me .go{margin-left:auto;color:#BBB;display:flex;}
+  .sell-btn{margin-bottom:12px;}
+  .guest{text-align:center;padding:60px 0 40px;}
   .guest h1{font-size:24px;font-weight:800;margin-top:12px;}
   .guest p{color:var(--sub);margin:6px 0 28px;}
 </style>
 </head>
-<body>
+<body class="gray-page">
 <div class="app">
-  <main class="page" id="main"></main>
-</div>
-
-<div class="sheet-bg" id="sheetBg"></div>
-<div class="sheet" id="statusSheet" role="dialog" aria-label="판매 상태 바꾸기">
-  <div class="handle"></div>
-  <button class="opt" data-s="selling"><i data-icon3d="sell" data-size="30"></i>판매중</button>
-  <button class="opt" data-s="reserved"><i data-icon3d="calendar" data-size="30"></i>예약중</button>
-  <button class="opt" data-s="sold"><i data-icon3d="handshake" data-size="30"></i>판매완료</button>
-  <button class="opt" data-s="delete" style="color:var(--danger)"><i data-icon3d="trash" data-size="30"></i>삭제하기</button>
-</div>
-<div class="sheet" id="editSheet" role="dialog" aria-label="내 정보 바꾸기">
-  <div class="handle"></div>
-  <h2 style="font-size:20px;font-weight:800">내 정보 바꾸기</h2>
-  <label class="field"><span>사진</span>
-    <input type="file" id="avatarInput" accept="image/*" style="font-size:15px">
-  </label>
-  <label class="field"><span>이름 (다른 사람에게 보여요)</span>
-    <input class="input" id="nameInput" maxlength="20">
-  </label>
-  <label class="field"><span>전화번호 (전화하기 버튼에 쓰여요, 안 써도 돼요)</span>
-    <input class="input" id="phoneInput" inputmode="tel" maxlength="20" placeholder="010-0000-0000">
-  </label>
-  <button class="btn" id="saveProfile" style="margin-top:24px">저장하기</button>
+  <main class="page">
+    <div class="page-title">
+      <h1>마이</h1>
+      <a class="gear" href="/settings" aria-label="설정"><i data-icon="gear" data-size="28"></i></a>
+    </div>
+    <div id="main"></div>
+  </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -68,145 +40,64 @@
 (function () {
   PS.renderTabbar('my');
   var main = document.getElementById('main');
-  var products = [];
-  var tab = PS.param('tab') || 'selling';
-  var targetId = null;
+
+  function row(href, icon, label, extra) {
+    return '<a class="mrow" href="' + href + '">' + PS.icon(icon, 26) + '<span>' + label + '</span>' + (extra || '') +
+      '<span class="go">' + PS.icon('chevron', 20) + '</span></a>';
+  }
 
   PS.ready.then(function (user) {
     if (!user) {
-      main.innerHTML = '<div class="guest"><div class="big">' + PS.sticker('hello', 160) + '</div><h1>판다산다에 오신 걸 환영해요</h1><p>로그인하면 내 물건과 채팅을 볼 수 있어요</p><a class="btn" href="/login?next=/mypage">로그인 / 가입하기</a></div>';
+      main.innerHTML = '<div class="guest">' + PS.sticker('hello', 160) + '<h1>판다산다에 오신 걸 환영해요</h1><p>로그인하면 내 물건과 채팅을 볼 수 있어요</p><a class="btn" href="/login?next=/mypage">로그인 / 가입하기</a></div>';
       return;
     }
-    render();
-    load();
-  });
-
-  function render() {
     var pr = PS.profile || {};
+    var home = PS.getHome();
     main.innerHTML =
-      '<section class="me">' +
-        '<a class="avatar" href="' + PS.profileUrl(PS.user.id) + '">' + PS.avatarHtml(pr.avatar_url) + '</a>' +
-        '<a href="' + PS.profileUrl(PS.user.id) + '" style="min-width:0"><b>' + PS.esc(pr.name || '이웃') + '</b><span>내 프로필 보기 ›</span></a>' +
-        '<button class="edit" id="editBtn">수정</button>' +
+      '<a class="me" href="' + PS.profileUrl(user.id) + '">' +
+        '<div class="avatar">' + PS.avatarHtml(pr.avatar_url) + '</div>' +
+        '<div style="min-width:0"><b>' + PS.esc(pr.name || '이웃') + '</b><span>내 프로필 보기</span></div>' +
+        '<span class="go">' + PS.icon('chevron', 20) + '</span>' +
+      '</a>' +
+      '<a class="btn sell-btn" href="/sell">' + PS.icon3d('camera', 32) + ' 판다 · 새 물건 팔기</a>' +
+
+      '<div class="quick">' +
+        '<a href="/favorites">' + PS.icon('heart', 28) + '관심목록</a>' +
+        '<a href="/recent">' + PS.icon('clock', 28) + '최근 본</a>' +
+      '</div>' +
+
+      '<section class="mcard"><h3>자주 사용</h3>' +
+        row('/neighborhood', 'pin', '내 동네 설정', home ? '<span style="margin-left:auto;font-size:14px;color:var(--sub)">' + PS.esc(home.region) + '</span>' : '') +
       '</section>' +
-      '<div class="stats" id="stats"><div><b>-</b><span>조회수</span></div><div><b>-</b><span>찜수</span></div><div><b>-</b><span>채팅수</span></div></div>' +
-      '<a class="btn" href="/sell" style="margin-top:16px">' + PS.icon3d('camera', 32) + ' 판다 · 새 물건 팔기</a>' +
-      '<div class="tabs" id="tabs" role="tablist"></div>' +
-      '<div class="list" id="list"></div>' +
-      '<h2 class="sec-title" style="display:flex;align-items:center;gap:6px">' + PS.icon3d('heart', 34) + '찜한 물건</h2><div class="list" id="favList"></div>' +
-      '<nav class="menu">' +
-        '<a href="/terms">이용약관</a><a href="/privacy">개인정보처리방침</a>' +
-        '<button id="logoutBtn" style="color:var(--sub)">로그아웃</button>' +
-      '</nav>';
-    document.getElementById('editBtn').addEventListener('click', openEdit);
-    document.getElementById('logoutBtn').addEventListener('click', function () { if (confirm('로그아웃할까요?')) PS.signOut(); });
-  }
 
-  async function load() {
-    var res = await sb.from('products').select(PS.PRODUCT_LIST_COLUMNS)
-      .eq('seller_profile_id', PS.user.id).neq('status', 'deleted')
-      .order('created_at', { ascending: false });
-    products = res.data || [];
-    var sum = function (k) { return products.reduce(function (a, p) { return a + (p[k] || 0); }, 0).toLocaleString('ko-KR'); };
-    document.getElementById('stats').innerHTML =
-      '<div><b>' + sum('view_count') + '</b><span>조회수</span></div>' +
-      '<div><b>' + sum('like_count') + '</b><span>찜수</span></div>' +
-      '<div><b>' + sum('inquiry_count') + '</b><span>채팅수</span></div>';
-    renderTabs();
-    loadFavorites();
-  }
+      '<section class="mcard"><h3>나의 거래</h3>' +
+        row('/sales', 'receipt', '판매관리') +
+        row('/purchases', 'bag', '구매/예약내역') +
+        row('/price', 'scan', '내 물건 가격 찾기') +
+      '</section>' +
 
-  function renderTabs() {
-    var count = function (s) { return products.filter(function (p) { return p.status === s; }).length; };
-    var tabs = document.getElementById('tabs');
-    tabs.innerHTML = Object.keys(PS.STATUS).map(function (s) {
-      return '<button role="tab" aria-selected="' + (s === tab) + '" class="' + (s === tab ? 'on' : '') + '" data-s="' + s + '">' + PS.STATUS[s] + '<em>' + count(s) + '</em></button>';
-    }).join('');
-    tabs.onclick = function (e) {
-      var b = e.target.closest('button');
-      if (!b) return;
-      tab = b.dataset.s;
-      history.replaceState(null, '', '?tab=' + tab);
-      renderTabs();
-    };
-    var rows = products.filter(function (p) { return p.status === tab; });
-    var list = document.getElementById('list');
-    if (!rows.length) {
-      var msg = { selling: '판매중인 물건이 없어요', reserved: '예약중인 물건이 없어요', sold: '아직 판매완료된 물건이 없어요' }[tab];
-      list.innerHTML = '<div class="empty" style="padding:40px 0">' + PS.icon3d('sell', 80) + msg + '</div>';
-      return;
-    }
-    list.innerHTML = rows.map(function (p) {
-      return '<div class="row-wrap">' + PS.rowHtml(p) + '<button class="chg" data-id="' + p.id + '">상태 바꾸기</button></div>';
-    }).join('');
-    list.onclick = function (e) {
-      var b = e.target.closest('.chg');
-      if (!b) return;
-      e.preventDefault();
-      targetId = b.dataset.id;
-      openSheet('statusSheet');
-    };
-  }
-
-  async function loadFavorites() {
-    var res = await sb.from('favorites').select('products(' + PS.PRODUCT_LIST_COLUMNS + ')')
-      .eq('profile_id', PS.user.id).order('created_at', { ascending: false }).limit(30);
-    var rows = (res.data || []).map(function (f) { return f.products; }).filter(function (p) { return p && p.status !== 'deleted'; });
-    document.getElementById('favList').innerHTML = rows.length
-      ? rows.map(PS.rowHtml).join('')
-      : '<div class="empty" style="padding:24px 0">마음에 드는 물건에 하트를 눌러 보세요</div>';
-  }
-
-  // ---------- 바텀시트 ----------
-  var bg = document.getElementById('sheetBg');
-  function openSheet(id) { document.getElementById(id).classList.add('show'); bg.classList.add('show'); }
-  function closeSheets() { document.querySelectorAll('.sheet').forEach(function (s) { s.classList.remove('show'); }); bg.classList.remove('show'); }
-  bg.addEventListener('click', closeSheets);
-
-  document.getElementById('statusSheet').addEventListener('click', async function (e) {
-    var opt = e.target.closest('.opt');
-    if (!opt || !targetId) return;
-    var s = opt.dataset.s;
-    closeSheets();
-    if (s === 'delete' && !confirm('정말 삭제할까요?')) return;
-    var newStatus = s === 'delete' ? 'deleted' : s;
-    var res = await sb.from('products').update({ status: newStatus }).eq('id', targetId);
-    if (res.error) { PS.toast('바꾸지 못했어요'); return; }
-    PS.toast(s === 'delete' ? '삭제했어요' : PS.STATUS[s] + '(으)로 바꿨어요');
-    if (newStatus !== 'deleted') tab = newStatus;
-    load();
+      '<section class="mcard"><h3>나의 관심</h3>' +
+        row('/favorites', 'heart', '관심목록') +
+        row('/keywords', 'tag', '키워드 알림 설정', '<span class="badge-n" id="kwBadge" hidden></span>') +
+      '</section>';
+    // "내 동네" 글자가 있으면 화살표와 겹치지 않게
+    main.querySelectorAll('.mrow span[style*="margin-left:auto"] + .go').forEach(function (g) { g.style.marginLeft = '6px'; });
+    loadKeywordBadge();
   });
 
-  function openEdit() {
-    var pr = PS.profile || {};
-    document.getElementById('nameInput').value = pr.name || '';
-    document.getElementById('phoneInput').value = pr.phone || '';
-    document.getElementById('avatarInput').value = '';
-    openSheet('editSheet');
+  // 키워드 알림: 마지막으로 본 뒤 새로 올라온, 키워드가 들어간 물건 수
+  async function loadKeywordBadge() {
+    var kw = await sb.from('keyword_alerts').select('keyword').eq('profile_id', PS.user.id);
+    if (kw.error || !(kw.data || []).length) return;
+    var since = null;
+    try { since = localStorage.getItem('ps_kw_seen'); } catch (e) {}
+    since = since || new Date(Date.now() - 7 * 86400000).toISOString();
+    var ors = kw.data.map(function (k) { return 'title.ilike.%' + k.keyword.replace(/[%_,()]/g, ' ') + '%'; }).join(',');
+    var res = await sb.from('products').select('id', { count: 'exact', head: true })
+      .in('status', ['selling', 'reserved']).neq('seller_profile_id', PS.user.id).gt('created_at', since).or(ors);
+    var b = document.getElementById('kwBadge');
+    if (b && res.count) { b.textContent = res.count > 99 ? '99+' : res.count; b.hidden = false; }
   }
-
-  document.getElementById('saveProfile').addEventListener('click', async function () {
-    var btn = this;
-    var name = document.getElementById('nameInput').value.trim();
-    if (!name) { PS.toast('이름을 써 주세요'); return; }
-    btn.disabled = true;
-    var update = { name: name, phone: document.getElementById('phoneInput').value.trim() || null };
-    var file = document.getElementById('avatarInput').files[0];
-    if (file) {
-      var path = PS.user.id + '/avatar-' + Date.now() + '.' + ((file.name.split('.').pop() || 'jpg').toLowerCase());
-      var up = await sb.storage.from('avatars').upload(path, file, { contentType: file.type });
-      if (!up.error) update.avatar_url = sb.storage.from('avatars').getPublicUrl(path).data.publicUrl;
-      else PS.toast('사진을 올리지 못했어요');
-    }
-    var res = await sb.from('profiles').update(update).eq('id', PS.user.id);
-    btn.disabled = false;
-    if (res.error) { PS.toast('저장하지 못했어요'); return; }
-    Object.assign(PS.profile, update);
-    closeSheets();
-    render();
-    load();
-    PS.toast('저장했어요');
-  });
 })();
 </script>
 </body>

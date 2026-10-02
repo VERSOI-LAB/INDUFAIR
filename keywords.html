@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>키워드 알림 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .chip .kx{display:inline-flex;margin-left:2px;padding:4px;color:var(--sub);}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>키워드 알림 설정</h1>
+  </header>
+  <main class="page">
+    <p style="color:var(--sub);margin-top:16px;line-height:1.6">찾는 물건 이름을 등록하면, 새로 올라온 물건을 여기와 마이 메뉴에 빨간 숫자로 알려드려요.</p>
+    <form id="form" style="display:flex;gap:8px;margin-top:16px">
+      <input class="input" id="kw" maxlength="30" placeholder="예) 레귤레이터, 컴프레샤" autocomplete="off" aria-label="키워드" style="flex:1">
+      <button class="btn" type="submit" style="width:88px">등록</button>
+    </form>
+    <div class="chip-grid" id="chips" style="margin-top:14px"></div>
+    <p id="limit" style="font-size:13px;color:var(--hint);margin-top:8px"></p>
+    <h3 class="sec-title" style="font-size:18px">키워드 새 물건</h3>
+    <div class="list" id="list"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  var MAX = 10;
+  var keywords = [];
+  var seenBefore = null;
+  try { seenBefore = localStorage.getItem('ps_kw_seen'); } catch (e) {}
+
+  PS.ready.then(function (user) {
+    if (!user) return PS.goLogin();
+    load();
+    try { localStorage.setItem('ps_kw_seen', new Date().toISOString()); } catch (e) {}
+  });
+
+  async function load() {
+    var res = await sb.from('keyword_alerts').select('id,keyword').eq('profile_id', PS.user.id).order('created_at');
+    if (res.error) {
+      $('chips').innerHTML = '';
+      $('list').innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>키워드 알림을 준비 중이에요</b>잠시 후 다시 들어와 주세요</div>';
+      return;
+    }
+    keywords = res.data || [];
+    renderChips();
+    loadMatches();
+  }
+
+  function renderChips() {
+    $('chips').innerHTML = keywords.map(function (k) {
+      return '<span class="chip on">' + PS.esc(k.keyword) + '<button type="button" class="kx" data-id="' + k.id + '" aria-label="' + PS.esc(k.keyword) + ' 지우기">' + PS.icon('close', 14) + '</button></span>';
+    }).join('');
+    $('limit').textContent = keywords.length + ' / ' + MAX + '개';
+  }
+
+  async function loadMatches() {
+    if (!keywords.length) {
+      $('list').innerHTML = '<div class="empty" style="padding:32px 0">' + PS.icon('tag', 56) + '<b style="margin-top:10px">등록한 키워드가 없어요</b>찾는 물건 이름을 위에 써 보세요</div>';
+      return;
+    }
+    var since = new Date(Date.now() - 30 * 86400000).toISOString();
+    var ors = keywords.map(function (k) { return 'title.ilike.%' + k.keyword.replace(/[%_,()]/g, ' ') + '%'; }).join(',');
+    var res = await sb.from('products').select(PS.PRODUCT_LIST_COLUMNS).in('status', ['selling', 'reserved'])
+      .neq('seller_profile_id', PS.user.id).gt('created_at', since).or(ors).order('created_at', { ascending: false }).limit(50);
+    var rows = res.data || [];
+    $('list').innerHTML = rows.length
+      ? rows.map(function (p) {
+          var isNew = !seenBefore || p.created_at > seenBefore;
+          return isNew ? PS.rowHtml(p).replace('<div class="t">', '<div class="t"><span class="badge reserved" style="background:var(--danger)">NEW</span>') : PS.rowHtml(p);
+        }).join('')
+      : '<div class="empty" style="padding:32px 0">' + PS.sticker('searching', 100) + '<b>아직 맞는 물건이 없어요</b>새로 올라오면 알려드릴게요</div>';
+  }
+
+  $('form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var kw = $('kw').value.trim();
+    if (!kw) return;
+    if (keywords.length >= MAX) { PS.toast('키워드는 ' + MAX + '개까지 등록할 수 있어요'); return; }
+    if (keywords.some(function (k) { return k.keyword === kw; })) { PS.toast('이미 등록한 키워드예요'); return; }
+    var res = await sb.from('keyword_alerts').insert({ profile_id: PS.user.id, keyword: kw });
+    if (res.error) { PS.toast('등록하지 못했어요'); return; }
+    $('kw').value = '';
+    PS.toast('"' + kw + '" 키워드를 등록했어요');
+    load();
+  });
+
+  $('chips').addEventListener('click', async function (e) {
+    var b = e.target.closest('.kx');
+    if (!b) return;
+    var res = await sb.from('keyword_alerts').delete().eq('id', b.dataset.id);
+    if (res.error) { PS.toast('지우지 못했어요'); return; }
+    load();
+  });
+})();
+</script>
+</body>
+</html>
