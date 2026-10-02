@@ -89,6 +89,7 @@ p{margin:0;}
   font-size:15px;font-weight:600;color:var(--sub);white-space:nowrap;}
 .chip.on{background:var(--text);border-color:var(--text);color:#fff;}
 .chip-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.chip-grid .chip{padding:0 13px;}
 .chip-grid .chip.on{background:var(--primary-light);border-color:var(--primary);color:var(--text);}
 
 /* 섹션 제목 */

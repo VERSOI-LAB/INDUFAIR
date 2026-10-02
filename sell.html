@@ -201,6 +201,7 @@
     window.scrollTo(0, 0);
     if (n === 2) enterPrice();
     if (n === 4) enterRegion();
+    if (n === 3) { renderChoice('usageChips', PS.USAGE, 'usage'); renderChoice('condChips', PS.CONDITIONS, 'condition'); }
     validate();
   }
 
@@ -320,6 +321,7 @@
       }
       form.brand = data.manufacturer || '';
       if (!form.condition && data.condition) form.condition = data.condition === 'new' || data.condition === 'a' ? 'great' : 'good';
+      if (!form.usage && data.condition === 'new') form.usage = 'new';
     } catch (e) {
       console.warn('[판다] AI 인식 실패', e);
       ai.state = 'failed';

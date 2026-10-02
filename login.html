@@ -37,13 +37,14 @@
       <label class="field"><span>이메일</span>
         <input class="input" id="email" type="email" inputmode="email" autocomplete="email" placeholder="panda@example.com">
       </label>
-      <label class="field"><span>비밀번호</span>
+      <label class="field" id="pwField"><span>비밀번호</span>
         <input class="input" id="password" type="password" autocomplete="current-password" placeholder="6자 이상">
       </label>
       <div class="err" id="err" hidden></div>
       <div class="info" id="info" hidden></div>
       <button class="btn" id="submit" type="submit" style="margin-top:24px">로그인</button>
     </form>
+    <div style="text-align:center"><button type="button" class="link-btn" id="forgotBtn">비밀번호를 잊었어요</button></div>
 
     <div class="switch" id="switch"></div>
     <p class="legal">시작하면 <a href="/terms">이용약관</a>과 <a href="/privacy">개인정보처리방침</a>에 동의하는 거예요</p>
@@ -55,7 +56,7 @@
 <script src="/js/app.js"></script>
 <script>
 (function () {
-  var mode = PS.param('mode') === 'signup' ? 'signup' : 'login';
+  var mode = ['signup', 'reset'].indexOf(PS.param('mode')) !== -1 ? PS.param('mode') : 'login';
   var $ = function (id) { return document.getElementById(id); };
 
   function nextUrl() {
@@ -68,20 +69,26 @@
   function setMode(m) {
     mode = m;
     var signup = m === 'signup';
+    var reset = m === 'reset';
     $('nameField').hidden = !signup;
+    $('pwField').hidden = reset;
+    $('forgotBtn').hidden = m !== 'login';
     var stk = document.querySelector('#loginStk img');
-    if (stk) stk.src = '/이미지/stickers/' + (signup ? 'fighting' : 'hello') + '.webp';
-    $('heading').textContent = signup ? '처음 오셨군요!' : '반가워요!';
-    $('subheading').textContent = signup ? '이름, 이메일, 비밀번호만 쓰면 끝' : '이메일로 바로 시작해요';
-    $('submit').textContent = signup ? '가입하고 시작하기' : '로그인';
+    if (stk) stk.src = '/이미지/stickers/' + (signup ? 'fighting' : reset ? 'curious' : 'hello') + '.webp';
+    $('heading').textContent = signup ? '처음 오셨군요!' : reset ? '비밀번호를 잊었나요?' : '반가워요!';
+    $('subheading').textContent = signup ? '이름, 이메일, 비밀번호만 쓰면 끝' : reset ? '가입한 이메일로 새 비밀번호 링크를 보내드려요' : '이메일로 바로 시작해요';
+    $('submit').textContent = signup ? '가입하고 시작하기' : reset ? '메일 받기' : '로그인';
     $('password').autocomplete = signup ? 'new-password' : 'current-password';
     $('switch').innerHTML = signup
       ? '이미 가입했나요? <button type="button" data-m="login">로그인</button>'
+      : reset ? '비밀번호가 생각났나요? <button type="button" data-m="login">로그인</button>'
       : '처음이에요? <button type="button" data-m="signup">새로 가입하기</button>';
     $('err').hidden = true;
     $('info').hidden = true;
     (signup ? $('name') : $('email')).focus();
   }
+
+  $('forgotBtn').addEventListener('click', function () { setMode('reset'); });
 
   $('switch').addEventListener('click', function (e) {
     var b = e.target.closest('button');
@@ -99,12 +106,26 @@
     var password = $('password').value;
     if (mode === 'signup' && !name) return showErr('이름을 써 주세요');
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr('이메일을 다시 확인해 주세요');
-    if (password.length < 6) return showErr('비밀번호는 6자 이상이에요');
+    if (mode !== 'reset' && password.length < 6) return showErr('비밀번호는 6자 이상이에요');
 
     var btn = $('submit');
     var label = btn.textContent;
     btn.disabled = true;
     btn.textContent = '잠깐만요…';
+
+    if (mode === 'reset') {
+      var rs = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/reset-password' });
+      btn.disabled = false;
+      btn.textContent = label;
+      if (rs.error) {
+        if (/rate|seconds|too many/i.test(rs.error.message)) return showErr('메일을 너무 자주 보냈어요. 1분 뒤에 다시 해 주세요');
+        return showErr('메일을 보내지 못했어요. 잠시 후 다시 해 주세요');
+      }
+      // 가입 여부를 알려주지 않도록 항상 같은 안내
+      $('info').textContent = email + ' 로 가입했다면 메일이 갔어요. 메일의 링크를 눌러 새 비밀번호를 정해 주세요. (안 보이면 스팸함도 확인해요)';
+      $('info').hidden = false;
+      return;
+    }
 
     if (mode === 'login') {
       var res = await sb.auth.signInWithPassword({ email: email, password: password });
@@ -112,7 +133,7 @@
       btn.textContent = label;
       if (res.error) {
         if (/confirm/i.test(res.error.message)) return showErr('메일함에서 확인 버튼을 먼저 눌러 주세요');
-        return showErr('이메일이나 비밀번호가 맞지 않아요. 처음이라면 아래 "새로 가입하기"를 눌러요');
+        return showErr('이메일이나 비밀번호가 맞지 않아요. 비밀번호가 기억나지 않으면 "비밀번호를 잊었어요"를 눌러요');
       }
       location.replace(nextUrl());
       return;
