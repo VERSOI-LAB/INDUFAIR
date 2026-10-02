@@ -213,6 +213,14 @@
     return PS.user;
   })();
 
+  // supabase 요청은 결과를 받아야(then) 실제로 전송된다. 결과가 필요 없는 요청은 이걸로 보낸다.
+  PS.fire = function (query) {
+    return Promise.resolve(query).then(function (r) {
+      if (r && r.error) console.warn('[판다산다]', r.error);
+      return r;
+    }, function (e) { console.warn('[판다산다]', e); });
+  };
+
   PS.accessToken = async function () {
     var res = await sb.auth.getSession();
     return res.data.session ? res.data.session.access_token : null;

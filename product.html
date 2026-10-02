@@ -94,10 +94,19 @@
     await PS.ready;
 
     var sellerMap = await PS.publicProfiles([product.seller_profile_id]);
+    // 조회수: 판매자 본인은 빼고, 같은 브라우저 세션에서는 한 번만
+    var viewKey = 'ps_viewed_' + id;
+    var seen = false;
+    try { seen = !!sessionStorage.getItem(viewKey); } catch (e) {}
+    var countView = !seen && !(PS.user && PS.user.id === product.seller_profile_id);
+    if (countView) product.view_count = (product.view_count || 0) + 1;
     renderSlider();
     renderBody(sellerMap[product.seller_profile_id] || {});
     await renderBar();
-    sb.rpc('increment_product_view', { p_product_id: id });
+    if (countView) {
+      PS.fire(sb.rpc('increment_product_view', { p_product_id: id }));
+      try { sessionStorage.setItem(viewKey, '1'); } catch (e) {}
+    }
   }
 
   function renderSlider() {
@@ -136,7 +145,7 @@
       '<div class="price">' + PS.won(p.price) + '</div>' +
       (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
       (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
-      '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + ((p.view_count || 0) + 1) + '</div>';
+      '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) + '</div>';
   }
 
   async function renderBar() {
