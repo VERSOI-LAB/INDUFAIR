@@ -49,6 +49,7 @@ p{margin:0;}
 .topbar .back:active{background:var(--bg);}
 
 /* 하단 탭바: 모든 페이지 공통. 페이지 전용 버튼줄은 탭바 바로 위에 */
+.toast.lift,body:has(.over-tabbar:not([hidden])) .toast{bottom:calc(var(--tabbar-h) + 104px + env(safe-area-inset-bottom));} /* 버튼줄 위에 안내 */
 .over-tabbar{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom)) !important;padding-bottom:12px !important;}
 /* 하단 탭바 */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;max-width:var(--app-w);margin:0 auto;
