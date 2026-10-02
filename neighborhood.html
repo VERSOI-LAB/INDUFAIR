@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>내 동네 설정 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .hood{margin-top:16px;border-radius:20px;overflow:hidden;background:var(--bg);}
+  .mini{height:200px;background:#EEF0F2;}
+  .map-me{width:18px;height:18px;border-radius:50%;background:#2F7CF6;border:3px solid #fff;box-shadow:0 0 0 6px rgba(47,124,246,.2);}
+  .now{padding:16px 20px;}
+  .now span{display:block;font-size:14px;color:var(--sub);}
+  .now b{display:block;font-size:22px;font-weight:800;margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>내 동네 설정</h1>
+  </header>
+  <main class="page">
+    <div class="hood">
+      <div id="mini" class="mini"></div>
+      <div class="now"><span>지금 내 동네</span><b id="nowRegion">아직 정하지 않았어요</b></div>
+    </div>
+    <button class="btn" id="gpsBtn" style="margin-top:16px"><i data-icon3d="location" data-size="30"></i> 지금 있는 곳으로 정하기</button>
+    <label class="field"><span>직접 쓰기</span>
+      <input class="input" id="regionInput" maxlength="40" placeholder="예) 성남시 분당구" autocomplete="off">
+    </label>
+    <button class="btn white" id="saveBtn" style="margin-top:12px" disabled>이 동네로 저장</button>
+    <p style="font-size:14px;color:var(--sub);margin:16px 0 24px;line-height:1.6">내 동네는 산다 지도의 시작 위치와 판매할 때 동네 기본값으로 쓰여요. 정확한 주소는 저장하지 않아요.</p>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/map.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  var adapter = null, map = null;
+  function show(home) {
+    $('nowRegion').textContent = home ? home.region : '아직 정하지 않았어요';
+    if (home && home.lat != null && map) { map.panTo(home.lat, home.lng); map.showMe(home.lat, home.lng); }
+  }
+  async function initMap() {
+    try {
+      adapter = await PS.loadMap();
+      var h = PS.getHome();
+      var c = h && h.lat != null ? { lat: h.lat, lng: h.lng } : PS.DEFAULT_CENTER;
+      map = adapter.create($('mini'), c);
+      if (h && h.lat != null) map.showMe(h.lat, h.lng);
+    } catch (e) { $('mini').hidden = true; }
+  }
+  show(PS.getHome());
+  initMap();
+
+  $('gpsBtn').addEventListener('click', function () {
+    var btn = this;
+    if (!navigator.geolocation) { PS.toast('이 기기에서는 위치를 찾을 수 없어요'); return; }
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>찾는 중…';
+    navigator.geolocation.getCurrentPosition(async function (pos) {
+      var lat = pos.coords.latitude, lng = pos.coords.longitude, text = '';
+      try {
+        var r = await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&accept-language=ko&lat=' + lat + '&lon=' + lng);
+        var a = (await r.json()).address || {};
+        var big = a.city || a.county || a.state || '';
+        var small = a.borough || a.city_district || a.district || a.suburb || a.town || '';
+        if (big === small) small = '';
+        text = [big, small].filter(Boolean).join(' ');
+      } catch (e) {}
+      btn.disabled = false;
+      btn.innerHTML = PS.icon3d('location', 30) + ' 지금 있는 곳으로 정하기';
+      if (!text) { PS.toast('동네 이름을 못 찾았어요. 아래에 직접 써 주세요'); return; }
+      var home = { region: text, lat: Math.round(lat * 1000) / 1000, lng: Math.round(lng * 1000) / 1000 };
+      PS.setHome(home);
+      show(home);
+      PS.toast(text + '(으)로 정했어요');
+    }, function () {
+      btn.disabled = false;
+      btn.innerHTML = PS.icon3d('location', 30) + ' 지금 있는 곳으로 정하기';
+      PS.toast('위치 권한을 허용하거나 아래에 직접 써 주세요');
+    }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
+  });
+
+  $('regionInput').addEventListener('input', function () { $('saveBtn').disabled = !this.value.trim(); });
+  $('saveBtn').addEventListener('click', async function () {
+    var text = $('regionInput').value.trim();
+    if (!text) return;
+    this.disabled = true;
+    var pos = adapter ? await PS.geocodeRegion(adapter, text) : null;
+    var home = { region: text };
+    if (pos) { home.lat = Math.round(pos.lat * 1000) / 1000; home.lng = Math.round(pos.lng * 1000) / 1000; }
+    PS.setHome(home);
+    show(home);
+    $('regionInput').value = '';
+    PS.toast(text + '(으)로 정했어요');
+  });
+})();
+</script>
+</body>
+</html>

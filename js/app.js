@@ -103,7 +103,14 @@
     back: '<path d="M15 5l-7 7 7 7"/>',
     trash: '<path d="M4 7h16M10 7V4h4v3M6 7l1 13h10l1-13"/>',
     pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
-    plus: '<path d="M12 5v14M5 12h14"/>'
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    receipt: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+    bag: '<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+    scan: '<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M12 8l1.2 2.8L16 12l-2.8 1.2L12 16l-1.2-2.8L8 12l2.8-1.2z"/>',
+    tag: '<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.5"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+    chevron: '<path d="M9 5l7 7-7 7"/>'
   };
   PS.icon = function (name, size, fill) {
     size = size || 22;
@@ -174,6 +181,56 @@
   };
 
   PS.PRODUCT_LIST_COLUMNS = 'id,title,price,region,status,created_at,like_count,inquiry_count,view_count,product_images(url,sort_order)';
+
+  // ---- 시세: 비슷한 이름 → 같은 분류 순으로, 최근 가격의 중간값 ±10% ----
+  PS.marketPrice = async function (title, categoryId) {
+    var cols = PS.PRODUCT_LIST_COLUMNS;
+    var items = [];
+    var words = (title || '').split(/\s+/).filter(function (w) { return w.length >= 2; });
+    if (words.length) {
+      var r1 = await sb.from('products').select(cols).neq('status', 'deleted').gt('price', 0)
+        .ilike('title', '%' + words[0].replace(/[%_,()]/g, '') + '%').order('created_at', { ascending: false }).limit(50);
+      items = r1.data || [];
+    }
+    if (items.length < 3 && categoryId) {
+      var r2 = await sb.from('products').select(cols).neq('status', 'deleted').gt('price', 0)
+        .eq('category_id', categoryId).order('created_at', { ascending: false }).limit(50);
+      if ((r2.data || []).length > items.length) items = r2.data;
+    }
+    if (items.length < 3) return { count: items.length, items: items };
+    var prices = items.map(function (p) { return p.price; }).sort(function (a, b) { return a - b; });
+    var mid = prices[Math.floor(prices.length / 2)];
+    var man = function (n) { return Math.max(10000, Math.round(n / 10000) * 10000); };
+    return { count: items.length, items: items, lo: man(mid * 0.9), hi: man(mid * 1.1), rec: man(mid) };
+  };
+
+  // ---- 최근 본 물건 (이 기기에만 저장) ----
+  PS.recentIds = function () {
+    try { return JSON.parse(localStorage.getItem('ps_recent') || '[]'); } catch (e) { return []; }
+  };
+  PS.addRecent = function (id) {
+    try {
+      var ids = PS.recentIds().filter(function (x) { return x !== id; });
+      ids.unshift(id);
+      localStorage.setItem('ps_recent', JSON.stringify(ids.slice(0, 50)));
+    } catch (e) {}
+  };
+
+  // ---- 내 동네 (이 기기에 저장: 지도 시작 위치, 판매 지역 기본값) ----
+  PS.getHome = function () {
+    try {
+      var h = JSON.parse(localStorage.getItem('ps_home') || 'null');
+      if (h && h.region) return h;
+      var r = localStorage.getItem('ps_region');
+      return r ? { region: r } : null;
+    } catch (e) { return null; }
+  };
+  PS.setHome = function (home) {
+    try {
+      localStorage.setItem('ps_home', JSON.stringify(home));
+      localStorage.setItem('ps_region', home.region);
+    } catch (e) {}
+  };
 
   // ---- 로그인 상태 ----
   PS.user = null;

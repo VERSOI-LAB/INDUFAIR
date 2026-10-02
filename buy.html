@@ -298,7 +298,9 @@
 
     try {
       adapter = await PS.loadMap();
-      map = adapter.create($('map'), PS.DEFAULT_CENTER);
+      var home = PS.getHome();
+      if (home && home.lat != null) origin = { lat: home.lat, lng: home.lng };
+      map = adapter.create($('map'), origin || PS.DEFAULT_CENTER);
       $('mapMsg').hidden = true;
       await placePins();
       render(true);

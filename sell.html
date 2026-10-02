@@ -495,32 +495,18 @@
     setPrice(add ? form.price + add : 0);
   });
 
-  function roundMan(n) { return Math.max(10000, Math.round(n / 10000) * 10000); }
 
   async function enterPrice() {
     $('priceFor').textContent = form.title ? '"' + form.title + '"' : '';
     if (!form.price) setTimeout(function () { $('priceInput').focus(); }, 50);
     var box = $('suggest');
     box.hidden = true;
-    // 시세 추천: 비슷한 이름 → 같은 종류 순으로, 최근 등록 가격의 중간값 ±10%
-    var prices = [];
-    var keyword = (form.title || '').split(/\s+/).filter(function (w) { return w.length >= 2; })[0];
-    if (keyword) {
-      var r1 = await sb.from('products').select('price').neq('status', 'deleted').gt('price', 0)
-        .ilike('title', '%' + keyword.replace(/[%_]/g, '') + '%').order('created_at', { ascending: false }).limit(50);
-      prices = (r1.data || []).map(function (r) { return r.price; });
-    }
-    if (prices.length < 3 && categoryIds[form.category]) {
-      var r2 = await sb.from('products').select('price').neq('status', 'deleted').gt('price', 0)
-        .eq('category_id', categoryIds[form.category]).order('created_at', { ascending: false }).limit(50);
-      prices = (r2.data || []).map(function (r) { return r.price; });
-    }
-    if (prices.length < 3) return;
-    prices.sort(function (a, b) { return a - b; });
-    var mid = prices[Math.floor(prices.length / 2)];
-    var lo = roundMan(mid * 0.9), hi = roundMan(mid * 1.1), rec = roundMan(mid);
+    // 시세 추천 (PS.marketPrice: 비슷한 이름 → 같은 분류, 중간값 ±10%)
+    var mp = await PS.marketPrice(form.title, categoryIds[form.category]);
+    if (!mp.rec) return;
+    var lo = mp.lo, hi = mp.hi, rec = mp.rec;
     box.innerHTML = '<b style="display:flex;align-items:center;gap:6px">' + PS.icon3d('chart', 36) + '비슷한 물건은 ' + PS.won(lo) + ' ~ ' + PS.won(hi) + '</b>' +
-      '<p>최근 ' + prices.length + '개 거래를 보고 추천했어요</p>' +
+      '<p>최근 ' + mp.count + '개 거래를 보고 추천했어요</p>' +
       '<button type="button" class="btn small white" id="useRec">' + PS.won(rec) + '으로 할게요</button>';
     box.hidden = false;
     $('useRec').addEventListener('click', function () { setPrice(rec); });
@@ -633,7 +619,9 @@
 
     // 지도용 좌표: GPS 동네 그대로면 GPS 좌표, 직접 쓴 동네면 주소로 찾기. 소수점 3자리(약 100m)로 줄여 저장
     var coords = null;
+    var home = PS.getHome();
     if (gps && gps.region === form.region) coords = gps;
+    else if (home && home.lat != null && home.region === form.region) coords = home;
     else {
       try {
         var adapter = await Promise.race([PS.loadMap(), new Promise(function (r) { setTimeout(r, 4000); })]);

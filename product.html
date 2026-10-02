@@ -90,6 +90,7 @@
       .eq('id', id).maybeSingle();
     if (res.error || !res.data || res.data.status === 'deleted') return notFound();
     product = res.data;
+    PS.addRecent(product.id);
     document.title = product.title + ' - 판다산다';
     await PS.ready;
 

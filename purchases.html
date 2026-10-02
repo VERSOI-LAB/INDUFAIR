@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>구매/예약내역 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .row-wrap{position:relative;}
+  .row-wrap .row .s{justify-content:flex-start;}
+  .row-wrap .chg{position:absolute;right:0;bottom:16px;height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>구매/예약내역</h1>
+  </header>
+  <main class="page">
+    <p style="font-size:14px;color:var(--sub);padding:14px 0 0">채팅으로 물어본 물건이 모여 있어요</p>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  var chats = [];
+  var tab = 'all';
+  var TABS = { all: '전체', reserved: '예약중', sold: '판매완료' };
+
+  PS.ready.then(function (user) { if (!user) return PS.goLogin(); load(); });
+
+  async function load() {
+    var res = await sb.from('chats').select('id,last_message_at,created_at,products(' + PS.PRODUCT_LIST_COLUMNS + ')')
+      .eq('buyer_id', PS.user.id).order('last_message_at', { ascending: false, nullsFirst: false });
+    chats = (res.data || []).filter(function (c) { return c.products && c.products.status !== 'deleted'; });
+    render();
+  }
+
+  function render() {
+    var count = function (t) { return chats.filter(function (c) { return t === 'all' || c.products.status === t; }).length; };
+    $('tabs').innerHTML = Object.keys(TABS).map(function (t) {
+      return '<button role="tab" aria-selected="' + (t === tab) + '" class="' + (t === tab ? 'on' : '') + '" data-t="' + t + '">' + TABS[t] + '<em>' + count(t) + '</em></button>';
+    }).join('');
+    $('tabs').onclick = function (e) {
+      var b = e.target.closest('button');
+      if (!b) return;
+      tab = b.dataset.t;
+      render();
+    };
+    var rows = chats.filter(function (c) { return tab === 'all' || c.products.status === tab; });
+    $('list').innerHTML = rows.length
+      ? rows.map(function (c) {
+          return '<div class="row-wrap">' + PS.rowHtml(c.products) + '<a class="chg" href="/chat/' + c.id + '">' + PS.icon('chat', 16) + ' 채팅 보기</a></div>';
+        }).join('')
+      : '<div class="empty">' + PS.icon3d('buy', 96) + '<b>' + (tab === 'all' ? '아직 물어본 물건이 없어요' : TABS[tab] + ' 물건이 없어요') + '</b>' +
+        (tab === 'all' ? '마음에 드는 물건에서 채팅하기를 눌러 보세요<div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div>' : '') + '</div>';
+  }
+})();
+</script>
+</body>
+</html>

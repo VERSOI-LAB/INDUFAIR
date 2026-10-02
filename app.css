@@ -173,6 +173,23 @@ p{margin:0;}
 .sheet button.opt:last-child{border-bottom:none;}
 .sheet button.opt{display:flex;align-items:center;gap:10px;}
 
+/* 회색 바탕 위 흰 카드 메뉴 (마이페이지 등) */
+.gray-page{background:#F2F3F5;}
+.gray-page .app{background:#F2F3F5;}
+.mcard{background:var(--surface);border-radius:20px;margin:0 0 12px;padding:8px 0;}
+.mcard h3{font-size:15px;font-weight:800;padding:14px 20px 4px;}
+.mrow{display:flex;align-items:center;gap:14px;width:100%;padding:16px 20px;font-size:17px;text-align:left;}
+.mrow:active{background:var(--bg);}
+.mrow .ico{color:var(--text);}
+.mrow .go{margin-left:auto;color:#BBB;display:flex;}
+.mrow .badge-n{margin-left:auto;min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--danger);color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;}
+.mrow .badge-n + .go{margin-left:6px;}
+.quick{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:20px;margin-bottom:12px;}
+.quick a{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 0;font-size:16px;}
+.quick a + a{border-left:1px solid var(--line);}
+.page-title{display:flex;align-items:center;justify-content:space-between;padding:20px 4px 16px;}
+.page-title h1{font-size:26px;font-weight:800;}
+
 @media (min-width:481px){
   body{background:#F0F0F0;}
   .app{box-shadow:0 0 0 1px var(--line);}
