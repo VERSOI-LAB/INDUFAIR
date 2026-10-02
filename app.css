@@ -129,6 +129,23 @@ p{margin:0;}
 .ico{display:inline-block;vertical-align:-0.18em;flex-shrink:0;}
 .avatar-stk{width:100% !important;height:100% !important;object-fit:cover;object-position:50% 10%;transform:scale(1.25);}
 
+/* 물건 상태 뱃지 (반짝임) */
+.cbadge{position:relative;display:inline-flex;align-items:center;height:20px;padding:0 7px;margin-right:6px;border-radius:6px;
+  font-size:12px;font-weight:800;line-height:1;vertical-align:2px;overflow:hidden;white-space:nowrap;color:#fff;}
+.cbadge::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:45%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-20deg);
+  animation:cb-shine 2.6s ease-in-out infinite;}
+.cb-new{background:linear-gradient(135deg,#FF7A00,#FFB800);box-shadow:0 0 0 0 rgba(255,140,0,.5);animation:cb-pulse 2.6s ease-in-out infinite;}
+.cb-clean{background:linear-gradient(135deg,#1FB866,#34C759);}
+.cb-used{background:linear-gradient(135deg,#2F5BD3,#4D8BFF);}
+.cb-fix{background:linear-gradient(135deg,#E5484D,#FF7A7A);}
+.cb-clean::after{animation-delay:.4s;}
+.cb-used::after{animation-delay:.8s;}
+.cb-fix::after{animation-delay:1.2s;}
+@keyframes cb-shine{0%{left:-60%}55%,100%{left:130%}}
+@keyframes cb-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,140,0,.45)}50%{box-shadow:0 0 0 4px rgba(255,140,0,0)}}
+@media (prefers-reduced-motion:reduce){.cbadge::after,.cb-new{animation:none;}}
+
 /* 상태 배지 */
 .badge{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:6px;font-size:13px;font-weight:700;margin-right:6px;vertical-align:2px;}
 .badge.reserved{background:var(--success);color:#fff;}

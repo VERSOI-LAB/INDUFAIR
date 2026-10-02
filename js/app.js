@@ -146,6 +146,14 @@
     return img;
   }
 
+  // 상태 뱃지: 신품 / 사용감 없음 / 사용감 있음 / 수리필요 (반짝이는 작은 뱃지)
+  PS.conditionBadge = function (p) {
+    var k = p.usage_period === 'new' ? 'new' : p.condition === 'great' ? 'clean' : p.condition === 'good' ? 'used' : p.condition === 'broken' ? 'fix' : '';
+    if (!k) return '';
+    var label = { new: '신품', clean: '사용감 없음', used: '사용감 있음', fix: '수리필요' }[k];
+    return '<span class="cbadge cb-' + k + '">' + label + '</span>';
+  };
+
   function statusBadge(p) {
     if (p.status === 'reserved') return '<span class="badge reserved">예약중</span>';
     if (p.status === 'sold') return '<span class="badge sold">판매완료</span>';
@@ -159,7 +167,7 @@
   PS.cardHtml = function (p) {
     return '<a class="card" href="' + PS.productUrl(p.id) + '">' +
       '<div class="ph">' + photoHtml(p) + '</div>' +
-      '<div class="t">' + PS.esc(p.title) + '</div>' +
+      '<div class="t">' + PS.conditionBadge(p) + PS.esc(p.title) + '</div>' +
       '<div class="p">' + statusBadge(p) + PS.won(p.price) + '</div>' +
       '<div class="m">' + PS.esc(p.region || '') + (p.region ? ' · ' : '') + PS.ago(p.created_at) + '</div>' +
       '</a>';
@@ -173,14 +181,14 @@
     return '<a class="row" href="' + PS.productUrl(p.id) + '">' +
       '<div class="ph">' + photoHtml(p) + '</div>' +
       '<div class="info">' +
-        '<div class="t">' + PS.esc(p.title) + '</div>' +
+        '<div class="t">' + PS.conditionBadge(p) + PS.esc(p.title) + '</div>' +
         '<div class="m">' + PS.esc(p.region || '') + (p.region ? ' · ' : '') + PS.ago(p.created_at) + '</div>' +
         '<div class="p">' + statusBadge(p) + PS.won(p.price) + '</div>' +
         '<div class="s">' + stats.join('') + '</div>' +
       '</div></a>';
   };
 
-  PS.PRODUCT_LIST_COLUMNS = 'id,title,price,region,status,created_at,like_count,inquiry_count,view_count,product_images(url,sort_order)';
+  PS.PRODUCT_LIST_COLUMNS = 'id,title,price,region,status,condition,usage_period,created_at,like_count,inquiry_count,view_count,product_images(url,sort_order)';
 
   // ---- 동네 업체 ----
   PS.bizUrl = function (id) { return '/biz/' + encodeURIComponent(id); };
