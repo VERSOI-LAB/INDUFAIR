@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>업체 소개하기 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .photos .ph{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#F2F2F2;}
+  .photos .ph img{width:100%;height:100%;object-fit:cover;}
+  .photos .ph .x{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:flex;align-items:center;justify-content:center;}
+  .photos .ph .first{position:absolute;left:4px;bottom:4px;background:var(--text);color:#fff;font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;}
+  .photos .add{aspect-ratio:1/1;border-radius:12px;border:2px dashed #DDD;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sub);font-size:13px;font-weight:600;}
+  .photos .add b{font-size:26px;line-height:1;}
+  .cnt{font-style:normal;font-weight:500;color:var(--hint);font-size:13px;margin-left:4px;}
+  .err{margin-top:14px;padding:12px 14px;border-radius:12px;background:#FFF0EF;color:var(--danger);font-size:15px;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>우리 업체 소개하기</h1>
+  </header>
+  <main class="page" id="main">
+    <div class="skeleton" style="height:160px;margin-top:24px"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/map.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  function resize(file, max, quality) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { b ? resolve(b) : reject(new Error('toBlob')); }, 'image/jpeg', quality);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('사진을 읽지 못했어요')); };
+      img.src = url;
+    });
+  }
+  function toBase64(blob) {
+    return new Promise(function (resolve) { var r = new FileReader(); r.onload = function () { resolve(String(r.result).split(',')[1]); }; r.readAsDataURL(blob); });
+  }
+  var main = $('main');
+  var editId = PS.param('id');
+  var photos = [];   // { url, blob? } — blob 있으면 새 사진
+  var form = { cat: '' };
+  var categoryIds = {};
+  var gps = null;
+
+  PS.ready.then(async function (user) {
+    if (!user) return PS.goLogin();
+    var catRes = await sb.from('categories').select('id,name').is('parent_id', null);
+    (catRes.data || []).forEach(function (c) { categoryIds[c.name] = c.id; });
+    var v = await PS.myVerification();
+    if (!v) {
+      main.innerHTML = '<div class="empty">' + PS.icon3d('home', 110) + '<b>사업자 인증이 필요해요</b>사업자등록증을 찍기만 하면 1분이면 끝나요' +
+        '<div style="margin-top:20px"><a class="btn" href="/biz/verify?next=' + encodeURIComponent(location.pathname + location.search) + '">사업자 인증하러 가기</a></div></div>';
+      return;
+    }
+    var biz = null;
+    if (editId) {
+      var r = await sb.from('businesses').select('*,categories(name),business_images(url,sort_order)').eq('id', editId).maybeSingle();
+      biz = r.data;
+      if (!biz || biz.owner_id !== user.id) { main.innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>수정할 수 없는 업체예요</b></div>'; return; }
+      photos = (biz.business_images || []).sort(function (a, b) { return a.sort_order - b.sort_order; }).map(function (im) { return { url: im.url }; });
+      form.cat = biz.categories ? biz.categories.name : '';
+    } else {
+      var cnt = await sb.from('businesses').select('id', { count: 'exact', head: true }).eq('owner_id', user.id).neq('status', 'deleted');
+      if ((cnt.count || 0) >= 3) {
+        main.innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>업체는 3개까지 소개할 수 있어요</b>안 쓰는 소개를 지우고 다시 해 주세요<div style="margin-top:20px"><a class="btn" href="/my-biz">내 업체 관리</a></div></div>';
+        return;
+      }
+    }
+    renderForm(biz, v);
+  });
+
+  function renderForm(biz, v) {
+    var home = PS.getHome();
+    main.innerHTML =
+      '<p style="margin-top:16px"><span class="verified">✓ 사업자 인증</span> <span style="color:var(--sub);font-size:14px">' + PS.esc(v.company_name) + '</span></p>' +
+      '<div class="field"><span>사진 (첫 사진이 카드에 크게 보여요, 최대 10장)</span><div class="photos" id="photos"></div></div>' +
+      '<input type="file" id="photoInput" accept="image/*" multiple hidden>' +
+      '<label class="field"><span>업체 이름</span><input class="input" id="name" maxlength="40" value="' + PS.esc(biz ? biz.name : v.company_name) + '"></label>' +
+      '<label class="field"><span>한 줄 소개 <em id="tgCount" class="cnt"></em></span><input class="input" id="tagline" maxlength="40" placeholder="예) CNC 고장, 당일 출장 수리해 드려요" value="' + PS.esc(biz ? biz.tagline : '') + '"></label>' +
+      '<div class="field"><span>어떤 분야인가요?</span><div class="chip-grid" id="cats"></div></div>' +
+      '<label class="field"><span>자세한 소개 (안 써도 돼요)</span><textarea class="textarea" id="desc" maxlength="2000" placeholder="예) 20년 경력 기계 수리 전문입니다. 국내외 장비 모두 가능하고, 부품도 직접 구해 드려요. 견적은 무료예요.">' + PS.esc(biz ? biz.description : '') + '</textarea></label>' +
+      '<label class="field"><span>전화번호 (손님이 바로 전화할 수 있어요)</span><input class="input" id="phone" inputmode="tel" maxlength="20" placeholder="010-0000-0000" value="' + PS.esc(biz ? (biz.phone || '') : ((PS.profile && PS.profile.phone) || '')) + '"></label>' +
+      '<label class="field"><span>동네</span><div style="display:flex;gap:8px"><input class="input" id="region" maxlength="40" placeholder="예) 성남시 분당구" value="' + PS.esc(biz ? (biz.region || '') : (home ? home.region : '')) + '" style="flex:1">' +
+        '<button type="button" class="btn white small" id="gpsBtn" style="width:auto;padding:0 14px;height:56px">' + PS.icon('pin', 18) + ' 내 위치</button></div></label>' +
+      '<div class="err" id="err" hidden></div>' +
+      '<button class="btn" id="submit" style="margin:24px 0">' + (biz ? '수정 완료' : '소개 올리기') + '</button>';
+    renderPhotos();
+    renderCats();
+    var tg = $('tagline');
+    var cnt = function () { $('tgCount').textContent = tg.value.length + '/40'; };
+    tg.addEventListener('input', cnt); cnt();
+    $('photoInput').addEventListener('change', addPhotos);
+    $('cats').addEventListener('click', function (e) { var b = e.target.closest('.chip'); if (!b) return; form.cat = b.dataset.v; renderCats(); });
+    $('gpsBtn').addEventListener('click', locate);
+    $('submit').addEventListener('click', function () { save(biz); });
+  }
+
+  function renderCats() {
+    $('cats').innerHTML = PS.CATEGORIES.map(function (c) {
+      return '<button type="button" class="chip' + (form.cat === c ? ' on' : '') + '" data-v="' + PS.esc(c) + '">' + PS.categoryIcon(c, 22) + ' ' + PS.esc(c) + '</button>';
+    }).join('');
+  }
+
+  function renderPhotos() {
+    var html = photos.map(function (p, i) {
+      return '<div class="ph"><img src="' + PS.esc(p.url) + '" alt="사진 ' + (i + 1) + '">' + (i === 0 ? '<span class="first">대표</span>' : '') +
+        '<button type="button" class="x" data-i="' + i + '" aria-label="사진 빼기">' + PS.icon('close', 16) + '</button></div>';
+    }).join('');
+    if (photos.length < 10) html += '<button type="button" class="add" id="addPh"><b>+</b>' + photos.length + '/10</button>';
+    $('photos').innerHTML = html;
+    var a = $('addPh');
+    if (a) a.addEventListener('click', function () { $('photoInput').click(); });
+    $('photos').onclick = function (e) {
+      var x = e.target.closest('.x');
+      if (!x) return;
+      photos.splice(Number(x.dataset.i), 1);
+      renderPhotos();
+    };
+  }
+
+  async function addPhotos() {
+    var files = Array.prototype.slice.call(this.files || []).slice(0, 10 - photos.length);
+    this.value = '';
+    for (var i = 0; i < files.length; i++) {
+      try { var b = await resize(files[i], 1600, 0.85); photos.push({ url: URL.createObjectURL(b), blob: b }); } catch (e) {}
+    }
+    renderPhotos();
+  }
+
+  function locate() {
+    if (!navigator.geolocation) return PS.toast('이 기기에서는 위치를 찾을 수 없어요');
+    var btn = $('gpsBtn');
+    btn.disabled = true;
+    navigator.geolocation.getCurrentPosition(async function (pos) {
+      try {
+        var r = await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=14&accept-language=ko&lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude);
+        var a = (await r.json()).address || {};
+        var big = a.city || a.county || a.state || '', small = a.borough || a.city_district || a.district || a.suburb || a.town || '';
+        if (big === small) small = '';
+        var text = [big, small].filter(Boolean).join(' ');
+        if (text) { $('region').value = text; gps = { lat: pos.coords.latitude, lng: pos.coords.longitude, region: text }; }
+      } catch (e) {}
+      btn.disabled = false;
+    }, function () { btn.disabled = false; PS.toast('위치 권한을 허용하거나 직접 써 주세요'); }, { timeout: 8000, maximumAge: 600000 });
+  }
+
+  async function save(biz) {
+    var err = $('err');
+    err.hidden = true;
+    var show = function (m) { err.textContent = m; err.hidden = false; err.scrollIntoView({ block: 'center' }); };
+    var name = $('name').value.trim(), tagline = $('tagline').value.trim(), region = $('region').value.trim();
+    if (!photos.length) return show('사진을 1장 이상 올려 주세요');
+    if (!name) return show('업체 이름을 써 주세요');
+    if (!tagline) return show('한 줄 소개를 써 주세요');
+    if (!form.cat) return show('분야를 골라 주세요');
+    if (!region) return show('동네를 써 주세요');
+    var btn = $('submit');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>올리는 중…';
+
+    // 좌표: GPS → 내 동네 → 주소 찾기, 소수점 3자리
+    var home = PS.getHome(), coords = null;
+    if (gps && gps.region === region) coords = gps;
+    else if (home && home.lat != null && home.region === region) coords = home;
+    else if (biz && biz.region === region && biz.lat != null) coords = { lat: biz.lat, lng: biz.lng };
+    else {
+      try {
+        var adapter = await Promise.race([PS.loadMap(), new Promise(function (r) { setTimeout(r, 4000); })]);
+        if (adapter) coords = await Promise.race([PS.geocodeRegion(adapter, region), new Promise(function (r) { setTimeout(r, 4000); })]);
+      } catch (e) {}
+    }
+    if (coords) coords = { lat: Math.round(coords.lat * 1000) / 1000, lng: Math.round(coords.lng * 1000) / 1000 };
+
+    var payload = {
+      name: name, tagline: tagline, description: $('desc').value.trim(), category_id: categoryIds[form.cat] || null,
+      phone: $('phone').value.trim() || null, region: region, lat: coords ? coords.lat : null, lng: coords ? coords.lng : null
+    };
+    var res = biz
+      ? await sb.from('businesses').update(payload).eq('id', biz.id).select('id').single()
+      : await sb.from('businesses').insert(Object.assign({ owner_id: PS.user.id }, payload)).select('id').single();
+    if (res.error) {
+      btn.disabled = false;
+      btn.textContent = biz ? '수정 완료' : '소개 올리기';
+      return show('저장하지 못했어요. 잠시 후 다시 해 주세요');
+    }
+    var bid = res.data.id;
+    // 사진: 새 사진 올리고, 순서대로 다시 저장
+    var urls = [];
+    for (var i = 0; i < photos.length; i++) {
+      var p = photos[i];
+      if (!p.blob) { urls.push(p.url); continue; }
+      var path = PS.user.id + '/biz/' + bid + '/' + Date.now() + '-' + i + '.jpg';
+      var up = await sb.storage.from('product-images').upload(path, p.blob, { contentType: 'image/jpeg' });
+      if (!up.error) urls.push(sb.storage.from('product-images').getPublicUrl(path).data.publicUrl);
+    }
+    if (biz) await sb.from('business_images').delete().eq('business_id', bid);
+    if (urls.length) await sb.from('business_images').insert(urls.map(function (u, i) { return { business_id: bid, url: u, sort_order: i }; }));
+    location.href = PS.bizUrl(bid);
+  }
+})();
+</script>
+</body>
+</html>

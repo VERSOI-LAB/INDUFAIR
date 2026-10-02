@@ -182,6 +182,30 @@
 
   PS.PRODUCT_LIST_COLUMNS = 'id,title,price,region,status,created_at,like_count,inquiry_count,view_count,product_images(url,sort_order)';
 
+  // ---- 동네 업체 ----
+  PS.bizUrl = function (id) { return '/biz/' + encodeURIComponent(id); };
+  PS.BIZ_COLUMNS = 'id,owner_id,name,tagline,category_id,region,lat,lng,like_count,view_count,bumped_at,created_at,status,business_images(url,sort_order)';
+  PS.distLabel = function (km) {
+    if (km == null || km > 999) return '';
+    return km < 1 ? Math.max(10, Math.round(km * 100) * 10) + 'm' : (km < 10 ? km.toFixed(1) : Math.round(km)) + 'km';
+  };
+  // 당근 '동네가게' 카드: 사진 위에 한 줄 소개, 아래 업체명 · 분류 · 찜 · 거리
+  PS.bizCardHtml = function (b, opts) {
+    opts = opts || {};
+    var img = PS.firstImage({ product_images: b.business_images });
+    var meta = [opts.categoryName, b.like_count ? '찜 ' + b.like_count : '', PS.distLabel(opts.km)].filter(Boolean).join(' · ');
+    return '<a class="bizcard' + (opts.active ? ' hl' : '') + '" href="' + PS.bizUrl(b.id) + '" data-biz="' + PS.esc(b.id) + '">' +
+      '<div class="bz-ph">' + (img ? '<img src="' + PS.esc(img) + '" alt="" loading="lazy">' : '<div class="noimg">' + PS.icon3d('home', 64) + '</div>') +
+        '<div class="bz-quote"><span>“</span>' + PS.esc(b.tagline) + '</div></div>' +
+      '<div class="bz-name">' + PS.esc(b.name) + '</div>' +
+      '<div class="bz-meta">' + PS.esc(meta) + '</div></a>';
+  };
+  PS.myVerification = async function () {
+    if (!PS.user) return null;
+    var r = await sb.from('business_verifications').select('company_name,biz_reg_no,verified_at').eq('profile_id', PS.user.id).maybeSingle();
+    return r.error ? null : r.data;
+  };
+
   // ---- 시세: 비슷한 이름 → 같은 분류 순으로, 최근 가격의 중간값 ±10% ----
   PS.marketPrice = async function (title, categoryId) {
     var cols = PS.PRODUCT_LIST_COLUMNS;

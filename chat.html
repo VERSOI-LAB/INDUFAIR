@@ -80,10 +80,12 @@
     PS.renderTabbar('chat');
     app.innerHTML = '<header class="topbar"><h1>채팅</h1></header><div id="list"><div class="skeleton" style="height:64px;margin:16px"></div><div class="skeleton" style="height:64px;margin:16px"></div></div>';
     var me = PS.user.id;
-    var res = await sb.from('chats')
-      .select('id,buyer_id,seller_id,last_message,last_message_at,created_at,products(id,title,status,product_images(url,sort_order))')
-      .or('buyer_id.eq.' + me + ',seller_id.eq.' + me)
-      .order('last_message_at', { ascending: false, nullsFirst: false });
+    var listCols = 'id,buyer_id,seller_id,last_message,last_message_at,created_at,products(id,title,status,product_images(url,sort_order))';
+    var listQuery = function (cols) {
+      return sb.from('chats').select(cols).or('buyer_id.eq.' + me + ',seller_id.eq.' + me).order('last_message_at', { ascending: false, nullsFirst: false });
+    };
+    var res = await listQuery(listCols + ',business_id,businesses(id,name,tagline,business_images(url,sort_order))');
+    if (res.error) res = await listQuery(listCols); // 업체 채팅 컬럼이 아직 없을 때
     var chats = (res.data || []).filter(function (c) { return c.last_message || c.buyer_id === me; });
     var list = document.getElementById('list');
     if (!chats.length) {
@@ -100,7 +102,7 @@
     list.innerHTML = chats.map(function (c) {
       var otherId = c.buyer_id === me ? c.seller_id : c.buyer_id;
       var o = names[otherId] || {};
-      var p = c.products || {};
+      var p = c.businesses ? { title: '🏢 ' + c.businesses.name, product_images: c.businesses.business_images } : (c.products || {});
       var img = PS.firstImage(p);
       var n = unread[c.id] || 0;
       return '<a class="chat-item" href="/chat/' + c.id + '">' +
@@ -131,7 +133,9 @@
     document.querySelector('.room .back').style.fontSize = '28px';
 
     var me = PS.user.id;
-    var res = await sb.from('chats').select('id,buyer_id,seller_id,products(id,title,price,status,product_images(url,sort_order))').eq('id', id).maybeSingle();
+    var roomCols = 'id,buyer_id,seller_id,products(id,title,price,status,product_images(url,sort_order))';
+    var res = await sb.from('chats').select(roomCols + ',business_id,businesses(id,name,tagline,business_images(url,sort_order))').eq('id', id).maybeSingle();
+    if (res.error) res = await sb.from('chats').select(roomCols).eq('id', id).maybeSingle();
     if (!res.data) {
       document.getElementById('msgs').innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>채팅방을 찾을 수 없어요</b></div>';
       document.getElementById('composer').hidden = true;
@@ -143,15 +147,27 @@
     document.getElementById('otherName').textContent = ((names[otherId] && names[otherId].name) || '이웃') + ' ›';
     document.getElementById('otherName').href = PS.profileUrl(otherId);
 
-    var p = chat.products || {};
-    var img = PS.firstImage(p);
     var strip = document.getElementById('strip');
-    strip.href = p.id ? PS.productUrl(p.id) : '#';
-    strip.innerHTML = '<div class="thumb">' + (img ? '<img src="' + PS.esc(img) + '" alt="">' : '') + '</div>' +
-      '<div style="min-width:0"><div class="t">' + (p.status === 'reserved' ? '<span class="badge reserved">예약중</span>' : p.status === 'sold' ? '<span class="badge sold">판매완료</span>' : '') +
-      PS.esc(p.title || '삭제된 물건') + '</div><div class="p">' + (p.title ? PS.won(p.price) : '') + '</div></div>';
+    var bz = chat.businesses;
+    if (bz) {
+      var bimg = PS.firstImage({ product_images: bz.business_images });
+      strip.href = PS.bizUrl(bz.id);
+      strip.innerHTML = '<div class="thumb">' + (bimg ? '<img src="' + PS.esc(bimg) + '" alt="">' : '') + '</div>' +
+        '<div style="min-width:0"><div class="t"><span class="verified" style="margin-right:6px">업체</span>' + PS.esc(bz.name) + '</div><div class="p" style="font-size:14px;font-weight:600;color:var(--sub)">' + PS.esc(bz.tagline) + '</div></div>';
+    } else {
+      var p = chat.products || {};
+      var img = PS.firstImage(p);
+      strip.href = p.id ? PS.productUrl(p.id) : '#';
+      strip.innerHTML = '<div class="thumb">' + (img ? '<img src="' + PS.esc(img) + '" alt="">' : '') + '</div>' +
+        '<div style="min-width:0"><div class="t">' + (p.status === 'reserved' ? '<span class="badge reserved">예약중</span>' : p.status === 'sold' ? '<span class="badge sold">판매완료</span>' : '') +
+        PS.esc(p.title || '삭제된 물건') + '</div><div class="p">' + (p.title ? PS.won(p.price) : '') + '</div></div>';
+    }
 
-    var quick = chat.buyer_id === me
+    var quick = bz
+      ? (chat.buyer_id === me
+          ? ['안녕하세요! 문의드려요', '견적 받을 수 있을까요?', '방문 가능한 날짜가 언제인가요?', '위치가 어디인가요?']
+          : ['네, 말씀하세요!', '견적 보내드릴게요', '언제 방문하시면 될까요?'])
+      : chat.buyer_id === me
       ? ['안녕하세요! 아직 판매하시나요?', '가격 조금 깎아주실 수 있나요?', '직접 보러 가도 될까요?', '어디서 거래할까요?']
       : ['네, 판매중이에요!', '직접 보러 오셔도 돼요', '죄송해요, 예약됐어요'];
     document.getElementById('quick').innerHTML = quick.map(function (q) { return '<button type="button">' + PS.esc(q) + '</button>'; }).join('');

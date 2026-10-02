@@ -3,7 +3,7 @@
 import http.server, os, re, socketserver
 
 PORT = int(os.environ.get('PORT', 8743))
-REWRITES = [(re.compile(r'^/product/[^/]+/?$'), '/product.html'), (re.compile(r'^/chat/[^/]+/?$'), '/chat.html'), (re.compile(r'^/profile/[^/]+/?$'), '/profile.html')]
+REWRITES = [(re.compile(r'^/biz/new/?$'), '/biz-new.html'), (re.compile(r'^/biz/verify/?$'), '/biz-verify.html'), (re.compile(r'^/biz/[^/]+/?$'), '/business.html'), (re.compile(r'^/product/[^/]+/?$'), '/product.html'), (re.compile(r'^/chat/[^/]+/?$'), '/chat.html'), (re.compile(r'^/profile/[^/]+/?$'), '/profile.html')]
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):

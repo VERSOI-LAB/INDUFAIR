@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>내 업체 관리 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .vcard{margin-top:20px;padding:18px 20px;border-radius:18px;background:#EAF2FE;display:flex;flex-direction:column;gap:4px;align-items:flex-start;}
+  .vcard b{font-size:20px;font-weight:800;}
+  .vcard .no{font-size:14px;color:var(--sub);}
+  .acts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+  .acts a,.acts button{height:36px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;background:#fff;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>업체 소개 관리</h1>
+  </header>
+  <main class="page" id="main">
+    <div class="skeleton" style="height:120px;margin-top:20px"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  var main = $('main');
+  PS.ready.then(async function (user) {
+    if (!user) return PS.goLogin();
+    var v = await PS.myVerification();
+    if (!v) {
+      main.innerHTML = '<div class="empty">' + PS.icon3d('home', 110) + '<b>우리 업체를 동네에 소개해 보세요</b>사업자 인증 후 무료로 최대 3개까지 올릴 수 있어요' +
+        '<div style="margin-top:20px"><a class="btn" href="/biz/verify">사업자 인증하기</a></div></div>';
+      return;
+    }
+    var res = await sb.from('businesses').select(PS.BIZ_COLUMNS).eq('owner_id', user.id).neq('status', 'deleted').order('created_at', { ascending: false });
+    var list = res.data || [];
+    main.innerHTML =
+      '<div class="vcard"><span class="verified">✓ 사업자 인증</span><b>' + PS.esc(v.company_name) + '</b><span class="no">' + PS.esc(v.biz_reg_no) + '</span></div>' +
+      (list.length < 3 ? '<a class="btn" href="/biz/new" style="margin-top:12px">' + PS.icon3d('home', 30) + ' 새 업체 소개하기 (' + list.length + '/3)</a>' : '<p style="margin-top:12px;color:var(--sub);font-size:14px">업체는 3개까지 소개할 수 있어요</p>') +
+      (list.length ? '<div class="bizgrid" style="margin-top:20px">' + list.map(function (b) {
+          return '<div>' + PS.bizCardHtml(b, {}) +
+            (b.status === 'hidden' ? '<p style="color:var(--danger);font-size:13px;font-weight:700;margin-top:4px">신고로 숨겨졌어요</p>' : '') +
+            '<div class="acts"><a href="/biz/new?id=' + b.id + '">수정</a><button type="button" data-bump="' + b.id + '">끌어올리기</button></div></div>';
+        }).join('') + '</div>'
+        : '<div class="empty" style="padding:32px 0">' + PS.icon3d('home', 72) + '<b>아직 소개한 업체가 없어요</b></div>');
+    main.addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-bump]');
+      if (!b) return;
+      var r = await sb.rpc('bump_business', { p_business_id: b.dataset.bump });
+      PS.toast(r.data === 'ok' ? '맨 위로 끌어올렸어요!' : r.data === 'too_soon' ? '끌어올리기는 하루에 한 번만 할 수 있어요' : '끌어올리지 못했어요');
+    });
+  });
+})();
+</script>
+</body>
+</html>

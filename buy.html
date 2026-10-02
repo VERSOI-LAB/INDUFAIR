@@ -23,6 +23,11 @@
   .map-pin::after{content:"";position:absolute;left:50%;bottom:-7px;width:10px;height:10px;background:#fff;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:translateX(-50%) rotate(45deg);}
   .map-pin.on{background:var(--primary);transform:scale(1.12);}
   .map-pin.on::after{background:var(--primary);}
+  .map-pin.biz{border-color:#2F5BD3;background:#2F5BD3;color:#fff;gap:4px;}
+  .map-pin.biz::after{background:#2F5BD3;border-color:#2F5BD3;}
+  .map-pin.biz.on{background:#1E3FA8;}
+  .map-pin.biz.on::after{background:#1E3FA8;border-color:#1E3FA8;}
+  .map-pin i{font-style:normal;font-size:13px;}
   .map-pin-wrap{background:none;border:none;}
   .map-pin-wrap .map-pin{transform:translate(-50%, calc(-100% - 8px));}
   .map-pin-wrap .map-pin.on{transform:translate(-50%, calc(-100% - 8px)) scale(1.12);}
@@ -45,6 +50,15 @@
   .list-head{display:flex;align-items:center;justify-content:space-between;padding:12px 0 4px;border-top:1px solid var(--line);margin-top:8px;font-size:15px;font-weight:700;}
   .list-head span{font-size:13px;color:var(--hint);font-weight:500;}
   .sheet-body{flex:1;overflow-y:auto;padding:0 16px 24px;overscroll-behavior:contain;}
+  .sec-h{font-size:21px;font-weight:800;margin:18px 0 14px;line-height:1.3;}
+  .refresh{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;margin-top:20px;border-radius:14px;background:#F2F3F5;font-size:16px;font-weight:700;}
+  .refresh em{font-style:normal;color:var(--hint);font-weight:600;}
+  .refresh em b{color:var(--text);}
+  .seg{display:grid;grid-template-columns:1fr 1fr;background:#F2F3F5;border-radius:12px;padding:4px;margin-top:14px;}
+  .seg button{height:40px;border-radius:9px;font-size:15px;font-weight:700;color:var(--sub);}
+  .seg button.on{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .divider{height:8px;background:#F2F3F5;margin:28px -16px 0;}
+  .biz-cta{display:flex;align-items:center;gap:12px;margin-top:16px;padding:14px 16px;border-radius:14px;background:#EAF2FE;color:#1E3FA8;font-weight:700;font-size:15px;}
   .row.hl{background:var(--primary-light);margin:0 -16px;padding-left:16px;padding-right:16px;border-radius:0;}
 
   /* 떠 있는 버튼 (시트와 같이 움직임) */
@@ -71,17 +85,28 @@
   <section class="sheet2" id="sheet" aria-label="물건 목록">
     <div class="floats">
       <button type="button" class="fbtn" id="locBtn" aria-label="내 위치"><i data-icon3d="location" data-size="34"></i></button>
-      <a class="fbtn add" href="/sell" aria-label="판매하기">+</a>
+      <button type="button" class="fbtn add" id="addBtn" aria-label="올리기">+</button>
     </div>
     <div class="sheet-head" id="sheetHead">
       <div class="handle" aria-hidden="true"></div>
       <div class="cats" id="cats" role="tablist"></div>
-      <div class="list-head"><b id="countLabel">물건</b><span id="sortLabel">가까운 순</span></div>
     </div>
     <div class="sheet-body" id="sheetBody">
-      <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
+      <div id="segWrap"></div>
+      <section id="bizSec"></section>
+      <section id="prodSec">
+        <div class="list-head"><b id="countLabel">물건</b><span id="sortLabel">가까운 순</span></div>
+        <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
+      </section>
     </div>
   </section>
+
+  <div class="sheet-bg" id="addBg"></div>
+  <div class="sheet" id="addSheet" role="dialog" aria-label="무엇을 올릴까요">
+    <div class="handle"></div>
+    <a class="opt" href="/sell"><i data-icon3d="camera" data-size="34"></i>물건 팔기</a>
+    <a class="opt" href="/biz/new"><i data-icon3d="home" data-size="34"></i>우리 업체 소개하기</a>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -91,9 +116,11 @@
 <script>
 (function () {
   PS.renderTabbar('buy');
-  var state = { q: PS.param('q') || '', cat: PS.param('c') || '', selected: null };
+  var state = { q: PS.param('q') || '', cat: PS.param('c') || '', selected: null, tab: 'prod', page: 0 };
   var categoryIds = {}, categoryNames = {};
   var all = [];          // 모든 물건 (좌표 포함)
+  var bizAll = [];       // 동네 업체 (사업자 인증 업체)
+  var BIZ_PAGE = 4;
   var map = null, adapter = null;
   var origin = null;     // 거리 기준점 (내 위치 또는 지도 중심)
 
@@ -171,6 +198,7 @@
     if (!b) return;
     state.cat = state.cat === b.dataset.c ? '' : b.dataset.c;
     state.selected = null;
+    state.page = 0;
     renderCats();
     syncUrl();
     render(true);
@@ -182,6 +210,7 @@
     e.preventDefault();
     state.q = qInput.value.trim();
     state.selected = null;
+    state.tab = 'prod';
     qInput.blur();
     $('clearQ').hidden = !state.q;
     syncUrl();
@@ -215,37 +244,150 @@
     });
   }
 
-  function render(refit) {
-    var rows = filtered();
-    var base = origin || (map ? map.center() : null);
-    if (base) {
-      rows.forEach(function (p) { p._km = p.lat != null ? PS.distanceKm(base, p) : 9999; });
-      rows.sort(function (a, b) { return a._km - b._km; });
+  function filteredBiz() {
+    var q = state.q.toLowerCase();
+    var catId = state.cat ? categoryIds[state.cat] : null;
+    return bizAll.filter(function (b) {
+      if (state.cat && b.category_id !== catId) return false;
+      if (q && (b.name + ' ' + b.tagline + ' ' + (b.description || '')).toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+  }
+
+  // 새로 보기 순서: 인기(찜·조회·끌어올림) 3개 + 새 업체 1개씩 섞어서 한 업체만 계속 위에 있지 않게
+  function feedOrder(list) {
+    var now = Date.now();
+    var score = function (b) {
+      var bumpDays = (now - new Date(b.bumped_at).getTime()) / 86400000;
+      return (b.like_count || 0) * 3 + (b.view_count || 0) * 0.2 + Math.max(0, 7 - bumpDays) * 2;
+    };
+    var ranked = list.slice().sort(function (a, b) { return score(b) - score(a); });
+    var newest = list.slice().sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+    var used = {}, out = [];
+    var take = function (arr) { for (var i = 0; i < arr.length; i++) if (!used[arr[i].id]) { used[arr[i].id] = 1; return arr[i]; } return null; };
+    while (out.length < list.length) {
+      for (var k = 0; k < 3; k++) { var r = take(ranked); if (r) out.push(r); }
+      var n = take(newest); if (n) out.push(n);
     }
+    return out;
+  }
+
+  function withKm(rows) {
+    var base = origin || (map ? map.center() : null);
+    rows.forEach(function (p) { p._km = base && p.lat != null ? PS.distanceKm(base, p) : null; });
+    return rows;
+  }
+
+  function isSel(kind, id) { return state.selected && state.selected.kind === kind && state.selected.id === id; }
+
+  function renderBiz(list, searching) {
+    var sec = $('bizSec');
+    if (!bizAll.length && !searching) {
+      // 아직 업체가 없을 때: 소개하기 안내만
+      sec.innerHTML = '<a class="biz-cta" href="/biz/new">' + PS.icon3d('home', 36) + '<span>우리 동네 첫 업체가 되어 보세요!<br><small style="font-weight:500">사업자 인증 후 무료로 소개할 수 있어요</small></span></a>';
+      return;
+    }
+    var title = searching ? '' : '<h2 class="sec-h">' + (state.cat ? PS.esc(state.cat) + ' 업체' : '이웃들이 찾는 동네 업체는?') + '</h2>';
+    if (!list.length) {
+      sec.innerHTML = title + '<div class="empty" style="padding:24px 0">' + PS.icon3d('home', 72) + '<b>' + (searching ? '찾는 업체가 없어요' : '이 분류 업체가 아직 없어요') + '</b></div>';
+      return;
+    }
+    var ordered = searching ? list : feedOrder(list);
+    var pages = searching ? 1 : Math.ceil(ordered.length / BIZ_PAGE);
+    if (state.page >= pages) state.page = 0;
+    var shown = searching ? ordered : ordered.slice(state.page * BIZ_PAGE, state.page * BIZ_PAGE + BIZ_PAGE);
+    sec.innerHTML = title +
+      '<div class="bizgrid">' + shown.map(function (b) {
+        return PS.bizCardHtml(b, { km: b._km, categoryName: categoryNames[b.category_id], active: isSel('biz', b.id) });
+      }).join('') + '</div>' +
+      (pages > 1 ? '<button type="button" class="refresh" id="refreshBtn">' +
+        '<span style="font-size:20px;line-height:1">↻</span> 새로 보기 <em><b>' + (state.page + 1) + '</b> / ' + pages + '</em></button>' : '');
+    var rb = $('refreshBtn');
+    if (rb) rb.addEventListener('click', function () { state.page = (state.page + 1) % pages; renderBiz(list, searching); drawPins(false); });
+  }
+
+  function renderProducts(rows, searching) {
     var label = state.cat || (state.q ? '"' + state.q + '"' : '근처 물건');
     $('countLabel').textContent = label + ' ' + rows.length + '개';
     $('list').innerHTML = rows.length
       ? rows.map(function (p) {
-          return PS.rowHtml(p).replace('<a class="row"', '<a class="row' + (p.id === state.selected ? ' hl' : '') + '" data-id="' + PS.esc(p.id) + '"');
+          return PS.rowHtml(p).replace('<a class="row"', '<a class="row' + (isSel('prod', p.id) ? ' hl' : '') + '" data-id="' + PS.esc(p.id) + '"');
         }).join('')
       : '<div class="empty" style="padding:32px 0">' + PS.sticker('curious', 100) + '<b>' + (all.length ? '찾는 물건이 없어요' : '아직 올라온 물건이 없어요') + '</b>' +
         (all.length ? '다른 분류나 검색어로 찾아보세요' : '첫 번째로 판매해 보세요!') + '</div>';
+  }
 
+  var lastRows = [], lastBiz = [];
+  function render(refit) {
+    var rows = withKm(filtered());
+    rows.sort(function (a, b) { return (a._km == null ? 9999 : a._km) - (b._km == null ? 9999 : b._km); });
+    var biz = withKm(filteredBiz());
+    var searching = !!state.q;
+    lastRows = rows; lastBiz = biz;
+
+    // 검색 중이면 [물건 | 업체] 탭, 아니면 업체 피드 → 물건 목록
+    if (searching) {
+      $('segWrap').innerHTML = '<div class="seg" role="tablist">' +
+        '<button type="button" data-t="prod" class="' + (state.tab === 'prod' ? 'on' : '') + '">물건 ' + rows.length + '</button>' +
+        '<button type="button" data-t="biz" class="' + (state.tab === 'biz' ? 'on' : '') + '">업체 ' + biz.length + '</button></div>';
+      $('bizSec').hidden = state.tab !== 'biz';
+      $('prodSec').hidden = state.tab !== 'prod';
+    } else {
+      $('segWrap').innerHTML = '';
+      $('bizSec').hidden = false;
+      $('prodSec').hidden = false;
+    }
+    renderBiz(biz, searching);
+    if (!searching) $('bizSec').insertAdjacentHTML('beforeend', '<div class="divider"></div>');
+    renderProducts(rows, searching);
+    drawPins(refit);
+  }
+
+  function drawPins(refit) {
     if (!map) return;
-    var pins = rows.filter(function (p) { return p.lat != null; }).map(function (p) {
-      return { id: p.id, lat: p._plat, lng: p._plng, label: PS.won(p.price), active: p.id === state.selected };
-    });
-    map.setMarkers(pins, selectProduct);
+    var searching = !!state.q;
+    var pins = [];
+    if (!searching || state.tab === 'prod') {
+      lastRows.filter(function (p) { return p._plat != null; }).forEach(function (p) {
+        pins.push({ id: 'p:' + p.id, lat: p._plat, lng: p._plng, label: PS.won(p.price), active: isSel('prod', p.id) });
+      });
+    }
+    if (!searching || state.tab === 'biz') {
+      lastBiz.filter(function (b) { return b._plat != null; }).forEach(function (b) {
+        pins.push({ id: 'b:' + b.id, kind: 'biz', lat: b._plat, lng: b._plng, label: b.name.length > 8 ? b.name.slice(0, 8) + '…' : b.name, active: isSel('biz', b.id) });
+      });
+    }
+    map.setMarkers(pins, onPin);
     if (refit && pins.length) map.fit(pins);
   }
 
-  function selectProduct(id) {
-    state.selected = id;
+  function onPin(pinId) {
+    var kind = pinId.slice(0, 1) === 'b' ? 'biz' : 'prod';
+    var id = pinId.slice(2);
+    state.selected = { kind: kind, id: id };
+    if (state.q) state.tab = kind;
+    if (kind === 'biz' && !state.q) {
+      // 그 업체가 있는 페이지로
+      var ordered = feedOrder(lastBiz);
+      var idx = ordered.findIndex(function (b) { return b.id === id; });
+      if (idx >= 0) state.page = Math.floor(idx / BIZ_PAGE);
+    }
     render(false);
     if (sheetState === 'peek') setSheet('half');
-    var row = $('list').querySelector('[data-id="' + CSS.escape(id) + '"]');
-    if (row) row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    var el = kind === 'biz' ? $('bizSec').querySelector('[data-biz="' + CSS.escape(id) + '"]') : $('list').querySelector('[data-id="' + CSS.escape(id) + '"]');
+    if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
+
+  $('segWrap').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-t]');
+    if (!b) return;
+    state.tab = b.dataset.t;
+    render(false);
+  });
+
+  // + 버튼: 물건 팔기 / 업체 소개하기
+  $('addBtn').addEventListener('click', function () { $('addSheet').classList.add('show'); $('addBg').classList.add('show'); });
+  $('addBg').addEventListener('click', function () { $('addSheet').classList.remove('show'); $('addBg').classList.remove('show'); });
 
   // ---------- 데이터 ----------
   async function loadProducts() {
@@ -260,6 +402,12 @@
     all = res.data || [];
   }
 
+  async function loadBusinesses() {
+    var res = await sb.from('businesses').select(PS.BIZ_COLUMNS + ',description').eq('status', 'active')
+      .order('bumped_at', { ascending: false }).limit(200);
+    bizAll = res.error ? [] : (res.data || []);
+  }
+
   async function placePins() {
     // 좌표 없는 물건은 지역 이름으로 동네 중심을 찾는다
     for (var i = 0; i < all.length; i++) {
@@ -269,7 +417,14 @@
         if (pos) { p.lat = pos.lat; p.lng = pos.lng; }
       }
     }
-    var withPos = all.filter(function (p) { return p.lat != null; });
+    for (var j = 0; j < bizAll.length; j++) {
+      var b = bizAll[j];
+      if (b.lat == null && b.region) {
+        var bp = await PS.geocodeRegion(adapter, b.region);
+        if (bp) { b.lat = bp.lat; b.lng = bp.lng; }
+      }
+    }
+    var withPos = all.concat(bizAll).filter(function (p) { return p.lat != null; });
     var spread = PS.spreadPins(withPos.map(function (p) { return { id: p.id, lat: p.lat, lng: p.lng }; }));
     spread.forEach(function (s, i) { withPos[i]._plat = s.lat; withPos[i]._plng = s.lng; });
   }
@@ -293,8 +448,9 @@
     sheet.classList.remove('dragging');
     var catRes = await sb.from('categories').select('id,name').is('parent_id', null);
     (catRes.data || []).forEach(function (c) { categoryIds[c.name] = c.id; categoryNames[c.id] = c.name; });
-    await loadProducts();
+    await Promise.all([loadProducts(), loadBusinesses()]);
     render(false);
+    if (state.q || state.cat) setSheet('half'); // 검색어·분류를 들고 들어오면 결과가 보이게
 
     try {
       adapter = await PS.loadMap();

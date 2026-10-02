@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>사업자 인증 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .certbox{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;margin-top:20px;min-height:180px;border:2px dashed #C9D6EE;border-radius:20px;background:#F5F8FE;cursor:pointer;text-align:center;overflow:hidden;position:relative;}
+  .certbox b{font-size:18px;}
+  .certbox span{font-size:14px;color:var(--sub);}
+  .certbox.has{border-style:solid;padding:0;}
+  .certbox img{width:100%;max-height:280px;object-fit:contain;background:#fff;}
+  .certbox .re{position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.6);color:#fff !important;padding:4px 10px;border-radius:12px;font-size:13px;font-weight:700;}
+  .info{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--primary-light);font-size:15px;font-weight:600;}
+  .err{margin-top:14px;padding:12px 14px;border-radius:12px;background:#FFF0EF;color:var(--danger);font-size:15px;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>사업자 인증</h1>
+  </header>
+  <main class="page" id="main">
+    <div class="skeleton" style="height:160px;margin-top:24px"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  function resize(file, max, quality) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { b ? resolve(b) : reject(new Error('toBlob')); }, 'image/jpeg', quality);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('사진을 읽지 못했어요')); };
+      img.src = url;
+    });
+  }
+  function toBase64(blob) {
+    return new Promise(function (resolve) { var r = new FileReader(); r.onload = function () { resolve(String(r.result).split(',')[1]); }; r.readAsDataURL(blob); });
+  }
+  var main = $('main');
+  var next = PS.param('next');
+  if (!next || next.charAt(0) !== '/' || next.charAt(1) === '/') next = '/biz/new';
+  var certBlob = null;
+
+  PS.ready.then(async function (user) {
+    if (!user) return PS.goLogin();
+    var v = await PS.myVerification();
+    if (v) return showDone(v);
+    showForm();
+  });
+
+  function showDone(v) {
+    main.innerHTML = '<section class="hello" style="text-align:center;padding:36px 0 8px">' + PS.sticker('done', 140) +
+      '<h1 style="font-size:24px;font-weight:800;margin-top:12px">사업자 인증 완료!</h1>' +
+      '<p style="color:var(--sub);margin-top:6px"><span class="verified">✓ 인증</span> ' + PS.esc(v.company_name) + ' · ' + PS.esc(v.biz_reg_no) + '</p></section>' +
+      '<a class="btn" href="' + PS.esc(next) + '" style="margin-top:24px">' + PS.icon3d('home', 30) + ' 우리 업체 소개하러 가기</a>' +
+      '<a class="btn white" href="/my-biz" style="margin-top:10px">내 업체 관리</a>';
+  }
+
+  function showForm() {
+    main.innerHTML =
+      '<h2 style="font-size:24px;font-weight:800;margin-top:20px">사업자등록증을 찍어 주세요</h2>' +
+      '<p style="color:var(--sub);margin-top:4px;line-height:1.6">AI가 글자를 읽어서 자동으로 채워줘요. 등록증 사진은 본인만 볼 수 있게 안전하게 보관돼요.</p>' +
+      '<label class="certbox" id="certBox" for="certInput">' + PS.icon3d('camera', 56) + '<b>등록증 사진 올리기</b><span>찍거나 앨범에서 골라요</span></label>' +
+      '<input type="file" id="certInput" accept="image/*" hidden>' +
+      '<div id="aiMsg" class="info" hidden></div>' +
+      '<form id="form" novalidate>' +
+        field('company', '상호 (업체 이름)', '예) 판다기계') +
+        field('ceo', '대표자', '예) 김판다') +
+        field('regno', '사업자등록번호', '000-00-00000', 'numeric') +
+        field('btype', '업태 (안 써도 돼요)', '예) 제조업') +
+        field('bitem', '종목 (안 써도 돼요)', '예) 산업기계 수리') +
+        field('addr', '사업장 주소 (안 써도 돼요)', '') +
+        '<div class="err" id="err" hidden></div>' +
+        '<button class="btn" id="submit" type="submit" style="margin:24px 0">인증하기</button>' +
+      '</form>';
+    $('certInput').addEventListener('change', onCert);
+    $('regno').addEventListener('input', function () {
+      var d = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+      this.value = d.length > 5 ? d.slice(0, 3) + '-' + d.slice(3, 5) + '-' + d.slice(5) : d.length > 3 ? d.slice(0, 3) + '-' + d.slice(3) : d;
+    });
+    $('form').addEventListener('submit', submit);
+  }
+
+  function field(id, label, ph, mode) {
+    return '<label class="field"><span>' + label + '</span><input class="input" id="' + id + '" placeholder="' + ph + '"' + (mode ? ' inputmode="' + mode + '"' : '') + ' autocomplete="off"></label>';
+  }
+
+  async function onCert() {
+    var file = this.files[0];
+    this.value = '';
+    if (!file) return;
+    try { certBlob = await resize(file, 1600, 0.85); } catch (e) { PS.toast('사진을 읽지 못했어요'); return; }
+    $('certBox').innerHTML = '<img src="' + URL.createObjectURL(certBlob) + '" alt="사업자등록증"><span class="re">다시 올리기</span>';
+    $('certBox').classList.add('has');
+    var msg = $('aiMsg');
+    msg.hidden = false;
+    msg.innerHTML = '<span class="spinner"></span>AI가 등록증을 읽고 있어요…';
+    try {
+      var small = await resize(certBlob, 1400, 0.85);
+      var token = await PS.accessToken();
+      var res = await fetch(PS.FUNCTIONS_URL + '/ai-business-reg-ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ image: await toBase64(small), mimeType: 'image/jpeg' })
+      });
+      var d = await res.json();
+      if (!res.ok || d.error || !(d.company_name || d.biz_reg_no)) throw new Error(d.error || 'empty');
+      var set = function (id, v) { if (v) $(id).value = v; };
+      set('company', d.company_name); set('ceo', d.ceo_name); set('btype', d.biz_type); set('bitem', d.biz_item); set('addr', d.address);
+      if (d.biz_reg_no) { $('regno').value = d.biz_reg_no; $('regno').dispatchEvent(new Event('input')); }
+      msg.innerHTML = '✅ 자동으로 채웠어요. 틀린 곳이 없는지 확인해 주세요';
+    } catch (e) {
+      msg.innerHTML = '글자를 잘 못 읽었어요. 아래에 직접 써 주세요';
+    }
+  }
+
+  async function submit(e) {
+    e.preventDefault();
+    var err = $('err');
+    err.hidden = true;
+    var show = function (m) { err.textContent = m; err.hidden = false; };
+    if (!certBlob) return show('사업자등록증 사진을 먼저 올려 주세요');
+    if (!$('company').value.trim()) return show('상호를 써 주세요');
+    if ($('regno').value.replace(/[^0-9]/g, '').length !== 10) return show('사업자등록번호 10자리를 써 주세요');
+    var btn = $('submit');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>확인하는 중…';
+    var path = PS.user.id + '/cert-' + Date.now() + '.jpg';
+    var up = await sb.storage.from('biz-docs').upload(path, certBlob, { contentType: 'image/jpeg' });
+    var r = await sb.rpc('submit_business_verification', {
+      p_company_name: $('company').value.trim(), p_ceo_name: $('ceo').value.trim(), p_biz_reg_no: $('regno').value,
+      p_biz_type: $('btype').value.trim(), p_biz_item: $('bitem').value.trim(), p_address: $('addr').value.trim(),
+      p_cert_path: up.error ? null : path
+    });
+    btn.disabled = false;
+    btn.textContent = '인증하기';
+    var code = r.data;
+    if (code === 'ok') { var v = await PS.myVerification(); return showDone(v || { company_name: $('company').value, biz_reg_no: $('regno').value }); }
+    if (code === 'invalid_number') return show('사업자등록번호가 올바르지 않아요. 등록증의 숫자를 다시 확인해 주세요');
+    if (code === 'already_used') return show('이미 다른 계정에서 인증한 사업자등록번호예요');
+    if (code === 'name_required') return show('상호를 써 주세요');
+    show('인증하지 못했어요. 잠시 후 다시 해 주세요');
+  }
+})();
+</script>
+</body>
+</html>

@@ -21,8 +21,8 @@
   }
 
   function pinHtml(item) {
-    return '<button type="button" class="map-pin' + (item.active ? ' on' : '') + '" data-id="' + PS.esc(item.id) + '">' +
-      '<span>' + PS.esc(item.label) + '</span></button>';
+    return '<button type="button" class="map-pin' + (item.kind === 'biz' ? ' biz' : '') + (item.active ? ' on' : '') + '" data-id="' + PS.esc(item.id) + '">' +
+      (item.kind === 'biz' ? '<i aria-hidden="true">🏢</i>' : '') + '<span>' + PS.esc(item.label) + '</span></button>';
   }
 
   // ---------- 카카오맵 ----------
