@@ -202,8 +202,17 @@
   };
   PS.myVerification = async function () {
     if (!PS.user) return null;
-    var r = await sb.from('business_verifications').select('company_name,biz_reg_no,verified_at').eq('profile_id', PS.user.id).maybeSingle();
+    var r = await sb.from('business_verifications').select('company_name,biz_reg_no,verified_at,nts_status').eq('profile_id', PS.user.id).maybeSingle();
+    if (r.error) r = await sb.from('business_verifications').select('company_name,biz_reg_no,verified_at').eq('profile_id', PS.user.id).maybeSingle();
     return r.error ? null : r.data;
+  };
+  // 국세청 상태 배지
+  PS.ntsBadge = function (v) {
+    var s = v && v.nts_status;
+    if (s === 'active') return '<span class="verified">✓ 국세청 확인 완료</span>';
+    if (s === 'suspended') return '<span class="verified" style="background:#FFF4D6;color:#8A6400">휴업 중</span>';
+    if (s === 'closed' || s === 'unregistered') return '<span class="verified" style="background:#FFF0EF;color:var(--danger)">' + (s === 'closed' ? '폐업' : '국세청 미등록') + '</span>';
+    return '<span class="verified" style="background:#F2F3F5;color:var(--sub)">국세청 확인 중</span>';
   };
 
   // ---- 시세: 비슷한 이름 → 같은 분류 순으로, 최근 가격의 중간값 ±10% ----

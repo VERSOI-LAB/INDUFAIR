@@ -46,14 +46,15 @@
         '<div style="margin-top:20px"><a class="btn" href="/biz/verify">사업자 인증하기</a></div></div>';
       return;
     }
-    var res = await sb.from('businesses').select(PS.BIZ_COLUMNS).eq('owner_id', user.id).neq('status', 'deleted').order('created_at', { ascending: false });
+    var res = await sb.from('businesses').select(PS.BIZ_COLUMNS + ',hidden_reason').eq('owner_id', user.id).neq('status', 'deleted').order('created_at', { ascending: false });
     var list = res.data || [];
     main.innerHTML =
-      '<div class="vcard"><span class="verified">✓ 사업자 인증</span><b>' + PS.esc(v.company_name) + '</b><span class="no">' + PS.esc(v.biz_reg_no) + '</span></div>' +
+      '<div class="vcard">' + PS.ntsBadge(v) + '<b>' + PS.esc(v.company_name) + '</b><span class="no">' + PS.esc(v.biz_reg_no) + '</span>' +
+        (v.nts_status === 'suspended' || v.nts_status === 'closed' || v.nts_status === 'unregistered' ? '<span style="color:var(--danger);font-size:13px;font-weight:700">국세청 확인 결과 때문에 업체 소개가 숨겨졌어요. 다시 운영하면 자동으로 보여요.</span>' : '') + '</div>' +
       (list.length < 3 ? '<a class="btn" href="/biz/new" style="margin-top:12px">' + PS.icon3d('home', 30) + ' 새 업체 소개하기 (' + list.length + '/3)</a>' : '<p style="margin-top:12px;color:var(--sub);font-size:14px">업체는 3개까지 소개할 수 있어요</p>') +
       (list.length ? '<div class="bizgrid" style="margin-top:20px">' + list.map(function (b) {
           return '<div>' + PS.bizCardHtml(b, {}) +
-            (b.status === 'hidden' ? '<p style="color:var(--danger);font-size:13px;font-weight:700;margin-top:4px">신고로 숨겨졌어요</p>' : '') +
+            (b.status === 'hidden' ? '<p style="color:var(--danger);font-size:13px;font-weight:700;margin-top:4px">' + (b.hidden_reason === 'nts' ? '국세청 확인으로 숨겨졌어요' : '신고로 숨겨졌어요') + '</p>' : '') +
             '<div class="acts"><a href="/biz/new?id=' + b.id + '">수정</a><button type="button" data-bump="' + b.id + '">끌어올리기</button></div></div>';
         }).join('') + '</div>'
         : '<div class="empty" style="padding:32px 0">' + PS.icon3d('home', 72) + '<b>아직 소개한 업체가 없어요</b></div>');
