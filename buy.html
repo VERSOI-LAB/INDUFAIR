@@ -120,6 +120,7 @@
   var categoryIds = {}, categoryNames = {};
   var all = [];          // 모든 물건 (좌표 포함)
   var bizAll = [];       // 동네 업체 (사업자 인증 업체)
+  var sellers = [];      // 판매자별 위치 (업체가 없는 판매자만, 지도 핀용)
   var BIZ_PAGE = 4;
   var map = null, adapter = null;
   var origin = null;     // 거리 기준점 (내 위치 또는 지도 중심)
@@ -345,15 +346,21 @@
 
   function drawPins(refit) {
     if (!map) return;
-    // 지도에는 업체 위치만 (물건은 아래 목록에서)
-    var pins = lastBiz.filter(function (b) { return b._plat != null; }).map(function (b) {
-      return { id: 'b:' + b.id, kind: 'biz', lat: b._plat, lng: b._plng, label: b.name.length > 8 ? b.name.slice(0, 8) + '…' : b.name, active: isSel('biz', b.id) };
+    // 지도에는 업체와 판매자 위치만 (물건 하나하나는 아래 목록에서)
+    var shown = {};
+    lastRows.forEach(function (p) { shown[p.seller_profile_id] = 1; });
+    var sellerPins = sellers.filter(function (x) { return x._plat != null && shown[x.id]; }).map(function (x) {
+      return { id: 's:' + x.id, lat: x._plat, lng: x._plng, label: (x.name.length > 6 ? x.name.slice(0, 6) + '…' : x.name) + ' · ' + x.count + '개' };
     });
+    var pins = sellerPins.concat(lastBiz.filter(function (b) { return b._plat != null; }).map(function (b) {
+      return { id: 'b:' + b.id, kind: 'biz', lat: b._plat, lng: b._plng, label: b.name.length > 8 ? b.name.slice(0, 8) + '…' : b.name, active: isSel('biz', b.id) };
+    }));
     map.setMarkers(pins, onPin);
     if (refit && pins.length) map.fit(pins);
   }
 
   function onPin(pinId) {
+    if (pinId.slice(0, 2) === 's:') { location.href = PS.profileUrl(pinId.slice(2)); return; } // 판매자 → 판매자 프로필(판매 물건)
     var kind = pinId.slice(0, 1) === 'b' ? 'biz' : 'prod';
     var id = pinId.slice(2);
     state.selected = { kind: kind, id: id };
@@ -383,7 +390,7 @@
 
   // ---------- 데이터 ----------
   async function loadProducts() {
-    var cols = PS.PRODUCT_LIST_COLUMNS + ',brand,category_id';
+    var cols = PS.PRODUCT_LIST_COLUMNS + ',brand,category_id,seller_profile_id';
     var res = await sb.from('products').select(cols + ',lat,lng').in('status', ['selling', 'reserved'])
       .order('created_at', { ascending: false }).limit(300);
     if (res.error) {
@@ -416,7 +423,20 @@
         if (bp) { b.lat = bp.lat; b.lng = bp.lng; }
       }
     }
-    var withPos = bizAll.filter(function (b) { return b.lat != null; }); // 지도 핀은 업체만
+    // 판매자 핀: 판매자마다 하나 (업체 소개가 있는 판매자는 업체 핀으로 대신)
+    var owners = {};
+    bizAll.forEach(function (b) { owners[b.owner_id] = 1; });
+    var bySeller = {};
+    all.forEach(function (p) {
+      if (!p.seller_profile_id || owners[p.seller_profile_id] || p.lat == null) return;
+      (bySeller[p.seller_profile_id] = bySeller[p.seller_profile_id] || { id: p.seller_profile_id, lat: p.lat, lng: p.lng, count: 0 }).count++;
+    });
+    sellers = Object.keys(bySeller).map(function (k) { return bySeller[k]; });
+    if (sellers.length) {
+      var names = await PS.publicProfiles(sellers.map(function (x) { return x.id; }));
+      sellers.forEach(function (x) { x.name = (names[x.id] && names[x.id].name) || '판매자'; });
+    }
+    var withPos = bizAll.filter(function (b) { return b.lat != null; }).concat(sellers); // 지도 핀: 업체 + 판매자
     var spread = PS.spreadPins(withPos.map(function (p) { return { id: p.id, lat: p.lat, lng: p.lng }; }));
     spread.forEach(function (s, i) { withPos[i]._plat = s.lat; withPos[i]._plng = s.lng; });
   }
