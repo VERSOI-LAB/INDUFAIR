@@ -640,13 +640,18 @@
       price: form.price,
       description: $('descInput').value.trim(),
       usage_period: form.usage || null,
-      condition: form.condition || 'good',
+      condition: form.condition || null,
       region: form.region,
       lat: coords ? coords.lat : null,
       lng: coords ? coords.lng : null,
       status: 'selling'
     };
     var res = await sb.from('products').insert(payload).select('id').single();
+    // 상태를 안 고른 경우: DB가 아직 빈 값을 막고 있으면(23502) 예전처럼 '괜찮아요'로 저장
+    if (res.error && res.error.code === '23502' && !payload.condition) {
+      payload.condition = 'good';
+      res = await sb.from('products').insert(payload).select('id').single();
+    }
     if (res.error) {
       console.error(res.error);
       btn.disabled = false;
