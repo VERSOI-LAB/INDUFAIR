@@ -1,7 +1,7 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/product/:id", "destination": "/product.html" },
-    { "source": "/chat/:id", "destination": "/chat.html" }
+    { "source": "/product/:id", "destination": "/product?id=:id" },
+    { "source": "/chat/:id", "destination": "/chat?id=:id" }
   ]
 }
