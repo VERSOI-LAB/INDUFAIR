@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>프로필 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .who{display:flex;align-items:center;gap:16px;padding:24px 0 8px;}
+  .who .avatar{width:76px;height:76px;border-radius:50%;background:var(--primary-light);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .who .avatar img{width:100%;height:100%;object-fit:cover;}
+  .who b{display:block;font-size:24px;font-weight:800;line-height:1.25;}
+  .who span{display:block;font-size:15px;color:var(--sub);margin-top:2px;}
+  .counts{display:grid;grid-template-columns:repeat(3,1fr);margin-top:16px;border-radius:var(--radius);background:var(--bg);}
+  .counts div{text-align:center;padding:14px 4px;}
+  .counts b{display:block;font-size:22px;font-weight:800;}
+  .counts span{font-size:14px;color:var(--sub);}
+  .tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);margin:24px 0 16px;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <button class="back" id="backBtn" aria-label="뒤로"><i data-icon="back" data-size="24"></i></button>
+    <h1 id="topName">프로필</h1>
+  </header>
+  <main class="page" id="main">
+    <div class="skeleton" style="height:76px;margin-top:24px"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('');
+  var id = PS.idFromUrl('profile');
+  var main = document.getElementById('main');
+  var products = [];
+  var tab = 'selling';
+
+  document.getElementById('backBtn').addEventListener('click', function () {
+    if (history.length > 1 && document.referrer.indexOf(location.host) !== -1) history.back();
+    else location.href = '/buy';
+  });
+
+  function notFound() {
+    main.innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>사용자를 찾을 수 없어요</b><div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div></div>';
+  }
+
+  async function load() {
+    if (!id) return notFound();
+    var people = await PS.publicProfiles([id]);
+    var person = people[id];
+    if (!person) return notFound();
+
+    var res = await sb.from('products').select(PS.PRODUCT_LIST_COLUMNS)
+      .eq('seller_profile_id', id).neq('status', 'deleted')
+      .order('created_at', { ascending: false });
+    products = res.data || [];
+    await PS.ready;
+
+    var mine = PS.user && PS.user.id === id;
+    var region = (products.find(function (p) { return p.region; }) || {}).region;
+    var sold = products.filter(function (p) { return p.status === 'sold'; }).length;
+    var likes = products.reduce(function (a, p) { return a + (p.like_count || 0); }, 0);
+    var name = person.name || '이웃';
+    document.title = name + ' - 판다산다';
+    document.getElementById('topName').textContent = mine ? '내 프로필' : name + '님의 물건';
+
+    main.innerHTML =
+      '<section class="who">' +
+        '<div class="avatar">' + PS.avatarHtml(person.avatar_url) + '</div>' +
+        '<div style="min-width:0"><b>' + PS.esc(name) + '</b><span>' + PS.esc(region || '지역 정보 없음') + '</span></div>' +
+      '</section>' +
+      '<div class="counts">' +
+        '<div><b>' + (products.length - sold) + '</b><span>판매중</span></div>' +
+        '<div><b>' + sold + '</b><span>거래 완료</span></div>' +
+        '<div><b>' + likes + '</b><span>받은 찜</span></div>' +
+      '</div>' +
+      (mine ? '<a class="btn white small" href="/mypage" style="margin-top:12px">내 정보 바꾸기</a>' : '') +
+      '<div class="tabs" id="tabs" role="tablist"></div>' +
+      '<div id="list"></div>';
+    renderList();
+  }
+
+  function renderList() {
+    var selling = products.filter(function (p) { return p.status !== 'sold'; });
+    var sold = products.filter(function (p) { return p.status === 'sold'; });
+    var tabs = document.getElementById('tabs');
+    tabs.innerHTML =
+      '<button role="tab" data-t="selling" class="' + (tab === 'selling' ? 'on' : '') + '" aria-selected="' + (tab === 'selling') + '">판매중<em>' + selling.length + '</em></button>' +
+      '<button role="tab" data-t="sold" class="' + (tab === 'sold' ? 'on' : '') + '" aria-selected="' + (tab === 'sold') + '">거래 완료<em>' + sold.length + '</em></button>';
+    tabs.onclick = function (e) {
+      var b = e.target.closest('button');
+      if (!b) return;
+      tab = b.dataset.t;
+      renderList();
+    };
+    var rows = tab === 'selling' ? selling : sold;
+    document.getElementById('list').innerHTML = rows.length
+      ? '<div class="grid">' + rows.map(PS.cardHtml).join('') + '</div>'
+      : '<div class="empty" style="padding:40px 0">' + PS.icon3d('sell', 80) + (tab === 'selling' ? '판매중인 물건이 없어요' : '아직 거래 완료된 물건이 없어요') + '</div>';
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>

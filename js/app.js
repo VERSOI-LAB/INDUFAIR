@@ -137,6 +137,7 @@
   }
 
   PS.productUrl = function (id) { return '/product/' + encodeURIComponent(id); };
+  PS.profileUrl = function (id) { return '/profile/' + encodeURIComponent(id); };
 
   // 홈: 2열 카드
   PS.cardHtml = function (p) {

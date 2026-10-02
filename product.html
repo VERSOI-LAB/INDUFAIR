@@ -24,6 +24,8 @@
   .avatar img{width:100%;height:100%;object-fit:cover;}
   .seller b{display:block;font-size:17px;}
   .seller span{font-size:14px;color:var(--sub);}
+  .seller:active{background:var(--bg);}
+  .seller .more-link{font-size:14px;color:var(--sub);flex-shrink:0;}
   .title{font-size:22px;font-weight:700;margin-top:20px;line-height:1.35;}
   .meta{font-size:14px;color:var(--hint);margin-top:6px;}
   .price{font-size:30px;font-weight:800;margin-top:10px;}
@@ -124,10 +126,11 @@
     var badge = p.status === 'reserved' ? '<span class="badge reserved">예약중</span>' : p.status === 'sold' ? '<span class="badge sold">판매완료</span>' : '';
 
     document.getElementById('body').innerHTML =
-      '<div class="seller">' +
+      '<a class="seller" href="' + PS.profileUrl(p.seller_profile_id) + '">' +
         '<div class="avatar">' + PS.avatarHtml(seller.avatar_url) + '</div>' +
-        '<div><b>' + PS.esc(seller.name || '판매자') + '</b><span>' + PS.esc(p.region || '지역 정보 없음') + '</span></div>' +
-      '</div>' +
+        '<div style="flex:1;min-width:0"><b>' + PS.esc(seller.name || '판매자') + '</b><span>' + PS.esc(p.region || '지역 정보 없음') + '</span></div>' +
+        '<span class="more-link">다른 물건 보기 ›</span>' +
+      '</a>' +
       '<h1 class="title">' + badge + PS.esc(p.title) + '</h1>' +
       '<div class="meta">' + PS.esc(p.categories ? p.categories.name : '') + (p.categories ? ' · ' : '') + PS.ago(p.created_at) + '</div>' +
       '<div class="price">' + PS.won(p.price) + '</div>' +
