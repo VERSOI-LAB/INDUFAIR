@@ -10,10 +10,10 @@
 <style>
   html,body{height:100%;overflow:hidden;}
   .app{min-height:0;height:100%;padding-bottom:0;}
-  #map{position:fixed;top:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));left:0;right:0;max-width:480px;margin:0 auto;background:#EEF0F2;z-index:1;}
+  #map{position:fixed;top:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));left:0;right:0;max-width:var(--app-w);margin:0 auto;background:#EEF0F2;z-index:1;}
 
   /* 상단 검색 */
-  .top{position:fixed;top:0;left:0;right:0;max-width:480px;margin:0 auto;z-index:30;padding:calc(12px + env(safe-area-inset-top)) 16px 0;pointer-events:none;}
+  .top{position:fixed;top:0;left:0;right:0;max-width:var(--app-w);margin:0 auto;z-index:30;padding:calc(12px + env(safe-area-inset-top)) 16px 0;pointer-events:none;}
   .top .search{pointer-events:auto;background:var(--surface);box-shadow:0 4px 16px rgba(0,0,0,.12);}
   .top .clear{width:32px;height:32px;border-radius:50%;background:#E5E5E5;color:var(--sub);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 
@@ -35,7 +35,7 @@
   .leaflet-control-attribution{font-size:10px;}
 
   /* 아래 시트(목차바) */
-  .sheet2{position:fixed;left:0;right:0;max-width:480px;margin:0 auto;z-index:20;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  .sheet2{position:fixed;left:0;right:0;max-width:var(--app-w);margin:0 auto;z-index:20;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));
     height:calc(100dvh - var(--tabbar-h) - env(safe-area-inset-bottom) - 80px);background:var(--surface);border-radius:20px 20px 0 0;
     box-shadow:0 -4px 20px rgba(0,0,0,.10);display:flex;flex-direction:column;transition:transform .28s cubic-bezier(.2,.8,.2,1);will-change:transform;}
   .sheet2.dragging{transition:none;}
