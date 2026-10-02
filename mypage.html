@@ -2,451 +2,211 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>PANDA SANDA(판다산다) 마이페이지</title>
-<meta name="description" content="주문/배송 현황과 견적, 구해요, 판매 내역을 한눈에 보는 PANDA SANDA(판다산다) 마이페이지">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="styles.css">
+<title>마이 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
 <style>
-  .profile-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:26px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
-  .profile-avatar{width:64px;height:64px;border-radius:50%;background:var(--bg-soft);color:var(--text-tertiary);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:visible;}
-  .profile-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
-  .avatar-edit-btn{position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
-  .avatar-edit-btn:hover{opacity:.88;}
-  .profile-main{flex:1;min-width:220px;}
-  .profile-main h1{font-size:1.2rem;font-weight:900;}
-  .profile-main .welcome{font-size:.86rem;color:var(--text-secondary);margin-top:2px;}
-  .profile-meta{display:flex;flex-wrap:wrap;align-items:center;gap:16px;margin-top:14px;font-size:.82rem;color:var(--text-tertiary);}
-  .profile-meta b{color:var(--text-secondary);font-weight:700;margin-right:4px;}
-  .grade-pill{font-size:.72rem;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:3px 10px;border-radius:20px;}
-
-  .order-stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px;}
-  .order-stat{background:var(--bg-soft);border-radius:var(--radius-m);padding:18px 10px;text-align:center;}
-  .order-stat-icon{width:38px;height:38px;border-radius:50%;background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
-  .order-stat b{display:block;font-size:1.3rem;font-weight:900;font-family:var(--font-en);}
-  .order-stat span{font-size:.78rem;color:var(--text-tertiary);font-weight:700;}
-
-  .mp-table{width:100%;border-collapse:collapse;margin-top:6px;}
-  .mp-table th{text-align:left;font-size:.78rem;color:var(--text-tertiary);font-weight:700;padding:10px 8px;border-bottom:1px solid var(--border);}
-  .mp-table td{font-size:.86rem;padding:13px 8px;border-bottom:1px solid var(--border);color:var(--text-secondary);}
-  .mp-table tr:last-child td{border-bottom:none;}
-  .mp-table td:first-child{font-family:var(--font-en);color:var(--text-tertiary);}
-  .mp-table td.title{color:var(--text);font-weight:600;}
-  .mp-status{font-size:.72rem;font-weight:800;padding:4px 10px;border-radius:20px;white-space:nowrap;}
-  .mp-status.shipping{background:var(--accent-soft);color:var(--accent);}
-  .mp-status.done{background:var(--good-soft);color:var(--good);}
-  .mp-status.confirmed{background:var(--bg-soft);color:var(--text-secondary);}
-  .mp-status.pending{background:var(--bg-soft);color:var(--text-tertiary);}
-  .mp-status.pay{background:var(--accent-soft);color:var(--accent);}
-  .mp-status.prep{background:var(--warn-soft);color:var(--warn);}
-  .mp-status.cancel{background:color-mix(in srgb, var(--up) 14%, transparent);color:var(--up);}
-  .notif-empty{padding:16px 0;font-size:.84rem;color:var(--text-tertiary);text-align:center;}
-  .mp-loading td{padding:20px 8px;text-align:center;color:var(--text-tertiary);font-size:.86rem;}
-
-  .reco-track{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:16px;}
-  .reco-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;transition:box-shadow .2s ease,transform .2s ease;}
-  .reco-card:hover{box-shadow:var(--shadow-2);transform:translateY(-3px);}
-  .reco-media{aspect-ratio:1/1;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);}
-  .reco-body{padding:11px 12px 12px;}
-  .reco-name{font-size:.84rem;font-weight:700;line-height:1.35;margin-bottom:2px;}
-  .reco-brand{font-size:.72rem;color:var(--text-tertiary);font-family:var(--font-en);}
-  .reco-price{font-family:var(--font-en);font-weight:800;font-size:.9rem;margin-top:6px;}
-
-  .activity-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:.86rem;color:var(--text-secondary);}
-  .activity-row:last-child{border-bottom:none;}
-  .activity-row b{font-family:var(--font-en);color:var(--accent);font-weight:800;}
-
-  .alert-item{padding:10px 0;border-bottom:1px solid var(--border);}
-  .alert-item:last-child{border-bottom:none;}
-  .alert-item p{font-size:.84rem;color:var(--text);line-height:1.5;}
-  .alert-item span{font-size:.72rem;color:var(--text-tertiary);font-family:var(--font-en);}
-
-  @media (max-width:1160px){ .order-stat-row{grid-template-columns:repeat(3,1fr);} .reco-track{grid-template-columns:repeat(3,1fr);} }
-  @media (max-width:1080px){ .mp-table{display:block;overflow-x:auto;} }
-  @media (max-width:640px){ .order-stat-row{grid-template-columns:repeat(2,1fr);} .reco-track{grid-template-columns:repeat(2,1fr);} .profile-card{flex-direction:column;align-items:flex-start;} }
+  .me{display:flex;align-items:center;gap:14px;padding:24px 0 8px;}
+  .me .avatar{width:64px;height:64px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0;}
+  .me .avatar img{width:100%;height:100%;object-fit:cover;}
+  .me b{display:block;font-size:22px;font-weight:800;}
+  .me span{font-size:14px;color:var(--sub);}
+  .me .edit{margin-left:auto;height:40px;padding:0 14px;border-radius:12px;background:#F2F2F2;font-size:15px;font-weight:700;flex-shrink:0;}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:16px;border-radius:var(--radius);background:var(--bg);}
+  .stats div{text-align:center;padding:16px 4px;}
+  .stats b{display:block;font-size:24px;font-weight:800;}
+  .stats span{font-size:14px;color:var(--sub);}
+  .tabs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line);margin-top:28px;}
+  .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .row-wrap{position:relative;}
+  .row-wrap .row .s{justify-content:flex-start;}
+  .row-wrap .chg{position:absolute;right:0;bottom:16px;height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:700;}
+  .menu{margin:32px 0 16px;border-top:8px solid var(--bg);margin-left:-16px;margin-right:-16px;}
+  .menu a,.menu button{display:flex;width:100%;align-items:center;padding:18px 16px;font-size:17px;border-bottom:1px solid var(--line);text-align:left;}
+  .guest{text-align:center;padding:80px 0 40px;}
+  .guest .big{font-size:72px;}
+  .guest h1{font-size:24px;font-weight:800;margin-top:12px;}
+  .guest p{color:var(--sub);margin:6px 0 28px;}
 </style>
 </head>
 <body>
+<div class="app">
+  <main class="page" id="main"></main>
+</div>
 
-<header class="site-header">
-  <div class="header-inner">
-    <a class="logo" href="index.html" aria-label="PANDA SANDA 홈으로 이동">
-      <img src="이미지/web/logo.jpg" alt="PANDA SANDA" class="logo-img">
-      <span class="logo-tag">INDUSTRIAL CIRCULATION<br>PLATFORM</span>
-    </a>
-    <nav class="main-nav" id="mainNav">
-      <a href="index.html">홈</a>
-      <a href="goods.html">산업용품</a>
-      <a href="used.html">중고장터</a>
-      <a href="brand.html">브랜드관</a>
-      <a href="rfq.html">견적요청(RFQ)</a>
-      <a href="community.html">커뮤니티</a>
-      <a href="support.html">고객센터</a>
-    </nav>
-    <div class="header-actions">
-      <button class="icon-btn" aria-label="검색">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
-      <button class="icon-btn" aria-label="알림">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="icon-count">5</span>
-      </button>
-      <a href="cart.html" class="icon-btn" aria-label="장바구니">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-        <span class="icon-count">3</span>
-      </a>
-      <button class="btn btn-ghost" style="color:var(--accent);border-color:var(--accent);">마이페이지</button>
-      <button class="btn btn-primary">로그아웃</button>
-      <button class="icon-btn nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-    </div>
-  </div>
-</header>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="statusSheet" role="dialog" aria-label="판매 상태 바꾸기">
+  <div class="handle"></div>
+  <button class="opt" data-s="selling">🟡 판매중</button>
+  <button class="opt" data-s="reserved">🟢 예약중</button>
+  <button class="opt" data-s="sold">✅ 판매완료</button>
+  <button class="opt" data-s="delete" style="color:var(--danger)">🗑️ 삭제하기</button>
+</div>
+<div class="sheet" id="editSheet" role="dialog" aria-label="내 정보 바꾸기">
+  <div class="handle"></div>
+  <h2 style="font-size:20px;font-weight:800">내 정보 바꾸기</h2>
+  <label class="field"><span>사진</span>
+    <input type="file" id="avatarInput" accept="image/*" style="font-size:15px">
+  </label>
+  <label class="field"><span>이름 (다른 사람에게 보여요)</span>
+    <input class="input" id="nameInput" maxlength="20">
+  </label>
+  <label class="field"><span>전화번호 (전화하기 버튼에 쓰여요, 안 써도 돼요)</span>
+    <input class="input" id="phoneInput" inputmode="tel" maxlength="20" placeholder="010-0000-0000">
+  </label>
+  <button class="btn" id="saveProfile" style="margin-top:24px">저장하기</button>
+</div>
 
-<main>
-  <div class="wrap page-layout with-aside">
-
-    <!-- LEFT -->
-    <aside>
-      <div class="page-title-block" style="padding-top:26px;">
-        <h1>마이페이지</h1>
-        <p id="sidebarGreeting">안녕하세요!<br>고객님</p>
-      </div>
-
-      <div class="side-panel" id="sellerCenterPanel" style="display:none;">
-        <a href="seller-dashboard.html" class="btn btn-outline" style="width:100%;justify-content:center;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-          판매자센터 바로가기
-        </a>
-      </div>
-
-      <div class="side-panel" style="margin-top:16px;">
-                <nav class="side-nav">
-          <a href="mypage.html" class="active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>대시보드</a>
-          <p class="side-nav-group-title">나의 거래 활동</p>
-          <a href="cart.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>장바구니</a>
-          <a href="order.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg>주문/배송 내역</a>
-          <a href="rfq.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>견적요청 내역</a>
-          <a href="goomrq-board.html?mine=1"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>구해요 내역</a>
-          <a href="my-listings.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>판매 등록 내역</a>
-          <p class="side-nav-group-title">관심 목록</p>
-          <a href="favorites.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>관심 상품</a>
-          <a href="favorite-brands.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>관심 브랜드</a>
-          <a href="recently-viewed.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>최근 본 상품</a>
-          <p class="side-nav-group-title">혜택 · 지원</p>
-          <a href="coupons.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L11 3.83V2h1.83l9.58 9.59a2 2 0 0 1 0 2.82z"/><circle cx="6.5" cy="6.5" r="1"/></svg>쿠폰함</a>
-          <a href="inquiries.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>문의/상담 내역</a>
-          <p class="side-nav-group-title">계정 설정</p>
-          <a href="account.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>내 정보 관리</a>
-          <a href="company-info.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>회사 정보 관리</a>
-          <a href="payment-methods.html"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>결제수단 관리</a>
-          <a href="account.html#t-address"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>배송지 관리</a>
-          <a href="account.html#t-notify"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>알림 설정</a>
-          <a href="account.html#t-delete"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>회원 탈퇴</a>
-        </nav>
-      </div>
-
-      <div class="side-panel" style="margin-top:16px;">
-        <p class="side-panel-title">고객센터</p>
-        <div class="contact-row">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          <span class="lbl"><b>1688-PANDA SANDA(판다산다)</b><small>평일 09:00 ~ 18:00 (주말/공휴일 휴무)</small></span>
-        </div>
-        <a href="support.html" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:10px;">1:1 문의하기 ›</a>
-      </div>
-    </aside>
-
-    <!-- MAIN -->
-    <div>
-      <div class="profile-card">
-        <span class="profile-avatar" id="profileAvatar">
-          <span id="profileAvatarInner"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg></span>
-          <button type="button" class="avatar-edit-btn" id="avatarEditBtn" aria-label="프로필 사진 변경">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          </button>
-          <input type="file" id="avatarInput" accept="image/*" style="display:none;">
-        </span>
-        <div class="profile-main">
-          <h1 id="profileName">-</h1>
-          <p class="welcome">환영합니다!</p>
-          <div class="profile-meta">
-            <span>회원등급 <span class="grade-pill">일반회원</span></span>
-            <span>가입일 <b class="tabular" id="profileJoin">-</b></span>
-            <span>이메일 <b id="profileEmail">-</b></span>
-            <span>연락처 <b class="tabular" id="profilePhone">-</b></span>
-          </div>
-        </div>
-        <a class="btn btn-outline" href="account.html">내 정보 수정</a>
-      </div>
-
-      <div class="support-panel" style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:22px 24px;">
-        <div class="section-head" style="margin-bottom:0;"><h2 style="font-size:1.02rem;">주문/배송 현황</h2><a href="order.html" class="more-link">전체보기 ›</a></div>
-        <div class="order-stat-row">
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><b class="tabular" id="statPending">0</b><span>주문접수</span></div>
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="7" height="7"/><rect x="9" y="10" width="7" height="7"/><rect x="16" y="10" width="6" height="7"/><path d="M2 10l3-4h14l3 4"/></svg></span><b class="tabular" id="statPrep">0</b><span>상품준비중</span></div>
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="10" rx="1"/><path d="M15 10h4l3 3v3h-7z"/><circle cx="6" cy="19" r="1.8"/><circle cx="17.5" cy="19" r="1.8"/></svg></span><b class="tabular" id="statShip">0</b><span>배송중</span></div>
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="9 12 11 14 15 10"/></svg></span><b class="tabular" id="statDone">0</b><span>배송완료</span></div>
-          <div class="order-stat"><span class="order-stat-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></span><b class="tabular" id="statCancel">0</b><span>교환/반품</span></div>
-        </div>
-      </div>
-
-      <div class="support-panel" style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:22px 24px;">
-        <div class="section-head" style="margin-bottom:0;"><h2 style="font-size:1.02rem;">최근 주문 내역</h2><a href="order.html" class="more-link">전체보기 ›</a></div>
-        <div style="overflow-x:auto;">
-        <table class="mp-table">
-          <thead><tr><th>주문번호</th><th>주문일</th><th>상품명</th><th>주문금액</th><th>주문상태</th></tr></thead>
-          <tbody id="recentOrdersBody">
-            <tr class="mp-loading"><td colspan="5">불러오는 중...</td></tr>
-          </tbody>
-        </table>
-        </div>
-      </div>
-
-      <div class="support-panel" style="margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);box-shadow:var(--shadow-1);padding:22px 24px;">
-        <div class="section-head" style="margin-bottom:0;"><h2 style="font-size:1.02rem;">맞춤 추천 상품</h2><a href="goods.html" class="more-link">전체보기 ›</a></div>
-        <div class="reco-track" id="recoTrack">
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT ASIDE -->
-    <aside class="page-aside">
-      <div class="side-panel">
-        <p class="side-panel-title">나의 활동 요약</p>
-        <div class="activity-row"><span>견적요청 내역</span><b class="tabular" id="actRfq">0건</b></div>
-        <div class="activity-row"><span>구해요 등록 내역</span><b class="tabular" id="actWanted">0건</b></div>
-        <div class="activity-row"><span>판매 등록 내역</span><b class="tabular" id="actProducts">0건</b></div>
-        <div class="activity-row"><span>문의/상담 내역</span><b class="tabular" id="actInquiries">0건</b></div>
-        <div class="activity-row"><span>받은 쿠폰</span><b class="tabular" id="actCoupons">0장</b></div>
-        <div class="activity-row"><span>관심 상품</span><b class="tabular" id="actFavorites">0개</b></div>
-      </div>
-
-      <div class="side-panel" style="margin-top:16px;">
-        <div class="side-panel-title-row"><p class="side-panel-title" style="margin:0;">보유 쿠폰</p><a href="coupons.html" class="more-link">전체보기 ›</a></div>
-        <div id="couponList"><div class="notif-empty">불러오는 중...</div></div>
-      </div>
-
-      <div class="side-panel" style="margin-top:16px;">
-        <div class="side-panel-title-row"><p class="side-panel-title" style="margin:0;">알림</p><a href="#" class="more-link" id="notifMoreLink">전체보기 ›</a></div>
-        <div id="notifList"><div class="notif-empty">불러오는 중...</div></div>
-      </div>
-    </aside>
-  </div>
-</main>
-
-<footer class="site-footer">
-  <div class="wrap footer-inner">
-    <p>&copy; 2026 PANDA SANDA(판다산다). 산업 자원의 순환을 연결하다.</p>
-    <div class="footer-links">
-      <a href="terms.html">이용약관</a>
-      <a href="privacy.html">개인정보처리방침</a>
-      <a href="business-info.html">사업자정보확인</a>
-      <a href="seller-apply.html">제휴/입점문의</a>
-    </div>
-  </div>
-</footer>
-
-<script>
-  var navToggle = document.getElementById('navToggle');
-  var mainNav = document.getElementById('mainNav');
-  navToggle.addEventListener('click', function(){
-    var open = mainNav.classList.toggle('open');
-    navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-client.js"></script>
-<script src="js/auth.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
 <script>
 (function () {
-  function fmtCurrency(n) { return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
-  function fmtDate(s) {
-    if (!s) return '';
-    var d = new Date(s);
-    var p = function (n) { return String(n).padStart(2, '0'); };
-    return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate());
-  }
-  var STATUS_META = {
-    pending_payment: { label: '입금대기', cls: 'pending' },
-    paid: { label: '결제완료', cls: 'pay' },
-    preparing: { label: '상품준비중', cls: 'prep' },
-    shipping: { label: '배송중', cls: 'shipping' },
-    delivered: { label: '배송완료', cls: 'done' },
-    confirmed: { label: '구매확정', cls: 'confirmed' },
-    canceled: { label: '취소', cls: 'cancel' },
-    refund_requested: { label: '환불요청', cls: 'cancel' },
-    refunded: { label: '환불완료', cls: 'cancel' }
-  };
-  var RECO_ICON = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><line x1="8" y1="9" x2="8" y2="15"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="16" y1="9" x2="16" y2="15"/></svg>';
+  PS.renderTabbar('my');
+  var main = document.getElementById('main');
+  var products = [];
+  var tab = PS.param('tab') || 'selling';
+  var targetId = null;
 
-  var PLACEHOLDER_AVATAR_SVG = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>';
-
-  function renderAvatar(url) {
-    var inner = document.getElementById('profileAvatarInner');
-    if (!inner) return;
-    inner.innerHTML = url ? '<img src="' + url + '" alt="프로필 사진">' : PLACEHOLDER_AVATAR_SVG;
-  }
-
-  document.getElementById('notifMoreLink').addEventListener('click', function (e) {
-    e.preventDefault();
-    var bell = document.querySelector('[aria-label="알림"]');
-    if (bell) bell.click();
+  PS.ready.then(function (user) {
+    if (!user) {
+      main.innerHTML = '<div class="guest"><div class="big">🐼</div><h1>판다산다에 오신 걸 환영해요</h1><p>로그인하면 내 물건과 채팅을 볼 수 있어요</p><a class="btn" href="/login?next=/mypage">로그인 / 가입하기</a></div>';
+      return;
+    }
+    render();
+    load();
   });
 
-  document.addEventListener('versoi:ready', function (e) {
-    var user = e.detail.user;
-    if (!user) return;
-    loadMypage(user).catch(function (err) { console.error('[mypage]', err); });
-    setupAvatarUpload(user);
-    if (user.company) {
-      var panel = document.getElementById('sellerCenterPanel');
-      if (panel) panel.style.display = '';
+  function render() {
+    var pr = PS.profile || {};
+    main.innerHTML =
+      '<section class="me">' +
+        '<div class="avatar">' + (pr.avatar_url ? '<img src="' + PS.esc(pr.avatar_url) + '" alt="">' : '🐼') + '</div>' +
+        '<div style="min-width:0"><b>' + PS.esc(pr.name || '이웃') + '</b><span>' + PS.esc(pr.phone || '전화번호 없음') + '</span></div>' +
+        '<button class="edit" id="editBtn">수정</button>' +
+      '</section>' +
+      '<div class="stats" id="stats"><div><b>-</b><span>조회수</span></div><div><b>-</b><span>찜수</span></div><div><b>-</b><span>채팅수</span></div></div>' +
+      '<a class="btn" href="/sell" style="margin-top:16px">📷 판다 · 새 물건 팔기</a>' +
+      '<div class="tabs" id="tabs" role="tablist"></div>' +
+      '<div class="list" id="list"></div>' +
+      '<h2 class="sec-title">♥ 찜한 물건</h2><div class="list" id="favList"></div>' +
+      '<nav class="menu">' +
+        '<a href="/terms">이용약관</a><a href="/privacy">개인정보처리방침</a>' +
+        '<button id="logoutBtn" style="color:var(--sub)">로그아웃</button>' +
+      '</nav>';
+    document.getElementById('editBtn').addEventListener('click', openEdit);
+    document.getElementById('logoutBtn').addEventListener('click', function () { if (confirm('로그아웃할까요?')) PS.signOut(); });
+  }
+
+  async function load() {
+    var res = await sb.from('products').select(PS.PRODUCT_LIST_COLUMNS)
+      .eq('seller_profile_id', PS.user.id).neq('status', 'deleted')
+      .order('created_at', { ascending: false });
+    products = res.data || [];
+    var sum = function (k) { return products.reduce(function (a, p) { return a + (p[k] || 0); }, 0).toLocaleString('ko-KR'); };
+    document.getElementById('stats').innerHTML =
+      '<div><b>' + sum('view_count') + '</b><span>조회수</span></div>' +
+      '<div><b>' + sum('like_count') + '</b><span>찜수</span></div>' +
+      '<div><b>' + sum('inquiry_count') + '</b><span>채팅수</span></div>';
+    renderTabs();
+    loadFavorites();
+  }
+
+  function renderTabs() {
+    var count = function (s) { return products.filter(function (p) { return p.status === s; }).length; };
+    var tabs = document.getElementById('tabs');
+    tabs.innerHTML = Object.keys(PS.STATUS).map(function (s) {
+      return '<button role="tab" aria-selected="' + (s === tab) + '" class="' + (s === tab ? 'on' : '') + '" data-s="' + s + '">' + PS.STATUS[s] + '<em>' + count(s) + '</em></button>';
+    }).join('');
+    tabs.onclick = function (e) {
+      var b = e.target.closest('button');
+      if (!b) return;
+      tab = b.dataset.s;
+      history.replaceState(null, '', '?tab=' + tab);
+      renderTabs();
+    };
+    var rows = products.filter(function (p) { return p.status === tab; });
+    var list = document.getElementById('list');
+    if (!rows.length) {
+      var msg = { selling: '판매중인 물건이 없어요', reserved: '예약중인 물건이 없어요', sold: '아직 판매완료된 물건이 없어요' }[tab];
+      list.innerHTML = '<div class="empty" style="padding:40px 0"><div class="ei">📦</div>' + msg + '</div>';
+      return;
     }
+    list.innerHTML = rows.map(function (p) {
+      return '<div class="row-wrap">' + PS.rowHtml(p) + '<button class="chg" data-id="' + p.id + '">상태 바꾸기</button></div>';
+    }).join('');
+    list.onclick = function (e) {
+      var b = e.target.closest('.chg');
+      if (!b) return;
+      e.preventDefault();
+      targetId = b.dataset.id;
+      openSheet('statusSheet');
+    };
+  }
+
+  async function loadFavorites() {
+    var res = await sb.from('favorites').select('products(' + PS.PRODUCT_LIST_COLUMNS + ')')
+      .eq('profile_id', PS.user.id).order('created_at', { ascending: false }).limit(30);
+    var rows = (res.data || []).map(function (f) { return f.products; }).filter(function (p) { return p && p.status !== 'deleted'; });
+    document.getElementById('favList').innerHTML = rows.length
+      ? rows.map(PS.rowHtml).join('')
+      : '<div class="empty" style="padding:24px 0">마음에 드는 물건에 ♡를 눌러 보세요</div>';
+  }
+
+  // ---------- 바텀시트 ----------
+  var bg = document.getElementById('sheetBg');
+  function openSheet(id) { document.getElementById(id).classList.add('show'); bg.classList.add('show'); }
+  function closeSheets() { document.querySelectorAll('.sheet').forEach(function (s) { s.classList.remove('show'); }); bg.classList.remove('show'); }
+  bg.addEventListener('click', closeSheets);
+
+  document.getElementById('statusSheet').addEventListener('click', async function (e) {
+    var opt = e.target.closest('.opt');
+    if (!opt || !targetId) return;
+    var s = opt.dataset.s;
+    closeSheets();
+    if (s === 'delete' && !confirm('정말 삭제할까요?')) return;
+    var newStatus = s === 'delete' ? 'deleted' : s;
+    var res = await sb.from('products').update({ status: newStatus }).eq('id', targetId);
+    if (res.error) { PS.toast('바꾸지 못했어요'); return; }
+    PS.toast(s === 'delete' ? '삭제했어요' : PS.STATUS[s] + '(으)로 바꿨어요');
+    if (newStatus !== 'deleted') tab = newStatus;
+    load();
   });
 
-  function setupAvatarUpload(user) {
-    var input = document.getElementById('avatarInput');
-    var btn = document.getElementById('avatarEditBtn');
-    if (!input || !btn) return;
-    btn.addEventListener('click', function () { input.click(); });
-    input.addEventListener('change', async function () {
-      var file = input.files && input.files[0];
-      if (!file) return;
-      try {
-        var path = user.id + '/' + Date.now() + '-' + file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
-        var up = await window.sb.storage.from('avatars').upload(path, file);
-        if (up.error) throw up.error;
-        var pub = window.sb.storage.from('avatars').getPublicUrl(path);
-        var url = pub.data.publicUrl;
-        var updRes = await window.sb.from('profiles').update({ avatar_url: url }).eq('id', user.id);
-        if (updRes.error) throw updRes.error;
-        renderAvatar(url);
-      } catch (err) {
-        console.error('[mypage] avatar upload failed', err);
-        alert('프로필 사진 업로드에 실패했습니다.');
-      } finally {
-        input.value = '';
-      }
-    });
+  function openEdit() {
+    var pr = PS.profile || {};
+    document.getElementById('nameInput').value = pr.name || '';
+    document.getElementById('phoneInput').value = pr.phone || '';
+    document.getElementById('avatarInput').value = '';
+    openSheet('editSheet');
   }
 
-  async function loadMypage(user) {
-    var profile = user.profile || {};
-    var name = (profile.name || user.email) + '님';
-    document.getElementById('profileName').textContent = name;
-    document.getElementById('sidebarGreeting').innerHTML = '안녕하세요!<br>' + name;
-    document.getElementById('profileJoin').textContent = fmtDate(profile.created_at);
-    document.getElementById('profileEmail').textContent = profile.email || user.email;
-    document.getElementById('profilePhone').textContent = profile.phone || '-';
-    renderAvatar(profile.avatar_url);
-
-    var ordersRes = await window.sb.from('orders').select('*').eq('buyer_id', user.id);
-    var orders = ordersRes.data || [];
-    var orderMap = {};
-    orders.forEach(function (o) { orderMap[o.id] = o; });
-    var orderIds = orders.map(function (o) { return o.id; });
-
-    var items = [];
-    if (orderIds.length) {
-      var itemsRes = await window.sb.from('order_items').select('*').in('order_id', orderIds).order('created_at', { ascending: false });
-      items = itemsRes.data || [];
+  document.getElementById('saveProfile').addEventListener('click', async function () {
+    var btn = this;
+    var name = document.getElementById('nameInput').value.trim();
+    if (!name) { PS.toast('이름을 써 주세요'); return; }
+    btn.disabled = true;
+    var update = { name: name, phone: document.getElementById('phoneInput').value.trim() || null };
+    var file = document.getElementById('avatarInput').files[0];
+    if (file) {
+      var path = PS.user.id + '/avatar-' + Date.now() + '.' + ((file.name.split('.').pop() || 'jpg').toLowerCase());
+      var up = await sb.storage.from('avatars').upload(path, file, { contentType: file.type });
+      if (!up.error) update.avatar_url = sb.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+      else PS.toast('사진을 올리지 못했어요');
     }
-
-    // stats
-    var counts = { pending: 0, prep: 0, ship: 0, done: 0, cancel: 0 };
-    items.forEach(function (it) {
-      if (it.status === 'pending_payment' || it.status === 'paid') counts.pending++;
-      else if (it.status === 'preparing') counts.prep++;
-      else if (it.status === 'shipping') counts.ship++;
-      else if (it.status === 'delivered' || it.status === 'confirmed') counts.done++;
-      else if (it.status === 'canceled' || it.status === 'refund_requested' || it.status === 'refunded') counts.cancel++;
-    });
-    document.getElementById('statPending').textContent = counts.pending;
-    document.getElementById('statPrep').textContent = counts.prep;
-    document.getElementById('statShip').textContent = counts.ship;
-    document.getElementById('statDone').textContent = counts.done;
-    document.getElementById('statCancel').textContent = counts.cancel;
-
-    // recent orders table
-    var tbody = document.getElementById('recentOrdersBody');
-    var recent = items.slice(0, 5);
-    if (!recent.length) {
-      tbody.innerHTML = '<tr><td colspan="5" class="notif-empty">주문 내역이 없습니다.</td></tr>';
-    } else {
-      tbody.innerHTML = recent.map(function (it) {
-        var order = orderMap[it.order_id] || {};
-        var meta = STATUS_META[it.status] || { label: it.status, cls: 'confirmed' };
-        return '<tr>' +
-          '<td class="tabular">' + (order.order_no || '') + '</td>' +
-          '<td class="tabular">' + fmtDate(order.created_at) + '</td>' +
-          '<td class="title">' + it.product_title + (it.qty > 1 ? ' 외 ' + (it.qty - 1) + '개' : '') + '</td>' +
-          '<td class="tabular">' + fmtCurrency(it.line_amount) + '</td>' +
-          '<td><span class="mp-status ' + meta.cls + '">' + meta.label + '</span></td>' +
-          '</tr>';
-      }).join('');
-    }
-
-    // recommended products (cosmetic)
-    var prodRes = await window.sb.from('products').select('id,title,manufacturer,price').eq('status', 'selling').order('created_at', { ascending: false }).limit(5);
-    var products = prodRes.data || [];
-    var recoTrack = document.getElementById('recoTrack');
-    if (products.length) {
-      recoTrack.innerHTML = products.map(function (p) {
-        return '<a class="reco-card" href="goods.html">' +
-          '<div class="reco-media">' + RECO_ICON + '</div>' +
-          '<div class="reco-body"><p class="reco-name">' + p.title + '</p><p class="reco-brand">' + (p.manufacturer || '') + '</p><p class="reco-price">' + fmtCurrency(p.price) + '</p></div>' +
-          '</a>';
-      }).join('');
-    } else {
-      recoTrack.innerHTML = '<div class="notif-empty">추천 상품이 없습니다.</div>';
-    }
-
-    // activity summary
-    var rfqRes = await window.sb.from('rfq_requests').select('id', { count: 'exact', head: true }).eq('profile_id', user.id);
-    var wantedRes = await window.sb.from('wanted_posts').select('id', { count: 'exact', head: true }).eq('profile_id', user.id);
-    var myProductsRes = await window.sb.from('products').select('id', { count: 'exact', head: true }).eq('seller_profile_id', user.id);
-    var inquiriesRes = await window.sb.from('inquiries').select('id', { count: 'exact', head: true }).eq('buyer_profile_id', user.id);
-    var favRes = await window.sb.from('favorites').select('id', { count: 'exact', head: true }).eq('profile_id', user.id);
-    document.getElementById('actRfq').textContent = (rfqRes.count || 0) + '건';
-    document.getElementById('actWanted').textContent = (wantedRes.count || 0) + '건';
-    document.getElementById('actProducts').textContent = (myProductsRes.count || 0) + '건';
-    document.getElementById('actInquiries').textContent = (inquiriesRes.count || 0) + '건';
-    document.getElementById('actFavorites').textContent = (favRes.count || 0) + '개';
-
-    // coupons (unused only)
-    var couponRes = await window.sb.from('user_coupons')
-      .select('id,created_at,coupon:coupons(title,discount_type,discount_value)')
-      .eq('profile_id', user.id)
-      .is('used_at', null);
-    var coupons = couponRes.data || [];
-    document.getElementById('actCoupons').textContent = coupons.length + '장';
-    var couponListEl = document.getElementById('couponList');
-    if (!coupons.length) {
-      couponListEl.innerHTML = '<div class="notif-empty">보유한 쿠폰이 없습니다.</div>';
-    } else {
-      couponListEl.innerHTML = coupons.map(function (uc) {
-        var c = uc.coupon || {};
-        var discountLabel = c.discount_type === 'percent' ? (c.discount_value + '% 할인') : (fmtCurrency(c.discount_value) + ' 할인');
-        return '<div class="alert-item"><p>' + (c.title || '') + '</p><span>' + discountLabel + '</span></div>';
-      }).join('');
-    }
-
-    // notifications
-    var notifRes = await window.sb.from('notifications').select('*').eq('profile_id', user.id).order('created_at', { ascending: false }).limit(5);
-    var notifs = notifRes.data || [];
-    var notifList = document.getElementById('notifList');
-    if (!notifs.length) {
-      notifList.innerHTML = '<div class="notif-empty">새 알림이 없습니다.</div>';
-    } else {
-      notifList.innerHTML = notifs.map(function (n) {
-        return '<div class="alert-item"><p>' + n.title + '</p><span>' + fmtDate(n.created_at) + '</span></div>';
-      }).join('');
-    }
-  }
+    var res = await sb.from('profiles').update(update).eq('id', PS.user.id);
+    btn.disabled = false;
+    if (res.error) { PS.toast('저장하지 못했어요'); return; }
+    Object.assign(PS.profile, update);
+    closeSheets();
+    render();
+    load();
+    PS.toast('저장했어요');
+  });
 })();
 </script>
 </body>

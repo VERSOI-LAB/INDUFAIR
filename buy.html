@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>산다 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .head{position:sticky;top:0;z-index:20;background:var(--surface);padding:16px 16px 0;}
+  .head h1{font-size:24px;font-weight:800;margin-bottom:12px;}
+  .count{font-size:14px;color:var(--sub);margin:4px 0 0;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="head">
+    <h1>🔍 산다</h1>
+    <form class="search" id="searchForm" role="search">
+      <span class="si" aria-hidden="true">🔍</span>
+      <input id="q" type="search" placeholder="무엇을 찾으시나요?" enterkeyhint="search" autocomplete="off" aria-label="검색어">
+    </form>
+    <div class="chips" id="chips" style="margin-top:12px"></div>
+  </div>
+  <main class="page">
+    <p class="count" id="count"></p>
+    <div class="list" id="list"></div>
+    <div style="margin:16px 0" id="moreWrap" hidden><button class="btn white small" id="moreBtn">더 보기</button></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('buy');
+  var PAGE = 20;
+  var state = { q: PS.param('q') || '', cat: PS.param('c') || '', offset: 0 };
+  var categoryIds = {};
+  var list = document.getElementById('list');
+  var qInput = document.getElementById('q');
+  qInput.value = state.q;
+
+  var chips = document.getElementById('chips');
+  chips.innerHTML = ['전체'].concat(PS.CATEGORIES).map(function (c) {
+    var val = c === '전체' ? '' : c;
+    return '<button type="button" class="chip' + (val === state.cat ? ' on' : '') + '" data-c="' + PS.esc(val) + '">' + PS.esc(c) + '</button>';
+  }).join('');
+  chips.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    state.cat = b.dataset.c;
+    chips.querySelectorAll('.chip').forEach(function (x) { x.classList.toggle('on', x === b); });
+    reload();
+  });
+
+  document.getElementById('searchForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    state.q = qInput.value.trim();
+    qInput.blur();
+    reload();
+  });
+
+  function syncUrl() {
+    var p = new URLSearchParams();
+    if (state.q) p.set('q', state.q);
+    if (state.cat) p.set('c', state.cat);
+    history.replaceState(null, '', location.pathname + (p.toString() ? '?' + p : ''));
+  }
+
+  function reload() {
+    state.offset = 0;
+    syncUrl();
+    list.innerHTML = '<div class="skeleton" style="height:108px;margin:16px 0"></div><div class="skeleton" style="height:108px;margin:16px 0"></div>';
+    load();
+  }
+
+  async function load() {
+    var q = sb.from('products').select(PS.PRODUCT_LIST_COLUMNS, { count: 'exact' })
+      .in('status', ['selling', 'reserved'])
+      .order('created_at', { ascending: false })
+      .range(state.offset, state.offset + PAGE - 1);
+    if (state.q) {
+      var term = state.q.replace(/[%_,()]/g, ' ');
+      q = q.or('title.ilike.%' + term + '%,brand.ilike.%' + term + '%');
+    }
+    if (state.cat && categoryIds[state.cat]) q = q.eq('category_id', categoryIds[state.cat]);
+    var res = await q;
+    var rows = res.data || [];
+    if (state.offset === 0) {
+      list.innerHTML = '';
+      document.getElementById('count').textContent = res.count ? '물건 ' + res.count.toLocaleString('ko-KR') + '개' : '';
+      if (!rows.length) {
+        list.innerHTML = '<div class="empty"><div class="ei">🤔</div><b>찾는 물건이 없어요</b>다른 말로 검색해 보세요</div>';
+      }
+    }
+    list.insertAdjacentHTML('beforeend', rows.map(PS.rowHtml).join(''));
+    state.offset += rows.length;
+    document.getElementById('moreWrap').hidden = rows.length < PAGE;
+  }
+
+  document.getElementById('moreBtn').addEventListener('click', load);
+
+  sb.from('categories').select('id,name').then(function (res) {
+    (res.data || []).forEach(function (c) { categoryIds[c.name] = c.id; });
+    reload();
+  });
+})();
+</script>
+</body>
+</html>
