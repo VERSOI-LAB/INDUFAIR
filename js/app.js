@@ -285,7 +285,12 @@
   // 결제가 끝난 주문과 취소된 주문만 (결제창에서 그만둔 주문은 제외)
   // 발송·취소 정보 (컬럼이 아직 없으면 빼고 조회)
   PS.ORDER_EXTRA_COLUMNS = 'shipped_at,carrier,tracking_no,cancel_request_status,cancel_request_reason,cancel_requested_at,canceled_at,canceled_by,cancel_reason';
-  PS.CARRIERS = ['CJ대한통운', '한진택배', '롯데택배', '우체국택배', '로젠택배', '경동택배', '대신택배', '화물·용달', '직접 전달'];
+  PS.CARRIERS = [
+    'CJ대한통운', '우체국택배', '한진택배', '롯데택배', '로젠택배',          // 종합 택배
+    'GS25 편의점택배', 'CU 편의점택배', '홈픽',                              // 편의점·방문 수거
+    '경동택배', '대신택배', '합동택배', '건영택배', '천일택배', '일양로지스', // 화물·기업 물류
+    '화물·용달', '직접 전달'
+  ];
   PS.CARRIERS_NO_TRACKING = ['화물·용달', '직접 전달']; // 송장번호 없이도 발송 처리 가능
   PS.myOrders = async function (role) {
     var q = function (cols) {
