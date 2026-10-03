@@ -34,6 +34,22 @@
   .state dt{color:var(--sub);}
   .state dd{margin:0;font-weight:700;text-align:right;}
   .acts{display:grid;gap:8px;margin-top:24px;}
+  /* 추천 물건 고르기 (프리미엄 이용 중일 때) */
+  .picks{margin-top:24px;}
+  .picks h2{font-size:19px;font-weight:800;display:flex;align-items:baseline;gap:8px;}
+  .picks h2 em{font-style:normal;font-size:15px;color:var(--hint);font-weight:700;}
+  .picks > p{font-size:14px;color:var(--sub);margin-top:4px;line-height:1.5;}
+  .pick-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:12px;max-height:420px;overflow-y:auto;}
+  .pick-item{display:flex;align-items:center;gap:12px;width:100%;padding:8px 12px 8px 8px;border:1.5px solid var(--line);border-radius:14px;text-align:left;background:var(--surface);}
+  .pick-item .th{width:52px;height:52px;border-radius:10px;overflow:hidden;background:#F2F2F2;flex-shrink:0;}
+  .pick-item .th img{width:100%;height:100%;object-fit:cover;}
+  .pick-item .tx{flex:1;min-width:0;}
+  .pick-item .tx b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pick-item .tx span{font-size:14px;color:var(--sub);}
+  .pick-item .ck{width:26px;height:26px;border-radius:50%;border:2px solid #D5D5D5;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:transparent;}
+  .pick-item.on{border-color:var(--primary);background:var(--primary-light);}
+  .pick-item.on .ck{background:var(--primary);border-color:var(--primary);color:var(--text);}
+  .pick-item:disabled{opacity:.6;}
   .msg{margin-top:16px;padding:14px 16px;border-radius:14px;font-size:15px;font-weight:600;line-height:1.5;}
   .msg.ok{background:#F4FBF6;border:1px solid #D4F0DC;}
   .msg.err{background:#FFF0EF;color:var(--danger);}
@@ -61,6 +77,8 @@
   var bizId = PS.param('id');
   var PRICE = 10000;
   var biz = null, sub = null, notice = null; // notice: { ok, text }
+  var MAX_PICKS = 4;
+  var myProducts = [], picks = {}, picksReady = false; // 추천 물건: 내 판매중 물건과 고른 것 { productId: 1 }
 
   function day(iso) {
     var d = new Date(iso);
@@ -105,8 +123,49 @@
     if (authKey || PS.param('fail')) history.replaceState(null, '', location.pathname + '?id=' + encodeURIComponent(bizId)); // 새로고침해도 다시 결제되지 않게
 
     await loadSub();
+    await loadPicks();
     render();
   });
+
+  // 추천 물건: 산다 화면 '추천순' 맨 앞에 보일 내 물건 (업체당 최대 4개)
+  async function loadPicks() {
+    var fr = await sb.from('biz_featured').select('product_id').eq('business_id', bizId);
+    if (fr.error) { picksReady = false; return; } // 표가 아직 없으면(준비 전) 고르기 영역을 숨김
+    picks = {};
+    (fr.data || []).forEach(function (x) { picks[x.product_id] = 1; });
+    var pr = await sb.from('products').select('id,title,price,product_images(url,sort_order)')
+      .eq('seller_profile_id', PS.user.id).eq('status', 'selling').order('created_at', { ascending: false }).limit(200);
+    myProducts = pr.data || [];
+    picksReady = true;
+  }
+  function picksHtml() {
+    var n = Object.keys(picks).length;
+    // 고른 물건을 위로
+    var list = myProducts.slice().sort(function (a, b) { return (picks[b.id] ? 1 : 0) - (picks[a.id] ? 1 : 0); });
+    return '<h2>추천순에 올릴 물건 <em>' + n + ' / ' + MAX_PICKS + '</em></h2>' +
+      '<p>고른 물건은 산다 화면의 "추천순" 맨 앞에 보여요. 내가 올린 판매중 물건 중 최대 ' + MAX_PICKS + '개까지 고를 수 있어요.</p>' +
+      (list.length ? '<div class="pick-list">' + list.map(function (p) {
+        var img = PS.firstImage(p);
+        return '<button type="button" class="pick-item' + (picks[p.id] ? ' on' : '') + '" data-pick="' + PS.esc(p.id) + '" aria-pressed="' + !!picks[p.id] + '">' +
+          '<span class="th">' + (img ? '<img src="' + PS.esc(img) + '" alt="" loading="lazy">' : '') + '</span>' +
+          '<span class="tx"><b>' + PS.esc(p.title) + '</b><span>' + PS.won(p.price) + '</span></span><span class="ck" aria-hidden="true">✓</span></button>';
+      }).join('') + '</div>'
+        : '<p style="margin-top:12px">아직 판매중인 물건이 없어요. <a href="/sell" style="text-decoration:underline">물건 올리기</a></p>');
+  }
+  async function togglePick(btn) {
+    var id = btn.dataset.pick, on = !picks[id];
+    if (on && Object.keys(picks).length >= MAX_PICKS) { PS.toast('추천 물건은 ' + MAX_PICKS + '개까지 고를 수 있어요'); return; }
+    btn.disabled = true;
+    var r = await sb.rpc('set_biz_featured', { p_business_id: bizId, p_product_id: id, p_on: on });
+    btn.disabled = false;
+    if (r.error || r.data !== 'ok') {
+      PS.toast(r.data === 'full' ? '추천 물건은 ' + MAX_PICKS + '개까지 고를 수 있어요'
+        : r.data === 'not_premium' ? '프리미엄 이용 중일 때만 고를 수 있어요' : '바꾸지 못했어요. 잠시 후 다시 해 주세요');
+      return;
+    }
+    if (on) picks[id] = 1; else delete picks[id];
+    $('picks').innerHTML = picksHtml();
+  }
 
   function render() {
     var now = Date.now();
@@ -127,9 +186,13 @@
       if (sub.status === 'past_due') html += '<div class="msg err">카드 결제가 되지 않았어요. 카드를 다시 등록하면 바로 결제하고 프리미엄을 이어가요.</div>';
     }
 
+    // 프리미엄이 적용되는 동안 추천 물건 고르기
+    if (live && picksReady) html += '<section class="picks" id="picks">' + picksHtml() + '</section>';
+
     html += '<div class="plan"><div class="price">월 ' + PRICE.toLocaleString('ko-KR') + '원<small>부가세 포함</small></div><ul>' +
       '<li><span class="ck">✓</span><div><b>매일 자동 끌어올리기</b><span>직접 누르지 않아도 매일 맨 위로 올라가요</span></div></li>' +
-      '<li><span class="ck">✓</span><div><b>동네 업체 맨 앞 고정</b><span>산다 화면의 "이웃들이 찾는 동네 업체"에서 항상 먼저 보여요</span></div></li></ul></div>' +
+      '<li><span class="ck">✓</span><div><b>동네 업체 맨 앞 고정</b><span>산다 화면의 "이웃들이 찾는 동네 업체"에서 항상 먼저 보여요</span></div></li>' +
+      '<li><span class="ck">✓</span><div><b>추천 물건 ' + MAX_PICKS + '개</b><span>내 물건 중 ' + MAX_PICKS + '개를 골라 산다 화면의 "추천순" 맨 앞에 올려요</span></div></li></ul></div>' +
       '<p class="free">프리미엄이 아니어도 업체 소개 관리에서 <b>하루에 한 번</b> 직접 끌어올릴 수 있어요.</p>';
 
     // 해지·환불 기준 (이용약관 제9조의2 와 같은 내용)
@@ -158,6 +221,8 @@
     if (agree) agree.addEventListener('change', function () { start.disabled = !agree.checked; });
     if (start) start.addEventListener('click', registerCard);
     if (cancel) cancel.addEventListener('click', cancelSub);
+    var pk = $('picks');
+    if (pk) pk.addEventListener('click', function (e) { var b = e.target.closest('[data-pick]'); if (b && !b.disabled) togglePick(b); });
   }
 
   var tossLoaded = null;

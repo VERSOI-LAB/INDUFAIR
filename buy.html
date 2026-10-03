@@ -59,6 +59,7 @@
   .bizdots button{width:8px;height:8px;border-radius:50%;background:#D9DCE1;transition:width .2s ease,background .2s ease;}
   .bizdots button.on{width:20px;border-radius:4px;background:var(--text);}
   /* 물건 정렬 */
+  .badge.pick{background:var(--primary);color:var(--text);}
   .sorts{display:flex;gap:2px;}
   .sorts button{height:32px;padding:0 10px;border-radius:16px;font-size:13px;font-weight:600;color:var(--hint);white-space:nowrap;}
   .sorts button.on{background:#F2F3F5;color:var(--text);font-weight:700;}
@@ -446,24 +447,30 @@
     $('countLabel').textContent = label + ' ' + rows.length + '개';
     $('list').innerHTML = rows.length
       ? rows.map(function (p) {
-          return PS.rowHtml(p).replace('<a class="row"', '<a class="row' + (isSel('prod', p.id) ? ' hl' : '') + '" data-id="' + PS.esc(p.id) + '"');
+          var html = PS.rowHtml(p).replace('<a class="row"', '<a class="row' + (isSel('prod', p.id) ? ' hl' : '') + '" data-id="' + PS.esc(p.id) + '"');
+          // 추천순에서 프리미엄 업체가 고른 물건은 '추천' 표시
+          return state.sort === 'rec' && featured[p.id] ? html.replace('<div class="t">', '<div class="t"><span class="badge pick">추천</span>') : html;
         }).join('')
       : '<div class="empty" style="padding:32px 0">' + PS.sticker('curious', 100) + '<b>' + (all.length ? '찾는 물건이 없어요' : '아직 올라온 물건이 없어요') + '</b>' +
         (all.length ? '다른 분류나 검색어로 찾아보세요' : '첫 번째로 판매해 보세요!') + '</div>';
   }
 
   // 물건 정렬: 추천순(기본) · 인기순 · 가까운순
-  function popScore(p) { return (p.like_count || 0) * 3 + (p.inquiry_count || 0) * 2 + (p.view_count || 0) * 0.2; }
+  //   추천순: 프리미엄 업체가 고른 추천 물건(업체당 최대 4개)이 맨 앞, 나머지는 추천 점수순
+  //   인기순: 조회 많은 순      가까운순: 현재 위치(GPS)에서 가까운 순
   function recScore(p) {
-    // 인기 + 새로 올라온 물건(2주 안) + 가까운 물건(30km 안)을 함께 반영
+    // 찜·문의·조회 + 새로 올라온 물건(2주 안) + 가까운 물건(30km 안)을 함께 반영
     var days = (Date.now() - new Date(p.created_at).getTime()) / 86400000;
-    return popScore(p) + Math.max(0, 14 - days) * 1.5 + (p._km == null ? 0 : Math.max(0, 30 - p._km) * 0.3);
+    return (p.like_count || 0) * 3 + (p.inquiry_count || 0) * 2 + (p.view_count || 0) * 0.2 +
+      Math.max(0, 14 - days) * 1.5 + (p._km == null ? 0 : Math.max(0, 30 - p._km) * 0.3);
   }
   function sortRows(rows) {
     var newer = function (a, b) { return new Date(b.created_at) - new Date(a.created_at); };
     if (state.sort === 'near') return rows.sort(function (a, b) { return (a._km == null ? 9999 : a._km) - (b._km == null ? 9999 : b._km); });
-    var score = state.sort === 'pop' ? popScore : recScore;
-    return rows.sort(function (a, b) { return score(b) - score(a) || newer(a, b); });
+    if (state.sort === 'pop') return rows.sort(function (a, b) { return (b.view_count || 0) - (a.view_count || 0) || newer(a, b); });
+    return rows.sort(function (a, b) {
+      return (featured[b.id] ? 1 : 0) - (featured[a.id] ? 1 : 0) || recScore(b) - recScore(a) || newer(a, b);
+    });
   }
   $('sorts').addEventListener('click', function (e) {
     var b = e.target.closest('[data-s]');
@@ -474,9 +481,12 @@
       x.setAttribute('aria-selected', String(x === b));
     });
     render(false);
+    if (state.sort === 'near' && !gpsOk) locateMe(false); // 가까운순은 현재 위치 기준: 아직 못 찾았으면 지금 찾음
   });
 
   var lastRows = [], lastBiz = [];
+  var featured = {};   // 프리미엄 업체가 고른 추천 물건 { productId: 1 }
+  var gpsOk = false;   // 현재 위치(GPS)를 찾았는지
   function render(refit) {
     var rows = sortRows(withKm(filtered()));
     var biz = withKm(filteredBiz());
@@ -580,6 +590,13 @@
     var prem = {};
     if (!pr.error) (pr.data || []).forEach(function (x) { prem[x.id] = 1; });
     bizAll.forEach(function (b) { b._premium = !!prem[b.id]; });
+    // 프리미엄 업체가 고른 추천 물건 (추천순 맨 앞). 표가 아직 없으면 없는 것으로
+    featured = {};
+    var premIds = Object.keys(prem);
+    if (premIds.length) {
+      var fr = await sb.from('biz_featured').select('product_id').in('business_id', premIds);
+      if (!fr.error) (fr.data || []).forEach(function (x) { featured[x.product_id] = 1; });
+    }
   }
 
   async function placePins() {
@@ -620,6 +637,7 @@
     if (!navigator.geolocation) { if (!silent) PS.toast('이 기기에서는 위치를 찾을 수 없어요'); return; }
     navigator.geolocation.getCurrentPosition(function (pos) {
       origin = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      gpsOk = true;
       if (map) { map.showMe(origin.lat, origin.lng); map.panTo(origin.lat, origin.lng); }
       render(false);
     }, function () {
