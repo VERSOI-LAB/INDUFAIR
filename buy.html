@@ -460,7 +460,7 @@
   //   인기순: 조회 많은 순      가까운순: 현재 위치(GPS)에서 가까운 순
   function recScore(p) {
     // 찜·문의·조회 + 새로 올라온 물건(2주 안) + 가까운 물건(30km 안)을 함께 반영
-    var days = (Date.now() - new Date(p.created_at).getTime()) / 86400000;
+    var days = (Date.now() - new Date(p.bumped_at || p.created_at).getTime()) / 86400000; // 끌어올리면 새 물건처럼
     return (p.like_count || 0) * 3 + (p.inquiry_count || 0) * 2 + (p.view_count || 0) * 0.2 +
       Math.max(0, 14 - days) * 1.5 + (p._km == null ? 0 : Math.max(0, 30 - p._km) * 0.3);
   }
@@ -571,13 +571,13 @@
   // ---------- 데이터 ----------
   async function loadProducts() {
     var cols = PS.PRODUCT_LIST_COLUMNS + ',brand,category_id,seller_profile_id';
-    var res = await sb.from('products').select(cols + ',lat,lng').in('status', ['selling', 'reserved'])
-      .order('created_at', { ascending: false }).limit(300);
-    if (res.error) {
-      // 좌표 컬럼이 아직 없을 때(마이그레이션 전)도 목록은 보이게
-      res = await sb.from('products').select(cols).in('status', ['selling', 'reserved'])
-        .order('created_at', { ascending: false }).limit(300);
-    }
+    var q = function (c) {
+      return sb.from('products').select(c).in('status', ['selling', 'reserved']).order('created_at', { ascending: false }).limit(300);
+    };
+    // 새 컬럼(끌어올린 시각, 좌표)이 아직 없을 때(마이그레이션 전)도 목록은 보이게 차례로 줄여서 조회
+    var res = await q(cols + ',lat,lng,bumped_at');
+    if (res.error) res = await q(cols + ',lat,lng');
+    if (res.error) res = await q(cols);
     all = res.data || [];
   }
 

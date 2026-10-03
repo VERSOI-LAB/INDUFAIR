@@ -210,6 +210,25 @@ p{margin:0;}
 .bizcard.hl .bz-ph{box-shadow:0 0 0 3px #2F5BD3;}
 .verified{display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 8px;border-radius:11px;background:#EAF2FE;color:#2F5BD3;font-size:12px;font-weight:800;}
 
+/* 주문 카드 (판매관리의 주문 내역 / 구매내역의 결제한 주문) */
+.badge.paid{background:var(--success);color:#fff;}
+.ocard{margin-top:14px;padding:16px;border:1.5px solid var(--line);border-radius:16px;}
+.ocard.off{opacity:.6;}
+.ocard header{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;font-size:13px;color:var(--hint);}
+.ocard header .badge{margin-right:0;vertical-align:0;}
+.ocard header .no{margin-left:auto;font-size:12px;}
+.ocard .oitems{list-style:none;margin:12px 0 0;padding:0;}
+.ocard .oitems li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:16px;font-weight:600;}
+.ocard .oitems li a,.ocard .oitems li span{min-width:0;overflow-wrap:anywhere;}
+.ocard .oitems small{display:block;font-size:13px;font-weight:500;color:var(--sub);}
+.ocard .oitems em{font-style:normal;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.ocard dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:15px;}
+.ocard dt{color:var(--sub);white-space:nowrap;}
+.ocard dd{margin:0;text-align:right;overflow-wrap:anywhere;}
+.ocard .osum .tot{font-weight:800;font-size:17px;color:var(--text);}
+.ocard .oship dd{text-align:left;font-weight:600;}
+.ocard .oship a{text-decoration:underline;}
+
 /* 회색 바탕 위 흰 카드 메뉴 (마이페이지 등) */
 .gray-page{background:#F2F3F5;}
 .gray-page .app{background:#F2F3F5;}

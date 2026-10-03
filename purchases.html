@@ -24,7 +24,7 @@
     <h1>구매내역</h1>
   </header>
   <main class="page">
-    <p style="font-size:14px;color:var(--sub);padding:14px 0 0">채팅으로 물어본 물건이 모여 있어요</p>
+    <p id="hint" style="font-size:14px;color:var(--sub);padding:14px 0 0">채팅으로 물어본 물건이 모여 있어요</p>
     <div class="tabs" id="tabs" role="tablist"></div>
     <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
   </main>
@@ -38,8 +38,9 @@
   PS.renderTabbar('my');
   var $ = function (id) { return document.getElementById(id); };
   var chats = [];
-  var tab = 'all';
-  var TABS = { all: '전체', sold: '판매완료' };
+  var orders = [], sellers = {}; // 결제한 주문과 판매자 이름
+  var tab = PS.param('tab') === 'orders' ? 'orders' : 'all';
+  var TABS = { orders: '결제한 주문', all: '문의한 물건', sold: '판매완료' };
 
   PS.ready.then(function (user) { if (!user) return PS.goLogin(); load(); });
 
@@ -47,11 +48,14 @@
     var res = await sb.from('chats').select('id,last_message_at,created_at,products(' + PS.PRODUCT_LIST_COLUMNS + ')')
       .eq('buyer_id', PS.user.id).order('last_message_at', { ascending: false, nullsFirst: false });
     chats = (res.data || []).filter(function (c) { return c.products && c.products.status !== 'deleted'; });
+    orders = await PS.myOrders('buyer');
+    sellers = await PS.publicProfiles(orders.map(function (o) { return o.seller_id; }));
+    if (!PS.param('tab') && orders.length) tab = 'orders'; // 결제한 주문이 있으면 그 탭부터
     render();
   }
 
   function render() {
-    var count = function (t) { return chats.filter(function (c) { return t === 'all' || c.products.status === t; }).length; };
+    var count = function (t) { return t === 'orders' ? orders.length : chats.filter(function (c) { return t === 'all' || c.products.status === t; }).length; };
     $('tabs').innerHTML = Object.keys(TABS).map(function (t) {
       return '<button role="tab" aria-selected="' + (t === tab) + '" class="' + (t === tab ? 'on' : '') + '" data-t="' + t + '">' + TABS[t] + '<em>' + count(t) + '</em></button>';
     }).join('');
@@ -61,6 +65,13 @@
       tab = b.dataset.t;
       render();
     };
+    $('hint').textContent = tab === 'orders' ? '결제를 마친 주문이 모여 있어요' : '채팅으로 물어본 물건이 모여 있어요';
+    if (tab === 'orders') {
+      $('list').innerHTML = orders.length
+        ? orders.map(function (o) { return PS.orderCardHtml(o, 'buyer', sellers); }).join('')
+        : '<div class="empty">' + PS.icon3d('buy', 96) + '<b>아직 결제한 주문이 없어요</b><div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div></div>';
+      return;
+    }
     var rows = chats.filter(function (c) { return tab === 'all' || c.products.status === tab; });
     $('list').innerHTML = rows.length
       ? rows.map(function (c) {

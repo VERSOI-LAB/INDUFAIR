@@ -93,10 +93,12 @@
   }).join('');
 
   async function load() {
-    var res = await sb.from('products').select(PS.PRODUCT_LIST_COLUMNS)
-      .in('status', ['selling', 'reserved'])
-      .order('created_at', { ascending: false })
-      .range(offset, offset + PAGE - 1);
+    var q = function (col) {
+      return sb.from('products').select(PS.PRODUCT_LIST_COLUMNS).in('status', ['selling', 'reserved'])
+        .order(col, { ascending: false }).range(offset, offset + PAGE - 1);
+    };
+    var res = await q('bumped_at');        // 끌어올린 물건이 맨 위
+    if (res.error) res = await q('created_at'); // 끌어올리기 컬럼이 아직 없을 때(마이그레이션 전)
     var rows = res.data || [];
     if (offset === 0) grid.innerHTML = '';
     if (offset === 0 && !rows.length) {
