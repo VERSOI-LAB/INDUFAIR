@@ -241,12 +241,14 @@ p{margin:0;}
 @media (min-width:1101px){
   :root{--app-w:640px;--tabbar-h:0px;--head-h:68px;--wide-w:1120px;}
   html.pc-wide{--app-w:var(--wide-w);}
+  html.pc-70{--app-w:70vw;} /* 홈과 같은 좌우 여백: 내용 폭 = 화면의 70% */
   body{padding-top:var(--head-h);}
   .app{max-width:none;min-height:calc(100vh - var(--head-h));padding-bottom:48px;}
   /* 내용은 --app-w 폭으로 가운데. 상단 바는 줄만 화면 끝까지, 버튼·제목 위치는 그대로 */
   .app > :where(:not(.topbar,.sheet,.sheet-bg)){max-width:var(--app-w);margin-left:auto;margin-right:auto;}
   .app > .topbar{padding-left:max(16px, calc((100% - var(--app-w)) / 2 + 16px));padding-right:max(8px, calc((100% - var(--app-w)) / 2 + 8px));}
   .page{padding:0 24px;}
+  html.pc-70 .page{padding:0;} /* 내용 양끝이 홈의 판다/산다 카드와 같은 위치 */
   .topbar{top:var(--head-h);}
 
   /* 상단 헤더 */
