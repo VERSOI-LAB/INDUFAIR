@@ -43,8 +43,10 @@
     .pick-card > img{width:auto;height:clamp(300px,42vh,460px);aspect-ratio:3/4;object-fit:contain;margin:0 auto;
       -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
     .pick-card .go{height:64px;font-size:20px;}
+    /* 방금 올라온 물건도 판다/산다 버튼과 같은 폭(70%)으로 가운데 */
+    .sec-title,.list,.page > .empty{width:70vw;max-width:100%;margin-left:auto;margin-right:auto;}
     .sec-title{margin-top:44px;font-size:24px;}
-    .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:48px;}
+    .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;}
     .list .row:nth-last-child(2):nth-child(odd){border-bottom:none;} /* 마지막 줄은 두 칸 모두 밑줄 없음 */
     .more{max-width:360px;margin-left:auto;margin-right:auto;}
   }
