@@ -161,7 +161,7 @@
       var img = PS.firstImage(p);
       strip.href = p.id ? PS.productUrl(p.id) : '#';
       strip.innerHTML = '<div class="thumb">' + (img ? '<img src="' + PS.esc(img) + '" alt="">' : '') + '</div>' +
-        '<div style="min-width:0"><div class="t">' + (p.status === 'reserved' ? '<span class="badge reserved">예약중</span>' : p.status === 'sold' ? '<span class="badge sold">판매완료</span>' : '') +
+        '<div style="min-width:0"><div class="t">' + (p.status === 'sold' ? '<span class="badge sold">판매완료</span>' : '') +
         PS.esc(p.title || '삭제된 물건') + '</div><div class="p">' + (p.title ? PS.won(p.price) : '') + '</div></div>';
     }
 

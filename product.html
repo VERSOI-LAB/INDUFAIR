@@ -114,7 +114,6 @@
 <div class="sheet" id="sheet" role="dialog" aria-label="판매 상태 바꾸기">
   <div class="handle"></div>
   <button class="opt" data-s="selling"><i data-icon3d="sell" data-size="30"></i>판매중</button>
-  <button class="opt" data-s="reserved"><i data-icon3d="calendar" data-size="30"></i>예약중</button>
   <button class="opt" data-s="sold"><i data-icon3d="handshake" data-size="30"></i>판매완료</button>
   <button class="opt" data-s="delete" style="color:var(--danger)"><i data-icon3d="trash" data-size="30"></i>삭제하기</button>
 </div>
@@ -191,7 +190,7 @@
     if (p.condition && PS.CONDITIONS[p.condition]) facts.push('<span class="fact"><em>상태</em>' + PS.CONDITIONS[p.condition] + '</span>');
     if (p.usage_period && PS.USAGE[p.usage_period]) facts.push('<span class="fact"><em>사용기간</em>' + PS.USAGE[p.usage_period] + '</span>');
     if (p.brand) facts.push('<span class="fact"><em>만든 곳</em>' + PS.esc(p.brand) + '</span>');
-    var badge = p.status === 'reserved' ? '<span class="badge reserved">예약중</span>' : p.status === 'sold' ? '<span class="badge sold">판매완료</span>' : '';
+    var badge = p.status === 'sold' ? '<span class="badge sold">판매완료</span>' : '';
 
     document.getElementById('body').innerHTML =
       '<a class="seller" href="' + PS.profileUrl(p.seller_profile_id) + '">' +

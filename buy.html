@@ -338,7 +338,7 @@
     });
   }
 
-  // 새로 보기 순서: 인기(찜·조회·끌어올림) 3개 + 새 업체 1개씩 섞어서 한 업체만 계속 위에 있지 않게
+  // 보여주는 순서: 프리미엄 업체 먼저, 그다음 인기(찜·조회·끌어올림) 3개 + 새 업체 1개씩 섞어서 한 업체만 계속 위에 있지 않게
   function feedOrder(list) {
     var now = Date.now();
     var score = function (b) {
@@ -349,6 +349,8 @@
     var newest = list.slice().sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
     var used = {}, out = [];
     var take = function (arr) { for (var i = 0; i < arr.length; i++) if (!used[arr[i].id]) { used[arr[i].id] = 1; return arr[i]; } return null; };
+    // 프리미엄 업체는 항상 맨 앞 (그 안에서는 점수순)
+    ranked.forEach(function (b) { if (b._premium) { used[b.id] = 1; out.push(b); } });
     while (out.length < list.length) {
       for (var k = 0; k < 3; k++) { var r = take(ranked); if (r) out.push(r); }
       var n = take(newest); if (n) out.push(n);
@@ -573,6 +575,11 @@
     var res = await sb.from('businesses').select(PS.BIZ_COLUMNS + ',description').eq('status', 'active')
       .order('bumped_at', { ascending: false }).limit(200);
     bizAll = res.error ? [] : (res.data || []);
+    // 프리미엄(월 정기결제) 업체 표시. 컬럼이 아직 없으면(준비 전) 아무도 프리미엄이 아닌 것으로
+    var pr = await sb.from('businesses').select('id').eq('status', 'active').gt('premium_until', new Date().toISOString());
+    var prem = {};
+    if (!pr.error) (pr.data || []).forEach(function (x) { prem[x.id] = 1; });
+    bizAll.forEach(function (b) { b._premium = !!prem[b.id]; });
   }
 
   async function placePins() {

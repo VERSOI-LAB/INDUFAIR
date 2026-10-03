@@ -37,7 +37,6 @@
 <div class="sheet" id="statusSheet" role="dialog" aria-label="판매 상태 바꾸기">
   <div class="handle"></div>
   <button class="opt" data-s="selling"><i data-icon3d="sell" data-size="30"></i>판매중</button>
-  <button class="opt" data-s="reserved"><i data-icon3d="calendar" data-size="30"></i>예약중</button>
   <button class="opt" data-s="sold"><i data-icon3d="handshake" data-size="30"></i>판매완료</button>
   <button class="opt" data-s="delete" style="color:var(--danger)"><i data-icon3d="trash" data-size="30"></i>삭제하기</button>
 </div>
@@ -51,7 +50,7 @@
   PS.renderTabbar('my');
   var $ = function (id) { return document.getElementById(id); };
   var products = [];
-  var tab = PS.param('tab') || 'selling';
+  var tab = PS.STATUS[PS.param('tab')] ? PS.param('tab') : 'selling';
   var targetId = null;
 
   PS.ready.then(function (user) { if (!user) return PS.goLogin(); load(); });
@@ -66,7 +65,9 @@
   }
 
   function renderTabs() {
-    var count = function (s) { return products.filter(function (p) { return p.status === s; }).length; };
+    // 예약중은 없앤 상태: 예전에 예약중으로 둔 물건이 남아 있으면 판매중으로 묶어 보여줌
+    var inTab = function (p, s) { return p.status === s || (s === 'selling' && p.status === 'reserved'); };
+    var count = function (s) { return products.filter(function (p) { return inTab(p, s); }).length; };
     $('tabs').innerHTML = Object.keys(PS.STATUS).map(function (s) {
       return '<button role="tab" aria-selected="' + (s === tab) + '" class="' + (s === tab ? 'on' : '') + '" data-s="' + s + '">' + PS.STATUS[s] + '<em>' + count(s) + '</em></button>';
     }).join('');
@@ -77,9 +78,9 @@
       history.replaceState(null, '', '?tab=' + tab);
       renderTabs();
     };
-    var rows = products.filter(function (p) { return p.status === tab; });
+    var rows = products.filter(function (p) { return inTab(p, tab); });
     if (!rows.length) {
-      var msg = { selling: '판매중인 물건이 없어요', reserved: '예약중인 물건이 없어요', sold: '아직 판매완료된 물건이 없어요' }[tab];
+      var msg = { selling: '판매중인 물건이 없어요', sold: '아직 판매완료된 물건이 없어요' }[tab];
       $('list').innerHTML = '<div class="empty" style="padding:40px 0">' + PS.icon3d('sell', 80) + msg + '</div>';
       return;
     }

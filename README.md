@@ -10,7 +10,7 @@
 | `/buy` | `buy.html` | 검색 + 카테고리 칩 + 당근식 목록 |
 | `/product/:id` | `product.html` | 사진 슬라이드, 가격, 찜·전화·채팅 |
 | `/chat`, `/chat/:id` | `chat.html` | 채팅 목록 / 채팅방 (실시간, 읽음 표시) |
-| `/mypage` | `mypage.html` | 내 물건(판매중·예약중·판매완료), 통계, 찜 |
+| `/mypage` | `mypage.html` | 내 물건(판매중·판매완료), 통계, 찜 |
 | `/login` | `login.html` | 이메일 로그인/가입 한 화면 |
 
 공용: `app.css`(디자인 토큰), `js/app.js`(로그인 상태·탭바·포맷), `js/supabase-client.js`.

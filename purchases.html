@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>구매/예약내역 - 판다산다</title>
+<title>구매내역 - 판다산다</title>
 <link rel="icon" href="/이미지/web/logo.jpg">
 <link rel="stylesheet" href="/app.css">
 <style>
@@ -21,7 +21,7 @@
 <div class="app">
   <header class="topbar">
     <a class="back" href="/mypage" aria-label="마이로 돌아가기"><i data-icon="back" data-size="24"></i></a>
-    <h1>구매/예약내역</h1>
+    <h1>구매내역</h1>
   </header>
   <main class="page">
     <p style="font-size:14px;color:var(--sub);padding:14px 0 0">채팅으로 물어본 물건이 모여 있어요</p>
@@ -39,7 +39,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var chats = [];
   var tab = 'all';
-  var TABS = { all: '전체', reserved: '예약중', sold: '판매완료' };
+  var TABS = { all: '전체', sold: '판매완료' };
 
   PS.ready.then(function (user) { if (!user) return PS.goLogin(); load(); });
 

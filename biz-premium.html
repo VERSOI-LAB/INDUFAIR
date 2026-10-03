@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>업체 프리미엄 - 판다산다</title>
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .who{margin-top:20px;font-size:15px;color:var(--sub);}
+  .who b{display:block;font-size:22px;font-weight:800;color:var(--text);margin-top:2px;}
+  .plan{margin-top:16px;padding:22px 20px;border-radius:20px;background:var(--primary-light);}
+  .plan .price{font-size:30px;font-weight:800;line-height:1.2;}
+  .plan .price small{font-size:16px;font-weight:600;color:var(--sub);margin-left:4px;}
+  .plan ul{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:12px;}
+  .plan li{display:flex;gap:10px;align-items:flex-start;font-size:16px;line-height:1.45;}
+  .plan li b{display:block;font-weight:800;}
+  .plan li span{color:var(--sub);font-size:14px;}
+  .plan li .ck{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;margin-top:1px;}
+  .free{margin-top:12px;padding:14px 16px;border-radius:14px;background:var(--bg);font-size:14px;color:var(--sub);line-height:1.5;}
+  .notes{margin:20px 0 0;padding-left:18px;font-size:14px;color:var(--sub);line-height:1.7;}
+  .agree{display:flex;gap:10px;align-items:flex-start;margin-top:20px;font-size:15px;font-weight:600;line-height:1.5;cursor:pointer;}
+  .agree input{width:22px;height:22px;flex-shrink:0;margin:1px 0 0;accent-color:var(--primary-press);}
+  .state{margin-top:16px;padding:20px;border-radius:20px;border:1.5px solid var(--line);}
+  .state .tag{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:13px;font-size:13px;font-weight:800;background:var(--success);color:#fff;}
+  .state .tag.off{background:#888;}
+  .state .tag.warn{background:var(--danger);}
+  .state dl{margin:14px 0 0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:16px;}
+  .state dt{color:var(--sub);}
+  .state dd{margin:0;font-weight:700;text-align:right;}
+  .acts{display:grid;gap:8px;margin-top:24px;}
+  .msg{margin-top:16px;padding:14px 16px;border-radius:14px;font-size:15px;font-weight:600;line-height:1.5;}
+  .msg.ok{background:#F4FBF6;border:1px solid #D4F0DC;}
+  .msg.err{background:#FFF0EF;color:var(--danger);}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/my-biz" aria-label="업체 소개 관리로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>업체 프리미엄</h1>
+  </header>
+  <main class="page" id="main">
+    <div class="skeleton" style="height:220px;margin-top:20px;border-radius:20px"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('my');
+  var $ = function (id) { return document.getElementById(id); };
+  var main = $('main');
+  var bizId = PS.param('id');
+  var PRICE = 10000;
+  var biz = null, sub = null, notice = null; // notice: { ok, text }
+
+  function day(iso) {
+    var d = new Date(iso);
+    return d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate();
+  }
+
+  // 서버(Edge Function biz-billing) 호출
+  async function call(body) {
+    var token = await PS.accessToken();
+    var res = await fetch(PS.FUNCTIONS_URL + '/biz-billing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(body)
+    });
+    var d = await res.json().catch(function () { return {}; });
+    return { ok: res.ok && d.ok, data: d };
+  }
+
+  async function loadSub() {
+    var r = await sb.from('biz_subscriptions').select('status,amount,card_label,period_end,next_charge_at,canceled_at').eq('business_id', bizId).maybeSingle();
+    sub = r.error ? null : r.data; // 표가 아직 없으면(준비 전) 구독 없음으로
+  }
+
+  PS.ready.then(async function (user) {
+    if (!user) return PS.goLogin();
+    var r = bizId ? await sb.from('businesses').select('id,name,owner_id,status').eq('id', bizId).maybeSingle() : { data: null };
+    biz = r.data;
+    if (!biz || biz.owner_id !== user.id || biz.status === 'deleted') {
+      main.innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>업체를 찾을 수 없어요</b><div style="margin-top:20px"><a class="btn" href="/my-biz">업체 소개 관리로</a></div></div>';
+      return;
+    }
+
+    // 토스 카드 등록 창에서 돌아왔을 때
+    var authKey = PS.param('authKey'), customerKey = PS.param('customerKey');
+    if (PS.param('fail')) notice = { ok: false, text: PS.param('message') || '카드 등록을 마치지 못했어요. 돈은 빠져나가지 않았어요.' };
+    if (authKey && customerKey) {
+      main.innerHTML = '<div class="empty" style="padding-top:60px"><div class="skeleton" style="width:120px;height:120px;border-radius:50%;margin:0 auto 16px"></div><b>결제를 확인하고 있어요</b>창을 닫지 말고 잠시만 기다려 주세요</div>';
+      var res = await call({ action: 'subscribe', businessId: bizId, authKey: authKey, customerKey: customerKey });
+      if (res.ok) notice = { ok: true, text: res.data.charged === false ? '프리미엄을 다시 시작했어요. 다음 결제일부터 청구돼요.' : '결제가 끝났어요! 지금부터 프리미엄이 적용돼요.' };
+      else notice = { ok: false, text: res.data.code === 'not_configured' ? '결제가 아직 준비 중이에요. 곧 열릴 거예요!' : (res.data.message || '결제를 마치지 못했어요. 돈이 빠져나갔다면 고객센터로 알려 주세요.') };
+    }
+    if (authKey || PS.param('fail')) history.replaceState(null, '', location.pathname + '?id=' + encodeURIComponent(bizId)); // 새로고침해도 다시 결제되지 않게
+
+    await loadSub();
+    render();
+  });
+
+  function render() {
+    var now = Date.now();
+    var live = sub && new Date(sub.period_end).getTime() > now && sub.status !== 'ended'; // 지금 프리미엄 이용 중
+    var html = '<p class="who">프리미엄을 적용할 업체<b>' + PS.esc(biz.name) + '</b></p>';
+    if (notice) html += '<div class="msg ' + (notice.ok ? 'ok' : 'err') + '" role="status">' + PS.esc(notice.text) + '</div>';
+
+    if (sub && (live || sub.status === 'past_due')) {
+      var tag = sub.status === 'active' ? '<span class="tag">이용 중</span>'
+        : sub.status === 'canceled' ? '<span class="tag off">해지함</span>' : '<span class="tag warn">결제 실패</span>';
+      html += '<div class="state">' + tag + '<dl>' +
+        '<dt>요금</dt><dd>월 ' + sub.amount.toLocaleString('ko-KR') + '원</dd>' +
+        (sub.card_label ? '<dt>결제 카드</dt><dd>' + PS.esc(sub.card_label) + '</dd>' : '') +
+        (sub.status === 'active' ? '<dt>다음 결제일</dt><dd>' + day(sub.next_charge_at || sub.period_end) + '</dd>'
+          : sub.status === 'canceled' ? '<dt>이용 기간</dt><dd>' + day(sub.period_end) + '까지</dd>'
+          : '<dt>다시 결제</dt><dd>' + (sub.next_charge_at ? day(sub.next_charge_at) + ' 자동으로 다시 시도' : '-') + '</dd>') +
+        '</dl></div>';
+      if (sub.status === 'past_due') html += '<div class="msg err">카드 결제가 되지 않았어요. 카드를 다시 등록하면 바로 결제하고 프리미엄을 이어가요.</div>';
+    }
+
+    html += '<div class="plan"><div class="price">월 ' + PRICE.toLocaleString('ko-KR') + '원<small>부가세 포함</small></div><ul>' +
+      '<li><span class="ck">✓</span><div><b>매일 자동 끌어올리기</b><span>직접 누르지 않아도 매일 맨 위로 올라가요</span></div></li>' +
+      '<li><span class="ck">✓</span><div><b>동네 업체 맨 앞 고정</b><span>산다 화면의 "이웃들이 찾는 동네 업체"에서 항상 먼저 보여요</span></div></li></ul></div>' +
+      '<p class="free">프리미엄이 아니어도 업체 소개 관리에서 <b>하루에 한 번</b> 직접 끌어올릴 수 있어요.</p>';
+
+    if (sub && sub.status === 'active' && live) {
+      html += '<ul class="notes"><li>해지해도 ' + day(sub.period_end) + '까지는 프리미엄이 그대로 적용돼요.</li><li>해지하면 다음 결제일부터 청구되지 않아요.</li></ul>' +
+        '<div class="acts"><button class="btn white" id="cancelBtn">프리미엄 해지하기</button></div>';
+    } else {
+      var again = sub && sub.status === 'canceled' && live;
+      html += '<ul class="notes">' +
+        (again ? '<li>이미 결제한 ' + day(sub.period_end) + '까지는 추가 결제가 없고, 그날부터 매월 자동으로 결제돼요.</li>'
+          : '<li>카드를 등록하면 오늘 ' + PRICE.toLocaleString('ko-KR') + '원이 결제되고, 매월 같은 날 자동으로 결제돼요.</li>') +
+        '<li>언제든 이 화면에서 해지할 수 있고, 해지해도 결제한 기간 끝까지는 그대로 이용해요.</li>' +
+        '<li>환불이 필요하면 고객센터로 알려 주세요.</li></ul>' +
+        '<label class="agree"><input type="checkbox" id="agree"><span>매월 ' + PRICE.toLocaleString('ko-KR') + '원이 등록한 카드로 자동 결제되는 것에 동의해요</span></label>' +
+        '<div class="acts"><button class="btn" id="startBtn" disabled>' + (again ? '카드 등록하고 다시 시작하기' : sub && sub.status === 'past_due' ? '카드 다시 등록하기' : '카드 등록하고 시작하기') + '</button></div>';
+    }
+    main.innerHTML = html;
+
+    var agree = $('agree'), start = $('startBtn'), cancel = $('cancelBtn');
+    if (agree) agree.addEventListener('change', function () { start.disabled = !agree.checked; });
+    if (start) start.addEventListener('click', registerCard);
+    if (cancel) cancel.addEventListener('click', cancelSub);
+  }
+
+  var tossLoaded = null;
+  function loadToss() {
+    if (window.TossPayments) return Promise.resolve();
+    if (tossLoaded) return tossLoaded;
+    tossLoaded = new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://js.tosspayments.com/v2/standard';
+      s.onload = resolve;
+      s.onerror = function () { tossLoaded = null; reject(); };
+      document.head.appendChild(s);
+    });
+    return tossLoaded;
+  }
+
+  // 토스 카드 등록 창 → 성공하면 이 화면으로 authKey 를 들고 돌아옴
+  async function registerCard() {
+    if (!PS.TOSS_CLIENT_KEY) { PS.toast('결제는 곧 열려요! 조금만 기다려 주세요'); return; }
+    var btn = $('startBtn');
+    btn.disabled = true;
+    try {
+      await loadToss();
+      var payment = window.TossPayments(PS.TOSS_CLIENT_KEY).payment({ customerKey: PS.user.id });
+      var here = location.origin + '/biz-premium?id=' + encodeURIComponent(bizId);
+      await payment.requestBillingAuth({
+        method: 'CARD',
+        successUrl: here,
+        failUrl: here + '&fail=1',
+        customerEmail: PS.user.email || undefined,
+        customerName: (PS.profile && PS.profile.name) || undefined
+      });
+    } catch (e) {
+      console.error(e);
+      btn.disabled = false;
+      if (!e || e.code !== 'USER_CANCEL') PS.toast('카드 등록 창을 열지 못했어요');
+    }
+  }
+
+  async function cancelSub() {
+    if (!confirm('프리미엄을 해지할까요?\n' + day(sub.period_end) + '까지는 그대로 이용하고, 그 뒤로는 결제되지 않아요.')) return;
+    var btn = $('cancelBtn');
+    btn.disabled = true;
+    var res = await call({ action: 'cancel', businessId: bizId });
+    if (!res.ok) { btn.disabled = false; PS.toast('해지하지 못했어요. 잠시 후 다시 해 주세요'); return; }
+    notice = { ok: true, text: '해지했어요. ' + day(sub.period_end) + '까지는 프리미엄이 그대로 적용돼요.' };
+    await loadSub();
+    render();
+  }
+})();
+</script>
+</body>
+</html>

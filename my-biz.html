@@ -17,6 +17,8 @@
   .vcard .no{font-size:14px;color:var(--sub);}
   .acts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
   .acts a,.acts button{height:36px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;background:#fff;}
+  .acts .prem{grid-column:1 / -1;background:var(--primary-light);border-color:var(--primary);}
+  .acts .prem.on{background:var(--primary);}
 </style>
 </head>
 <body>
@@ -48,6 +50,10 @@
     }
     var res = await sb.from('businesses').select(PS.BIZ_COLUMNS + ',hidden_reason').eq('owner_id', user.id).neq('status', 'deleted').order('created_at', { ascending: false });
     var list = res.data || [];
+    // 프리미엄(월 정기결제) 이용 중인 업체. 컬럼이 아직 없으면(준비 전) 없는 것으로
+    var premium = {};
+    var pr = await sb.from('businesses').select('id,premium_until').eq('owner_id', user.id).gt('premium_until', new Date().toISOString());
+    if (!pr.error) (pr.data || []).forEach(function (x) { premium[x.id] = x.premium_until; });
     main.innerHTML =
       '<div class="vcard">' + PS.ntsBadge(v) + '<b>' + PS.esc(v.company_name) + '</b><span class="no">' + PS.esc(v.biz_reg_no) + '</span>' +
         (v.nts_status === 'suspended' || v.nts_status === 'closed' || v.nts_status === 'unregistered' ? '<span style="color:var(--danger);font-size:13px;font-weight:700">국세청 확인 결과 때문에 업체 소개가 숨겨졌어요. 다시 운영하면 자동으로 보여요.</span>' : '') + '</div>' +
@@ -55,7 +61,9 @@
       (list.length ? '<div class="bizgrid" style="margin-top:20px">' + list.map(function (b) {
           return '<div>' + PS.bizCardHtml(b, {}) +
             (b.status === 'hidden' ? '<p style="color:var(--danger);font-size:13px;font-weight:700;margin-top:4px">' + (b.hidden_reason === 'nts' ? '국세청 확인으로 숨겨졌어요' : '신고로 숨겨졌어요') + '</p>' : '') +
-            '<div class="acts"><a href="/biz/new?id=' + b.id + '">수정</a><button type="button" data-bump="' + b.id + '">끌어올리기</button></div></div>';
+            '<div class="acts"><a href="/biz/new?id=' + b.id + '">수정</a><button type="button" data-bump="' + b.id + '">끌어올리기</button>' +
+              '<a class="prem' + (premium[b.id] ? ' on' : '') + '" href="/biz-premium?id=' + b.id + '">' +
+                (premium[b.id] ? '프리미엄 이용 중 · 관리' : '매일 자동 끌어올리기 · 월 1만원') + '</a></div></div>';
         }).join('') + '</div>'
         : '<div class="empty" style="padding:32px 0">' + PS.icon3d('home', 72) + '<b>아직 소개한 업체가 없어요</b></div>');
     main.addEventListener('click', async function (e) {
