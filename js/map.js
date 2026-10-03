@@ -53,7 +53,8 @@
             if (items.length === 1) { map.setCenter(new kakao.maps.LatLng(items[0].lat, items[0].lng)); map.setLevel(5); return; }
             var b = new kakao.maps.LatLngBounds();
             items.forEach(function (it) { b.extend(new kakao.maps.LatLng(it.lat, it.lng)); });
-            map.setBounds(b, 80, 40, 260, 40);
+            if (isPc()) map.setBounds(b, 40, 30, 30, 30); // PC: 시트에 가리지 않는 작은 지도
+            else map.setBounds(b, 80, 40, 260, 40);
           },
           panTo: function (lat, lng) { map.panTo(new kakao.maps.LatLng(lat, lng)); },
           center: function () { var c = map.getCenter(); return { lat: c.getLat(), lng: c.getLng() }; },
@@ -82,6 +83,8 @@
     };
   }
 
+  function isPc() { return window.matchMedia('(min-width:1101px)').matches; } // app.css 의 PC 기준과 같게
+
   // ---------- Leaflet + OSM (카카오 키가 없을 때) ----------
   function leafletAdapter() {
     var L = window.L;
@@ -108,7 +111,9 @@
           fit: function (items) {
             if (!items.length) return;
             if (items.length === 1) { map.setView([items[0].lat, items[0].lng], 14); return; }
-            map.fitBounds(items.map(function (it) { return [it.lat, it.lng]; }), { paddingTopLeft: [40, 90], paddingBottomRight: [40, 280], maxZoom: 15 });
+            map.fitBounds(items.map(function (it) { return [it.lat, it.lng]; }), isPc()
+              ? { paddingTopLeft: [30, 40], paddingBottomRight: [30, 30], maxZoom: 15 } // PC: 시트에 가리지 않는 작은 지도
+              : { paddingTopLeft: [40, 90], paddingBottomRight: [40, 280], maxZoom: 15 });
           },
           panTo: function (lat, lng) { map.panTo([lat, lng]); },
           center: function () { var c = map.getCenter(); return { lat: c.lat, lng: c.lng }; },

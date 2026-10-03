@@ -64,6 +64,31 @@
   .done .big{font-size:72px;}
   .done h2{font-size:26px;font-weight:800;margin-top:12px;}
   .done p{color:var(--sub);margin-top:6px;}
+
+  /* 사진 올린 화면: 묶음은 PC 용. 모바일에서는 묶음을 풀고(order) 제목 → 사진 → AI 순서 그대로 */
+  #photoView{display:flex;flex-direction:column;}
+  .pv-photos,.pv-text{display:contents;}
+  #photoView .q{order:1;} #photoView .q-sub{order:2;} #photoView .photos{order:3;} #photoView .bg-btn{order:4;}
+  #photoView .bg-hint{order:5;} #photoView .ai-box{order:6;} #photoView #editBox{order:7;}
+
+  /* PC: 왼쪽에 사진(판다 그림 → 사진을 올리면 올린 사진), 오른쪽에 글·버튼. 좌우 여백은 홈과 같게 (내용 폭 = 화면의 70%) */
+  .pc-side{display:none;}
+  @media (min-width:1101px){
+    :root{--app-w:70vw;--col-gap:20px;}
+    .pc-side{display:block;position:fixed;left:15vw;top:calc(var(--head-h) + 92px);margin:0;border-radius:20px;height:auto;
+      width:min(35vw - var(--col-gap) / 2, (100vh - var(--head-h) - 140px) * .75, 480px);}
+    .pc-side.prod{aspect-ratio:3/4;object-fit:contain;background:#F7F7F7;border:1px solid var(--line);} /* 올린 대표 사진 */
+    #pickView > img{display:none;} /* 왼쪽 큰 그림으로 대신함 */
+    /* 사진 올린 화면: 왼쪽 칸에 사진 묶음(추가·삭제 가능), 오른쪽 칸에 글 */
+    .app:has(.step.on[data-step="1"] #photoView:not([hidden])) .pc-side{display:none;}
+    .app > .step[data-step="1"]:has(#photoView:not([hidden])){margin:0 15vw;}
+    #photoView{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--col-gap);align-items:start;}
+    .pv-photos,.pv-text{display:block;}
+    #photoView .photos{margin-top:0;}
+    .app > .step{max-width:none;margin:0 15vw 0 calc(50% + var(--col-gap) / 2);padding:32px 0 0;}
+    .footer{left:50%;right:auto;width:calc(35vw - var(--col-gap) / 2);max-width:none;margin:0 0 0 calc(var(--col-gap) / 2);bottom:24px !important;
+      border:1px solid var(--line);border-radius:18px;padding:12px !important;}
+  }
 </style>
 <!-- 배경 지우기(@imgly)가 쓰는 onnxruntime-web 위치. 버튼을 누를 때만 내려받는다 -->
 <script type="importmap">
@@ -77,6 +102,7 @@
     <h1>판다 · 판매하기</h1>
   </header>
   <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+  <img class="pc-side" id="pcSide" src="/이미지/web/panda-sell.jpg" alt="" width="600" height="800">
 
   <!-- 1. 사진 -->
   <section class="step on" data-step="1">
@@ -95,20 +121,25 @@
     </div>
 
     <div id="photoView" hidden>
-      <h2 class="q">사진을 올렸어요</h2>
-      <p class="q-sub">여러 각도로 찍을수록 잘 팔려요 (최대 10장)</p>
-      <div class="photos" id="photos"></div>
-      <button type="button" class="bg-btn" id="bgBtn"></button>
-      <p class="bg-hint" id="bgHint">배경을 지우면 물건이 더 잘 보여요. 처음 한 번은 30초쯤 걸려요.</p>
+      <!-- PC 에서는 사진 묶음이 왼쪽, 글 묶음이 오른쪽. 모바일은 order 로 기존 순서(제목 → 사진 → AI) 그대로 -->
+      <div class="pv-photos">
+        <div class="photos" id="photos"></div>
+        <button type="button" class="bg-btn" id="bgBtn"></button>
+        <p class="bg-hint" id="bgHint">배경을 지우면 물건이 더 잘 보여요. 처음 한 번은 30초쯤 걸려요.</p>
+      </div>
+      <div class="pv-text">
+        <h2 class="q">사진을 올렸어요</h2>
+        <p class="q-sub">여러 각도로 찍을수록 잘 팔려요 (최대 10장)</p>
 
-      <div class="ai-box" id="aiBox"></div>
+        <div class="ai-box" id="aiBox"></div>
 
-      <div id="editBox" hidden>
-        <label class="field"><span>물건 이름</span>
-          <input class="input" id="titleInput" maxlength="60" placeholder="예) 쇼트블라스트기" autocomplete="off">
-        </label>
-        <div class="field"><span>어떤 종류인가요?</span>
-          <div class="chip-grid" id="catChips"></div>
+        <div id="editBox" hidden>
+          <label class="field"><span>물건 이름</span>
+            <input class="input" id="titleInput" maxlength="60" placeholder="예) 쇼트블라스트기" autocomplete="off">
+          </label>
+          <div class="field"><span>어떤 종류인가요?</span>
+            <div class="chip-grid" id="catChips"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -315,6 +346,10 @@
     }).join('');
     if (photos.length < MAX_PHOTOS) html += '<button type="button" class="add" id="addMore"><b>+</b>' + photos.length + '/' + MAX_PHOTOS + '</button>';
     $('photos').innerHTML = html;
+    // PC 왼쪽 그림: 사진을 올린 뒤에는 대표 사진, 없으면 판다 그림
+    var side = $('pcSide');
+    side.src = photos.length ? photos[0].url : '/이미지/web/panda-sell.jpg';
+    side.classList.toggle('prod', photos.length > 0);
     var add = $('addMore');
     if (add) add.addEventListener('click', function () { $('galInput').click(); });
     renderBgBtn();
