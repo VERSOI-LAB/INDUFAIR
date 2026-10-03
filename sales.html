@@ -84,7 +84,7 @@
       return;
     }
     $('list').innerHTML = rows.map(function (p) {
-      // 사진·품명을 누르면 고치기 화면으로
+      // 사진·품명을 누르면 규격 수정하기 화면으로
       return '<div class="row-wrap">' + PS.rowHtml(p).replace('href="' + PS.productUrl(p.id) + '"', 'href="/edit?id=' + encodeURIComponent(p.id) + '"') +
         '<button class="chg" data-id="' + p.id + '">상태 바꾸기</button></div>';
     }).join('');
