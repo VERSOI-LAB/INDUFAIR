@@ -17,8 +17,10 @@
   .vcard .no{font-size:14px;color:var(--sub);}
   .acts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
   .acts a,.acts button{height:36px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;background:#fff;}
-  .acts .prem{grid-column:1 / -1;background:var(--primary-light);border-color:var(--primary);}
+  .acts .prem{grid-column:1 / -1;height:auto;min-height:36px;padding:6px 8px;text-align:center;line-height:1.3;background:var(--primary-light);border-color:var(--primary);} /* 좁은 화면에서는 두 줄 */
   .acts .prem.on{background:var(--primary);}
+  .acts .unsub{grid-column:1 / -1;background:#F2F2F2;border-color:#F2F2F2;color:var(--sub);}
+  .acts .ended{grid-column:1 / -1;font-size:13px;color:var(--sub);text-align:center;margin:2px 0 0;}
 </style>
 </head>
 <body>
@@ -54,6 +56,19 @@
     var premium = {};
     var pr = await sb.from('businesses').select('id,premium_until').eq('owner_id', user.id).gt('premium_until', new Date().toISOString());
     if (!pr.error) (pr.data || []).forEach(function (x) { premium[x.id] = x.premium_until; });
+    // 자동결제 상태 (해지 버튼 표시용). 표가 아직 없으면 없는 것으로
+    var subs = {};
+    var sr = await sb.from('biz_subscriptions').select('business_id,status,period_end').eq('owner_id', user.id);
+    if (!sr.error) (sr.data || []).forEach(function (x) { subs[x.business_id] = x; });
+    var day = function (iso) { var d = new Date(iso); return d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(); };
+    // 자동결제가 걸려 있으면 해지 버튼, 이미 해지했으면 언제까지 쓰는지 안내
+    var subHtml = function (id) {
+      var s = subs[id];
+      if (!s) return '';
+      if (s.status === 'active' || s.status === 'past_due') return '<button type="button" class="unsub" data-unsub="' + id + '">자동결제 해지하기</button>';
+      if (s.status === 'canceled' && new Date(s.period_end) > new Date()) return '<p class="ended">자동결제를 해지했어요 · ' + day(s.period_end) + '까지 이용</p>';
+      return '';
+    };
     main.innerHTML =
       '<div class="vcard">' + PS.ntsBadge(v) + '<b>' + PS.esc(v.company_name) + '</b><span class="no">' + PS.esc(v.biz_reg_no) + '</span>' +
         (v.nts_status === 'suspended' || v.nts_status === 'closed' || v.nts_status === 'unregistered' ? '<span style="color:var(--danger);font-size:13px;font-weight:700">국세청 확인 결과 때문에 업체 소개가 숨겨졌어요. 다시 운영하면 자동으로 보여요.</span>' : '') + '</div>' +
@@ -63,10 +78,36 @@
             (b.status === 'hidden' ? '<p style="color:var(--danger);font-size:13px;font-weight:700;margin-top:4px">' + (b.hidden_reason === 'nts' ? '국세청 확인으로 숨겨졌어요' : '신고로 숨겨졌어요') + '</p>' : '') +
             '<div class="acts"><a href="/biz/new?id=' + b.id + '">수정</a><button type="button" data-bump="' + b.id + '">끌어올리기</button>' +
               '<a class="prem' + (premium[b.id] ? ' on' : '') + '" href="/biz-premium?id=' + b.id + '">' +
-                (premium[b.id] ? '프리미엄 이용 중 · 관리' : '매일 자동 끌어올리기 · 월 1만원') + '</a></div></div>';
+                (premium[b.id] ? '프리미엄 이용 중 · 관리' : '매일 자동 끌어올리기 · 월 1만원') + '</a>' + subHtml(b.id) + '</div></div>';
         }).join('') + '</div>'
         : '<div class="empty" style="padding:32px 0">' + PS.icon3d('home', 72) + '<b>아직 소개한 업체가 없어요</b></div>');
     main.addEventListener('click', async function (e) {
+      // 자동결제 해지: 결제한 기간 끝까지는 그대로 이용, 다음 청구만 없앰
+      var u = e.target.closest('[data-unsub]');
+      if (u) {
+        var s = subs[u.dataset.unsub];
+        if (!confirm('자동결제를 해지할까요?\n' + day(s.period_end) + '까지는 그대로 이용하고, 그 뒤로는 결제되지 않아요.')) return;
+        u.disabled = true;
+        try {
+          var token = await PS.accessToken();
+          var res = await fetch(PS.FUNCTIONS_URL + '/biz-billing', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ action: 'cancel', businessId: u.dataset.unsub })
+          });
+          var d = await res.json().catch(function () { return {}; });
+          if (!res.ok || !d.ok) throw new Error(d.code || 'cancel failed');
+        } catch (err) {
+          console.error(err);
+          u.disabled = false;
+          PS.toast('해지하지 못했어요. 잠시 후 다시 해 주세요');
+          return;
+        }
+        s.status = 'canceled';
+        u.outerHTML = subHtml(u.dataset.unsub);
+        PS.toast('자동결제를 해지했어요');
+        return;
+      }
       var b = e.target.closest('[data-bump]');
       if (!b) return;
       var r = await sb.rpc('bump_business', { p_business_id: b.dataset.bump });
