@@ -417,8 +417,8 @@
   // PC 에서 넓게 쓰는 페이지 (홈·물건·업체·프로필). 나머지는 가운데 한 컬럼 (app.css 의 html.pc-wide)
   if (/^\/(index(\.html)?)?$|^\/(product|business|biz\/(?!new|verify)|profile)/.test(location.pathname)) document.documentElement.classList.add('pc-wide');
 
-  // PC 에서 홈과 같은 좌우 여백(내용 폭 70%)을 쓰는 페이지: 채팅·마이 (app.css 의 html.pc-70)
-  if (/^\/(chat|mypage)(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
+  // PC 에서 홈과 같은 좌우 여백(내용 폭 70%)을 쓰는 페이지: 채팅·마이와 마이 하위 화면 (app.css 의 html.pc-70)
+  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|shipping|cart|my-biz|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
 
   // ---- 하단 탭바 ----
   var TABS = [
