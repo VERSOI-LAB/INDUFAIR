@@ -278,6 +278,44 @@
       '<div class="bz-name">' + PS.esc(b.name) + '</div>' +
       '<div class="bz-meta">' + PS.esc(meta) + '</div></a>';
   };
+  // ---- 결제한 주문 (판매관리의 주문 내역 / 구매내역의 결제한 주문) ----
+  PS.ORDER_COLUMNS = 'id,order_no,buyer_id,seller_id,product_id,product_title,option_name,item_amount,shipping_fee,total_amount,' +
+    'recipient,phone,zipcode,address,status,payment_method,paid_at,created_at,' +
+    'market_order_items(product_id,product_title,option_name,unit_price,qty,line_amount)';
+  // 결제가 끝난 주문과 취소된 주문만 (결제창에서 그만둔 주문은 제외)
+  PS.myOrders = async function (role) {
+    var res = await sb.from('market_orders').select(PS.ORDER_COLUMNS)
+      .eq(role === 'seller' ? 'seller_id' : 'buyer_id', PS.user.id).in('status', ['paid', 'canceled'])
+      .order('created_at', { ascending: false }).limit(200);
+    return res.error ? [] : (res.data || []);
+  };
+  // role: 'seller' 는 받는 분·배송지를 크게, 'buyer' 는 판매자와 내 배송지. names: { profileId: { name } }
+  PS.orderCardHtml = function (o, role, names) {
+    var d = new Date(o.paid_at || o.created_at);
+    var when = d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    var items = (o.market_order_items || []).length ? o.market_order_items
+      : [{ product_id: o.product_id, product_title: o.product_title, option_name: o.option_name, qty: 1, line_amount: o.item_amount }];
+    var other = (names || {})[role === 'seller' ? o.buyer_id : o.seller_id] || {};
+    var won = function (n) { return Number(n || 0).toLocaleString('ko-KR') + '원'; };
+    return '<article class="ocard' + (o.status === 'canceled' ? ' off' : '') + '">' +
+      '<header><span class="badge ' + (o.status === 'paid' ? 'paid' : 'sold') + '">' + (o.status === 'paid' ? '결제완료' : '취소됨') + '</span>' +
+        '<time>' + when + '</time><span class="no">' + PS.esc(o.order_no) + '</span></header>' +
+      '<ul class="oitems">' + items.map(function (it) {
+        var t = PS.esc(it.product_title) + (it.option_name ? ' <small>' + PS.esc(it.option_name) + '</small>' : '');
+        return '<li>' + (it.product_id ? '<a href="' + PS.productUrl(it.product_id) + '">' + t + '</a>' : '<span>' + t + '</span>') +
+          '<em>' + (it.qty || 1) + '개 · ' + won(it.line_amount) + '</em></li>';
+      }).join('') + '</ul>' +
+      '<dl class="osum"><dt>상품 합계</dt><dd>' + won(o.item_amount) + '</dd><dt>배송비</dt><dd>' + (o.shipping_fee ? won(o.shipping_fee) : '무료') + '</dd>' +
+        '<dt class="tot">결제 금액</dt><dd class="tot">' + won(o.total_amount) + '</dd></dl>' +
+      '<dl class="oship">' +
+        (role === 'seller' ? '<dt>구매자</dt><dd>' + PS.esc(other.name || '구매자') + '</dd>'
+          : '<dt>판매자</dt><dd><a href="' + PS.profileUrl(o.seller_id) + '">' + PS.esc(other.name || '판매자') + ' ›</a></dd>') +
+        '<dt>받는 분</dt><dd>' + PS.esc(o.recipient) + '</dd>' +
+        '<dt>연락처</dt><dd>' + (role === 'seller' ? '<a href="tel:' + PS.esc(String(o.phone).replace(/[^0-9+]/g, '')) + '">' + PS.esc(o.phone) + '</a>' : PS.esc(o.phone)) + '</dd>' +
+        '<dt>' + (role === 'seller' ? '보낼 곳' : '배송지') + '</dt><dd>' + (o.zipcode ? '(' + PS.esc(o.zipcode) + ') ' : '') + PS.esc(o.address) + '</dd>' +
+      '</dl></article>';
+  };
+
   PS.myVerification = async function () {
     if (!PS.user) return null;
     var r = await sb.from('business_verifications').select('company_name,biz_reg_no,verified_at,nts_status').eq('profile_id', PS.user.id).maybeSingle();
