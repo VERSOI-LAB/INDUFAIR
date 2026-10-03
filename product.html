@@ -76,7 +76,9 @@
 
   /* PC: 왼쪽 사진(고정), 오른쪽 정보. 구매 버튼줄은 오른쪽 칸 아래에 */
   @media (min-width:1101px){
-    .app,.app.no-tabbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px;align-items:start;padding:32px 24px 140px;}
+    .app,.app.no-tabbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px;align-items:start;
+      padding:32px max(24px, calc((100% - var(--app-w)) / 2 + 24px)) 140px;}
+    .app > *{max-width:none;margin-left:0;margin-right:0;}
     .slider-wrap{position:sticky;top:calc(var(--head-h) + 32px);border-radius:20px;overflow:hidden;border:1px solid var(--line);}
     .slider{max-height:none;}
     .page{padding:0;}
