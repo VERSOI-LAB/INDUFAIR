@@ -124,6 +124,8 @@
     $('statusSheet').classList.add('show');
     $('sheetBg').classList.add('show');
   });
+  // 주문 내역의 발송함·주문 취소·취소 요청 동의/거절
+  PS.bindOrderActions($('list'), 'seller', function (id) { return orders.filter(function (o) { return o.id === id; })[0]; }, load);
   function closeSheet() { $('statusSheet').classList.remove('show'); $('sheetBg').classList.remove('show'); }
   $('sheetBg').addEventListener('click', closeSheet);
   $('statusSheet').addEventListener('click', async function (e) {

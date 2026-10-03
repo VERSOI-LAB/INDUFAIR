@@ -43,6 +43,8 @@
   var TABS = { orders: '결제한 주문', all: '문의한 물건', sold: '판매완료' };
 
   PS.ready.then(function (user) { if (!user) return PS.goLogin(); load(); });
+  // 결제한 주문의 주문 취소·취소 요청
+  PS.bindOrderActions($('list'), 'buyer', function (id) { return orders.filter(function (o) { return o.id === id; })[0]; }, load);
 
   async function load() {
     var res = await sb.from('chats').select('id,last_message_at,created_at,products(' + PS.PRODUCT_LIST_COLUMNS + ')')
