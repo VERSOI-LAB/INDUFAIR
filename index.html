@@ -25,19 +25,28 @@
   .pick-card.buy{background:#EAF2FE;}
   .pick-card.buy .go{background:#2F5BD3;color:#fff;}
   .more{margin:24px 0 8px;}
-  /* PC: 왼쪽에 소개·판다/산다, 오른쪽에 방금 올라온 물건 */
+  /* PC: 화면 좌우를 꽉 채움. 소개 → 판다/산다(화면 폭의 70%) → 방금 올라온 물건(2칸) */
   @media (min-width:1101px){
-    .page{display:grid;grid-template-columns:440px minmax(0,1fr);column-gap:64px;align-items:start;padding-top:24px;}
-    .hero{grid-column:1;grid-row:1;padding-top:16px;text-align:left;}
+    :root{--wide-w:100%;} /* 홈은 헤더·본문 모두 화면 폭 전체 */
+    .page{padding:8px 40px 0;}
+    .tabbar{padding:0 40px;}
+    .hero{padding-top:32px;}
     .hero .brand{display:none;} /* 로고는 상단 헤더에 있음 */
-    .hero h1{font-size:30px;white-space:normal;line-height:1.3;text-wrap:balance;}
-    .hero p{font-size:18px;margin-top:10px;}
-    .actions{grid-column:1;grid-row:2;position:sticky;top:calc(var(--head-h) + 24px);}
+    .hero h1{font-size:34px;white-space:nowrap;}
+    .hero p{font-size:19px;margin-top:10px;}
+    .actions{width:70vw;max-width:100%;margin:28px auto 0;gap:20px;}
     .pick-card{transition:transform .15s ease,box-shadow .15s ease;}
     .pick-card:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(0,0,0,.10);}
-    .sec-title{grid-column:2;grid-row:1;align-self:end;margin:16px 0 4px;font-size:22px;}
-    .list,.page > .empty{grid-column:2;grid-row:2;}
-    .more{grid-column:2;grid-row:3;}
+    /* 그림은 원래 비율 그대로 가운데, 카드 배경색만 좌우로 늘어남 (그림 가장자리는 배경색에 녹아들게) */
+    .pick-card.sell{background:#FBF6EA;}
+    .pick-card.buy{background:#EBF5FE;}
+    .pick-card > img{width:auto;height:clamp(300px,42vh,460px);aspect-ratio:3/4;object-fit:contain;margin:0 auto;
+      -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
+    .pick-card .go{height:64px;font-size:20px;}
+    .sec-title{margin-top:44px;font-size:24px;}
+    .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:48px;}
+    .list .row:nth-last-child(2):nth-child(odd){border-bottom:none;} /* 마지막 줄은 두 칸 모두 밑줄 없음 */
+    .more{max-width:360px;margin-left:auto;margin-right:auto;}
   }
 </style>
 </head>
