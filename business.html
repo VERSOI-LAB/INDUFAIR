@@ -30,6 +30,8 @@
   .mini-btn,.mini-bg{display:none;} /* 지도 크게 보기는 PC 전용 */
   .where{font-size:15px;color:var(--sub);margin-top:8px;}
   .stats{margin:20px 0 8px;font-size:14px;color:var(--hint);}
+  .prods-h{font-size:20px;font-weight:800;margin:20px 0 14px;padding-top:24px;border-top:1px solid var(--line);}
+  .prods-h em{font-style:normal;color:var(--hint);font-weight:700;margin-left:2px;}
   .owner{display:flex;align-items:center;gap:12px;padding:16px 0;border-top:1px solid var(--line);margin-top:20px;}
   .owner .avatar{width:40px;height:40px;border-radius:50%;background:var(--primary-light);overflow:hidden;flex-shrink:0;}
   .owner .avatar img{width:100%;height:100%;object-fit:cover;}
@@ -134,6 +136,7 @@
     renderBar();
     $('moreBtn').hidden = false;
     renderMap();
+    renderProducts();
   }
 
   function renderSlider() {
@@ -165,8 +168,19 @@
         '<button type="button" class="mini-btn mini-close" id="miniClose" aria-label="지도 작게 되돌리기">' + PS.icon('close', 22) + '</button></div>' : '') +
       (b.region ? '<p class="where">📍 ' + PS.esc(b.region) + ' 근처</p>' : '') +
       '<a class="owner" href="' + PS.profileUrl(b.owner_id) + '"><div class="avatar">' + PS.avatarHtml(owner.avatar_url) + '</div>' +
-        '<div style="flex:1;min-width:0"><b style="display:block">' + PS.esc(owner.name || '대표') + '</b><span style="font-size:14px;color:var(--sub)">올린 물건 보기 ›</span></div></a>' +
-      '<div class="stats">찜 ' + (b.like_count || 0) + ' · 조회 ' + (b.view_count || 0) + ' · ' + PS.ago(b.created_at) + ' 소개</div>';
+        '<div style="flex:1;min-width:0"><b style="display:block">' + PS.esc(owner.name || '대표') + '</b><span style="font-size:14px;color:var(--sub)">판매자 프로필 보기 ›</span></div></a>' +
+      '<div class="stats">찜 ' + (b.like_count || 0) + ' · 조회 ' + (b.view_count || 0) + ' · ' + PS.ago(b.created_at) + ' 소개</div>' +
+      '<section id="prods"></section>';
+  }
+
+  // 이 업체(대표)가 올린 판매중 물건을 바로 아래에 보여줌
+  async function renderProducts() {
+    var res = await sb.from('products').select(PS.PRODUCT_LIST_COLUMNS)
+      .eq('seller_profile_id', biz.owner_id).in('status', ['selling', 'reserved'])
+      .order('created_at', { ascending: false }).limit(60);
+    var rows = res.data || [];
+    if (!rows.length || !$('prods')) return;
+    $('prods').innerHTML = '<h2 class="prods-h">올린 물건 <em>' + rows.length + '</em></h2><div class="grid">' + rows.map(PS.cardHtml).join('') + '</div>';
   }
 
   async function renderMap() {

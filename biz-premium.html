@@ -20,6 +20,10 @@
   .plan li .ck{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;margin-top:1px;}
   .free{margin-top:12px;padding:14px 16px;border-radius:14px;background:var(--bg);font-size:14px;color:var(--sub);line-height:1.5;}
   .notes{margin:20px 0 0;padding-left:18px;font-size:14px;color:var(--sub);line-height:1.7;}
+  .refund{margin-top:20px;padding:16px 18px;border-radius:14px;background:var(--bg);font-size:14px;color:var(--sub);line-height:1.7;}
+  .refund b{display:block;font-size:15px;color:var(--text);margin-bottom:4px;}
+  .refund ul{margin:0;padding-left:18px;}
+  .refund a{display:inline-block;margin-top:6px;text-decoration:underline;}
   .agree{display:flex;gap:10px;align-items:flex-start;margin-top:20px;font-size:15px;font-weight:600;line-height:1.5;cursor:pointer;}
   .agree input{width:22px;height:22px;flex-shrink:0;margin:1px 0 0;accent-color:var(--primary-press);}
   .state{margin-top:16px;padding:20px;border-radius:20px;border:1.5px solid var(--line);}
@@ -128,16 +132,23 @@
       '<li><span class="ck">✓</span><div><b>동네 업체 맨 앞 고정</b><span>산다 화면의 "이웃들이 찾는 동네 업체"에서 항상 먼저 보여요</span></div></li></ul></div>' +
       '<p class="free">프리미엄이 아니어도 업체 소개 관리에서 <b>하루에 한 번</b> 직접 끌어올릴 수 있어요.</p>';
 
+    // 해지·환불 기준 (이용약관 제9조의2 와 같은 내용)
+    var refund = '<div class="refund"><b>해지·환불 안내</b><ul>' +
+      '<li>자동결제를 해지해도 결제한 날부터 1달 동안은 프리미엄이 그대로 유지돼요.</li>' +
+      '<li>그 1달이 지나면 프리미엄과 자동결제가 모두 끝나요.</li>' +
+      '<li>이미 결제한 이용 기간의 요금은 따로 환불되지 않아요.</li></ul>' +
+      '<a href="/terms">이용약관 보기</a></div>';
+
     if (sub && sub.status === 'active' && live) {
-      html += '<ul class="notes"><li>해지해도 ' + day(sub.period_end) + '까지는 프리미엄이 그대로 적용돼요.</li><li>해지하면 다음 결제일부터 청구되지 않아요.</li></ul>' +
+      html += '<ul class="notes"><li>해지해도 ' + day(sub.period_end) + '까지는 프리미엄이 그대로 적용돼요.</li><li>해지하면 다음 결제일부터 청구되지 않아요.</li></ul>' + refund +
         '<div class="acts"><button class="btn white" id="cancelBtn">프리미엄 해지하기</button></div>';
     } else {
       var again = sub && sub.status === 'canceled' && live;
       html += '<ul class="notes">' +
         (again ? '<li>이미 결제한 ' + day(sub.period_end) + '까지는 추가 결제가 없고, 그날부터 매월 자동으로 결제돼요.</li>'
           : '<li>카드를 등록하면 오늘 ' + PRICE.toLocaleString('ko-KR') + '원이 결제되고, 매월 같은 날 자동으로 결제돼요.</li>') +
-        '<li>언제든 이 화면에서 해지할 수 있고, 해지해도 결제한 기간 끝까지는 그대로 이용해요.</li>' +
-        '<li>환불이 필요하면 고객센터로 알려 주세요.</li></ul>' +
+        '<li>언제든 이 화면이나 업체 소개 관리에서 바로 해지할 수 있어요.</li>' +
+        '</ul>' + refund +
         '<label class="agree"><input type="checkbox" id="agree"><span>매월 ' + PRICE.toLocaleString('ko-KR') + '원이 등록한 카드로 자동 결제되는 것에 동의해요</span></label>' +
         '<div class="acts"><button class="btn" id="startBtn" disabled>' + (again ? '카드 등록하고 다시 시작하기' : sub && sub.status === 'past_due' ? '카드 다시 등록하기' : '카드 등록하고 시작하기') + '</button></div>';
     }
