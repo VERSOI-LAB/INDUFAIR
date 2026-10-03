@@ -20,7 +20,7 @@
   };
   PS.CONDITIONS = { great: '아주 좋아요', good: '괜찮아요', broken: '고장 있어요' };
   PS.USAGE = { new: '신품', lt1: '1년 미만', '1to3': '1~3년', gt3: '3년 이상' };
-  PS.STATUS = { selling: '판매중', reserved: '예약중', sold: '판매완료' };
+  PS.STATUS = { selling: '판매중', sold: '판매완료' };
 
   PS.esc = function (s) {
     return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (c) {
@@ -157,7 +157,6 @@
   };
 
   function statusBadge(p) {
-    if (p.status === 'reserved') return '<span class="badge reserved">예약중</span>';
     if (p.status === 'sold') return '<span class="badge sold">판매완료</span>';
     return '';
   }
@@ -417,8 +416,8 @@
   // PC 에서 넓게 쓰는 페이지 (홈·물건·업체·프로필). 나머지는 가운데 한 컬럼 (app.css 의 html.pc-wide)
   if (/^\/(index(\.html)?)?$|^\/(product|business|biz\/(?!new|verify)|profile)/.test(location.pathname)) document.documentElement.classList.add('pc-wide');
 
-  // PC 에서 홈과 같은 좌우 여백(내용 폭 70%)을 쓰는 페이지: 채팅·마이와 마이 하위 화면 (app.css 의 html.pc-70)
-  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|shipping|cart|my-biz|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
+  // PC 에서 홈과 같은 좌우 여백(내용 폭 70%)을 쓰는 페이지: 채팅·마이와 마이 하위 화면, 결제, 물건 수정 (app.css 의 html.pc-70)
+  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|shipping|cart|checkout|edit|my-biz|biz-premium|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
 
   // ---- 하단 탭바 ----
   var TABS = [
@@ -461,7 +460,7 @@
       : /^\/sell/.test(path) ? 'sell'
       : /^\/(buy|product|checkout|pay-|biz\/(?!new|verify)|business)/.test(path) ? 'buy'
       : /^\/chat/.test(path) ? 'chat'
-      : /^\/(mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|my-biz|biz\/new|biz\/verify|biz-new|biz-verify)/.test(path) ? 'my' : '';
+      : /^\/(mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|my-biz|biz-premium|biz\/new|biz\/verify|biz-new|biz-verify)/.test(path) ? 'my' : '';
     PS.renderTabbar(key);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(autoTabbar, 0); });

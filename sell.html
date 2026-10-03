@@ -268,6 +268,7 @@
   function hasExtra() { return !!(form.usage || form.condition || $('descInput').value.trim()); }
 
   function validate() {
+    if (step === 2) syncShip(); // 가격·규격이 바뀔 때마다 배송비 포함 고정 여부를 다시 봄
     var ok = false;
     if (step === 1) ok = photos.length > 0 && !!form.title.trim() && !!form.category;
     if (step === 2) ok = (form.price > 0 || allSpecsPriced()) && (!form.shipSep || form.ship > 0);
@@ -548,13 +549,38 @@
 
   // ---------- 배송비 (포함 / 별도) ----------
   form.shipSep = false; form.ship = 0;
+  var shipWant = false; // 판매자가 직접 고른 값 (true = 별도)
+  var freeMin = 0;      // 배송비 설정의 무료 기준 금액 (0 = 안 정함)
+  PS.ready.then(async function (user) {
+    if (!user) return;
+    freeMin = (await PS.freeShipMins([user.id]))[user.id] || 0;
+    syncShip();
+  });
+  // 사는 사람이 내는 가장 낮은 가격 (규격별 가격이 있으면 그중 가장 낮은 값)
+  function lowestPrice() {
+    var named = form.specs.filter(function (sp) { return sp.name.trim(); });
+    var prices = named.length > 1 ? named.map(function (sp) { return sp.price || form.price; }) : [form.price];
+    return Math.min.apply(null, prices);
+  }
+  // 무료 기준 금액 이상이면 배송비 포함으로 고정, 아니면 판매자가 고른 대로
+  function syncShip() {
+    var locked = freeMin > 0 && lowestPrice() >= freeMin;
+    form.shipSep = locked ? false : shipWant;
+    $('shipChips').querySelectorAll('.chip').forEach(function (c) {
+      var sep = c.dataset.sep === '1';
+      c.classList.toggle('on', sep === form.shipSep);
+      c.disabled = locked && sep;
+      c.style.opacity = locked && sep ? '.4' : '';
+    });
+    $('shipRow').hidden = !form.shipSep;
+    $('shipHint').textContent = locked ? PS.won(freeMin) + ' 이상은 배송비 무료로 정해 두셔서 배송비 포함으로 등록돼요'
+      : form.shipSep ? '사는 사람이 결제할 때 물건 가격에 더해져요' : '물건 가격에 배송비가 들어 있어요';
+  }
   $('shipChips').addEventListener('click', function (e) {
     var b = e.target.closest('.chip');
-    if (!b) return;
-    form.shipSep = b.dataset.sep === '1';
-    $('shipChips').querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('on', c === b); });
-    $('shipRow').hidden = !form.shipSep;
-    $('shipHint').textContent = form.shipSep ? '사는 사람이 결제할 때 물건 가격에 더해져요' : '물건 가격에 배송비가 들어 있어요';
+    if (!b || b.disabled) return;
+    shipWant = b.dataset.sep === '1';
+    syncShip();
     if (form.shipSep) $('shipInput').focus();
     validate();
   });
