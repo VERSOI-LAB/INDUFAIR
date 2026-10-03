@@ -228,6 +228,18 @@ p{margin:0;}
 .ocard .osum .tot{font-weight:800;font-size:17px;color:var(--text);}
 .ocard .oship dd{text-align:left;font-weight:600;}
 .ocard .oship a{text-decoration:underline;}
+.ocard .ostate{margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--bg);font-size:14px;color:var(--sub);line-height:1.5;overflow-wrap:anywhere;}
+.ocard .ostate b{display:block;font-size:15px;color:var(--text);}
+.ocard .ostate.ship{background:#F4FBF6;}
+.ocard .ostate.cancel{background:#FFF0EF;}
+.ocard .ostate.cancel b{color:var(--danger);}
+.ocard .oacts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+.ocard .oacts .btn{flex:1 1 140px;width:auto;}
+.ocard.off .ostate{opacity:1;}
+/* 주문 발송·취소 입력 창 */
+.osheet h3{font-size:19px;font-weight:800;padding:4px 0 0;}
+.osheet .ohint{font-size:14px;color:var(--sub);margin-top:8px;line-height:1.5;}
+.osheet select.input{appearance:auto;}
 
 /* 회색 바탕 위 흰 카드 메뉴 (마이페이지 등) */
 .gray-page{background:#F2F3F5;}

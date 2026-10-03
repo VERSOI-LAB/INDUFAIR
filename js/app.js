@@ -283,10 +283,23 @@
     'recipient,phone,zipcode,address,status,payment_method,paid_at,created_at,' +
     'market_order_items(product_id,product_title,option_name,unit_price,qty,line_amount)';
   // 결제가 끝난 주문과 취소된 주문만 (결제창에서 그만둔 주문은 제외)
+  // 발송·취소 정보 (컬럼이 아직 없으면 빼고 조회)
+  PS.ORDER_EXTRA_COLUMNS = 'shipped_at,carrier,tracking_no,cancel_request_status,cancel_request_reason,cancel_requested_at,canceled_at,canceled_by,cancel_reason';
+  PS.CARRIERS = [
+    'CJ대한통운', '우체국택배', '한진택배', '롯데택배', '로젠택배',          // 종합 택배
+    'GS25 편의점택배', 'CU 편의점택배', '홈픽',                              // 편의점·방문 수거
+    '경동택배', '대신택배', '합동택배', '건영택배', '천일택배', '일양로지스', // 화물·기업 물류
+    '화물·용달', '직접 전달'
+  ];
+  PS.CARRIERS_NO_TRACKING = ['화물·용달', '직접 전달']; // 송장번호 없이도 발송 처리 가능
   PS.myOrders = async function (role) {
-    var res = await sb.from('market_orders').select(PS.ORDER_COLUMNS)
-      .eq(role === 'seller' ? 'seller_id' : 'buyer_id', PS.user.id).in('status', ['paid', 'canceled'])
-      .order('created_at', { ascending: false }).limit(200);
+    var q = function (cols) {
+      return sb.from('market_orders').select(cols)
+        .eq(role === 'seller' ? 'seller_id' : 'buyer_id', PS.user.id).in('status', ['paid', 'canceled'])
+        .order('created_at', { ascending: false }).limit(200);
+    };
+    var res = await q(PS.ORDER_COLUMNS + ',' + PS.ORDER_EXTRA_COLUMNS);
+    if (res.error) res = await q(PS.ORDER_COLUMNS);
     return res.error ? [] : (res.data || []);
   };
   // role: 'seller' 는 받는 분·배송지를 크게, 'buyer' 는 판매자와 내 배송지. names: { profileId: { name } }
@@ -297,9 +310,34 @@
       : [{ product_id: o.product_id, product_title: o.product_title, option_name: o.option_name, qty: 1, line_amount: o.item_amount }];
     var other = (names || {})[role === 'seller' ? o.buyer_id : o.seller_id] || {};
     var won = function (n) { return Number(n || 0).toLocaleString('ko-KR') + '원'; };
+    var md = function (iso) { var x = new Date(iso); return (x.getMonth() + 1) + '.' + x.getDate(); };
+    var seller = role === 'seller', paid = o.status === 'paid', shipped = !!o.shipped_at, req = o.cancel_request_status;
+    // 배송·취소 상태 한 줄
+    var state = '';
+    if (o.status === 'canceled') {
+      state = '<p class="ostate cancel"><b>' + (o.canceled_by === 'seller' ? '판매자가 취소' : o.canceled_by === 'buyer' ? '구매자가 취소' : '취소됨') +
+        (o.canceled_at ? ' · ' + md(o.canceled_at) : '') + '</b>' + (o.cancel_reason ? '사유: ' + PS.esc(o.cancel_reason) : '') + '<br>결제 금액은 전액 환불돼요.</p>';
+    } else if (paid) {
+      state = shipped
+        ? '<p class="ostate ship"><b>발송함 · ' + md(o.shipped_at) + '</b>' + PS.esc(o.carrier || '') + (o.tracking_no ? ' ' + PS.esc(o.tracking_no) : '') + '</p>'
+        : '<p class="ostate"><b>배송 준비 중</b>' + (seller ? '물건을 보낸 뒤 "발송함"을 눌러 주세요' : '판매자가 발송하면 송장번호가 보여요') + '</p>';
+      if (req === 'requested') state += '<p class="ostate cancel"><b>' + (seller ? '구매자가 취소를 요청했어요' : '취소 요청 중') + '</b>' +
+        '사유: ' + PS.esc(o.cancel_request_reason || '') + (seller ? '' : '<br>판매자의 답을 기다리고 있어요') + '</p>';
+      if (req === 'rejected' && !seller) state += '<p class="ostate cancel"><b>판매자가 취소 요청에 동의하지 않았어요</b>채팅으로 판매자와 이야기해 보세요</p>';
+    }
+    // 할 수 있는 일
+    var btn = function (act, label, cls) { return '<button type="button" class="btn small ' + (cls || 'white') + '" data-oact="' + act + '" data-oid="' + PS.esc(o.id) + '">' + label + '</button>'; };
+    var acts = '';
+    if (paid && seller) {
+      if (req === 'requested') acts += btn('approve', '취소 동의 (전액 환불)', '') + btn('reject', '요청 거절');
+      acts += btn('ship', shipped ? '송장 수정' : '발송함', shipped || req === 'requested' ? 'white' : '') + (req === 'requested' ? '' : btn('cancel', '주문 취소'));
+    } else if (paid) {
+      if (!shipped) acts += btn('cancel', '주문 취소');
+      else if (req !== 'requested') acts += btn('request', req === 'rejected' ? '취소 다시 요청' : '취소 요청');
+    }
     return '<article class="ocard' + (o.status === 'canceled' ? ' off' : '') + '">' +
       '<header><span class="badge ' + (o.status === 'paid' ? 'paid' : 'sold') + '">' + (o.status === 'paid' ? '결제완료' : '취소됨') + '</span>' +
-        '<time>' + when + '</time><span class="no">' + PS.esc(o.order_no) + '</span></header>' +
+        '<time>' + when + '</time><span class="no">' + PS.esc(o.order_no) + '</span></header>' + state +
       '<ul class="oitems">' + items.map(function (it) {
         var t = PS.esc(it.product_title) + (it.option_name ? ' <small>' + PS.esc(it.option_name) + '</small>' : '');
         return '<li>' + (it.product_id ? '<a href="' + PS.productUrl(it.product_id) + '">' + t + '</a>' : '<span>' + t + '</span>') +
@@ -313,7 +351,112 @@
         '<dt>받는 분</dt><dd>' + PS.esc(o.recipient) + '</dd>' +
         '<dt>연락처</dt><dd>' + (role === 'seller' ? '<a href="tel:' + PS.esc(String(o.phone).replace(/[^0-9+]/g, '')) + '">' + PS.esc(o.phone) + '</a>' : PS.esc(o.phone)) + '</dd>' +
         '<dt>' + (role === 'seller' ? '보낼 곳' : '배송지') + '</dt><dd>' + (o.zipcode ? '(' + PS.esc(o.zipcode) + ') ' : '') + PS.esc(o.address) + '</dd>' +
-      '</dl></article>';
+      '</dl>' + (acts ? '<div class="oacts">' + acts + '</div>' : '') + '</article>';
+  };
+
+  // 주문 카드의 버튼(발송함·주문 취소·취소 요청·동의·거절) 동작. getOrder(id) 는 주문 한 건, reload() 는 목록 다시 불러오기
+  PS.bindOrderActions = function (listEl, role, getOrder, reload) {
+    var bg = null, sheet = null;
+    function close() { if (sheet) { sheet.classList.remove('show'); bg.classList.remove('show'); } }
+    function open(html) {
+      if (!sheet) {
+        bg = document.createElement('div'); bg.className = 'sheet-bg';
+        sheet = document.createElement('div'); sheet.className = 'sheet osheet'; sheet.setAttribute('role', 'dialog');
+        document.body.appendChild(bg); document.body.appendChild(sheet);
+        bg.addEventListener('click', close);
+      }
+      sheet.innerHTML = '<div class="handle"></div>' + html;
+      bg.classList.add('show'); sheet.classList.add('show');
+      return sheet;
+    }
+    // 서버(order-cancel): 토스 결제 취소 + 주문을 취소됨으로
+    async function refund(orderId, reason) {
+      var token = await PS.accessToken();
+      var res = await fetch(PS.FUNCTIONS_URL + '/order-cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ orderId: orderId, reason: reason || '' })
+      });
+      var d = await res.json().catch(function () { return {}; });
+      if (res.ok && d.ok) return '';
+      return d.code === 'not_configured' ? '결제가 아직 준비 중이라 취소할 수 없어요'
+        : d.code === 'already_shipped' ? '이미 발송된 주문이에요. 취소 요청을 보내 주세요'
+        : (d.message || '취소하지 못했어요. 잠시 후 다시 해 주세요');
+    }
+    function done(msg) { close(); PS.toast(msg); reload(); }
+
+    listEl.addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-oact]');
+      if (!b) return;
+      var act = b.dataset.oact, o = getOrder(b.dataset.oid);
+      if (!o) return;
+
+      if (act === 'ship') {
+        var s = open('<h3>' + (o.shipped_at ? '송장 정보 수정' : '발송 정보 입력') + '</h3>' +
+          '<label class="field"><span>배송업체</span><select class="input" id="oCarrier">' + PS.CARRIERS.map(function (c) {
+            return '<option' + (c === o.carrier ? ' selected' : '') + '>' + PS.esc(c) + '</option>';
+          }).join('') + '</select></label>' +
+          '<label class="field"><span>송장번호</span><input class="input" id="oTrack" inputmode="numeric" maxlength="40" autocomplete="off" placeholder="숫자만 입력" value="' + PS.esc(o.tracking_no || '') + '"></label>' +
+          '<p class="ohint" id="oTrackHint">화물·용달이나 직접 전달은 송장번호 없이 저장할 수 있어요.</p>' +
+          '<button type="button" class="btn" id="oSubmit" style="margin-top:16px">' + (o.shipped_at ? '저장하기' : '발송함') + '</button>');
+        s.querySelector('#oSubmit').addEventListener('click', async function () {
+          var carrier = s.querySelector('#oCarrier').value, no = s.querySelector('#oTrack').value.trim();
+          if (!no && PS.CARRIERS_NO_TRACKING.indexOf(carrier) < 0) { PS.toast('송장번호를 써 주세요'); return; }
+          this.disabled = true;
+          var r = await sb.rpc('ship_market_order', { p_order_id: o.id, p_carrier: carrier, p_tracking_no: no });
+          this.disabled = false;
+          if (r.error || r.data !== 'ok') { PS.toast('저장하지 못했어요. 잠시 후 다시 해 주세요'); return; }
+          done(o.shipped_at ? '송장 정보를 바꿨어요' : '발송 처리했어요');
+        });
+        return;
+      }
+
+      if (act === 'cancel' || act === 'request') {
+        var isReq = act === 'request', seller = role === 'seller';
+        var s2 = open('<h3>' + (isReq ? '취소 요청' : '주문 취소') + '</h3>' +
+          '<p class="ohint">' + (isReq ? '이미 발송된 주문이라 판매자가 동의해야 취소돼요. 사유를 적어 요청해 주세요.'
+            : seller ? '사유는 구매자에게 그대로 보여요. 취소하면 결제 금액이 전액 환불돼요.' : '취소하면 결제 금액이 전액 환불돼요.') + '</p>' +
+          '<label class="field"><span>' + (isReq ? '요청 사유' : '취소 사유') + '</span><textarea class="textarea" id="oReason" maxlength="500" style="min-height:110px" placeholder="' +
+            (seller ? '예) 재고가 부족해요 / 이미 판매된 물건이에요' : '예) 다른 물건으로 잘못 주문했어요') + '"></textarea></label>' +
+          '<button type="button" class="btn danger" id="oSubmit" style="margin-top:16px">' + (isReq ? '취소 요청 보내기' : '주문 취소하고 환불하기') + '</button>');
+        s2.querySelector('#oSubmit').addEventListener('click', async function () {
+          var reason = s2.querySelector('#oReason').value.trim();
+          if (!reason) { PS.toast('사유를 써 주세요'); return; }
+          this.disabled = true;
+          if (isReq) {
+            var r2 = await sb.rpc('request_order_cancel', { p_order_id: o.id, p_reason: reason });
+            this.disabled = false;
+            if (r2.error || r2.data !== 'ok') { PS.toast('요청하지 못했어요. 잠시 후 다시 해 주세요'); return; }
+            done('판매자에게 취소를 요청했어요');
+          } else {
+            var err = await refund(o.id, reason);
+            this.disabled = false;
+            if (err) { PS.toast(err); return; }
+            done('주문을 취소했어요. 결제 금액은 환불돼요');
+          }
+        });
+        return;
+      }
+
+      if (act === 'approve') {
+        if (!confirm('구매자의 취소 요청에 동의할까요?\n결제 금액이 전액 환불돼요.')) return;
+        b.disabled = true;
+        var err2 = await refund(o.id, '');
+        b.disabled = false;
+        if (err2) { PS.toast(err2); return; }
+        done('취소에 동의했어요. 결제 금액은 환불돼요');
+        return;
+      }
+
+      if (act === 'reject') {
+        if (!confirm('구매자의 취소 요청을 거절할까요?')) return;
+        b.disabled = true;
+        var r3 = await sb.rpc('reject_order_cancel', { p_order_id: o.id });
+        b.disabled = false;
+        if (r3.error || r3.data !== 'ok') { PS.toast('처리하지 못했어요. 잠시 후 다시 해 주세요'); return; }
+        done('취소 요청을 거절했어요');
+      }
+    });
   };
 
   PS.myVerification = async function () {
