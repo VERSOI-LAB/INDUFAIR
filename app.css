@@ -191,9 +191,9 @@ p{margin:0;}
   border-radius:20px 20px 0 0;padding:12px 16px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .25s ease;}
 .sheet.show{transform:translateY(0);}
 .sheet .handle{width:40px;height:4px;border-radius:2px;background:#DDD;margin:0 auto 12px;}
-.sheet button.opt{display:block;width:100%;text-align:left;padding:16px 4px;font-size:18px;font-weight:600;border-bottom:1px solid var(--line);}
-.sheet button.opt:last-child{border-bottom:none;}
-.sheet button.opt{display:flex;align-items:center;gap:10px;}
+.sheet .opt{display:block;width:100%;text-align:left;padding:16px 4px;font-size:18px;font-weight:600;border-bottom:1px solid var(--line);}
+.sheet .opt:last-child{border-bottom:none;}
+.sheet .opt{display:flex;align-items:center;gap:10px;}
 
 /* 동네 업체 카드 */
 .bizgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px 12px;}
@@ -230,4 +230,52 @@ p{margin:0;}
 @media (min-width:481px){
   body{background:#F0F0F0;}
   .app{box-shadow:0 0 0 1px var(--line);}
+}
+
+/* ============ PC (넓은 화면) ============
+   같은 HTML 그대로, 1101px 이상에서만 PC 틀을 덧입힌다.
+   - 하단 탭바 → 상단 헤더 (로고 · 메뉴 · 검색)
+   - 폰 폭 기둥(480px) → 페이지 성격에 맞는 폭 (기본 640px, html.pc-wide 는 1120px)
+   --tabbar-h 를 0 으로 두면 탭바 높이만큼 띄우던 계산이 전부 그대로 맞는다. */
+.tabbar .tb-logo,.tabbar .tb-search{display:none;}
+@media (min-width:1101px){
+  :root{--app-w:640px;--tabbar-h:0px;--head-h:68px;--wide-w:1120px;}
+  html.pc-wide{--app-w:var(--wide-w);}
+  body{padding-top:var(--head-h);}
+  .app{min-height:calc(100vh - var(--head-h));padding-bottom:48px;}
+  .page{padding:0 24px;}
+  .topbar{top:var(--head-h);}
+
+  /* 상단 헤더 */
+  .tabbar{top:0;bottom:auto;height:var(--head-h);max-width:none;padding:0 max(24px, calc((100% - var(--wide-w)) / 2));
+    display:flex;align-items:center;gap:4px;border-top:none;border-bottom:1px solid var(--line);}
+  .tabbar a{flex-direction:row;gap:6px;height:44px;padding:0 14px;border-radius:12px;font-size:16px;font-weight:700;color:var(--sub);transition:background .15s ease,color .15s ease;}
+  .tabbar a:hover{background:var(--bg);color:var(--text);}
+  .tabbar a.on{background:var(--primary-light);}
+  .tabbar a .ti .i3d{width:24px !important;height:24px !important;}
+  .tabbar a.on .ti{transform:none;}
+  .tabbar .dot{position:static;margin-left:2px;}
+  .tabbar .tb-logo{display:flex;padding:0;margin-right:20px;height:auto;border-radius:0;}
+  .tabbar .tb-logo:hover{background:none;}
+  .tabbar .tb-logo img{height:22px;width:auto;}
+  .tabbar .tb-search{display:flex;margin-left:auto;width:320px;height:44px;padding:0 16px;border-radius:22px;}
+  .tabbar .tb-search input{font-size:16px;}
+
+  /* 마우스용 반응 */
+  .btn:hover:not(:disabled){background:var(--primary-press);}
+  .btn.white:hover:not(:disabled),.btn.gray:hover:not(:disabled){background:var(--bg);}
+  .row:hover .t,.card:hover .t{text-decoration:underline;}
+  .mrow:hover,.chat-item:hover{background:var(--bg);}
+  .chip:hover{border-color:#CCC;}
+
+  /* 아래에서 올라오는 시트 → 가운데 창 */
+  .sheet{left:50%;right:auto;bottom:auto;top:50%;width:420px;max-width:calc(100% - 48px);margin:0;border-radius:20px;padding:20px;
+    transform:translate(-50%,-46%);opacity:0;visibility:hidden;transition:transform .2s ease,opacity .2s ease,visibility .2s;}
+  .sheet.show{transform:translate(-50%,-50%);opacity:1;visibility:visible;}
+  .sheet .handle{display:none;}
+  .sheet .opt{padding:14px 12px;border-radius:12px;}
+  .sheet .opt:hover:not(:disabled){background:var(--bg);}
+
+  .toast{bottom:40px;}
+  .app .room{height:calc(100vh - var(--head-h));height:calc(100dvh - var(--head-h));}
 }

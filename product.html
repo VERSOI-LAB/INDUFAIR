@@ -73,6 +73,23 @@
   .hscroll{display:grid;grid-auto-flow:column;grid-auto-columns:38%;gap:12px;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px;}
   .hscroll::-webkit-scrollbar{display:none;}
   @media (min-width:600px){ .hscroll{grid-auto-columns:23%;} }
+
+  /* PC: 왼쪽 사진(고정), 오른쪽 정보. 구매 버튼줄은 오른쪽 칸 아래에 */
+  @media (min-width:1101px){
+    .app,.app.no-tabbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:40px;align-items:start;padding:32px 24px 140px;}
+    .slider-wrap{position:sticky;top:calc(var(--head-h) + 32px);border-radius:20px;overflow:hidden;border:1px solid var(--line);}
+    .slider{max-height:none;}
+    .page{padding:0;}
+    .seller{padding-top:0;}
+    .seller:hover{background:var(--bg);}
+    .title{font-size:26px;}
+    .price{font-size:30px;}
+    .rec{margin-left:0;margin-right:0;padding-left:0;padding-right:0;border-top-width:1px;border-top-color:var(--line);}
+    .hscroll{grid-auto-columns:31%;margin-right:0;padding-right:0;}
+    .page .grid{grid-template-columns:repeat(3,1fr);} /* 오른쪽 칸 폭 기준 */
+    .bar{left:50%;right:auto;width:calc(var(--app-w) / 2 - 20px);max-width:calc(50vw - 24px);margin:0 0 0 20px;bottom:24px !important;
+      border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 28px rgba(0,0,0,.12);padding:12px !important;}
+  }
 </style>
 </head>
 <body>

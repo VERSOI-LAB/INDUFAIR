@@ -414,6 +414,9 @@
     return map;
   };
 
+  // PC 에서 넓게 쓰는 페이지 (홈·물건·업체·프로필). 나머지는 가운데 한 컬럼 (app.css 의 html.pc-wide)
+  if (/^\/(index(\.html)?)?$|^\/(product|business|biz\/(?!new|verify)|profile)/.test(location.pathname)) document.documentElement.classList.add('pc-wide');
+
   // ---- 하단 탭바 ----
   var TABS = [
     { key: 'home', href: '/', icon: 'home', label: '홈' },
@@ -428,11 +431,14 @@
     var nav = document.createElement('nav');
     nav.className = 'tabbar';
     nav.setAttribute('aria-label', '메뉴');
-    nav.innerHTML = TABS.map(function (t) {
+    // PC(넓은 화면)에서는 이 탭바가 상단 헤더가 된다: 로고와 검색창은 PC 에서만 보임 (app.css)
+    nav.innerHTML = '<a class="tb-logo" href="/" aria-label="판다산다 홈"><img src="/이미지/web/logo-wordmark.png" alt="판다산다"></a>' + TABS.map(function (t) {
       return '<a href="' + t.href + '" class="' + (t.key === active ? 'on' : '') + '"' + (t.key === active ? ' aria-current="page"' : '') + '>' +
         '<span class="ti" aria-hidden="true">' + PS.icon3d(t.icon, 30) + '</span>' + t.label +
         (t.key === 'chat' ? '<span class="dot" id="chatDot"></span>' : '') + '</a>';
-    }).join('');
+    }).join('') + (active === 'buy' && location.pathname === '/buy' ? '' :
+      '<form class="search tb-search" action="/buy" role="search"><span aria-hidden="true" style="display:flex">' + PS.icon('search', 18) + '</span>' +
+      '<input name="q" type="search" placeholder="무엇을 찾으시나요?" autocomplete="off" aria-label="검색어"></form>');
     document.body.appendChild(nav);
     PS.ready.then(function (user) { if (user) refreshChatDot(); });
   };
