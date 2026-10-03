@@ -39,6 +39,10 @@ Deno.serve(async (req) => {
   if (o.status === "canceled") return json({ ok: true, already: true });
   if (o.status !== "paid" || !o.payment_key) return json({ code: "not_paid" }, 409);
 
+  // 이미 판매자에게 정산된 주문은 여기서 취소할 수 없음 (돈이 이미 나감)
+  const { data: st } = await admin.from("order_settlements").select("id,status").eq("order_id", o.id).maybeSingle();
+  if (st?.status === "paid") return json({ code: "already_settled" }, 409);
+
   const by = o.seller_id === user.id ? "seller" : "buyer";
   if (by === "buyer" && o.shipped_at) return json({ code: "already_shipped" }, 409); // 발송 뒤에는 판매자 동의가 필요
   // 판매자가 구매자의 취소 요청에 동의하는 경우: 사유를 따로 안 쓰면 구매자의 요청 사유를 남김
@@ -67,5 +71,6 @@ Deno.serve(async (req) => {
     console.error("order cancel save", error.message);
     return json({ code: "save_failed" }, 500);
   }
+  if (st) await admin.from("order_settlements").update({ status: "canceled" }).eq("id", st.id).neq("status", "paid");
   return json({ ok: true, by });
 });

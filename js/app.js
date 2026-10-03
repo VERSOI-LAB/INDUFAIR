@@ -285,6 +285,10 @@
   // 결제가 끝난 주문과 취소된 주문만 (결제창에서 그만둔 주문은 제외)
   // 발송·취소 정보 (컬럼이 아직 없으면 빼고 조회)
   PS.ORDER_EXTRA_COLUMNS = 'shipped_at,carrier,tracking_no,cancel_request_status,cancel_request_reason,cancel_requested_at,canceled_at,canceled_by,cancel_reason';
+  // 수령 완료와 정산 (정산 건은 판매자에게만 보임)
+  PS.ORDER_SETTLE_COLUMNS = 'received_at,received_auto,order_settlements(fee_rate,fee_amount,net_amount,due_at,status,paid_at)';
+  PS.FEE_RATE = 0.05;        // 판매 수수료율 (상품 금액 기준). 실제 계산은 DB 의 settlement_fee_rate() — 바꿀 때 같이 바꿀 것
+  PS.AUTO_RECEIVE_DAYS = 14; // 발송 후 이만큼 지나면 자동 수령 처리
   PS.CARRIERS = [
     'CJ대한통운', '우체국택배', '한진택배', '롯데택배', '로젠택배',          // 종합 택배
     'GS25 편의점택배', 'CU 편의점택배', '홈픽',                              // 편의점·방문 수거
@@ -298,7 +302,9 @@
         .eq(role === 'seller' ? 'seller_id' : 'buyer_id', PS.user.id).in('status', ['paid', 'canceled'])
         .order('created_at', { ascending: false }).limit(200);
     };
-    var res = await q(PS.ORDER_COLUMNS + ',' + PS.ORDER_EXTRA_COLUMNS);
+    // 새 컬럼이 아직 없으면(마이그레이션 전) 차례로 줄여서 조회
+    var res = await q(PS.ORDER_COLUMNS + ',' + PS.ORDER_EXTRA_COLUMNS + ',' + PS.ORDER_SETTLE_COLUMNS);
+    if (res.error) res = await q(PS.ORDER_COLUMNS + ',' + PS.ORDER_EXTRA_COLUMNS);
     if (res.error) res = await q(PS.ORDER_COLUMNS);
     return res.error ? [] : (res.data || []);
   };
@@ -325,15 +331,37 @@
         '사유: ' + PS.esc(o.cancel_request_reason || '') + (seller ? '' : '<br>판매자의 답을 기다리고 있어요') + '</p>';
       if (req === 'rejected' && !seller) state += '<p class="ostate cancel"><b>판매자가 취소 요청에 동의하지 않았어요</b>채팅으로 판매자와 이야기해 보세요</p>';
     }
+    // 수령·정산 상태
+    var received = !!o.received_at;
+    var st = Array.isArray(o.order_settlements) ? o.order_settlements[0] : o.order_settlements; // 판매자에게만 내려옴
+    if (paid && received) state += '<p class="ostate ship"><b>' + (o.received_auto ? '자동 수령 확인' : '수령 완료') + ' · ' + md(o.received_at) + '</b>' +
+      (o.received_auto ? '발송 후 ' + PS.AUTO_RECEIVE_DAYS + '일이 지나 자동으로 수령 처리됐어요' : (seller ? '구매자가 물건을 받았어요' : '물건을 받았다고 확인했어요')) + '</p>';
+    if (paid && seller && shipped) {
+      if (st && st.status === 'paid') {
+        state += '<p class="ostate settle"><b>정산 완료 · ' + md(st.paid_at) + '</b>' + won(st.net_amount) + ' 입금</p>';
+      } else if (st && st.status !== 'canceled') {
+        state += '<p class="ostate settle"><b>' + (new Date(st.due_at) > new Date() ? '정산 예정 · ' + md(st.due_at) : '정산 처리 중') + '</b>' +
+          '정산 금액 ' + won(st.net_amount) + ' (상품 ' + won(o.item_amount) + ' − 수수료 ' + Math.round(st.fee_rate * 100) + '% ' + won(st.fee_amount) +
+          (o.shipping_fee ? ' + 배송비 ' + won(o.shipping_fee) : '') + ')</p>';
+      } else if (!received) {
+        var auto = new Date(new Date(o.shipped_at).getTime() + PS.AUTO_RECEIVE_DAYS * 86400000);
+        var fee = Math.floor(o.item_amount * PS.FEE_RATE);
+        state += '<p class="ostate settle"><b>정산 대기</b>구매자가 수령 완료를 누르면 3일 안에, 누르지 않으면 ' + md(auto) + ' 이후 자동으로 정산돼요' +
+          (req === 'requested' ? ' (취소 요청에 답하기 전에는 보류)' : '') + '<br>예상 정산 금액 ' + won(o.item_amount - fee + o.shipping_fee) +
+          ' (수수료 ' + Math.round(PS.FEE_RATE * 100) + '% ' + won(fee) + ' 제외)</p>';
+      }
+    }
+    var settled = !!(st && st.status === 'paid');
     // 할 수 있는 일
     var btn = function (act, label, cls) { return '<button type="button" class="btn small ' + (cls || 'white') + '" data-oact="' + act + '" data-oid="' + PS.esc(o.id) + '">' + label + '</button>'; };
     var acts = '';
     if (paid && seller) {
       if (req === 'requested') acts += btn('approve', '취소 동의 (전액 환불)', '') + btn('reject', '요청 거절');
-      acts += btn('ship', shipped ? '송장 수정' : '발송함', shipped || req === 'requested' ? 'white' : '') + (req === 'requested' ? '' : btn('cancel', '주문 취소'));
+      if (!received) acts += btn('ship', shipped ? '송장 수정' : '발송함', shipped || req === 'requested' ? 'white' : '');
+      if (req !== 'requested' && !settled) acts += btn('cancel', '주문 취소'); // 정산이 끝난 주문은 취소 불가
     } else if (paid) {
       if (!shipped) acts += btn('cancel', '주문 취소');
-      else if (req !== 'requested') acts += btn('request', req === 'rejected' ? '취소 다시 요청' : '취소 요청');
+      else if (!received && req !== 'requested') acts += btn('receive', '수령 완료', '') + btn('request', req === 'rejected' ? '취소 다시 요청' : '취소 요청');
     }
     return '<article class="ocard' + (o.status === 'canceled' ? ' off' : '') + '">' +
       '<header><span class="badge ' + (o.status === 'paid' ? 'paid' : 'sold') + '">' + (o.status === 'paid' ? '결제완료' : '취소됨') + '</span>' +
@@ -380,6 +408,7 @@
       var d = await res.json().catch(function () { return {}; });
       if (res.ok && d.ok) return '';
       return d.code === 'not_configured' ? '결제가 아직 준비 중이라 취소할 수 없어요'
+        : d.code === 'already_settled' ? '이미 정산이 끝난 주문이라 여기서 취소할 수 없어요. 고객센터로 알려 주세요'
         : d.code === 'already_shipped' ? '이미 발송된 주문이에요. 취소 요청을 보내 주세요'
         : (d.message || '취소하지 못했어요. 잠시 후 다시 해 주세요');
     }
@@ -435,6 +464,16 @@
             done('주문을 취소했어요. 결제 금액은 환불돼요');
           }
         });
+        return;
+      }
+
+      if (act === 'receive') {
+        if (!confirm('물건을 받으셨나요?\n수령 완료를 누르면 취소 요청을 할 수 없고, 판매자에게 정산돼요.')) return;
+        b.disabled = true;
+        var r4 = await sb.rpc('confirm_order_received', { p_order_id: o.id });
+        b.disabled = false;
+        if (r4.error || r4.data !== 'ok') { PS.toast(r4.data === 'cancel_pending' ? '취소 요청에 대한 답을 먼저 기다려 주세요' : '처리하지 못했어요. 잠시 후 다시 해 주세요'); return; }
+        done('수령 완료! 이용해 주셔서 고마워요');
         return;
       }
 
