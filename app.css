@@ -233,9 +233,19 @@ p{margin:0;}
 .ocard .ostate.ship{background:#F4FBF6;}
 .ocard .ostate.cancel{background:#FFF0EF;}
 .ocard .ostate.cancel b{color:var(--danger);}
+.ocard .ostate.settle{background:#EAF2FE;}
+.ocard .ostate.settle b{color:#1E3FA8;}
+.ocard .ostate + .ostate{margin-top:8px;}
 .ocard .oacts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
 .ocard .oacts .btn{flex:1 1 140px;width:auto;}
 .ocard.off .ostate{opacity:1;}
+/* 정산 계좌 안내 (판매관리 → 주문 내역) */
+.payacct{display:flex;align-items:center;gap:12px;margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--bg);font-size:15px;}
+.payacct.need{background:#FFF0EF;}
+.payacct div{flex:1;min-width:0;}
+.payacct b{display:block;}
+.payacct span{font-size:13px;color:var(--sub);}
+.payacct .btn{width:auto;flex-shrink:0;padding:0 16px;}
 /* 주문 발송·취소 입력 창 */
 .osheet h3{font-size:19px;font-weight:800;padding:4px 0 0;}
 .osheet .ohint{font-size:14px;color:var(--sub);margin-top:8px;line-height:1.5;}
