@@ -67,6 +67,26 @@
   .fbtn{width:56px;height:56px;border-radius:50%;background:var(--surface);box-shadow:0 3px 12px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;}
   .fbtn.add{background:var(--primary);font-size:30px;font-weight:400;color:var(--text);}
   .map-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;color:var(--sub);font-size:15px;text-align:center;}
+
+  /* PC: 왼쪽에 검색·목록 패널, 오른쪽에 지도 (시트 끌기는 쓰지 않음) */
+  @media (min-width:1101px){
+    :root{--side-w:440px;}
+    #map{top:var(--head-h);bottom:0;left:var(--side-w);right:0;max-width:none;margin:0;}
+    .map-msg{top:calc(50% + var(--head-h) / 2);left:calc(50% + var(--side-w) / 2);}
+    .top{top:var(--head-h);left:0;right:auto;width:var(--side-w);max-width:none;margin:0;padding:16px 16px 0;background:var(--surface);}
+    .top .search{box-shadow:none;background:#F2F2F2;}
+    .sheet2{top:calc(var(--head-h) + 72px);bottom:0;left:0;right:auto;width:var(--side-w);max-width:none;margin:0;height:auto;
+      border-radius:0;box-shadow:none;border-right:1px solid var(--line);transform:none !important;transition:none;will-change:auto;}
+    .sheet-head{cursor:default;touch-action:auto;padding-top:14px;}
+    .sheet-head .handle{display:none;}
+    .cat{cursor:pointer;}
+    .cat:hover{background:var(--bg);}
+    .cat.on:hover{background:var(--primary-light);}
+    .floats,.sheet2.full .floats{position:fixed;top:auto;right:24px;bottom:28px;opacity:1;pointer-events:auto;}
+    .fbtn:hover{filter:brightness(.96);}
+    .refresh:hover{background:#E9EAEE;}
+    .sheet2 .bizgrid,.sheet2 .grid{grid-template-columns:1fr 1fr;} /* 패널 폭 기준 2칸 */
+  }
 </style>
 </head>
 <body>
