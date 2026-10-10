@@ -13,6 +13,8 @@
 | `/mypage` | `mypage.html` | 내 물건(판매중·판매완료), 통계, 찜 |
 | `/login` | `login.html` | 이메일 로그인/가입 한 화면 |
 
+검색 노출: `/product/:id`·`/biz/:id` 는 `api/page.js` 가 제목·설명·사진을 html 에 미리 채워 내려주고, `/sitemap.xml` 은 `api/sitemap.js` 가 DB 에서 만든다 (Vercel 함수, 로컬 서버에서는 동작하지 않음).
+
 공용: `app.css`(디자인 토큰), `js/app.js`(로그인 상태·탭바·포맷), `js/supabase-client.js`.
 
 ## DB
