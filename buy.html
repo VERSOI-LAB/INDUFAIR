@@ -215,8 +215,12 @@
   $('clearQ').hidden = !state.q;
 
   // ---------- 목차바(대분류) ----------
+  // 물건도 업체도 없는 분류는 숨김 (자료를 읽은 뒤에 그림). 분류가 하나만 남으면 목차바 자체를 숨김
+  var liveCats = null;
   function renderCats() {
-    $('cats').innerHTML = PS.CATEGORIES.map(function (c) {
+    var cats = PS.CATEGORIES.filter(function (c) { return liveCats && (liveCats[c] || state.cat === c); });
+    $('cats').hidden = cats.length < 2 && !state.cat;
+    $('cats').innerHTML = cats.map(function (c) {
       var on = state.cat === c;
       return '<button type="button" role="tab" aria-selected="' + on + '" class="cat' + (on ? ' on' : '') + '" data-c="' + PS.esc(c) + '">' +
         PS.categoryIcon(c, 54) + '<span>' + PS.esc(c) + '</span></button>';
@@ -656,6 +660,12 @@
     var catRes = await sb.from('categories').select('id,name').is('parent_id', null);
     (catRes.data || []).forEach(function (c) { categoryIds[c.name] = c.id; categoryNames[c.id] = c.name; });
     await Promise.all([loadProducts(), loadBusinesses()]);
+    liveCats = {};
+    PS.CATEGORIES.forEach(function (c) {
+      var cid = categoryIds[c];
+      liveCats[c] = all.some(function (p) { return p.category_id === cid; }) || bizAll.some(function (x) { return x.category_id === cid; });
+    });
+    renderCats();
     render(false);
     if (state.q || state.cat) setSheet('half'); // 검색어·분류를 들고 들어오면 결과가 보이게
 
