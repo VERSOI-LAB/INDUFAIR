@@ -40,7 +40,11 @@
       <a class="mrow" href="/reset-password"><span>비밀번호 바꾸기</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
       <a class="mrow" href="/terms"><span>이용약관</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
       <a class="mrow" href="/privacy"><span>개인정보처리방침</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
+      <a class="mrow" id="supportRow" href="#"><span>고객센터 전화하기</span><span class="go" id="supportNo" style="color:var(--sub);font-size:15px"></span></a>
       <button class="mrow" id="logoutBtn" style="color:var(--sub)"><span>로그아웃</span></button>
+    </section>
+    <section class="mcard">
+      <button class="mrow" id="withdrawBtn" style="color:var(--hint);font-size:15px"><span>회원 탈퇴</span></button>
     </section>
   </main>
 </div>
@@ -84,6 +88,38 @@
     PS.toast('저장했어요');
   });
   $('logoutBtn').addEventListener('click', function () { if (confirm('로그아웃할까요?')) PS.signOut(); });
+  $('supportRow').href = 'tel:' + PS.BIZ.phone;
+  $('supportNo').textContent = PS.BIZ.phone;
+
+  // 회원 탈퇴: 올린 물건·업체 소개를 내리고 내 정보를 지운 뒤 계정을 닫는다 (supabase/functions/delete-account)
+  var WITHDRAW_ERR = {
+    orders_in_progress: '아직 끝나지 않은 거래가 있어요. 수령 완료와 정산이 끝난 뒤에 탈퇴할 수 있어요',
+    login_required: '다시 로그인한 뒤 시도해 주세요'
+  };
+  $('withdrawBtn').addEventListener('click', async function () {
+    var btn = this;
+    if (!confirm('정말 탈퇴할까요?\n\n올린 물건과 업체 소개가 모두 내려가고, 내 정보는 지워져요. 되돌릴 수 없어요.')) return;
+    btn.disabled = true;
+    var code = 'failed';
+    try {
+      var token = await PS.accessToken();
+      var res = await fetch(PS.FUNCTIONS_URL + '/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: '{}'
+      });
+      var out = await res.json().catch(function () { return {}; });
+      code = out.ok ? null : (out.code || 'failed');
+    } catch (e) {}
+    if (code) {
+      btn.disabled = false;
+      PS.toast(WITHDRAW_ERR[code] || '탈퇴를 마치지 못했어요. 고객센터(' + PS.BIZ.phone + ')로 알려 주세요');
+      return;
+    }
+    alert('탈퇴가 끝났어요. 그동안 이용해 주셔서 고맙습니다.');
+    await sb.auth.signOut().catch(function () {});
+    location.href = '/';
+  });
 })();
 </script>
 </body>
