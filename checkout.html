@@ -284,10 +284,12 @@
               : t.spec ? '<br><span style="color:var(--hint);font-size:13px">' + PS.esc(t.spec) + '</span>' : '') + '</div>' +
           '<div class="pr">' + (l.price * l.qty).toLocaleString('ko-KR') + '원 <small style="font-size:13px;font-weight:600;color:var(--hint)">' + l.qty + '개</small></div></div></div>';
       }).join('') + '</section>' +
-      '<section class="card2"><h3>결제수단</h3>' +
+      (PS.isWidgetPay()
+        ? '<section class="card2" style="padding:8px 0"><div id="tossMethods"></div><div id="tossAgree"></div></section>'
+        : '<section class="card2"><h3>결제수단</h3>' +
         '<button class="pm' + (payMethod === 'CARD' ? ' on' : '') + '" data-m="CARD"><span class="radio"></span><span>카드 · 간편결제<span class="toss">토스페이먼츠</span><small>신용·체크카드, 토스페이, 카카오페이 등</small></span></button>' +
         '<button class="pm' + (payMethod === 'TRANSFER' ? ' on' : '') + '" data-m="TRANSFER"><span class="radio"></span><span>계좌이체<small>내 은행 계좌에서 바로 보내요</small></span></button>' +
-      '</section>' +
+      '</section>') +
       '<section class="card2"><h3>결제 금액</h3>' +
         '<div class="rowp"><span>물품 금액</span><span>' + g.sub.toLocaleString('ko-KR') + '원</span></div>' +
         '<div class="rowp"><span>배송비' + (freeMin > 0 ? ' <small>(' + PS.won(freeMin) + ' 이상 무료)</small>' : '') + '</span><span>' + (fee ? fee.toLocaleString('ko-KR') + '원' : '무료') + '</span></div>' +
@@ -300,10 +302,27 @@
       b.addEventListener('click', function () { payMethod = b.dataset.m; render(); });
     });
     $('nextBtn').textContent = total.toLocaleString('ko-KR') + '원 결제하기';
-    $('nextBtn').disabled = false;
     $('nextBtn').onclick = pay;
+    if (!PS.isWidgetPay()) { $('nextBtn').disabled = false; return; }
+    // 결제위젯: 결제수단과 약관이 그려진 뒤에 결제 버튼을 연다
+    $('nextBtn').disabled = true;
+    widgets = null;
+    loadToss().then(async function () {
+      var w = window.TossPayments(PS.TOSS_CLIENT_KEY).widgets({ customerKey: PS.user.id });
+      await w.setAmount({ currency: 'KRW', value: total });
+      await Promise.all([
+        w.renderPaymentMethods({ selector: '#tossMethods', variantKey: 'DEFAULT' }),
+        w.renderAgreement({ selector: '#tossAgree', variantKey: 'AGREEMENT' })
+      ]);
+      widgets = w;
+      $('nextBtn').disabled = false;
+    }).catch(function (e) {
+      console.error(e);
+      PS.toast('결제수단을 불러오지 못했어요. 새로고침해 주세요');
+    });
   }
 
+  var widgets = null;   // 결제위젯(주문서형) 키일 때만 씀
   var tossLoaded = null;
   function loadToss() {
     if (window.TossPayments) return Promise.resolve();
@@ -332,22 +351,20 @@
       if (r.error || !r.data || !r.data[0]) throw r.error || new Error('no order');
       var o = r.data[0];
       var a = selected();
-      var toss = window.TossPayments(PS.TOSS_CLIENT_KEY);
-      var payment = toss.payment({ customerKey: PS.user.id });
+      var payment = widgets || window.TossPayments(PS.TOSS_CLIENT_KEY).payment({ customerKey: PS.user.id });
       var origin = location.origin;
       var back = sellerId ? 'seller=' + encodeURIComponent(sellerId) : 'pid=' + encodeURIComponent(lines[0].p.id);
       // 결제가 끝나면 장바구니에서 뺄 물건
       try { sessionStorage.setItem('ps_paid_cart', JSON.stringify(sellerId ? lines.map(function (l) { return l.p.id + '|' + l.opt; }) : [])); } catch (e) {}
-      await payment.requestPayment({
-        method: payMethod,
-        amount: { currency: 'KRW', value: o.total_amount },
+      if (widgets) await widgets.setAmount({ currency: 'KRW', value: o.total_amount }); // 서버가 계산한 금액으로 맞춤
+      await payment.requestPayment(Object.assign(widgets ? {} : { method: payMethod, amount: { currency: 'KRW', value: o.total_amount } }, {
         orderId: o.order_no,
         orderName: o.order_name,
         customerName: a.recipient,
         customerMobilePhone: a.phone.replace(/\D/g, ''),
         successUrl: origin + '/pay-success?' + back,
         failUrl: origin + '/pay-fail?' + back
-      });
+      }));
     } catch (e) {
       console.error(e);
       btn.disabled = false;
