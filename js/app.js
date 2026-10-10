@@ -8,7 +8,7 @@
   // 사업자 정보 (전자상거래법 표시 사항). 홈·약관·개인정보처리방침 하단과 설정의 고객센터에 쓰인다
   PS.BIZ = {
     name: '베르소이(VERSOI)', ceo: '이재희', regNo: '550-38-01564', mailOrderNo: '신고 준비 중',
-    address: '경기도 성남시 수정구 창업로 18, 876호(시흥동)', phone: '010-5616-8835'
+    address: '경기도 성남시 수정구 창업로 18, 876호(시흥동)', phone: '010-5616-8835', email: 'versoi.labs@gmail.com'
   };
 
   // 카카오맵 JavaScript 키 (Kakao Developers > 앱 키). 비어 있으면 무료 지도(OpenStreetMap)로 보여준다.
@@ -592,7 +592,7 @@
       '<p>대표 ' + b.ceo + ' · 사업자등록번호 ' + b.regNo + '<br>' +
         '통신판매업 신고번호 ' + b.mailOrderNo + '<br>' +
         '주소 ' + b.address + '<br>' +
-        '고객센터 <a href="tel:' + b.phone + '">' + b.phone + '</a></p>' +
+        '고객센터 <a href="tel:' + b.phone + '">' + b.phone + '</a> · <a href="mailto:' + b.email + '">' + b.email + '</a></p>' +
       '<p>판다산다는 통신판매중개자로서 거래 당사자가 아니며, 판매자가 올린 물건 정보와 거래에 대한 책임은 판매자에게 있습니다.</p>' +
       '<p class="links"><a href="/terms">이용약관</a><a href="/privacy"><strong>개인정보처리방침</strong></a></p>';
   };
