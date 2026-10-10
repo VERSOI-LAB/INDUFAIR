@@ -15,9 +15,8 @@
   PS.KAKAO_JS_KEY = 'eed04d223c75e55f7d445b88ca168023';
   // 토스페이먼츠 클라이언트 키 (공개용, test_ck_... 또는 live_ck_...). 비어 있으면 결제 버튼이 '준비 중'으로 안내
   PS.TOSS_CLIENT_KEY = '';
-  // 안전결제(구매하기)를 여는 판매자. 회사가 직접 파는 물건만 결제를 받는다 (다른 회원 물건은 채팅으로 직접 거래).
-  // 회원 간 결제까지 열려면 토스페이먼츠 지급대행 계약 후 null 로 바꾼다
-  PS.PAY_SELLERS = ['1bdc6eb2-6017-4740-a825-7dc325f37e42'];
+  // 안전결제(구매하기)를 여는 판매자. null 이면 모든 판매자 (오픈마켓). 판매 대금은 토스페이먼츠 지급대행으로 지급한다
+  PS.PAY_SELLERS = null;
   PS.canPay = function (sellerId) { return !PS.PAY_SELLERS || PS.PAY_SELLERS.indexOf(sellerId) !== -1; };
   PS.isTestPay = function () { return /^test_/.test(PS.TOSS_CLIENT_KEY); };
   // 결제 심사용 계정. 오픈 전까지 로그인 화면 아래에 보여 준다 (없으면 null)
