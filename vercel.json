@@ -11,11 +11,11 @@
     },
     {
       "source": "/biz/:id",
-      "destination": "/business?id=:id"
+      "destination": "/api/page?type=biz&id=:id"
     },
     {
       "source": "/product/:id",
-      "destination": "/product?id=:id"
+      "destination": "/api/page?type=product&id=:id"
     },
     {
       "source": "/chat/:id",
@@ -24,6 +24,15 @@
     {
       "source": "/profile/:id",
       "destination": "/profile?id=:id"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
     }
-  ]
+  ],
+  "functions": {
+    "api/page.js": {
+      "includeFiles": "{product,business}.html"
+    }
+  }
 }
