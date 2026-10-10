@@ -291,6 +291,7 @@
         '<div class="rowp"><span>배송비' + (freeMin > 0 ? ' <small>(' + PS.won(freeMin) + ' 이상 무료)</small>' : '') + '</span><span>' + (fee ? fee.toLocaleString('ko-KR') + '원' : '무료') + '</span></div>' +
         '<div class="rowp total"><span>최종 결제 금액</span><span>' + total.toLocaleString('ko-KR') + '원</span></div>' +
       '</section>' +
+      PS.policyHtml(true) +
       '<p class="note">결제는 토스페이먼츠로 안전하게 처리돼요. 결제한 돈은 물건을 받은 뒤 판매자에게 전달돼요.</p>';
     $('chgAddr').addEventListener('click', function () { go('list'); });
     $('main').querySelectorAll('.pm').forEach(function (b) {

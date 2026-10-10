@@ -208,6 +208,7 @@
       }).join('') + '</div>' : '') +
       (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
       (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
+      PS.policyHtml(true) +
       '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) + '</div>' +
       '<div id="recs"></div>';
   }

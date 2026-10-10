@@ -332,3 +332,12 @@ p{margin:0;}
 .site-foot p{margin-top:8px;}
 .site-foot .links{display:flex;gap:16px;}
 .site-foot a{text-decoration:underline;}
+
+/* 배송·취소·환불 안내 (물건 상세, 결제 화면) */
+.policy{margin-top:20px;border:1px solid var(--line);border-radius:14px;padding:0 16px;font-size:14px;line-height:1.6;color:var(--sub);background:var(--surface);}
+.policy summary{padding:14px 0;font-size:15px;font-weight:700;color:var(--text);cursor:pointer;}
+.policy h4{font-size:14px;font-weight:800;color:var(--text);margin-top:4px;}
+.policy ul{margin:4px 0 12px;padding-left:18px;list-style:disc;}
+.policy li{margin-top:4px;}
+.policy p{padding:0 0 14px;}
+.policy a{text-decoration:underline;}
