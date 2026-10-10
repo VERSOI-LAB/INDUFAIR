@@ -330,7 +330,7 @@ p{margin:0;}
 .site-foot{margin-top:40px;padding:24px 0 8px;border-top:1px solid var(--line);font-size:13px;line-height:1.7;color:var(--hint);}
 .site-foot b{display:block;font-size:14px;color:var(--sub);margin-bottom:4px;}
 .site-foot p{margin-top:8px;}
-.site-foot .links{display:flex;gap:16px;}
+.site-foot .links{display:flex;gap:16px;flex-wrap:wrap;}
 .site-foot a{text-decoration:underline;}
 
 /* 배송·취소·환불 안내 (물건 상세, 결제 화면) */
@@ -341,3 +341,30 @@ p{margin:0;}
 .policy li{margin-top:4px;}
 .policy p{padding:0 0 14px;}
 .policy a{text-decoration:underline;}
+
+/* 약관·개인정보처리방침·배송 안내 (terms, privacy, policy) */
+.legal-doc{padding-top:8px;padding-bottom:40px;font-size:15px;line-height:1.75;color:#333;} /* 좌우 여백은 .page 것을 그대로 */
+.legal-doc h2{font-size:19px;font-weight:800;margin:36px 0 10px;padding-top:20px;border-top:1px solid var(--line);scroll-margin-top:72px;}
+.legal-doc h3{font-size:16px;font-weight:700;margin:22px 0 6px;}
+.legal-doc p{margin:8px 0;}
+.legal-doc ul{padding-left:20px;margin:8px 0;list-style:disc;}
+.legal-doc li{margin:4px 0;}
+.legal-doc a{text-decoration:underline;}
+.legal-doc table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0;display:block;overflow-x:auto;}
+.legal-doc th,.legal-doc td{border:1px solid var(--line);padding:10px;text-align:left;vertical-align:top;}
+.legal-doc th{background:var(--bg);font-weight:700;white-space:nowrap;}
+.legal-tabs{display:flex;gap:8px;overflow-x:auto;padding:8px 0 4px;scrollbar-width:none;}
+.legal-tabs::-webkit-scrollbar{display:none;}
+.legal-tabs a{flex-shrink:0;padding:9px 14px;border-radius:999px;background:var(--bg);font-size:14px;font-weight:700;color:var(--sub);text-decoration:none;}
+.legal-tabs a.on{background:var(--text);color:#fff;}
+.legal-date{font-size:13px;color:var(--hint);margin-top:12px;}
+.legal-sum{margin-top:12px;padding:18px 20px;border-radius:16px;background:var(--primary-light);}
+.legal-sum b{display:block;font-size:16px;font-weight:800;color:var(--text);}
+.legal-sum ul{margin:8px 0 0;}
+.legal-toc{margin-top:12px;padding:16px 20px;border-radius:16px;border:1px solid var(--line);font-size:14px;}
+.legal-toc b{display:block;font-size:15px;font-weight:800;}
+.legal-toc ol{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:2px;}
+.legal-toc a{display:block;padding:4px 0;color:var(--sub);text-decoration:none;}
+.legal-toc a:hover{text-decoration:underline;}
+/* 결제 시험 기간 알림, 심사용 계정 안내 */
+.test-note{margin-bottom:12px;padding:14px 16px;border-radius:14px;background:#FFF4D6;color:#7A5200;font-size:14px;line-height:1.5;font-weight:600;}
