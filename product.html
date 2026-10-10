@@ -307,21 +307,19 @@
     var jobs = [
       (PS.user ? base().neq('seller_profile_id', PS.user.id) : base()).order('like_count', { ascending: false }).order('view_count', { ascending: false }).limit(10),
       p.category_id ? base().eq('category_id', p.category_id).order('created_at', { ascending: false }).limit(6) : Promise.resolve({ data: [] }),
-      base().eq('seller_profile_id', p.seller_profile_id).order('created_at', { ascending: false }).limit(6)
+      base().eq('seller_profile_id', p.seller_profile_id).order('created_at', { ascending: false }).limit(12)
     ];
     var r = await Promise.all(jobs);
+    // 세 묶음에 같은 물건이 겹치지 않게: 비슷한 물품 → 판매자의 다른 물품 → 추천 순으로 채움
     var similar = r[1].data || [];
-    var sellerItems = r[2].data || [];
     var used = {};
-    similar.concat(sellerItems).forEach(function (x) { used[x.id] = 1; });
-    // 추천은 아래 두 목록과 겹치지 않게 (내 물건은 쿼리에서 이미 뺌)
-    var all = r[0].data || [];
-    var picks = all.filter(function (x) { return !used[x.id]; });
-    if (picks.length < 4) picks = all; // 물건이 적을 땐 겹쳐도 보여줌
-    picks = picks.slice(0, 8);
+    similar.forEach(function (x) { used[x.id] = 1; });
+    var sellerItems = (r[2].data || []).filter(function (x) { return !used[x.id]; }).slice(0, 6);
+    sellerItems.forEach(function (x) { used[x.id] = 1; });
+    var picks = (r[0].data || []).filter(function (x) { return !used[x.id]; }).slice(0, 8); // 내 물건은 쿼리에서 이미 뺌
     var me = PS.user ? ((PS.profile && PS.profile.name) || '회원') : '회원';
     var html = '';
-    if (picks.length) html += '<section class="rec"><h2><span>' + PS.esc(me) + '님을 위한 추천 <small>· 광고</small></span></h2>' +
+    if (picks.length) html += '<section class="rec"><h2><span>' + PS.esc(me) + '님을 위한 추천</span></h2>' +
       '<div class="hscroll">' + picks.map(PS.cardHtml).join('') + '</div></section>';
     if (similar.length) html += '<section class="rec"><h2>보고 있는 물품과 비슷한 물품</h2>' +
       '<div class="grid">' + similar.map(PS.cardHtml).join('') + '</div></section>';

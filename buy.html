@@ -376,7 +376,8 @@
     }
     var title = searching ? '' : '<h2 class="sec-h">' + (state.cat ? PS.esc(state.cat) + ' 업체' : '이웃들이 찾는 동네 업체는?') + '</h2>';
     if (!list.length) {
-      sec.innerHTML = title + '<div class="empty" style="padding:24px 0">' + PS.icon3d('home', 72) + '<b>' + (searching ? '찾는 업체가 없어요' : '이 분류 업체가 아직 없어요') + '</b></div>';
+      sec.innerHTML = title + '<div class="empty" style="padding:24px 0">' + PS.icon3d('home', 72) + '<b>' + (searching ? '찾는 업체가 없어요' : '이 분류 업체가 아직 없어요') + '</b>' +
+        (searching ? '' : '<div style="margin-top:16px"><a class="btn white small" href="/biz/new">우리 업체 소개하기</a></div>') + '</div>';
       return;
     }
     var ordered = searching ? list : feedOrder(list);
@@ -452,7 +453,8 @@
           return state.sort === 'rec' && featured[p.id] ? html.replace('<div class="t">', '<div class="t"><span class="badge pick">추천</span>') : html;
         }).join('')
       : '<div class="empty" style="padding:32px 0">' + PS.sticker('curious', 100) + '<b>' + (all.length ? '찾는 물건이 없어요' : '아직 올라온 물건이 없어요') + '</b>' +
-        (all.length ? '다른 분류나 검색어로 찾아보세요' : '첫 번째로 판매해 보세요!') + '</div>';
+        (all.length ? '다른 분류나 검색어로 찾아보세요' : '첫 번째로 판매해 보세요!') +
+        (state.q ? '' : '<div style="margin-top:16px"><a class="btn white small" href="/sell">물건 올리기</a></div>') + '</div>';
   }
 
   // 물건 정렬: 추천순(기본) · 인기순 · 가까운순
