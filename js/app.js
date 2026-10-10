@@ -15,6 +15,13 @@
   PS.KAKAO_JS_KEY = 'eed04d223c75e55f7d445b88ca168023';
   // 토스페이먼츠 클라이언트 키 (공개용, test_ck_... 또는 live_ck_...). 비어 있으면 결제 버튼이 '준비 중'으로 안내
   PS.TOSS_CLIENT_KEY = '';
+  // 안전결제(구매하기)를 여는 판매자. 회사가 직접 파는 물건만 결제를 받는다 (다른 회원 물건은 채팅으로 직접 거래).
+  // 회원 간 결제까지 열려면 토스페이먼츠 지급대행 계약 후 null 로 바꾼다
+  PS.PAY_SELLERS = ['1bdc6eb2-6017-4740-a825-7dc325f37e42'];
+  PS.canPay = function (sellerId) { return !PS.PAY_SELLERS || PS.PAY_SELLERS.indexOf(sellerId) !== -1; };
+  PS.isTestPay = function () { return /^test_/.test(PS.TOSS_CLIENT_KEY); };
+  // 결제 심사용 계정. 오픈 전까지 로그인 화면 아래에 보여 준다 (없으면 null)
+  PS.REVIEW_ACCOUNT = null; // { id: '이메일', pw: '비밀번호' }
 
   // 대분류 5개 (중·소분류는 나중에 categories.parent_id 로 추가)
   PS.CATEGORIES = ['중고장터', '산업기계', '공구·부품', '자동화·전기', '물류·창고'];
@@ -582,6 +589,24 @@
     return false;
   };
 
+  // 배송·취소·환불 안내 요약 (물건 상세, 결제 화면). 내용은 policy.html, 이용약관 제17조~제19조와 같아야 한다
+  PS.policyHtml = function (open) {
+    return '<details class="policy"' + (open ? ' open' : '') + '><summary>배송·취소·환불 안내</summary>' +
+      '<h4>배송</h4><ul>' +
+        '<li>판매자가 결제일부터 3영업일 안에 택배 또는 화물로 보내요. 보내면 주문 내역에서 택배사와 송장번호를 볼 수 있어요.</li>' +
+        '<li>크거나 무거운 물건은 판매자와 채팅으로 배송 방법과 날짜를 정해요.</li>' +
+        '<li>배송비는 물건마다 다르고, 결제 전에 물품 금액과 따로 보여 드려요.</li></ul>' +
+      '<h4>취소·환불</h4><ul>' +
+        '<li>판매자가 보내기 전에는 주문 내역에서 바로 취소할 수 있고, 전액 환불돼요.</li>' +
+        '<li>보낸 뒤에는 주문 내역에서 취소를 요청하고, 판매자가 동의하면 전액 환불돼요.</li>' +
+        '<li>받은 물건이 설명과 다르거나 고장·파손된 경우, 받은 날부터 7일 안에 판매자 채팅이나 고객센터로 알려 주시면 반품 후 환불해 드려요. 이때 반품 배송비는 판매자가 내요.</li>' +
+        '<li>사업자가 판매한 물건은 받은 날부터 7일 안에 단순 변심으로도 반품할 수 있어요. 이때 반품 배송비는 구매자가 내고, 사용했거나 훼손되어 가치가 떨어진 물건은 반품이 어려울 수 있어요.</li>' +
+        '<li>환불은 결제한 수단으로 돌려 드리며, 카드사에 따라 3~7영업일이 걸릴 수 있어요.</li>' +
+        '<li>교환은 판매자와 채팅으로 상의해 주세요.</li></ul>' +
+      '<p><a href="/policy">배송·취소·환불 안내 전체 보기</a> · 고객센터 <a href="tel:' + PS.BIZ.phone + '">' + PS.BIZ.phone + '</a></p>' +
+      '</details>';
+  };
+
   // <footer class="site-foot" id="siteFoot"> 에 사업자 정보를 채운다
   PS.renderFooter = function () {
     var el = document.getElementById('siteFoot');
@@ -593,8 +618,8 @@
         '통신판매업 신고번호 ' + b.mailOrderNo + '<br>' +
         '주소 ' + b.address + '<br>' +
         '고객센터 <a href="tel:' + b.phone + '">' + b.phone + '</a> · <a href="mailto:' + b.email + '">' + b.email + '</a></p>' +
-      '<p>판다산다는 통신판매중개자로서 거래 당사자가 아니며, 판매자가 올린 물건 정보와 거래에 대한 책임은 판매자에게 있습니다.</p>' +
-      '<p class="links"><a href="/terms">이용약관</a><a href="/privacy"><strong>개인정보처리방침</strong></a></p>';
+      '<p>판다산다는 회사가 직접 판매하는 물건을 제외하고는 통신판매중개자로서 거래 당사자가 아니며, 회원이 올린 물건 정보와 거래에 대한 책임은 해당 판매자에게 있습니다.</p>' +
+      '<p class="links"><a href="/terms">이용약관</a><a href="/privacy"><strong>개인정보처리방침</strong></a><a href="/policy">배송·취소·환불 안내</a></p>';
   };
 
   PS.signOut = async function () {

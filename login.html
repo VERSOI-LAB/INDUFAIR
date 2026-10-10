@@ -48,6 +48,7 @@
 
     <div class="switch" id="switch"></div>
     <p class="legal">시작하면 <a href="/terms">이용약관</a>과 <a href="/privacy">개인정보처리방침</a>에 동의하는 거예요</p>
+    <div class="test-note" id="reviewBox" hidden style="margin-top:20px"></div>
   </main>
 </div>
 
@@ -58,6 +59,12 @@
 (function () {
   var mode = ['signup', 'reset'].indexOf(PS.param('mode')) !== -1 ? PS.param('mode') : 'login';
   var $ = function (id) { return document.getElementById(id); };
+
+  // 결제 심사용 계정 안내 (PS.REVIEW_ACCOUNT 가 있을 때만, 오픈 전까지)
+  if (PS.REVIEW_ACCOUNT) {
+    $('reviewBox').innerHTML = '결제 심사용 계정<br>아이디: ' + PS.esc(PS.REVIEW_ACCOUNT.id) + '<br>비밀번호: ' + PS.esc(PS.REVIEW_ACCOUNT.pw);
+    $('reviewBox').hidden = false;
+  }
 
   function nextUrl() {
     var n = PS.param('next') || '/';

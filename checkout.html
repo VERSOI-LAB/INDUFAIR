@@ -117,6 +117,7 @@
     }
     if (!lines.length) return fail('주문할 수 있는 물건이 없어요');
     var sid = lines[0].p.seller_profile_id;
+    if (!PS.canPay(sid)) return fail('이 물건은 판매자와 채팅으로 거래해 주세요');
     freeMin = (await PS.freeShipMins([sid]))[sid] || 0;
     await loadAddresses();
     go(addresses.length ? 'list' : 'form');
@@ -271,6 +272,7 @@
     var g = PS.groupShip(lines, freeMin);   // 서버(create_market_order_cart)도 같은 규칙으로 계산
     var fee = g.fee, total = g.sub + g.fee;
     $('main').innerHTML =
+      (PS.isTestPay() ? '<div class="test-note">지금은 결제 시험 기간이에요. 실제로 돈이 빠져나가지 않고, 물건도 발송되지 않아요.</div>' : '') +
       '<section class="card2"><h3>배송지<button id="chgAddr">변경</button></h3>' +
         '<div style="font-size:16px;line-height:1.5">' + PS.esc(addrText(a)) + '</div>' +
         '<div style="font-size:14px;color:var(--hint);margin-top:4px">' + PS.esc(a.recipient) + ' ' + PS.esc(a.phone) + '</div></section>' +
@@ -291,6 +293,7 @@
         '<div class="rowp"><span>배송비' + (freeMin > 0 ? ' <small>(' + PS.won(freeMin) + ' 이상 무료)</small>' : '') + '</span><span>' + (fee ? fee.toLocaleString('ko-KR') + '원' : '무료') + '</span></div>' +
         '<div class="rowp total"><span>최종 결제 금액</span><span>' + total.toLocaleString('ko-KR') + '원</span></div>' +
       '</section>' +
+      PS.policyHtml(true) +
       '<p class="note">결제는 토스페이먼츠로 안전하게 처리돼요. 결제한 돈은 물건을 받은 뒤 판매자에게 전달돼요.</p>';
     $('chgAddr').addEventListener('click', function () { go('list'); });
     $('main').querySelectorAll('.pm').forEach(function (b) {

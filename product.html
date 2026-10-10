@@ -208,6 +208,7 @@
       }).join('') + '</div>' : '') +
       (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
       (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
+      PS.policyHtml(true) +
       '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) + '</div>' +
       '<div id="recs"></div>';
   }
@@ -229,10 +230,11 @@
       liked = !!fav.data;
     }
     var canBuy = product.status === 'selling' && (product.price > 0 || PS.options(product).some(function (_, i) { return PS.optionPrice(product, i) > 0; })); // 가격 협의(0원)는 문의로
+    var payable = PS.canPay(product.seller_profile_id); // 안전결제 대상이 아닌 물건은 채팅으로 직접 거래
     bar.innerHTML =
       '<button class="heart' + (liked ? ' on' : '') + '" id="heartBtn" aria-label="찜하기" aria-pressed="' + liked + '">' + PS.icon3d('heart', 34) + '</button>' +
       '<button class="btn white" id="chatBtn"' + (product.status === 'sold' ? ' disabled' : '') + '>' + PS.icon3d('chat', 28) + ' 문의하기</button>' +
-      '<button class="btn" id="buyBtn"' + (canBuy ? '' : ' disabled') + '>' + (canBuy ? PS.icon3d('buy', 28) + ' 구매하기' : product.status === 'selling' ? '가격 협의' : PS.STATUS[product.status] || '구매 불가') + '</button>';
+      '<button class="btn" id="buyBtn"' + (canBuy && payable ? '' : ' disabled') + '>' + (canBuy && payable ? PS.icon3d('buy', 28) + ' 구매하기' : product.status === 'selling' ? (canBuy ? '채팅으로 거래' : '가격 협의') : PS.STATUS[product.status] || '구매 불가') + '</button>';
     document.getElementById('heartBtn').addEventListener('click', toggleLike);
     document.getElementById('chatBtn').addEventListener('click', startChat);
     document.getElementById('buyBtn').addEventListener('click', function () {

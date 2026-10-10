@@ -1,7 +1,7 @@
 // /sitemap.xml — 고정 페이지 + 판매중인 물건 + 공개된 업체 주소를 매번 DB 에서 만들어 준다.
 var L = require('./_lib');
 
-var STATIC = ['/', '/buy', '/terms', '/privacy'];
+var STATIC = ['/', '/buy', '/terms', '/privacy', '/policy'];
 var PAGE = 1000;     // Supabase REST 한 번에 받는 최대 행 수
 var MAX = 40000;     // 사이트맵 하나에 넣을 수 있는 주소는 50,000개까지
 
