@@ -13,14 +13,18 @@
 
   // 카카오맵 JavaScript 키 (Kakao Developers > 앱 키). 비어 있으면 무료 지도(OpenStreetMap)로 보여준다.
   PS.KAKAO_JS_KEY = 'eed04d223c75e55f7d445b88ca168023';
-  // 토스페이먼츠 클라이언트 키 (공개용, test_ck_... 또는 live_ck_...). 비어 있으면 결제 버튼이 '준비 중'으로 안내
-  PS.TOSS_CLIENT_KEY = '';
+  // 토스페이먼츠 클라이언트 키 (공개용). 비어 있으면 결제 버튼이 '준비 중'으로 안내
+  //   test_gck_/live_gck_ : 결제위젯(주문서형) 연동 키 → 결제 화면에 토스 결제위젯을 그림
+  //   test_ck_/live_ck_   : API 개별 연동 키 → 결제창을 띄움
+  // 서버(Supabase Secrets)의 TOSS_SECRET_KEY 는 같은 종류의 시크릿 키여야 한다 (gck ↔ gsk, ck ↔ sk)
+  PS.TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
   // 안전결제(구매하기)를 여는 판매자. null 이면 모든 판매자 (오픈마켓). 판매 대금은 토스페이먼츠 지급대행으로 지급한다
   PS.PAY_SELLERS = null;
   PS.canPay = function (sellerId) { return !PS.PAY_SELLERS || PS.PAY_SELLERS.indexOf(sellerId) !== -1; };
   PS.isTestPay = function () { return /^test_/.test(PS.TOSS_CLIENT_KEY); };
+  PS.isWidgetPay = function () { return /^(test|live)_gck_/.test(PS.TOSS_CLIENT_KEY); };
   // 결제 심사용 계정. 오픈 전까지 로그인 화면 아래에 보여 준다 (없으면 null)
-  PS.REVIEW_ACCOUNT = null; // { id: '이메일', pw: '비밀번호' }
+  PS.REVIEW_ACCOUNT = { id: 'pandasanda@gmail.com', pw: '000000' };
 
   // 대분류 5개 (중·소분류는 나중에 categories.parent_id 로 추가)
   PS.CATEGORIES = ['중고장터', '산업기계', '공구·부품', '자동화·전기', '물류·창고'];
