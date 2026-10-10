@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Disallow: /mypage
+Disallow: /settings
+Disallow: /cart
+Disallow: /checkout
+Disallow: /pay-success
+Disallow: /pay-fail
+Disallow: /purchases
+Disallow: /sales
+Disallow: /chat
+Disallow: /favorites
+Disallow: /recent
+Disallow: /edit
+Disallow: /sell
+Disallow: /reset-password
+Disallow: /my-biz
+
+Sitemap: https://www.pandasanda.com/sitemap.xml
