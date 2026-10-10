@@ -325,3 +325,10 @@ p{margin:0;}
   .toast{bottom:40px;}
   .app .room{height:calc(100vh - var(--head-h));height:calc(100dvh - var(--head-h));}
 }
+
+/* 사업자 정보 (홈·약관·개인정보처리방침 하단) */
+.site-foot{margin-top:40px;padding:24px 0 8px;border-top:1px solid var(--line);font-size:13px;line-height:1.7;color:var(--hint);}
+.site-foot b{display:block;font-size:14px;color:var(--sub);margin-bottom:4px;}
+.site-foot p{margin-top:8px;}
+.site-foot .links{display:flex;gap:16px;}
+.site-foot a{text-decoration:underline;}
