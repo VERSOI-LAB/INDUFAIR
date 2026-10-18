@@ -597,6 +597,7 @@
     return '<details class="policy"' + (open ? ' open' : '') + '><summary>배송·취소·환불 안내</summary>' +
       '<h4>배송</h4><ul>' +
         '<li>판매자가 결제일부터 3영업일 안에 택배 또는 화물로 보내요. 보내면 주문 내역에서 택배사와 송장번호를 볼 수 있어요.</li>' +
+        '<li><b>결제일부터 최대 14일 안에 받아요.</b> 택배는 보통 보낸 날부터 1~3일, 화물은 판매자와 정한 날에 도착해요.</li>' +
         '<li>크거나 무거운 물건은 판매자와 채팅으로 배송 방법과 날짜를 정해요.</li>' +
         '<li>배송비는 물건마다 다르고, 결제 전에 물품 금액과 따로 보여 드려요.</li></ul>' +
       '<h4>취소·환불</h4><ul>' +
@@ -616,11 +617,11 @@
     if (!el) return;
     var b = PS.BIZ;
     el.innerHTML =
-      '<b>' + b.name + '</b>' +
-      '<p>대표 ' + b.ceo + ' · 사업자등록번호 ' + b.regNo + '<br>' +
-        '통신판매업 신고번호 ' + b.mailOrderNo + '<br>' +
-        '주소 ' + b.address + '<br>' +
-        '고객센터 <a href="tel:' + b.phone + '">' + b.phone + '</a> · <a href="mailto:' + b.email + '">' + b.email + '</a></p>' +
+      '<b>판다산다 고객센터 <a href="tel:' + b.phone + '">' + b.phone + '</a></b>' +
+      '<p>상호 ' + b.name + ' · 대표자 ' + b.ceo + '<br>' +
+        '사업자등록번호 ' + b.regNo + ' · 통신판매업 신고번호 ' + b.mailOrderNo + '<br>' +
+        '사업장 주소 ' + b.address + '<br>' +
+        '전화 <a href="tel:' + b.phone + '">' + b.phone + '</a> · 이메일 <a href="mailto:' + b.email + '">' + b.email + '</a></p>' +
       '<p>판다산다는 회사가 직접 판매하는 물건을 제외하고는 통신판매중개자로서 거래 당사자가 아니며, 회원이 올린 물건 정보와 거래에 대한 책임은 해당 판매자에게 있습니다.</p>' +
       '<p class="links"><a href="/terms">이용약관</a><a href="/privacy"><strong>개인정보처리방침</strong></a><a href="/policy">배송·취소·환불 안내</a></p>';
   };
