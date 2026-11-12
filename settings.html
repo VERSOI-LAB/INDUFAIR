@@ -6,6 +6,9 @@
 <meta name="color-scheme" content="light">
 <title>설정 - 판다산다</title>
 <link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/이미지/app/icon-180.png">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="stylesheet" href="/app.css">
 <style>
   .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border-bottom:1px solid var(--line);margin:8px 0 0;}
@@ -37,6 +40,7 @@
       <button class="btn" id="saveBtn" style="margin-top:20px">저장하기</button>
     </section>
     <section class="mcard">
+      <button class="mrow" id="pushRow"><span>채팅 알림</span><span class="go" id="pushState" style="color:var(--sub);font-size:15px"></span></button>
       <a class="mrow" href="/reset-password"><span>비밀번호 바꾸기</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
       <a class="mrow" href="/terms"><span>이용약관</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
       <a class="mrow" href="/privacy"><span>개인정보처리방침</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
@@ -88,6 +92,28 @@
     PS.toast('저장했어요');
   });
   $('logoutBtn').addEventListener('click', function () { if (confirm('로그아웃할까요?')) PS.signOut(); });
+  // 채팅 알림 (이 브라우저·기기 기준)
+  async function pushLabel() {
+    var st = PS.push.state(), on = false;
+    if (st === 'granted') { var reg = await navigator.serviceWorker.getRegistration('/sw.js'); on = !!(reg && await reg.pushManager.getSubscription()); }
+    $('pushState').textContent = on ? '켜짐' : st === 'ios_install' ? '홈 화면에 추가 후 켤 수 있어요' : st === 'unsupported' ? '이 브라우저는 지원 안 해요' : st === 'denied' ? '브라우저에서 막혀 있어요' : '꺼짐';
+    return on;
+  }
+  pushLabel();
+  $('pushRow').addEventListener('click', async function () {
+    var st = PS.push.state();
+    if (st === 'ios_install') { alert('아이폰은 Safari 아래 공유 버튼 → "홈 화면에 추가"를 한 뒤, 홈 화면의 판다산다에서 알림을 켤 수 있어요.'); return; }
+    if (st === 'unsupported') { PS.toast('이 브라우저에서는 알림을 받을 수 없어요'); return; }
+    if (st === 'denied') { alert('브라우저에서 알림이 막혀 있어요. 주소창 옆 사이트 설정에서 알림을 허용한 뒤 다시 눌러 주세요.'); return; }
+    if (await pushLabel()) {
+      if (!confirm('이 기기에서 채팅 알림을 끌까요?')) return;
+      await PS.push.disable(); PS.toast('채팅 알림을 껐어요');
+    } else {
+      var r = await PS.push.enable();
+      PS.toast(r === 'ok' ? '채팅 알림을 켰어요' : r === 'denied' ? '알림이 허용되지 않았어요' : '알림을 켜지 못했어요');
+    }
+    pushLabel();
+  });
   $('supportRow').href = 'tel:' + PS.BIZ.phone;
   $('supportNo').textContent = PS.BIZ.phone;
 

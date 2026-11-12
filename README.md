@@ -42,3 +42,11 @@ python3 dev-server.py   # http://localhost:8743 (vercel.json 의 clean URL 흉�
 - **사기 신고**: 상품·채팅·프로필에서. 한 사람이 같은 상대는 한 번, 하루 10건까지. 서로 다른 3명 이상이 신고(기각 제외)하거나 운영자가 확정하면 그 사람의 상품·채팅·프로필에 주의 표시
 - **안전 수칙**: 안전결제가 아닌 상품·채팅에 직접 거래 수칙, 상대가 보낸 계좌번호에는 송금 전 조회 안내
 - 운영: `select * from user_reports where status = 'open' order by created_at desc;` → `update user_reports set status = 'confirmed' | 'dismissed' where id = ...;` 부적절한 후기는 `delete from trade_reviews where id = ...;`
+
+## 채팅 알림
+- **사이트를 열어 둔 동안**: 어느 화면에서든 새 메시지가 오면 탭바 채팅 배지(숫자)·브라우저 탭 제목 `(n)`·화면 위 알림 띠. 채팅 목록은 자동으로 새로 고침 (`js/app.js` 의 `watchMessages`)
+- **사이트를 닫아도 (웹 푸시)**: `sw.js` + `manifest.webmanifest` + `supabase/migrations/20261112_chat_push.sql` + Edge Function `chat-push`
+  - 채팅 목록 위 "알림 켜기" 또는 설정 › 채팅 알림에서 켬. 기기(브라우저)마다 따로
+  - 아이폰은 Safari에서 "홈 화면에 추가"한 뒤 홈 화면 앱에서만 켤 수 있음 (iOS 16.4+)
+  - 그 채팅방을 보고 있으면 알림을 띄우지 않음. 로그아웃하면 그 기기 알림은 꺼짐
+  - Edge Function 비밀값: `VAPID_PUBLIC_KEY`(= `js/app.js` 의 `PS.VAPID_PUBLIC_KEY`), `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`(mailto:...). `chat-push` 는 Verify JWT 끔

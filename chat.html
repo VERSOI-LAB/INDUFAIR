@@ -6,6 +6,9 @@
 <meta name="color-scheme" content="light">
 <title>채팅 - 판다산다</title>
 <link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/이미지/app/icon-180.png">
+<meta name="theme-color" content="#FFFFFF">
 <link rel="stylesheet" href="/app.css">
 <style>
   /* 목록 */
@@ -82,9 +85,20 @@
   }
 
   // ---------- 채팅 목록 ----------
-  async function openList() {
+  function openList() {
     PS.renderTabbar('chat');
-    app.innerHTML = '<header class="topbar"><h1>채팅</h1></header><div id="list"><div class="skeleton" style="height:64px;margin:16px"></div><div class="skeleton" style="height:64px;margin:16px"></div></div>';
+    app.innerHTML = '<header class="topbar"><h1>채팅</h1></header><div id="pushPrompt"></div><div id="list"><div class="skeleton" style="height:64px;margin:16px"></div><div class="skeleton" style="height:64px;margin:16px"></div></div>';
+    // 채팅 알림 켜기 안내 (켤 수 있을 때만)
+    var renderPrompt = function () { document.getElementById('pushPrompt').innerHTML = PS.push.promptHtml(); };
+    renderPrompt();
+    PS.push.bindPrompt(document.getElementById('pushPrompt'), renderPrompt);
+    // 새 메시지가 오면 목록을 다시 불러옴 (잠깐 사이 여러 개 오면 한 번만)
+    var t = null;
+    window.addEventListener('ps:message', function () { clearTimeout(t); t = setTimeout(loadList, 400); });
+    loadList();
+  }
+
+  async function loadList() {
     var me = PS.user.id;
     var listCols = 'id,buyer_id,seller_id,last_message,last_message_at,created_at,products(id,title,status,product_images(url,sort_order))';
     var listQuery = function (cols) {
@@ -212,7 +226,7 @@
     var msgRes = await sb.from('messages').select('id,sender_id,message,read_at,created_at').eq('chat_id', id).order('created_at', { ascending: true }).limit(500);
     messages = msgRes.data || [];
     renderMessages(true);
-    PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id }));
+    PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id })).then(PS.refreshChatDot);
 
     sb.channel('chat-' + id)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: 'chat_id=eq.' + id }, function (payload) {
@@ -220,7 +234,7 @@
         if (messages.some(function (x) { return x.id === m.id; })) return;
         messages.push(m);
         renderMessages(true);
-        if (m.sender_id !== me && document.visibilityState === 'visible') PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id }));
+        if (m.sender_id !== me && document.visibilityState === 'visible') PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id })).then(PS.refreshChatDot);
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: 'chat_id=eq.' + id }, function (payload) {
         var m = payload.new;
@@ -230,7 +244,7 @@
       .subscribe();
 
     document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'visible') PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id }));
+      if (document.visibilityState === 'visible') PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id })).then(PS.refreshChatDot);
     });
 
     var ta = document.getElementById('text');
