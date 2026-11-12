@@ -192,7 +192,7 @@
     });
     var payable = !bz && chat.products && chat.products.id ? await PS.canPay(chat.seller_id) : false;
     roomTop = PS.warnHtml(trust) + (bz || payable ? '' :
-      '<ul class="safe-tips"><li><b>판다산다는 직접 거래의 돈을 보관하지 않아요.</b></li>' + PS.SAFE_TRADE_TIPS.map(function (t) {
+      '<ul class="safe-tips"><li><b>판다산다는 개인과의 직접 거래의 돈을 보관하지 않아요.</b></li>' + PS.SAFE_TRADE_TIPS.map(function (t) {
         return '<li>' + PS.esc(t).replace('경찰청 사이버범죄 신고시스템', '<a href="' + PS.CYBER_COP_URL + '" target="_blank" rel="noopener">경찰청 사이버범죄 신고시스템</a>') + '</li>';
       }).join('') + '</ul>');
 
@@ -201,7 +201,7 @@
           ? ['안녕하세요! 문의드려요', '견적 받을 수 있을까요?', '방문 가능한 날짜가 언제인가요?', '위치가 어디인가요?']
           : ['네, 말씀하세요!', '견적 보내드릴게요', '언제 방문하시면 될까요?'])
       : chat.buyer_id === me
-      ? ['안녕하세요! 아직 판매하시나요?', '가격 조금 깎아주실 수 있나요?', '직접 보러 가도 될까요?', '어디서 거래할까요?']
+      ? ['안녕하세요! 아직 판매하시나요?', '직접 보러 가도 될까요?', '어디서 거래할까요?']
       : ['네, 판매중이에요!', '직접 보러 오셔도 돼요', '죄송해요, 예약됐어요'];
     document.getElementById('quick').innerHTML = quick.map(function (q) { return '<button type="button">' + PS.esc(q) + '</button>'; }).join('');
     document.getElementById('quick').addEventListener('click', function (e) {

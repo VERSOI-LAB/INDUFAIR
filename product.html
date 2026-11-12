@@ -217,7 +217,7 @@
       (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
       (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
       (payableSeller ? PS.policyHtml(true)
-        : '<div class="direct-note"><b>채팅으로 직접 거래하는 물건이에요</b>판다산다 안전결제를 쓰지 않는 판매자예요. 판다산다는 직접 거래의 돈을 보관하지 않으니 아래를 꼭 지켜 주세요.' +
+        : '<div class="direct-note"><b>채팅으로 직접 거래하는 물건이에요</b>판다산다 안전결제를 쓰지 않는 판매자예요. 판다산다는 개인과의 직접 거래의 돈을 보관하지 않으니 아래를 꼭 지켜 주세요.' +
           '<ul style="margin:6px 0 0;padding-left:18px">' + PS.SAFE_TRADE_TIPS.map(function (t) { return '<li>' + PS.esc(t).replace('경찰청 사이버범죄 신고시스템', '<a href="' + PS.CYBER_COP_URL + '" target="_blank" rel="noopener" style="text-decoration:underline">경찰청 사이버범죄 신고시스템</a>') + '</li>'; }).join('') + '</ul></div>') +
       '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) +
         (PS.user && PS.user.id === p.seller_profile_id ? '' : ' · <button type="button" id="reportSeller" style="color:var(--sub);text-decoration:underline;font-size:inherit">판매자 신고</button>') + '</div>' +
