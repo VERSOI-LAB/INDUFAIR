@@ -739,6 +739,8 @@
   };
 
   PS.signOut = async function () {
+    // 이 기기로는 더 이상 이 계정의 채팅 알림이 오지 않게 (공용 PC 등)
+    try { if ('serviceWorker' in navigator && PS.push) await Promise.race([PS.push.disable(), new Promise(function (r) { setTimeout(r, 2000); })]); } catch (e) {}
     await sb.auth.signOut();
     location.href = '/';
   };
@@ -826,12 +828,144 @@
     PS.ready.then(function (user) { if (user) refreshChatDot(); });
   };
 
+  // 안 읽은 채팅 수: 탭바 숫자 배지 + 브라우저 탭 제목 앞 (n)
+  var baseTitle = null;
   async function refreshChatDot() {
+    if (!PS.user) return;
     var res = await sb.from('messages').select('id', { count: 'exact', head: true })
       .is('read_at', null).neq('sender_id', PS.user.id);
+    var n = res.count || 0;
+    PS.unreadChats = n;
     var dot = document.getElementById('chatDot');
-    if (dot) dot.classList.toggle('show', (res.count || 0) > 0);
+    if (dot) { dot.classList.toggle('show', n > 0); dot.textContent = n > 99 ? '99+' : n ? String(n) : ''; }
+    if (baseTitle === null) baseTitle = document.title.replace(/^\(\d+\+?\)\s*/, '');
+    document.title = (n ? '(' + (n > 99 ? '99+' : n) + ') ' : '') + baseTitle;
   }
+  PS.refreshChatDot = refreshChatDot;
+
+  // ---- 새 채팅 알림 (사이트를 열어 둔 동안) ----
+  // 어느 화면에 있든 새 메시지가 오면 배지 갱신 + 위쪽 알림 띠. 'ps:message' 이벤트로 화면에도 알림
+  function showMessageBanner(m, name) {
+    var el = document.getElementById('psMsgBanner');
+    if (!el) {
+      el = document.createElement('a');
+      el.id = 'psMsgBanner';
+      el.className = 'msg-banner';
+      document.body.appendChild(el);
+    }
+    el.href = '/chat/' + m.chat_id;
+    el.innerHTML = '<span class="mb-ico" aria-hidden="true">' + PS.icon3d('chat', 28) + '</span><span class="mb-tx"><b>' + PS.esc(name || '이웃') + '님의 새 메시지</b>' +
+      '<span>' + PS.esc(String(m.message || '').slice(0, 80)) + '</span></span>';
+    el.classList.add('show');
+    clearTimeout(PS._bannerTimer);
+    PS._bannerTimer = setTimeout(function () { el.classList.remove('show'); }, 5000);
+  }
+  function watchMessages() {
+    if (!PS.user || PS._msgWatch) return;
+    PS._msgWatch = sb.channel('ps-inbox-' + PS.user.id)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async function (payload) {
+        var m = payload.new;
+        if (!m || m.sender_id === PS.user.id) return;
+        window.dispatchEvent(new CustomEvent('ps:message', { detail: m }));
+        // 그 채팅방을 보고 있으면 배지·띠 없이 (채팅방이 직접 읽음 처리)
+        var inRoom = PS.idFromUrl('chat') === m.chat_id && document.visibilityState === 'visible';
+        setTimeout(refreshChatDot, inRoom ? 1500 : 0);
+        if (inRoom) return;
+        var who = (await PS.publicProfiles([m.sender_id]))[m.sender_id];
+        showMessageBanner(m, who && who.name);
+      })
+      .subscribe();
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') refreshChatDot(); });
+  }
+  PS.ready.then(function (user) { if (user) { watchMessages(); PS.push.sync(); } });
+
+  // ---- 웹 푸시 (사이트를 닫아도 휴대폰·PC 알림) ----
+  // 공개 키. 비밀 키는 Supabase Edge Function 비밀값(VAPID_PRIVATE_KEY)에만 있다
+  PS.VAPID_PUBLIC_KEY = 'BCfvZwThfSlnH4f_hBfj5xcBkwoopNdEVkMR-WPesRh_PwljcAT_zvCOFRSH7mcp9c7HNBcRvkSpofLwcUDdO-s';
+  function b64ToBytes(b64) {
+    var s = (b64 + '='.repeat((4 - b64.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+    var raw = atob(s), out = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+  }
+  PS.push = {
+    // 'unsupported' | 'ios_install' (아이폰: 홈 화면에 추가해야 함) | 'denied' | 'default' | 'granted'
+    state: function () {
+      var ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+      if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return ios && !standalone ? 'ios_install' : 'unsupported';
+      if (ios && !standalone) return 'ios_install';
+      return Notification.permission;
+    },
+    // 알림 켜기: 권한 요청 → 구독 → 서버 저장. 결과: 'ok' | 'denied' | 'unsupported' | 'error'
+    enable: async function () {
+      var st = PS.push.state();
+      if (st === 'unsupported' || st === 'ios_install') return 'unsupported';
+      try {
+        var perm = await Notification.requestPermission();
+        if (perm !== 'granted') return 'denied';
+        return (await PS.push.sync(true)) ? 'ok' : 'error';
+      } catch (e) { console.warn('[판다산다] 알림 켜기 실패', e); return 'error'; }
+    },
+    // 권한이 있으면 이 브라우저 구독을 지금 로그인한 계정에 저장 (계정을 바꿔 로그인해도 맞춰짐)
+    sync: async function (force) {
+      try {
+        if (!PS.user || PS.push.state() !== 'granted') return false;
+        var reg = await navigator.serviceWorker.register('/sw.js');
+        await navigator.serviceWorker.ready;
+        var sub = await reg.pushManager.getSubscription();
+        if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64ToBytes(PS.VAPID_PUBLIC_KEY) });
+        var j = sub.toJSON();
+        var key = 'ps_push_saved';
+        var mark = PS.user.id + '|' + j.endpoint;
+        var saved = null;
+        try { saved = localStorage.getItem(key); } catch (e) {}
+        if (!force && saved === mark) return true;
+        var r = await sb.rpc('save_push_subscription', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_user_agent: navigator.userAgent });
+        if (r.error || r.data !== 'ok') return false;
+        try { localStorage.setItem(key, mark); } catch (e) {}
+        return true;
+      } catch (e) { console.warn('[판다산다] 알림 구독 실패', e); return false; }
+    },
+    // 이 브라우저 알림 끄기
+    disable: async function () {
+      try {
+        var reg = await navigator.serviceWorker.getRegistration('/sw.js');
+        var sub = reg && await reg.pushManager.getSubscription();
+        if (sub) {
+          await sb.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
+          await sub.unsubscribe();
+        }
+        try { localStorage.removeItem('ps_push_saved'); } catch (e) {}
+        return true;
+      } catch (e) { return false; }
+    },
+    // 알림 켜기 안내 띠 (채팅 목록 등). 켤 필요가 없으면 빈 문자열
+    promptHtml: function () {
+      var st = PS.push.state();
+      var off = false;
+      try { off = localStorage.getItem('ps_push_prompt_off') === '1'; } catch (e) {}
+      if (off || st === 'granted' || st === 'unsupported') return '';
+      if (st === 'ios_install') return '<div class="push-prompt"><div><b>채팅 알림을 받으려면</b><span>Safari 아래 공유 버튼 → "홈 화면에 추가" 후, 홈 화면의 판다산다에서 알림을 켜 주세요</span></div><button type="button" class="pp-x" aria-label="닫기">✕</button></div>';
+      if (st === 'denied') return '<div class="push-prompt"><div><b>채팅 알림이 꺼져 있어요</b><span>브라우저 주소창 옆 사이트 설정에서 알림을 허용해 주세요</span></div><button type="button" class="pp-x" aria-label="닫기">✕</button></div>';
+      return '<div class="push-prompt"><div><b>새 채팅이 오면 알려 드릴까요?</b><span>사이트를 닫아도 휴대폰·PC로 알림이 와요</span></div><button type="button" class="btn small" id="ppOn">알림 켜기</button><button type="button" class="pp-x" aria-label="닫기">✕</button></div>';
+    },
+    bindPrompt: function (root, rerender) {
+      root.addEventListener('click', async function (e) {
+        if (e.target.closest('.pp-x')) {
+          try { localStorage.setItem('ps_push_prompt_off', '1'); } catch (err) {}
+          var box = e.target.closest('.push-prompt'); if (box) box.remove();
+        }
+        var on = e.target.closest('#ppOn');
+        if (on) {
+          on.disabled = true;
+          var r = await PS.push.enable();
+          PS.toast(r === 'ok' ? '알림을 켰어요! 새 채팅이 오면 알려 드릴게요' : r === 'denied' ? '알림이 허용되지 않았어요' : '이 브라우저에서는 알림을 켤 수 없어요');
+          if (rerender) rerender();
+        }
+      });
+    }
+  };
 
   // 하단 탭바는 모든 페이지에 항상 고정 (페이지가 직접 그리지 않으면 주소로 판단해 자동으로)
   function autoTabbar() {

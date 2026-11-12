@@ -48,6 +48,7 @@ Deno.serve(async (req) => {
     ["business_likes", admin.from("business_likes").delete().eq("profile_id", uid)],
     ["keyword_alerts", admin.from("keyword_alerts").delete().eq("profile_id", uid)],
     ["notifications", admin.from("notifications").delete().eq("profile_id", uid)],
+    ["push_subscriptions", admin.from("push_subscriptions").delete().eq("profile_id", uid)],
   ];
   for (const [name, run] of steps) {
     const { error } = await run;
