@@ -368,3 +368,12 @@ p{margin:0;}
 .legal-toc a:hover{text-decoration:underline;}
 /* 결제 시험 기간 알림, 심사용 계정 안내 */
 .test-note{margin-bottom:12px;padding:14px 16px;border-radius:14px;background:#FFF4D6;color:#7A5200;font-size:14px;line-height:1.5;font-weight:600;}
+
+/* 신뢰: 사기 주의 · 직접 거래 안전 수칙 · 후기 */
+.trust-warn{margin-top:12px;padding:12px 14px;border-radius:12px;background:#FFF0EF;color:var(--danger);font-size:14px;line-height:1.55;}
+.trust-warn b{display:block;font-size:15px;margin-bottom:2px;}
+.trust-line{font-size:13px;color:var(--sub);font-weight:600;}
+.safe-tips{margin:0;padding:12px 14px 12px 30px;border-radius:12px;background:#FFF8E6;color:#6B5200;font-size:13px;line-height:1.6;}
+.safe-tips a{text-decoration:underline;}
+.acct-warn{display:block;margin-top:4px;font-size:12px;font-weight:700;color:var(--danger);}
+.acct-warn a{text-decoration:underline;}

@@ -389,6 +389,7 @@
       if (!shipped) acts += btn('cancel', '주문 취소');
       else if (!received && req !== 'requested') acts += btn('receive', '수령 완료', '') + btn('request', req === 'rejected' ? '취소 다시 요청' : '취소 요청');
     }
+    if (paid && received) acts += btn('review', '거래 후기 남기기');
     return '<article class="ocard' + (o.status === 'canceled' ? ' off' : '') + '">' +
       '<header><span class="badge ' + (o.status === 'paid' ? 'paid' : 'sold') + '">' + (o.status === 'paid' ? '결제완료' : '취소됨') + '</span>' +
         '<time>' + when + '</time><span class="no">' + PS.esc(o.order_no) + '</span></header>' + state +
@@ -445,6 +446,7 @@
       if (!b) return;
       var act = b.dataset.oact, o = getOrder(b.dataset.oid);
       if (!o) return;
+      if (act === 'review') { PS.openReview({ orderId: o.id }); return; }
 
       if (act === 'ship') {
         var s = open('<h3>' + (o.shipped_at ? '송장 정보 수정' : '발송 정보 입력') + '</h3>' +
@@ -522,6 +524,105 @@
         done('취소 요청을 거절했어요');
       }
     });
+  };
+
+  // ---- 신뢰: 거래 후기 · 사기 신고 (개인 간 직접 거래는 플랫폼이 돈을 다루지 않으므로 이걸로 보완) ----
+  PS.REPORT_REASONS = { fraud: '돈을 받고 물건을 안 보내요 (사기)', fake_item: '설명과 전혀 다른 물건이에요', no_show: '약속을 어기고 연락이 끊겼어요', abusive: '욕설·비매너', etc: '기타' };
+  PS.RATINGS = { good: '좋았어요', ok: '보통이에요', bad: '별로였어요' };
+  var trustCache = {};
+  // 여러 사람의 신뢰 요약 { id: { review_count, good, ok, bad, warned } }
+  PS.trust = async function (ids) {
+    var need = ids.filter(function (id, i) { return id && ids.indexOf(id) === i && !(id in trustCache); });
+    if (need.length) {
+      var r = await sb.rpc('get_trust', { p_ids: need });
+      need.forEach(function (id) { trustCache[id] = null; });
+      (r.data || []).forEach(function (t) { trustCache[t.id] = t; });
+    }
+    return trustCache;
+  };
+  // "후기 12 · 좋아요 92%" 한 줄 (후기 없으면 빈 문자열)
+  PS.trustLine = function (t) {
+    if (!t || !t.review_count) return '';
+    return '후기 ' + t.review_count + ' · 좋았어요 ' + Math.round(t.good / t.review_count * 100) + '%';
+  };
+  PS.warnHtml = function (t) {
+    if (!t || !t.warned) return '';
+    return '<div class="trust-warn"><b>⚠️ 여러 번 사기 신고를 받은 사용자예요</b>운영팀이 확인하고 있어요. 먼저 돈을 보내지 말고, 만나서 물건을 확인한 뒤 거래해 주세요.</div>';
+  };
+  // 직접 거래 안전 수칙
+  PS.SAFE_TRADE_TIPS = ['되도록 만나서 물건을 확인한 뒤 돈을 주세요', '물건을 받기 전에 먼저 송금하지 마세요', '송금 전 경찰청 사이버범죄 신고시스템에서 상대 계좌·전화번호를 조회해 보세요', '판다산다 밖 메신저나 링크로 옮기자고 하면 의심하세요'];
+  PS.CYBER_COP_URL = 'https://ecrm.police.go.kr/'; // 경찰청 사이버범죄 신고시스템 (사기 신고·계좌 조회)
+  // 메시지에 계좌번호처럼 보이는 숫자가 있는가
+  PS.hasAccountNo = function (text) {
+    text = String(text || '').replace(/01[016789][- .]?\d{3,4}[- .]?\d{4}/g, ''); // 휴대폰 번호는 빼고
+    return /(?:^|\D)(?:\d[\d -]{8,20}\d)(?:\D|$)/.test(text || '') && /계좌|입금|송금|은행|뱅크|농협|국민|신한|우리|하나|기업|새마을|우체국|\d{2,6}-\d{2,6}-\d{2,8}/.test(text || '');
+  };
+
+  var trustSheet = null;
+  function sheetOpen(html) {
+    if (!trustSheet) {
+      var bg = document.createElement('div'); bg.className = 'sheet-bg'; bg.id = 'trustBg';
+      var sh = document.createElement('div'); sh.className = 'sheet'; sh.id = 'trustSheet'; sh.setAttribute('role', 'dialog');
+      document.body.appendChild(bg); document.body.appendChild(sh);
+      bg.addEventListener('click', sheetClose);
+      trustSheet = sh;
+    }
+    trustSheet.innerHTML = '<div class="handle"></div>' + html;
+    trustSheet.classList.add('show'); document.getElementById('trustBg').classList.add('show');
+    return trustSheet;
+  }
+  function sheetClose() {
+    if (!trustSheet) return;
+    trustSheet.classList.remove('show'); document.getElementById('trustBg').classList.remove('show');
+  }
+
+  // 사기 신고. opts: { name, productId, chatId }
+  PS.openReport = function (targetId, opts) {
+    opts = opts || {};
+    if (!PS.user) return PS.goLogin();
+    var sh = sheetOpen('<h3 style="font-size:19px;font-weight:800">' + PS.esc(opts.name || '이 사용자') + '님 신고하기</h3>' +
+      '<p style="color:var(--sub);font-size:14px;margin-top:4px">운영팀이 확인해요. 서로 다른 여러 명에게 신고되면 다른 이용자에게 주의 표시가 보여요.</p>' +
+      '<div style="margin-top:8px">' + Object.keys(PS.REPORT_REASONS).map(function (k, i) {
+        return '<label class="chk" style="display:flex;gap:8px;align-items:center;padding:10px 0;font-size:16px"><input type="radio" name="rpReason" value="' + k + '"' + (i ? '' : ' checked') + '>' + PS.REPORT_REASONS[k] + '</label>';
+      }).join('') + '</div>' +
+      '<label class="field"><span>자세한 내용 (선택)</span><textarea class="input" id="rpDetail" rows="3" maxlength="1000" placeholder="언제, 얼마를, 어떻게 거래했는지 써 주시면 확인이 빨라요" style="height:auto;padding-top:10px"></textarea></label>' +
+      '<p style="font-size:13px;color:var(--sub);margin-top:8px">돈을 보냈는데 물건을 못 받았다면 <a href="' + PS.CYBER_COP_URL + '" target="_blank" rel="noopener" style="text-decoration:underline">경찰청 사이버범죄 신고시스템</a>에도 꼭 신고해 주세요.</p>' +
+      '<button type="button" class="btn" id="rpSend" style="margin-top:14px">신고하기</button>');
+    sh.querySelector('#rpSend').onclick = async function () {
+      var b = this; b.disabled = true;
+      var reason = (sh.querySelector('input[name=rpReason]:checked') || {}).value || 'etc';
+      var r = await sb.rpc('report_user', { p_target: targetId, p_reason: reason, p_detail: sh.querySelector('#rpDetail').value, p_product_id: opts.productId || null, p_chat_id: opts.chatId || null });
+      b.disabled = false;
+      var code = r.error ? 'error' : r.data;
+      if (code === 'ok') { sheetClose(); delete trustCache[targetId]; PS.toast('신고했어요. 운영팀이 확인할게요'); return; }
+      PS.toast({ already: '이미 신고한 사용자예요', self: '나를 신고할 수는 없어요', too_many: '오늘은 더 신고할 수 없어요. 고객센터로 알려 주세요', login_required: '다시 로그인해 주세요' }[code] || '신고하지 못했어요. 잠시 후 다시 해 주세요');
+    };
+  };
+
+  // 거래 후기. opts: { chatId } 또는 { orderId }, name
+  PS.openReview = function (opts) {
+    if (!PS.user) return PS.goLogin();
+    var rating = 'good';
+    var sh = sheetOpen('<h3 style="font-size:19px;font-weight:800">' + (opts.name ? PS.esc(opts.name) + '님과의 거래 어땠나요?' : '거래 어땠나요?') + '</h3>' +
+      '<div class="rate-pick" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">' + Object.keys(PS.RATINGS).map(function (k) {
+        return '<button type="button" class="btn ' + (k === 'good' ? '' : 'white') + ' small" data-rate="' + k + '">' + { good: '😊', ok: '🙂', bad: '😞' }[k] + ' ' + PS.RATINGS[k] + '</button>';
+      }).join('') + '</div>' +
+      '<label class="field"><span>한 줄 후기 (선택)</span><textarea class="input" id="rvText" rows="3" maxlength="300" placeholder="예) 약속 시간 잘 지키고 물건 상태도 설명대로였어요" style="height:auto;padding-top:10px"></textarea></label>' +
+      '<p style="font-size:13px;color:var(--sub);margin-top:8px">후기는 상대 프로필에 공개되고, 한 거래에 한 번만 남길 수 있어요.</p>' +
+      '<button type="button" class="btn" id="rvSend" style="margin-top:14px">후기 남기기</button>');
+    sh.querySelector('.rate-pick').onclick = function (e) {
+      var b = e.target.closest('[data-rate]'); if (!b) return;
+      rating = b.dataset.rate;
+      this.querySelectorAll('[data-rate]').forEach(function (x) { x.classList.toggle('white', x !== b); });
+    };
+    sh.querySelector('#rvSend').onclick = async function () {
+      var b = this; b.disabled = true;
+      var r = await sb.rpc('write_trade_review', { p_chat_id: opts.chatId || null, p_order_id: opts.orderId || null, p_rating: rating, p_comment: sh.querySelector('#rvText').value });
+      b.disabled = false;
+      var code = r.error ? 'error' : r.data;
+      if (code === 'ok') { sheetClose(); trustCache = {}; PS.toast('후기를 남겼어요. 고마워요!'); if (opts.onDone) opts.onDone(); return; }
+      PS.toast({ already: '이미 후기를 남긴 거래예요', not_traded: '서로 대화를 나눈 거래에만 후기를 남길 수 있어요', not_member: '내 거래가 아니에요', login_required: '다시 로그인해 주세요' }[code] || '후기를 남기지 못했어요. 잠시 후 다시 해 주세요');
+    };
   };
 
   PS.myVerification = async function () {
@@ -738,7 +839,7 @@
     var path = location.pathname;
     var key = path === '/' || path === '/index' ? 'home'
       : /^\/sell/.test(path) ? 'sell'
-      : /^\/(buy|product|checkout|pay-|biz\/(?!new|verify)|business)/.test(path) ? 'buy'
+      : /^\/(buy|product|checkout|pay-(?!seller)|biz\/(?!new|verify)|business)/.test(path) ? 'buy'
       : /^\/chat/.test(path) ? 'chat'
       : /^\/(mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|pay-seller|my-biz|biz-premium|biz\/new|biz\/verify|biz-new|biz-verify)/.test(path) ? 'my' : '';
     PS.renderTabbar(key);

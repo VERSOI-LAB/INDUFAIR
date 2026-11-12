@@ -129,6 +129,7 @@
   var product = null;
   var liked = false;
   var payableSeller = false; // 안전결제 판매자(승인된 사업자)인가
+  var sellerTrust = null;     // 판매자 후기 요약·주의 표시
 
   document.getElementById('backBtn').addEventListener('click', function () {
     if (history.length > 1 && document.referrer.indexOf(location.host) !== -1) history.back();
@@ -153,6 +154,7 @@
     var sellerMap = await PS.publicProfiles([product.seller_profile_id]);
     freeMin = (await PS.freeShipMins([product.seller_profile_id]))[product.seller_profile_id] || 0;
     payableSeller = await PS.canPay(product.seller_profile_id);
+    sellerTrust = (await PS.trust([product.seller_profile_id]))[product.seller_profile_id];
     var cn = PS.cart.count();
     if (cn) { document.getElementById('cartN').textContent = cn; document.getElementById('cartN').hidden = false; }
     // 조회수: 판매자 본인은 빼고, 같은 브라우저 세션에서는 한 번만
@@ -163,6 +165,8 @@
     if (countView) product.view_count = (product.view_count || 0) + 1;
     renderSlider();
     renderBody(sellerMap[product.seller_profile_id] || {});
+    var rs = document.getElementById('reportSeller');
+    if (rs) rs.addEventListener('click', function () { PS.openReport(product.seller_profile_id, { name: (sellerMap[product.seller_profile_id] || {}).name, productId: product.id }); });
     await renderBar();
     renderRecs(sellerMap[product.seller_profile_id] || {});
     if (countView) {
@@ -199,9 +203,9 @@
     document.getElementById('body').innerHTML =
       '<a class="seller" href="' + PS.profileUrl(p.seller_profile_id) + '">' +
         '<div class="avatar">' + PS.avatarHtml(seller.avatar_url) + '</div>' +
-        '<div style="flex:1;min-width:0"><b>' + PS.esc(seller.name || '판매자') + '</b><span>' + PS.esc(p.region || '지역 정보 없음') + '</span></div>' +
+        '<div style="flex:1;min-width:0"><b>' + PS.esc(seller.name || '판매자') + '</b><span>' + PS.esc(p.region || '지역 정보 없음') + (PS.trustLine(sellerTrust) ? ' · ' + PS.trustLine(sellerTrust) : '') + '</span></div>' +
         '<span class="more-link">다른 물건 보기 ›</span>' +
-      '</a>' +
+      '</a>' + PS.warnHtml(sellerTrust) +
       '<h1 class="title">' + badge + PS.esc(PS.splitTitle(p.title).name) +
         (PS.splitTitle(p.title).spec ? '<span class="spec">' + PS.esc(PS.splitTitle(p.title).spec) + '</span>' : '') + '</h1>' +
       '<div class="meta">' + PS.esc(p.categories ? p.categories.name : '') + (p.categories ? ' · ' : '') + PS.ago(p.created_at) + '</div>' +
@@ -213,8 +217,10 @@
       (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
       (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
       (payableSeller ? PS.policyHtml(true)
-        : '<div class="direct-note"><b>채팅으로 직접 거래하는 물건이에요</b>판다산다 안전결제를 쓰지 않는 판매자예요. 값을 치르기 전에 물건 상태와 판매자를 꼭 확인하고, 되도록 만나서 직접 확인한 뒤 거래해 주세요.</div>') +
-      '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) + '</div>' +
+        : '<div class="direct-note"><b>채팅으로 직접 거래하는 물건이에요</b>판다산다 안전결제를 쓰지 않는 판매자예요. 판다산다는 직접 거래의 돈을 보관하지 않으니 아래를 꼭 지켜 주세요.' +
+          '<ul style="margin:6px 0 0;padding-left:18px">' + PS.SAFE_TRADE_TIPS.map(function (t) { return '<li>' + PS.esc(t).replace('경찰청 사이버범죄 신고시스템', '<a href="' + PS.CYBER_COP_URL + '" target="_blank" rel="noopener" style="text-decoration:underline">경찰청 사이버범죄 신고시스템</a>') + '</li>'; }).join('') + '</ul></div>') +
+      '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) +
+        (PS.user && PS.user.id === p.seller_profile_id ? '' : ' · <button type="button" id="reportSeller" style="color:var(--sub);text-decoration:underline;font-size:inherit">판매자 신고</button>') + '</div>' +
       '<div id="recs"></div>';
   }
 

@@ -17,10 +17,21 @@
   .counts div{text-align:center;padding:14px 4px;}
   .counts b{display:block;font-size:22px;font-weight:800;}
   .counts span{font-size:14px;color:var(--sub);}
-  .tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);margin:24px 0 16px;}
+  .tabs{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--line);margin:24px 0 16px;}
   .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
   .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
   .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
+  .rv-sum{display:flex;gap:8px;margin-bottom:12px;}
+  .rv-sum span{flex:1;text-align:center;padding:10px 4px;border-radius:12px;background:var(--bg);font-size:14px;color:var(--sub);}
+  .rv-sum b{display:block;font-size:20px;color:var(--text);}
+  .rv{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);}
+  .rv .avatar{width:40px;height:40px;border-radius:50%;background:var(--primary-light);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .rv .avatar img{width:100%;height:100%;object-fit:cover;}
+  .rv .meta{font-size:13px;color:var(--sub);}
+  .rv p{margin:4px 0 0;font-size:15px;line-height:1.5;word-break:break-word;}
+  .rv .rt{font-weight:800;font-size:14px;}
+  .rv .rt.bad{color:var(--danger);}
+  .report-link{display:block;margin:16px auto 0;font-size:14px;color:var(--sub);text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -43,6 +54,7 @@
   var id = PS.idFromUrl('profile');
   var main = document.getElementById('main');
   var products = [];
+  var trust = null, reviews = null; // 후기 요약, 받은 후기 목록(탭을 열 때 불러옴)
   var tab = 'selling';
 
   document.getElementById('backBtn').addEventListener('click', function () {
@@ -65,6 +77,7 @@
       .order('created_at', { ascending: false });
     products = res.data || [];
     await PS.ready;
+    trust = (await PS.trust([id]))[id];
 
     var mine = PS.user && PS.user.id === id;
     var region = (products.find(function (p) { return p.region; }) || {}).region;
@@ -77,8 +90,9 @@
     main.innerHTML =
       '<section class="who">' +
         '<div class="avatar">' + PS.avatarHtml(person.avatar_url) + '</div>' +
-        '<div style="min-width:0"><b>' + PS.esc(name) + '</b><span>' + PS.esc(region || '지역 정보 없음') + '</span></div>' +
-      '</section>' +
+        '<div style="min-width:0"><b>' + PS.esc(name) + '</b><span>' + PS.esc(region || '지역 정보 없음') + '</span>' +
+          (PS.trustLine(trust) ? '<span class="trust-line">' + PS.trustLine(trust) + '</span>' : '') + '</div>' +
+      '</section>' + PS.warnHtml(trust) +
       '<div class="counts">' +
         '<div><b>' + (products.length - sold) + '</b><span>판매중</span></div>' +
         '<div><b>' + sold + '</b><span>거래 완료</span></div>' +
@@ -86,7 +100,9 @@
       '</div>' +
       (mine ? '<a class="btn white small" href="/mypage" style="margin-top:12px">내 정보 바꾸기</a>' : '') +
       '<div class="tabs" id="tabs" role="tablist"></div>' +
-      '<div id="list"></div>';
+      '<div id="list"></div>' +
+      (mine ? '' : '<button type="button" class="report-link" id="reportBtn">이 사용자 신고하기</button>');
+    if (!mine) document.getElementById('reportBtn').addEventListener('click', function () { PS.openReport(id, { name: name }); });
     renderList();
   }
 
@@ -96,17 +112,37 @@
     var tabs = document.getElementById('tabs');
     tabs.innerHTML =
       '<button role="tab" data-t="selling" class="' + (tab === 'selling' ? 'on' : '') + '" aria-selected="' + (tab === 'selling') + '">판매중<em>' + selling.length + '</em></button>' +
-      '<button role="tab" data-t="sold" class="' + (tab === 'sold' ? 'on' : '') + '" aria-selected="' + (tab === 'sold') + '">거래 완료<em>' + sold.length + '</em></button>';
+      '<button role="tab" data-t="sold" class="' + (tab === 'sold' ? 'on' : '') + '" aria-selected="' + (tab === 'sold') + '">거래 완료<em>' + sold.length + '</em></button>' +
+      '<button role="tab" data-t="reviews" class="' + (tab === 'reviews' ? 'on' : '') + '" aria-selected="' + (tab === 'reviews') + '">받은 후기<em>' + ((trust && trust.review_count) || 0) + '</em></button>';
     tabs.onclick = function (e) {
       var b = e.target.closest('button');
       if (!b) return;
       tab = b.dataset.t;
       renderList();
     };
+    if (tab === 'reviews') return renderReviews();
     var rows = tab === 'selling' ? selling : sold;
     document.getElementById('list').innerHTML = rows.length
       ? '<div class="grid">' + rows.map(PS.cardHtml).join('') + '</div>'
       : '<div class="empty" style="padding:40px 0">' + PS.icon3d('sell', 80) + (tab === 'selling' ? '판매중인 물건이 없어요' : '아직 거래 완료된 물건이 없어요') + '</div>';
+  }
+
+  async function renderReviews() {
+    var list = document.getElementById('list');
+    if (!reviews) {
+      list.innerHTML = '<div class="skeleton" style="height:120px"></div>';
+      var r = await sb.rpc('get_reviews', { p_profile: id, p_limit: 50 });
+      reviews = r.data || [];
+      if (tab !== 'reviews') return;
+    }
+    var t = trust || { good: 0, ok: 0, bad: 0 };
+    list.innerHTML = '<div class="rv-sum"><span><b>' + (t.good || 0) + '</b>😊 좋았어요</span><span><b>' + (t.ok || 0) + '</b>🙂 보통이에요</span><span><b>' + (t.bad || 0) + '</b>😞 별로였어요</span></div>' +
+      (reviews.length ? reviews.map(function (v) {
+        return '<div class="rv"><div class="avatar">' + PS.avatarHtml(v.reviewer_avatar) + '</div><div style="min-width:0;flex:1">' +
+          '<div><span class="rt' + (v.rating === 'bad' ? ' bad' : '') + '">' + PS.RATINGS[v.rating] + '</span> <span class="meta">· ' + PS.esc(v.reviewer_name || '이웃') + ' (' + (v.reviewer_role === 'buyer' ? '구매자' : '판매자') + ') · ' + PS.ago(v.created_at) + '</span></div>' +
+          (v.product_title ? '<div class="meta">' + PS.esc(v.product_title) + '</div>' : '') +
+          (v.comment ? '<p>' + PS.esc(v.comment) + '</p>' : '') + '</div></div>';
+      }).join('') : '<div class="empty" style="padding:40px 0">' + PS.icon3d('chat', 80) + '아직 받은 후기가 없어요</div>');
   }
 
   load();
