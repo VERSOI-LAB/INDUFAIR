@@ -56,6 +56,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var products = [];
   var orders = [], buyers = {}; // 결제된 주문과 구매자 이름
+  var payable = false; // 안전결제 판매자로 승인됐는가 (아니면 결제 주문이 들어오지 않음)
   var account = null, accountReady = false; // 정산 받을 계좌 (표가 아직 없으면 안내를 숨김)
   var BANKS = ['KB국민', '신한', '우리', '하나', 'NH농협', 'IBK기업', 'SC제일', '카카오뱅크', '토스뱅크', '케이뱅크', '새마을금고', '우체국', '수협', '신협', '부산', 'iM뱅크(대구)', '경남', '광주', '전북', '제주', 'KDB산업'];
   var tab = PS.STATUS[PS.param('tab')] || PS.param('tab') === 'orders' ? PS.param('tab') : 'selling';
@@ -74,6 +75,7 @@
     var ar = await sb.from('seller_payout_accounts').select('bank_name,account_no,holder_name').eq('profile_id', PS.user.id).maybeSingle();
     accountReady = !ar.error;
     account = ar.data || null;
+    payable = await PS.canPay(PS.user.id);
     renderTabs();
   }
 
@@ -100,6 +102,8 @@
           '<button type="button" class="btn white small" id="acctBtn">변경</button></div>'
         : '<div class="payacct need"><div><b>정산 받을 계좌를 등록해 주세요</b><span>계좌가 있어야 판매 대금을 받을 수 있어요</span></div>' +
           '<button type="button" class="btn small" id="acctBtn">등록</button></div>';
+      if (!payable) acct = '<div class="payacct need"><div><b>안전결제로 팔고 싶다면</b><span>사업자 판매자는 신청하면 구매자가 바로 카드결제할 수 있어요. 사업자가 아니면 채팅으로 직접 거래해요</span></div>' +
+        '<a class="btn small" href="/pay-seller">신청</a></div>' + (account ? acct : '');
       $('list').innerHTML = acct + (orders.length
         ? orders.map(function (o) { return PS.orderCardHtml(o, 'seller', buyers); }).join('')
         : '<div class="empty" style="padding:40px 0">' + PS.icon3d('sell', 80) + '아직 결제된 주문이 없어요</div>');

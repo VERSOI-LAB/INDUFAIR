@@ -33,6 +33,11 @@
   .prod-strip .thumb img{width:100%;height:100%;object-fit:cover;}
   .prod-strip .t{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .prod-strip .p{font-size:16px;font-weight:800;}
+  .room-acts{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--surface);}
+  .room-acts .trust-line{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .room-acts button{flex-shrink:0;height:32px;padding:0 12px;border-radius:16px;border:1px solid var(--line);font-size:14px;font-weight:700;color:var(--sub);}
+  .room-acts button.report{color:var(--danger);}
+  .room-top{display:grid;gap:8px;margin-bottom:8px;}
   .msgs{flex:1;overflow-y:auto;padding:16px;background:var(--bg);display:flex;flex-direction:column;gap:6px;}
   .day{align-self:center;font-size:12px;color:var(--hint);background:#EFEFEF;padding:4px 12px;border-radius:12px;margin:10px 0;}
   .msg{display:flex;align-items:flex-end;gap:6px;max-width:100%;}
@@ -121,6 +126,7 @@
 
   // ---------- 채팅방 ----------
   var messages = [];
+  var roomTop = ''; // 메시지 위에 고정으로 보이는 주의 표시·안전 수칙
 
   async function openRoom(id) {
     app.classList.add('no-tabbar');
@@ -128,6 +134,7 @@
     app.innerHTML = '<div class="room">' +
       '<header class="topbar"><a class="back" href="/chat" aria-label="채팅 목록">' + PS.icon('back', 24) + '</a><h1><a id="otherName" href="#">채팅</a></h1></header>' +
       '<a class="prod-strip" id="strip" href="#"></a>' +
+      '<div class="room-acts" id="roomActs" hidden></div>' +
       '<div class="msgs" id="msgs"></div>' +
       '<div class="quick" id="quick"></div>' +
       '<form class="composer" id="composer"><textarea id="text" rows="1" placeholder="메시지 보내기" aria-label="메시지"></textarea><button type="submit" id="send" aria-label="보내기" disabled>' + PS.icon('send', 22) + '</button></form>' +
@@ -145,7 +152,8 @@
     }
     var chat = res.data;
     var otherId = chat.buyer_id === me ? chat.seller_id : chat.buyer_id;
-    var names = await PS.publicProfiles([otherId]);
+    var people = await Promise.all([PS.publicProfiles([otherId]), PS.trust([otherId])]);
+    var names = people[0], trust = people[1][otherId];
     document.getElementById('otherName').textContent = ((names[otherId] && names[otherId].name) || '이웃') + ' ›';
     document.getElementById('otherName').href = PS.profileUrl(otherId);
 
@@ -164,6 +172,29 @@
         '<div style="min-width:0"><div class="t">' + (p.status === 'sold' ? '<span class="badge sold">판매완료</span>' : '') +
         PS.esc(p.title || '삭제된 물건') + '</div><div class="p">' + (p.title ? PS.won(p.price) : '') + '</div></div>';
     }
+
+    // 신뢰: 상대 후기 요약 + 거래 후기 / 신고 버튼, 직접 거래 안전 수칙
+    var otherName = (names[otherId] && names[otherId].name) || '이웃';
+    var reviewed = false;
+    if (!bz) {
+      var rv = await sb.from('trade_reviews').select('id').eq('chat_id', id).eq('reviewer_id', me).maybeSingle();
+      reviewed = !rv.error && !!rv.data;
+    }
+    var acts = document.getElementById('roomActs');
+    acts.hidden = false;
+    acts.innerHTML = '<span class="trust-line">' + (PS.trustLine(trust) || '아직 받은 후기가 없어요') + '</span>' +
+      (bz ? '' : '<button type="button" id="reviewBtn"' + (reviewed ? ' disabled' : '') + '>' + (reviewed ? '후기 남김' : '거래 후기') + '</button>') +
+      '<button type="button" class="report" id="reportBtn">신고</button>';
+    acts.addEventListener('click', function (e) {
+      if (e.target.closest('#reportBtn')) PS.openReport(otherId, { name: otherName, productId: chat.products && chat.products.id, chatId: id });
+      var rb = e.target.closest('#reviewBtn');
+      if (rb && !rb.disabled) PS.openReview({ chatId: id, name: otherName, onDone: function () { rb.disabled = true; rb.textContent = '후기 남김'; } });
+    });
+    var payable = !bz && chat.products && chat.products.id ? await PS.canPay(chat.seller_id) : false;
+    roomTop = PS.warnHtml(trust) + (bz || payable ? '' :
+      '<ul class="safe-tips"><li><b>판다산다는 직접 거래의 돈을 보관하지 않아요.</b></li>' + PS.SAFE_TRADE_TIPS.map(function (t) {
+        return '<li>' + PS.esc(t).replace('경찰청 사이버범죄 신고시스템', '<a href="' + PS.CYBER_COP_URL + '" target="_blank" rel="noopener">경찰청 사이버범죄 신고시스템</a>') + '</li>';
+      }).join('') + '</ul>');
 
     var quick = bz
       ? (chat.buyer_id === me
@@ -239,12 +270,12 @@
     var me = PS.user.id;
     var box = document.getElementById('msgs');
     if (!messages.length) {
-      box.innerHTML = '<div class="empty" style="padding:40px 0">' + PS.sticker('hello', 120) + '<b>먼저 인사해 보세요</b>아래 버튼을 눌러도 돼요</div>';
+      box.innerHTML = (roomTop ? '<div class="room-top">' + roomTop + '</div>' : '') + '<div class="empty" style="padding:40px 0">' + PS.sticker('hello', 120) + '<b>먼저 인사해 보세요</b>아래 버튼을 눌러도 돼요</div>';
       return;
     }
     var lastReadMine = -1;
     messages.forEach(function (m, i) { if (m.sender_id === me && m.read_at) lastReadMine = i; });
-    var html = '';
+    var html = roomTop ? '<div class="room-top">' + roomTop + '</div>' : '';
     var lastDay = '';
     messages.forEach(function (m, i) {
       var d = new Date(m.created_at);
@@ -253,7 +284,10 @@
       var mine = m.sender_id === me;
       var status = '';
       if (mine) status = m.read_at ? (i === lastReadMine ? '<span class="rd">읽음</span>' : '') : '<span class="r1" title="안 읽음">1</span>';
-      html += '<div class="msg' + (mine ? ' me' : '') + '"><div class="bubble">' + PS.esc(m.message) + '</div>' +
+      // 상대가 보낸 계좌번호에는 송금 전 조회 안내
+      var warn = !mine && PS.hasAccountNo(m.message)
+        ? '<span class="acct-warn">⚠️ 송금 전 <a href="' + PS.CYBER_COP_URL + '" target="_blank" rel="noopener">경찰청 사이버범죄 신고시스템</a>에서 이 계좌를 조회해 보세요</span>' : '';
+      html += '<div class="msg' + (mine ? ' me' : '') + '"><div class="bubble">' + PS.esc(m.message) + warn + '</div>' +
         '<div class="side">' + status + '<span>' + timeLabel(m.created_at) + '</span></div></div>';
     });
     var nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;

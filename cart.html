@@ -48,7 +48,7 @@
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var products = {};
-  var names = {}, mins = {};
+  var names = {}, mins = {}, pays = {}; // pays: 안전결제 판매자 여부
 
   $('backBtn').addEventListener('click', function () {
     if (history.length > 1 && document.referrer.indexOf(location.host) !== -1) history.back(); else location.href = '/buy';
@@ -62,8 +62,8 @@
     var r = await sb.from('products').select('id,title,price,status,seller_profile_id,options,shipping_fee,product_images(url,sort_order)').in('id', ids);
     (r.data || []).forEach(function (p) { products[p.id] = p; });
     var sellers = Object.keys(products).map(function (k) { return products[k].seller_profile_id; });
-    var res = await Promise.all([PS.publicProfiles(sellers), PS.freeShipMins(sellers)]);
-    names = res[0]; mins = res[1];
+    var res = await Promise.all([PS.publicProfiles(sellers), PS.freeShipMins(sellers), PS.paySellers(sellers)]);
+    names = res[0]; mins = res[1]; pays = res[2];
     render();
   });
 
@@ -76,7 +76,7 @@
     if (!p) return null;
     var opts = PS.options(p);
     var price = opts.length ? (x.opt != null && opts[x.opt] ? PS.optionPrice(p, x.opt) : 0) : p.price;
-    var bad = p.status !== 'selling' ? (PS.STATUS[p.status] || '판매 종료') : !(price > 0) ? '가격 협의' : opts.length && (x.opt == null || !opts[x.opt]) ? '규격을 다시 골라 주세요' : '';
+    var bad = !pays[p.seller_profile_id] ? '채팅으로 거래하는 물건이에요' : p.status !== 'selling' ? (PS.STATUS[p.status] || '판매 종료') : !(price > 0) ? '가격 협의' : opts.length && (x.opt == null || !opts[x.opt]) ? '규격을 다시 골라 주세요' : '';
     return { x: x, p: p, price: price, qty: x.qty, fee: p.shipping_fee || 0, bad: bad, opt: opts.length && opts[x.opt] ? opts[x.opt].name : '' };
   }
 

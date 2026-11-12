@@ -41,6 +41,7 @@
       try { var keys = JSON.parse(sessionStorage.getItem('ps_paid_cart') || '[]'); if (keys.length) PS.cart.removeMany(keys); sessionStorage.removeItem('ps_paid_cart'); } catch (e) {}
     }
     if (res.ok && d.ok) show(true, '결제가 끝났어요!', '판매자에게 알려 드릴게요. 물건을 받으면 거래가 마무리돼요.');
+    else if (d.code === 'seller_not_payable') show(false, '지금은 안전결제를 할 수 없는 판매자예요', '돈은 빠져나가지 않았어요. 판매자와 채팅으로 거래해 주세요.');
     else show(false, '결제를 마치지 못했어요', d.message || '돈은 빠져나가지 않았어요. 다시 시도해 주세요.');
   } catch (e) {
     console.error(e);
