@@ -576,6 +576,71 @@
     trustSheet.classList.remove('show'); document.getElementById('trustBg').classList.remove('show');
   }
 
+  // ---- 목록 검색 (판매완료·주문 내역): 글자 + 기간 ----
+  // el 에 검색 줄을 그리고, 바뀔 때마다 onChange(). f.test(['판매자', '물건', ...], iso날짜) 로 거름
+  PS.makeFilter = function (el, placeholder, onChange) {
+    var st = { q: '', period: 'all', from: '', to: '' };
+    var PERIODS = { all: '전체', '1m': '1개월', '3m': '3개월', '6m': '6개월', custom: '직접 선택' };
+    var timer = null;
+    function draw() {
+      el.innerHTML = '<div class="lfilter">' +
+        '<label class="lf-q">' + PS.icon('search', 18) + '<input type="search" id="lfQ" placeholder="' + PS.esc(placeholder) + '" value="' + PS.esc(st.q) + '" autocomplete="off" aria-label="검색어"></label>' +
+        '<div class="lf-p" role="group" aria-label="기간">' + Object.keys(PERIODS).map(function (k) {
+          return '<button type="button" data-p="' + k + '" class="' + (st.period === k ? 'on' : '') + '" aria-pressed="' + (st.period === k) + '">' + PERIODS[k] + '</button>';
+        }).join('') + '</div>' +
+        (st.period === 'custom' ? '<div class="lf-d"><input type="date" class="input" id="lfFrom" value="' + st.from + '" aria-label="시작일"><span>~</span><input type="date" class="input" id="lfTo" value="' + st.to + '" aria-label="종료일"></div>' : '') +
+        '</div>';
+    }
+    draw();
+    el.addEventListener('input', function (e) {
+      if (e.target.id === 'lfQ') { st.q = e.target.value; clearTimeout(timer); timer = setTimeout(onChange, 150); }
+    });
+    el.addEventListener('change', function (e) {
+      if (e.target.id === 'lfFrom') { st.from = e.target.value; onChange(); }
+      if (e.target.id === 'lfTo') { st.to = e.target.value; onChange(); }
+    });
+    el.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-p]');
+      if (!b) return;
+      st.period = b.dataset.p;
+      draw();
+      onChange();
+    });
+    function bounds() {
+      if (st.period === 'all') return null;
+      if (st.period === 'custom') {
+        return { from: st.from ? new Date(st.from + 'T00:00:00') : null, to: st.to ? new Date(st.to + 'T23:59:59.999') : null };
+      }
+      var d = new Date();
+      d.setMonth(d.getMonth() - Number(st.period.charAt(0)));
+      return { from: d, to: null };
+    }
+    var norm = function (t) { return String(t || '').toLowerCase().replace(/\s+/g, ''); };
+    return {
+      active: function () { return !!st.q.trim() || st.period !== 'all'; },
+      test: function (texts, iso) {
+        var q = norm(st.q);
+        if (q && !texts.some(function (t) { return norm(t).indexOf(q) !== -1; })) return false;
+        var b = bounds();
+        if (b) {
+          var t = iso ? new Date(iso) : null;
+          if (!t) return false;
+          if (b.from && t < b.from) return false;
+          if (b.to && t > b.to) return false;
+        }
+        return true;
+      },
+      setPlaceholder: function (ph) { placeholder = ph; var i = el.querySelector('#lfQ'); if (i) i.placeholder = ph; }
+    };
+  };
+  // 주문 하나에서 검색할 글자들
+  PS.orderTexts = function (o, names, role) {
+    var other = role === 'seller' ? o.buyer_id : o.seller_id;
+    var items = Array.isArray(o.market_order_items) ? o.market_order_items : [];
+    return [(names[other] && names[other].name) || '', o.product_title, o.order_no, o.recipient || ''].concat(items.map(function (it) { return it.product_title; }));
+  };
+  PS.FILTER_EMPTY = '<div class="empty" style="padding:40px 0">' + '<b>조건에 맞는 내역이 없어요</b>검색어나 기간을 바꿔 보세요</div>';
+
   // ---- 정산 계좌 등록·변경 (판매내역·안전결제 신청·마이에서 같이 씀) ----
   PS.BANKS = ['KB국민', '신한', '우리', '하나', 'NH농협', 'IBK기업', 'SC제일', '카카오뱅크', '토스뱅크', '케이뱅크', '새마을금고', '우체국', '수협', '신협', '부산', 'iM뱅크(대구)', '경남', '광주', '전북', '제주', 'KDB산업'];
   PS.myPayoutAccount = async function () {
