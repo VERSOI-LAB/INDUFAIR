@@ -71,6 +71,7 @@
         '<a href="/cart">' + PS.icon('bag', 28) + '장바구니</a>' +
       '</div>' +
 
+      '<div id="payoutNeed"></div>' +
       '<section class="mcard"><h3>자주 사용</h3>' +
         row('/neighborhood', 'pin', '내 동네 설정', home ? '<span style="margin-left:auto;font-size:14px;color:var(--sub)">' + PS.esc(home.region) + '</span>' : '') +
       '</section>' +
@@ -80,6 +81,7 @@
         row('/purchases', 'bag', '구매내역') +
         row('/price', 'scan', '내 물건 가격 찾기') +
         row('/my-biz', 'receipt', '업체 소개 관리') +
+        row('/pay-seller', 'receipt', '안전결제 판매자', '<span style="margin-left:auto;font-size:14px;color:var(--sub)" id="payState"></span>') +
         row('/shipping', 'bag', '배송비 설정') +
       '</section>' +
 
@@ -90,7 +92,30 @@
     // "내 동네" 글자가 있으면 화살표와 겹치지 않게
     main.querySelectorAll('.mrow span[style*="margin-left:auto"] + .go').forEach(function (g) { g.style.marginLeft = '6px'; });
     loadKeywordBadge();
+    loadPaySeller();
   });
+
+  // 사업자 인증을 했는데 정산 계좌가 없으면 등록 안내. 안전결제 판매자 상태 표시
+  async function loadPaySeller() {
+    var r = await sb.from('business_verifications').select('pay_status').eq('profile_id', PS.user.id).maybeSingle();
+    var v = r.error ? null : r.data;
+    var st = document.getElementById('payState');
+    if (st) {
+      st.textContent = !v ? '' : { approved: '이용 중', requested: '확인 중', rejected: '반려됨' }[v.pay_status] || '신청 가능';
+      var go = st.parentNode && st.parentNode.querySelector('.go'); if (go) go.style.marginLeft = '6px';
+    }
+    if (!v) return;
+    var acct = await PS.myPayoutAccount();
+    if (acct) return;
+    var box = document.getElementById('payoutNeed');
+    box.innerHTML = '<section class="mcard" style="background:var(--primary-light)"><div style="display:flex;gap:12px;align-items:center;padding:4px 0">' +
+      '<div style="flex:1;min-width:0"><b style="display:block;font-size:16px">정산 계좌를 등록해 주세요</b>' +
+      '<span style="font-size:14px;color:var(--sub)">' + (v.pay_status === 'approved' ? '계좌가 있어야 판매 대금을 받을 수 있어요' : '사업자 판매자는 계좌를 등록하고 안전결제를 신청할 수 있어요') + '</span></div>' +
+      '<button type="button" class="btn small" id="payoutBtn" style="width:auto;padding:0 16px;flex-shrink:0">등록</button></div></section>';
+    document.getElementById('payoutBtn').addEventListener('click', function () {
+      PS.openPayoutAccount({ onSaved: function () { box.innerHTML = ''; if (v.pay_status === 'none' || v.pay_status === 'rejected') location.href = '/pay-seller'; } });
+    });
+  }
 
   // 키워드 알림: 마지막으로 본 뒤 새로 올라온, 키워드가 들어간 물건 수
   async function loadKeywordBadge() {

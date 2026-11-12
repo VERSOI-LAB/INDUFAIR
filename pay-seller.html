@@ -18,7 +18,7 @@
   .step div{flex:1;min-width:0;}
   .step b{display:block;font-size:16px;}
   .step span{font-size:14px;color:var(--sub);}
-  .step a.btn{flex:0 0 auto;}
+  .step .btn{flex:0 0 auto;width:auto;padding:0 14px;}
   .info{margin-top:16px;padding:14px 16px;border-radius:14px;background:var(--primary-light);font-size:14px;line-height:1.6;}
   .err{margin-top:14px;padding:12px 14px;border-radius:12px;background:#FFF0EF;color:var(--danger);font-size:15px;font-weight:600;}
   .chk{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:15px;line-height:1.5;}
@@ -60,8 +60,8 @@
     var r = await sb.from('business_verifications')
       .select('company_name,biz_reg_no,nts_status,mail_order_no,mail_order_exempt,pay_status,pay_reject_reason').eq('profile_id', PS.user.id).maybeSingle();
     var v = r.error ? null : r.data;
-    var acct = await sb.from('seller_payout_accounts').select('bank_name').eq('profile_id', PS.user.id).maybeSingle();
-    var hasAcct = !!(acct.data);
+    var acct = await PS.myPayoutAccount();
+    var hasAcct = !!acct;
     var bizOk = !!v && v.nts_status === 'active';
     var status = v ? v.pay_status || 'none' : 'none';
 
@@ -73,18 +73,23 @@
     var steps = '<div class="steps">' +
       step(bizOk, 1, '사업자 인증', v ? PS.esc(v.company_name) + ' · ' + (bizOk ? '국세청 확인 완료' : '국세청 확인 중이거나 휴·폐업 상태') : '사업자등록증으로 인증해요',
         v ? '' : '<a class="btn small" href="/biz/verify?next=/pay-seller">인증하기</a>') +
-      step(status === 'approved' || status === 'requested', 2, '통신판매업 신고 확인', status === 'approved' ? '확인 완료' : status === 'requested' ? '운영팀이 확인하고 있어요 (영업일 1~2일)' : '신고번호를 알려 주세요', '') +
-      step(hasAcct, 3, '정산 계좌 등록', hasAcct ? '등록 완료' : '판매내역 › 주문 내역에서 등록해요', hasAcct ? '' : '<a class="btn small white" href="/sales?tab=orders">등록</a>') +
+      step(hasAcct, 2, '정산 계좌 등록', hasAcct ? PS.esc(acct.bank_name) + ' ****' + PS.esc(String(acct.account_no).replace(/-/g, '').slice(-4)) + ' · ' + PS.esc(acct.holder_name) : '판매 대금을 받을 사업자 명의 계좌',
+        bizOk ? '<button type="button" class="btn small' + (hasAcct ? ' white' : '') + '" id="acctBtn">' + (hasAcct ? '변경' : '등록') + '</button>' : '') +
+      step(status === 'approved' || status === 'requested', 3, '통신판매업 신고 확인', status === 'approved' ? '확인 완료' : status === 'requested' ? '운영팀이 확인하고 있어요 (영업일 1~2일)' : '신고번호를 알려 주세요', '') +
       '</div>';
 
+    var bindAcct = function () {
+      var b = $('acctBtn');
+      if (b) b.addEventListener('click', function () { PS.openPayoutAccount({ account: acct, onSaved: render }); });
+    };
     if (status === 'approved') {
       main.innerHTML = head + steps + '<div class="info"><b>안전결제 판매자로 승인됐어요!</b><br>이제 내 물건에 구매하기 버튼이 보이고, 구매자가 바로 결제할 수 있어요.' +
-        (hasAcct ? '' : '<br>정산 계좌를 등록해야 판매 대금을 받을 수 있어요.') + '</div>';
-      return;
+        (hasAcct ? '' : '<br><b>정산 계좌를 등록해야 판매 대금을 받을 수 있어요.</b>') + '</div>';
+      return bindAcct();
     }
     if (status === 'requested') {
       main.innerHTML = head + steps + '<div class="info">신청을 받았어요. 확인이 끝나면 내 물건에 구매하기 버튼이 열려요.</div>';
-      return;
+      return bindAcct();
     }
     if (!bizOk) { main.innerHTML = head + steps; return; }
 
@@ -96,8 +101,9 @@
         '<input type="file" id="certInput" accept="image/*" hidden>' +
         '<label class="chk"><input type="checkbox" id="exempt"' + (v.mail_order_exempt ? ' checked' : '') + '><span>신고 면제 대상이에요 (간이과세자 등). 운영팀이 사업자 정보를 보고 확인해요.</span></label>' +
         '<div class="err" id="err" hidden></div>' +
-        '<button class="btn" id="submit" type="submit" style="margin:24px 0">신청하기</button>' +
+        '<button class="btn" id="submit" type="submit" style="margin:24px 0"' + (hasAcct ? '' : ' disabled') + '>' + (hasAcct ? '신청하기' : '정산 계좌를 먼저 등록해 주세요') + '</button>' +
       '</form>';
+    bindAcct();
     $('exempt').addEventListener('change', function () { $('mno').disabled = this.checked; });
     $('mno').disabled = $('exempt').checked;
     $('certInput').addEventListener('change', function () {
@@ -141,7 +147,8 @@
       login_required: '다시 로그인해 주세요',
       not_verified: '사업자 인증을 먼저 해 주세요',
       nts_not_active: '국세청에서 계속사업자로 확인된 뒤 신청할 수 있어요',
-      mail_order_required: '통신판매업 신고번호를 써 주세요'
+      mail_order_required: '통신판매업 신고번호를 써 주세요',
+      payout_required: '정산 계좌를 먼저 등록해 주세요'
     }[code] || '신청하지 못했어요. 잠시 후 다시 해 주세요';
     err.textContent = msg;
     err.hidden = false;

@@ -576,6 +576,42 @@
     trustSheet.classList.remove('show'); document.getElementById('trustBg').classList.remove('show');
   }
 
+  // ---- 정산 계좌 등록·변경 (판매내역·안전결제 신청·마이에서 같이 씀) ----
+  PS.BANKS = ['KB국민', '신한', '우리', '하나', 'NH농협', 'IBK기업', 'SC제일', '카카오뱅크', '토스뱅크', '케이뱅크', '새마을금고', '우체국', '수협', '신협', '부산', 'iM뱅크(대구)', '경남', '광주', '전북', '제주', 'KDB산업'];
+  PS.myPayoutAccount = async function () {
+    if (!PS.user) return null;
+    var r = await sb.from('seller_payout_accounts').select('bank_name,account_no,holder_name').eq('profile_id', PS.user.id).maybeSingle();
+    return r.error ? null : r.data;
+  };
+  // opts: { account, onSaved }
+  PS.openPayoutAccount = function (opts) {
+    opts = opts || {};
+    if (!PS.user) return PS.goLogin();
+    var a = opts.account || {};
+    var sh = sheetOpen('<h3 style="font-size:19px;font-weight:800">정산 계좌</h3>' +
+      '<p style="color:var(--sub);font-size:14px;margin-top:4px">안전결제로 팔린 판매 대금이 이 계좌로 들어와요. 판매자 본인(사업자) 명의 계좌만 쓸 수 있어요.</p>' +
+      '<label class="field"><span>은행</span><select class="input" id="acBank" style="appearance:auto">' + PS.BANKS.map(function (b) {
+        return '<option' + (b === a.bank_name ? ' selected' : '') + '>' + PS.esc(b) + '</option>';
+      }).join('') + '</select></label>' +
+      '<label class="field"><span>계좌번호</span><input class="input" id="acNo" inputmode="numeric" maxlength="30" autocomplete="off" placeholder="숫자만 입력" value="' + PS.esc(a.account_no || '') + '"></label>' +
+      '<label class="field"><span>예금주</span><input class="input" id="acHolder" maxlength="30" autocomplete="off" placeholder="통장에 적힌 이름 (상호 또는 대표자)" value="' + PS.esc(a.holder_name || '') + '"></label>' +
+      '<button type="button" class="btn" id="acSave" style="margin-top:16px">저장하기</button>');
+    sh.querySelector('#acSave').onclick = async function () {
+      var b = this;
+      var no = sh.querySelector('#acNo').value.replace(/[^0-9-]/g, ''), holder = sh.querySelector('#acHolder').value.trim();
+      if (no.replace(/-/g, '').length < 6) { PS.toast('계좌번호를 확인해 주세요'); return; }
+      if (!holder) { PS.toast('예금주를 써 주세요'); return; }
+      b.disabled = true;
+      var row = { profile_id: PS.user.id, bank_name: sh.querySelector('#acBank').value, account_no: no, holder_name: holder, updated_at: new Date().toISOString() };
+      var r = await sb.from('seller_payout_accounts').upsert(row);
+      b.disabled = false;
+      if (r.error) { PS.toast('저장하지 못했어요. 잠시 후 다시 해 주세요'); return; }
+      sheetClose();
+      PS.toast('정산 계좌를 저장했어요');
+      if (opts.onSaved) opts.onSaved(row);
+    };
+  };
+
   // 사기 신고. opts: { name, productId, chatId }
   PS.openReport = function (targetId, opts) {
     opts = opts || {};

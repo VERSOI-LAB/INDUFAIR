@@ -40,8 +40,6 @@
     <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
   </main>
 <div class="sheet-bg" id="sheetBg"></div>
-<div class="sheet-bg" id="acctBg"></div>
-<div class="sheet" id="acctSheet" role="dialog" aria-label="정산 계좌"><div class="handle"></div><div id="acctBody"></div></div>
 <div class="sheet" id="statusSheet" role="dialog" aria-label="판매 상태 바꾸기">
   <div class="handle"></div>
   <button class="opt" data-s="selling"><i data-icon3d="sell" data-size="30"></i>판매중</button>
@@ -61,7 +59,6 @@
   var orders = [], buyers = {}; // 결제된 주문과 구매자 이름
   var payable = false; // 안전결제 판매자로 승인됐는가 (아니면 결제 주문이 들어오지 않음)
   var account = null, accountReady = false; // 정산 받을 계좌 (표가 아직 없으면 안내를 숨김)
-  var BANKS = ['KB국민', '신한', '우리', '하나', 'NH농협', 'IBK기업', 'SC제일', '카카오뱅크', '토스뱅크', '케이뱅크', '새마을금고', '우체국', '수협', '신협', '부산', 'iM뱅크(대구)', '경남', '광주', '전북', '제주', 'KDB산업'];
   var tab = PS.STATUS[PS.param('tab')] || PS.param('tab') === 'orders' ? PS.param('tab') : 'selling';
   var targetId = null;
 
@@ -147,32 +144,7 @@
   // 정산 계좌 등록·변경
   $('list').addEventListener('click', function (e) {
     if (!e.target.closest('#acctBtn')) return;
-    var a = account || {};
-    $('acctBody').innerHTML = '<h3 style="font-size:19px;font-weight:800">정산 계좌</h3>' +
-      '<label class="field"><span>은행</span><select class="input" id="acBank" style="appearance:auto">' + BANKS.map(function (b) {
-        return '<option' + (b === a.bank_name ? ' selected' : '') + '>' + PS.esc(b) + '</option>';
-      }).join('') + '</select></label>' +
-      '<label class="field"><span>계좌번호</span><input class="input" id="acNo" inputmode="numeric" maxlength="30" autocomplete="off" placeholder="숫자만 입력" value="' + PS.esc(a.account_no || '') + '"></label>' +
-      '<label class="field"><span>예금주</span><input class="input" id="acHolder" maxlength="30" autocomplete="off" placeholder="통장에 적힌 이름" value="' + PS.esc(a.holder_name || '') + '"></label>' +
-      '<button type="button" class="btn" id="acSave" style="margin-top:16px">저장하기</button>';
-    $('acctSheet').classList.add('show');
-    $('acctBg').classList.add('show');
-  });
-  function closeAcct() { $('acctSheet').classList.remove('show'); $('acctBg').classList.remove('show'); }
-  $('acctBg').addEventListener('click', closeAcct);
-  $('acctSheet').addEventListener('click', async function (e) {
-    var b = e.target.closest('#acSave');
-    if (!b) return;
-    var no = $('acNo').value.replace(/[^0-9-]/g, ''), holder = $('acHolder').value.trim();
-    if (no.replace(/-/g, '').length < 6) { PS.toast('계좌번호를 확인해 주세요'); return; }
-    if (!holder) { PS.toast('예금주를 써 주세요'); return; }
-    b.disabled = true;
-    var r = await sb.from('seller_payout_accounts').upsert({ profile_id: PS.user.id, bank_name: $('acBank').value, account_no: no, holder_name: holder, updated_at: new Date().toISOString() });
-    b.disabled = false;
-    if (r.error) { PS.toast('저장하지 못했어요. 잠시 후 다시 해 주세요'); return; }
-    closeAcct();
-    PS.toast('정산 계좌를 저장했어요');
-    load();
+    PS.openPayoutAccount({ account: account, onSaved: function () { load(); } });
   });
   // 주문 내역의 발송함·주문 취소·취소 요청 동의/거절
   PS.bindOrderActions($('list'), 'seller', function (id) { return orders.filter(function (o) { return o.id === id; })[0]; }, load);
