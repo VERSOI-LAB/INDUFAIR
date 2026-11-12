@@ -37,6 +37,7 @@
     <div class="stats" id="stats"><div><b>-</b><span>조회수</span></div><div><b>-</b><span>찜수</span></div><div><b>-</b><span>채팅수</span></div></div>
     <a class="btn" href="/sell" style="margin-top:12px"><i data-icon3d="camera" data-size="32"></i> 판다 · 새 물건 팔기</a>
     <div class="tabs" id="tabs" role="tablist"></div>
+    <div id="filter" hidden></div>
     <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
   </main>
 <div class="sheet-bg" id="sheetBg"></div>
@@ -61,6 +62,10 @@
   var account = null, accountReady = false; // 정산 받을 계좌 (표가 아직 없으면 안내를 숨김)
   var tab = PS.STATUS[PS.param('tab')] || PS.param('tab') === 'orders' ? PS.param('tab') : 'selling';
   var targetId = null;
+  var day = function (iso) { var d = new Date(iso); return d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(); };
+  var soldAt = {}; // 판매완료 날짜 (sold_at, 없으면 등록일)
+  // 판매완료·주문 내역 검색 (글자 + 기간)
+  var filter = PS.makeFilter($('filter'), '', function () { renderTabs(); });
 
   PS.ready.then(function (user) { if (!user) return PS.goLogin(); load(); });
 
@@ -68,6 +73,10 @@
     var res = await sb.from('products').select(PS.PRODUCT_LIST_COLUMNS)
       .eq('seller_profile_id', PS.user.id).neq('status', 'deleted').order('created_at', { ascending: false });
     products = res.data || [];
+    // 판매완료 날짜 (컬럼이 아직 없으면 등록일로)
+    var sr = await sb.from('products').select('id,sold_at').eq('seller_profile_id', PS.user.id).eq('status', 'sold');
+    soldAt = {};
+    if (!sr.error) (sr.data || []).forEach(function (x) { soldAt[x.id] = x.sold_at; });
     var sum = function (k) { return products.reduce(function (a, p) { return a + (p[k] || 0); }, 0).toLocaleString('ko-KR'); };
     $('stats').innerHTML = '<div><b>' + sum('view_count') + '</b><span>조회수</span></div><div><b>' + sum('like_count') + '</b><span>찜수</span></div><div><b>' + sum('inquiry_count') + '</b><span>채팅수</span></div>';
     orders = await PS.myOrders('seller');
@@ -94,6 +103,9 @@
       history.replaceState(null, '', '?tab=' + tab);
       renderTabs();
     };
+    // 검색 줄은 판매완료·주문 내역에서만
+    $('filter').hidden = !(tab === 'sold' || tab === 'orders');
+    filter.setPlaceholder(tab === 'orders' ? '구매자·물건 이름·주문번호로 찾기' : '물건 이름으로 찾기');
     // 주문 내역: 구매자가 결제한 주문 (누가, 얼마, 어디로 보낼지)
     if (tab === 'orders') {
       // 정산 받을 계좌: 계좌번호는 뒤 4자리만 보여줌
@@ -104,20 +116,34 @@
           '<button type="button" class="btn small" id="acctBtn">등록</button></div>';
       if (!payable) acct = '<div class="payacct need"><div><b>안전결제로 팔고 싶다면</b><span>사업자 판매자는 신청하면 구매자가 바로 카드결제할 수 있어요. 사업자가 아니면 채팅으로 직접 거래해요</span></div>' +
         '<a class="btn small" href="/pay-seller">신청</a></div>' + (account ? acct : '');
-      $('list').innerHTML = acct + (orders.length
-        ? orders.map(function (o) { return PS.orderCardHtml(o, 'seller', buyers); }).join('')
+      var shown = orders.filter(function (o) { return filter.test(PS.orderTexts(o, buyers, 'seller'), o.paid_at || o.created_at); });
+      $('list').innerHTML = acct + (filter.active() && orders.length ? '<p class="lf-count">' + shown.length + '건</p>' : '') + (orders.length
+        ? (shown.length ? shown.map(function (o) { return PS.orderCardHtml(o, 'seller', buyers); }).join('') : PS.FILTER_EMPTY)
         : '<div class="empty" style="padding:40px 0">' + PS.icon3d('sell', 80) + '아직 결제된 주문이 없어요</div>');
       return;
     }
     var rows = products.filter(function (p) { return inTab(p, tab); });
+    var head = '';
+    if (tab === 'sold' && rows.length) {
+      // 판매완료: 판매일 최신순, 검색어·기간으로 거름
+      var all = rows.length;
+      var when = function (p) { return soldAt[p.id] || p.created_at; };
+      rows = rows.filter(function (p) { return filter.test([p.title], when(p)); })
+        .sort(function (a, b) { return new Date(when(b)) - new Date(when(a)); });
+      if (!rows.length) { $('list').innerHTML = PS.FILTER_EMPTY; return; }
+      if (filter.active()) head = '<p class="lf-count">' + rows.length + '건 / ' + all + '건</p>';
+    }
     if (!rows.length) {
       var msg = { selling: '판매중인 물건이 없어요', sold: '아직 판매완료된 물건이 없어요' }[tab];
       $('list').innerHTML = '<div class="empty" style="padding:40px 0">' + PS.icon3d('sell', 80) + msg + '</div>';
       return;
     }
-    $('list').innerHTML = rows.map(function (p) {
+    $('list').innerHTML = head + rows.map(function (p) {
       // 사진·품명을 누르면 규격 수정하기 화면으로
-      return '<div class="row-wrap">' + PS.rowHtml(p).replace('href="' + PS.productUrl(p.id) + '"', 'href="/edit?id=' + encodeURIComponent(p.id) + '"') +
+      var html = PS.rowHtml(p).replace('href="' + PS.productUrl(p.id) + '"', 'href="/edit?id=' + encodeURIComponent(p.id) + '"');
+      // 판매완료: 지역·등록 시각 대신 판매완료 날짜
+      if (p.status === 'sold') html = html.replace(/<div class="m">[\s\S]*?<\/div>/, '<div class="m">' + (soldAt[p.id] ? '판매완료 ' + day(soldAt[p.id]) : '등록 ' + day(p.created_at)) + '</div>');
+      return '<div class="row-wrap">' + html +
         '<div class="row-acts">' + (p.status === 'selling' ? '<button class="chg bump" data-bump="' + p.id + '">끌어올리기</button>' : '') +
         '<button class="chg" data-id="' + p.id + '">상태 바꾸기</button></div></div>';
     }).join('');

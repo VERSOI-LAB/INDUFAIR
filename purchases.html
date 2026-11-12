@@ -29,6 +29,7 @@
   <main class="page">
     <p id="hint" style="font-size:14px;color:var(--sub);padding:14px 0 0">채팅으로 물어본 물건이 모여 있어요</p>
     <div class="tabs" id="tabs" role="tablist"></div>
+    <div id="filter"></div>
     <div class="list" id="list"><div class="skeleton" style="height:108px;margin:16px 0"></div></div>
   </main>
 </div>
@@ -41,26 +42,30 @@
   PS.renderTabbar('my');
   var $ = function (id) { return document.getElementById(id); };
   var chats = [];
-  var orders = [], sellers = {}; // 결제한 주문과 판매자 이름
+  var orders = [], sellers = {}; // 결제한 주문과 판매자 이름 (문의한 물건의 판매자도)
+  var day = function (iso) { var d = new Date(iso); return d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(); };
+  // 판매자·물건 이름·주문번호 + 기간으로 찾기
+  var filter = PS.makeFilter($('filter'), '판매자·물건 이름·주문번호로 찾기', function () { render(); });
   var tab = PS.param('tab') === 'orders' ? 'orders' : 'all';
-  var TABS = { orders: '결제한 주문', all: '문의한 물건', sold: '판매완료' };
+  // 문의한 물건에는 판매완료된 물건도 '판매완료' 표시와 함께 들어 있다 (따로 탭을 두지 않음)
+  var TABS = { orders: '결제한 주문', all: '문의한 물건' };
 
   PS.ready.then(function (user) { if (!user) return PS.goLogin(); load(); });
   // 결제한 주문의 주문 취소·취소 요청
   PS.bindOrderActions($('list'), 'buyer', function (id) { return orders.filter(function (o) { return o.id === id; })[0]; }, load);
 
   async function load() {
-    var res = await sb.from('chats').select('id,last_message_at,created_at,products(' + PS.PRODUCT_LIST_COLUMNS + ')')
+    var res = await sb.from('chats').select('id,seller_id,last_message_at,created_at,products(' + PS.PRODUCT_LIST_COLUMNS + ')')
       .eq('buyer_id', PS.user.id).order('last_message_at', { ascending: false, nullsFirst: false });
     chats = (res.data || []).filter(function (c) { return c.products && c.products.status !== 'deleted'; });
     orders = await PS.myOrders('buyer');
-    sellers = await PS.publicProfiles(orders.map(function (o) { return o.seller_id; }));
+    sellers = await PS.publicProfiles(orders.map(function (o) { return o.seller_id; }).concat(chats.map(function (c) { return c.seller_id; })));
     if (!PS.param('tab') && orders.length) tab = 'orders'; // 결제한 주문이 있으면 그 탭부터
     render();
   }
 
   function render() {
-    var count = function (t) { return t === 'orders' ? orders.length : chats.filter(function (c) { return t === 'all' || c.products.status === t; }).length; };
+    var count = function (t) { return t === 'orders' ? orders.length : chats.length; };
     $('tabs').innerHTML = Object.keys(TABS).map(function (t) {
       return '<button role="tab" aria-selected="' + (t === tab) + '" class="' + (t === tab ? 'on' : '') + '" data-t="' + t + '">' + TABS[t] + '<em>' + count(t) + '</em></button>';
     }).join('');
@@ -70,20 +75,31 @@
       tab = b.dataset.t;
       render();
     };
+    filter.setPlaceholder(tab === 'orders' ? '판매자·물건 이름·주문번호로 찾기' : '판매자·물건 이름으로 찾기');
     $('hint').textContent = tab === 'orders' ? '결제를 마친 주문이 모여 있어요' : '채팅으로 물어본 물건이 모여 있어요';
+    var count1 = function (n, all) { return filter.active() ? '<p class="lf-count">' + n + '건 / ' + all + '건</p>' : ''; };
     if (tab === 'orders') {
+      var shown = orders.filter(function (o) { return filter.test(PS.orderTexts(o, sellers, 'buyer'), o.paid_at || o.created_at); });
       $('list').innerHTML = orders.length
-        ? orders.map(function (o) { return PS.orderCardHtml(o, 'buyer', sellers); }).join('')
+        ? (shown.length ? count1(shown.length, orders.length) + shown.map(function (o) { return PS.orderCardHtml(o, 'buyer', sellers); }).join('') : PS.FILTER_EMPTY)
         : '<div class="empty">' + PS.icon3d('buy', 96) + '<b>아직 결제한 주문이 없어요</b><div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div></div>';
       return;
     }
-    var rows = chats.filter(function (c) { return tab === 'all' || c.products.status === tab; });
+    var rows = chats.slice();
+    var when = function (c) { return c.last_message_at || c.created_at; };
+    var total = rows.length;
+    rows = rows.filter(function (c) { return filter.test([(sellers[c.seller_id] && sellers[c.seller_id].name) || '', c.products.title], when(c)); });
+    if (total && !rows.length) { $('list').innerHTML = PS.FILTER_EMPTY; return; }
     $('list').innerHTML = rows.length
-      ? rows.map(function (c) {
-          return '<div class="row-wrap">' + PS.rowHtml(c.products) + '<a class="chg" href="/chat/' + c.id + '">' + PS.icon('chat', 16) + ' 채팅 보기</a></div>';
+      ? count1(rows.length, total) + rows.map(function (c) {
+          var name = (sellers[c.seller_id] && sellers[c.seller_id].name) || '판매자';
+          // 지역·등록 시각 대신 판매자와 마지막 채팅 날짜
+          var html = PS.rowHtml(c.products).replace(/<div class="m">[\s\S]*?<\/div>/, '<div class="m">' + PS.esc(name) + ' · ' +
+            '채팅 ' + day(when(c)) + '</div>');
+          return '<div class="row-wrap">' + html + '<a class="chg" href="/chat/' + c.id + '">' + PS.icon('chat', 16) + ' 채팅 보기</a></div>';
         }).join('')
-      : '<div class="empty">' + PS.icon3d('buy', 96) + '<b>' + (tab === 'all' ? '아직 물어본 물건이 없어요' : TABS[tab] + ' 물건이 없어요') + '</b>' +
-        (tab === 'all' ? '마음에 드는 물건에서 채팅하기를 눌러 보세요<div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div>' : '') + '</div>';
+      : '<div class="empty">' + PS.icon3d('buy', 96) + '<b>아직 물어본 물건이 없어요</b>' +
+        '마음에 드는 물건에서 채팅하기를 눌러 보세요<div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div></div>';
   }
 })();
 </script>
