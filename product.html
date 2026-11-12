@@ -49,6 +49,8 @@
   .opts b{display:block;font-size:14px;padding:10px 14px;background:var(--bg);}
   .opts span{display:flex;justify-content:space-between;gap:12px;padding:10px 14px;border-top:1px solid var(--line);font-size:16px;}
   .opts em{font-style:normal;font-weight:700;}
+  .direct-note{margin-top:16px;padding:14px 16px;border-radius:14px;background:#F2F3F5;color:var(--sub);font-size:14px;line-height:1.6;}
+  .direct-note b{display:block;color:var(--text);font-size:15px;margin-bottom:2px;}
   .cart-n{position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--danger);color:#fff;font-size:12px;font-weight:800;line-height:20px;text-align:center;}
   .ob h3{font-size:18px;font-weight:800;padding:4px 4px 10px;}
   .ob .optrow{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 12px;border:1.5px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:16px;}
@@ -126,6 +128,7 @@
   var id = PS.idFromUrl('product');
   var product = null;
   var liked = false;
+  var payableSeller = false; // 안전결제 판매자(승인된 사업자)인가
 
   document.getElementById('backBtn').addEventListener('click', function () {
     if (history.length > 1 && document.referrer.indexOf(location.host) !== -1) history.back();
@@ -149,6 +152,7 @@
 
     var sellerMap = await PS.publicProfiles([product.seller_profile_id]);
     freeMin = (await PS.freeShipMins([product.seller_profile_id]))[product.seller_profile_id] || 0;
+    payableSeller = await PS.canPay(product.seller_profile_id);
     var cn = PS.cart.count();
     if (cn) { document.getElementById('cartN').textContent = cn; document.getElementById('cartN').hidden = false; }
     // 조회수: 판매자 본인은 빼고, 같은 브라우저 세션에서는 한 번만
@@ -208,7 +212,8 @@
       }).join('') + '</div>' : '') +
       (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
       (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
-      PS.policyHtml(true) +
+      (payableSeller ? PS.policyHtml(true)
+        : '<div class="direct-note"><b>채팅으로 직접 거래하는 물건이에요</b>판다산다 안전결제를 쓰지 않는 판매자예요. 값을 치르기 전에 물건 상태와 판매자를 꼭 확인하고, 되도록 만나서 직접 확인한 뒤 거래해 주세요.</div>') +
       '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) + '</div>' +
       '<div id="recs"></div>';
   }
@@ -230,7 +235,7 @@
       liked = !!fav.data;
     }
     var canBuy = product.status === 'selling' && (product.price > 0 || PS.options(product).some(function (_, i) { return PS.optionPrice(product, i) > 0; })); // 가격 협의(0원)는 문의로
-    var payable = PS.canPay(product.seller_profile_id); // 안전결제 대상이 아닌 물건은 채팅으로 직접 거래
+    var payable = payableSeller; // 안전결제 대상(승인된 사업자 판매자)이 아닌 물건은 채팅으로 직접 거래
     bar.innerHTML =
       '<button class="heart' + (liked ? ' on' : '') + '" id="heartBtn" aria-label="찜하기" aria-pressed="' + liked + '">' + PS.icon3d('heart', 34) + '</button>' +
       '<button class="btn white" id="chatBtn"' + (product.status === 'sold' ? ' disabled' : '') + '>' + PS.icon3d('chat', 28) + ' 문의하기</button>' +

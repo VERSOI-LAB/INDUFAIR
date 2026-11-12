@@ -76,7 +76,8 @@
       '<p style="margin-top:10px">' + PS.ntsBadge(v) + '</p>' +
       (v.nts_status === 'pending' || !v.nts_status ? '<p style="color:var(--sub);font-size:14px;margin-top:8px">국세청 확인은 잠시 뒤 자동으로 해요. 업체 소개는 바로 올릴 수 있어요.</p>' : '') +
       '</section>' +
-      '<a class="btn" href="' + PS.esc(next) + '" style="margin-top:24px">' + PS.icon3d('home', 30) + ' 우리 업체 소개하러 가기</a>' +
+      (next === '/biz/new' ? '<a class="btn" href="' + PS.esc(next) + '" style="margin-top:24px">' + PS.icon3d('home', 30) + ' 우리 업체 소개하러 가기</a>'
+        : '<a class="btn" href="' + PS.esc(next) + '" style="margin-top:24px">계속하기</a>') +
       '<a class="btn white" href="/my-biz" style="margin-top:10px">내 업체 관리</a>';
   }
 

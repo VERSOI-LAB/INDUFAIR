@@ -18,9 +18,20 @@
   //   test_ck_/live_ck_   : API 개별 연동 키 → 결제창을 띄움
   // 서버(Supabase Secrets)의 TOSS_SECRET_KEY 는 같은 종류의 시크릿 키여야 한다 (gck ↔ gsk, ck ↔ sk)
   PS.TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
-  // 안전결제(구매하기)를 여는 판매자. null 이면 모든 판매자 (오픈마켓). 판매 대금은 토스페이먼츠 지급대행으로 지급한다
-  PS.PAY_SELLERS = null;
-  PS.canPay = function (sellerId) { return !PS.PAY_SELLERS || PS.PAY_SELLERS.indexOf(sellerId) !== -1; };
+  // 안전결제(구매하기)는 '안전결제 판매자'로 승인된 사업자만 (국세청 계속사업자 + 통신판매업 확인).
+  // 개인(비사업자) 판매자 물건은 채팅으로 직접 거래. 판매 대금은 토스페이먼츠 지급대행으로 지급한다.
+  // 서버(주문 생성·결제 승인)에서도 같은 조건으로 막으므로 여기는 화면 표시용
+  var paySellerCache = {};
+  PS.paySellers = async function (ids) {
+    ids = ids.filter(function (id, i) { return id && ids.indexOf(id) === i && !(id in paySellerCache); });
+    if (ids.length) {
+      var r = await sb.rpc('get_pay_sellers', { p_ids: ids });
+      var ok = (r.data || []).map(function (x) { return x.id; });
+      ids.forEach(function (id) { paySellerCache[id] = !r.error && ok.indexOf(id) !== -1; });
+    }
+    return paySellerCache;
+  };
+  PS.canPay = async function (sellerId) { return !!(await PS.paySellers([sellerId]))[sellerId]; };
   PS.isTestPay = function () { return /^test_/.test(PS.TOSS_CLIENT_KEY); };
   PS.isWidgetPay = function () { return /^(test|live)_gck_/.test(PS.TOSS_CLIENT_KEY); };
   // 결제 심사용 계정. 오픈 전까지 로그인 화면 아래에 보여 준다 (없으면 null)
@@ -686,7 +697,7 @@
   if (/^\/(index(\.html)?)?$|^\/(product|business|biz\/(?!new|verify)|profile)/.test(location.pathname)) document.documentElement.classList.add('pc-wide');
 
   // PC 에서 홈과 같은 좌우 여백(내용 폭 70%)을 쓰는 페이지: 채팅·마이와 마이 하위 화면, 결제, 물건 수정 (app.css 의 html.pc-70)
-  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|shipping|cart|checkout|edit|my-biz|biz-premium|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
+  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|shipping|cart|checkout|edit|pay-seller|my-biz|biz-premium|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
 
   // ---- 하단 탭바 ----
   var TABS = [
@@ -729,7 +740,7 @@
       : /^\/sell/.test(path) ? 'sell'
       : /^\/(buy|product|checkout|pay-|biz\/(?!new|verify)|business)/.test(path) ? 'buy'
       : /^\/chat/.test(path) ? 'chat'
-      : /^\/(mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|my-biz|biz-premium|biz\/new|biz\/verify|biz-new|biz-verify)/.test(path) ? 'my' : '';
+      : /^\/(mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|pay-seller|my-biz|biz-premium|biz\/new|biz\/verify|biz-new|biz-verify)/.test(path) ? 'my' : '';
     PS.renderTabbar(key);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(autoTabbar, 0); });

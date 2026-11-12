@@ -117,7 +117,7 @@
     }
     if (!lines.length) return fail('주문할 수 있는 물건이 없어요');
     var sid = lines[0].p.seller_profile_id;
-    if (!PS.canPay(sid)) return fail('이 물건은 판매자와 채팅으로 거래해 주세요');
+    if (!(await PS.canPay(sid))) return fail('이 판매자는 안전결제를 쓰지 않아요. 판매자와 채팅으로 거래해 주세요');
     freeMin = (await PS.freeShipMins([sid]))[sid] || 0;
     await loadAddresses();
     go(addresses.length ? 'list' : 'form');

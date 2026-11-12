@@ -32,12 +32,18 @@ Deno.serve(async (req) => {
   if (!paymentKey || !orderId || !Number.isFinite(amount)) return json({ code: "bad_request" }, 400);
 
   const { data: order } = await admin.from("market_orders")
-    .select("id,buyer_id,product_id,total_amount,status").eq("order_no", orderId).maybeSingle();
+    .select("id,buyer_id,seller_id,product_id,total_amount,status").eq("order_no", orderId).maybeSingle();
   if (!order || order.buyer_id !== user.id) return json({ code: "order_not_found" }, 404);
   if (order.status === "paid") return json({ ok: true, already: true });
   if (order.status !== "pending") return json({ code: "order_closed" }, 409);
   // 결제창에서 넘어온 금액이 주문 금액과 다르면 승인하지 않음 (금액 위변조 방지)
   if (order.total_amount !== amount) return json({ code: "amount_mismatch" }, 400);
+  // 안전결제는 승인된 사업자 판매자만 (주문 뒤 휴·폐업 등으로 승인이 풀렸으면 결제하지 않음)
+  const { data: payable, error: payErr } = await admin.rpc("pay_seller_ok", { p_seller: order.seller_id });
+  if (payErr || payable !== true) {
+    await admin.from("market_orders").update({ status: "failed" }).eq("id", order.id).eq("status", "pending");
+    return json({ code: "seller_not_payable" }, 409);
+  }
 
   const res = await fetch("https://api.tosspayments.com/v1/payments/confirm", {
     method: "POST",
