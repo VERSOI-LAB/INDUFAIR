@@ -3,6 +3,7 @@
 //   { post_id }    새 글   → 글 자동 검토
 //   { report_id }  새 신고 → 신고된 글/댓글 자동 검토 + 운영자(app_admins)에게 웹 푸시
 //   { deadline_digest: true } 매일 아침 cron → 지원사업 마감 임박 알림 (support_alerts)
+//   { invite_promo: true } 매월 1일 cron → 업체 주인에게 친구 초대 보상 안내 (invite_promo_state)
 // 자동 검토: 먼저 규칙(욕설·계좌·링크 여러 개·전화번호)에 걸리면 바로 숨김. 아니면 ANTHROPIC_API_KEY 가 있을 때 Claude 가 판단(hide/keep/review)
 //   hide 판정이면 바로 숨김(story_record_review). AI 의 hide·review 는 운영자에게 알림, 규칙 숨김은 알림 없음
 // 비밀값: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT(채팅 알림과 같음), ANTHROPIC_API_KEY(선택)
@@ -177,6 +178,23 @@ Deno.serve(async (req) => {
 
   // ---- 지원사업 마감 임박 알림 (매일 아침 cron) ----
   if (b.deadline_digest === true) return json(await deadlineDigest(admin));
+
+  // ---- 친구 초대 홍보 (매월 1일 cron): 아직 초대 0명인 업체 주인에게, 25일에 한 번, '다시 보지 않기' 누른 사람 제외 ----
+  if (b.invite_promo === true) {
+    const { data: ids } = await admin.rpc("invite_promo_targets");
+    let sent = 0;
+    for (const id of (ids || []) as string[]) {
+      const n = await pushTo(admin, [id], {
+        title: "🎁 친구 초대하면 내 업체가 일주일 동안 맨 위에 떠요",
+        body: "동료가 내 초대 링크로 가입할 때마다 업체 프리미엄 7일을 드려요 (한 달 4명까지)",
+        url: "/my-biz",
+        tag: "invite-promo",
+      });
+      await admin.from("invite_promo_state").upsert({ profile_id: id, last_push_at: new Date().toISOString() });
+      sent += n;
+    }
+    return json({ ok: true, people: (ids || []).length, sent });
+  }
 
   // ---- 새 글: 자동 검토 ----
   if (b.post_id != null) {

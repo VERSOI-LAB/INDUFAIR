@@ -40,6 +40,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/js/supabase-client.js"></script>
 <script src="/js/app.js"></script>
+<script src="/js/invite-promo.js"></script>
 <script>
 (function () {
   PS.renderTabbar('my');
@@ -72,9 +73,11 @@
       if (s.status === 'canceled' && new Date(s.period_end) > new Date()) return '<p class="ended">자동결제를 해지했어요 · ' + day(s.period_end) + '까지 이용</p>';
       return '';
     };
+    var hideInvite = await PS.inviteHidden();
     main.innerHTML =
       '<div class="vcard">' + PS.ntsBadge(v) + '<b>' + PS.esc(v.company_name) + '</b><span class="no">' + PS.esc(v.biz_reg_no) + '</span>' +
         (v.nts_status === 'suspended' || v.nts_status === 'closed' || v.nts_status === 'unregistered' ? '<span style="color:var(--danger);font-size:13px;font-weight:700">국세청 확인 결과 때문에 업체 소개가 숨겨졌어요. 다시 운영하면 자동으로 보여요.</span>' : '') + '</div>' +
+      (hideInvite ? '' : PS.inviteBannerHtml()) +
       (list.length < 3 ? '<a class="btn" href="/biz/new" style="margin-top:12px">' + PS.icon3d('home', 30) + ' 새 업체 소개하기 (' + list.length + '/3)</a>' : '<p style="margin-top:12px;color:var(--sub);font-size:14px">업체는 3개까지 소개할 수 있어요</p>') +
       (list.length ? '<div class="bizgrid" style="margin-top:20px">' + list.map(function (b) {
           return '<div>' + PS.bizCardHtml(b, {}) +
@@ -115,7 +118,19 @@
       if (!b) return;
       var r = await sb.rpc('bump_business', { p_business_id: b.dataset.bump });
       PS.toast(r.data === 'ok' ? '맨 위로 끌어올렸어요!' : r.data === 'too_soon' ? '끌어올리기는 하루에 한 번만 할 수 있어요' : '끌어올리지 못했어요');
+      // 직접 끌어올린 뒤 (프리미엄 아닐 때, 일주일에 한 번만): 초대하면 자동으로 맨 위
+      if (r.data === 'ok' && !premium[b.dataset.bump] && !hideInvite && PS.inviteOnce('bump', 7)) {
+        setTimeout(function () {
+          PS.inviteSheet('매일 누르기 번거로우시죠?', '동료 1명만 내 링크로 가입해도 7일 동안 매일 자동으로 맨 위에 올라가요. 한 달에 4명까지 받을 수 있어요.');
+        }, 900);
+      }
     });
+
+    // 업체를 처음 등록하고 왔을 때
+    if (PS.param('created') && !hideInvite) {
+      history.replaceState(null, '', location.pathname);
+      PS.inviteSheet('업체 등록 완료! 🎉', '지금 동료 1명만 초대하면 내 업체가 7일 동안 동네 업체 맨 위에 보여요.');
+    }
   });
 })();
 </script>
