@@ -230,10 +230,12 @@
       }
       var my = ++seq;
       var q = sb.from('story_posts').select(PS.COMMUNITY_POST_COLUMNS).order('created_at', { ascending: false });
-      q = st.mine ? q.eq('author_id', PS.user.id).neq('status', 'deleted') : q.eq('status', 'active');
+      q = st.mine ? q.eq('author_id', PS.user.id).neq('status', 'deleted') : q.eq('status', 'active').is('pinned_at', null); // 고정 글은 따로 맨 위에
       if (st.topic) q = q.eq('topic', st.topic);
       if (st.town && home) q = q.ilike('region', '%' + PS.townKey(home.region).replace(/[%_,()]/g, ' ') + '%');
-      var res = await q.range(st.offset, st.offset + PAGE - 1);
+      var pinQ = reset && !st.mine ? sb.from('story_posts').select(PS.COMMUNITY_POST_COLUMNS).eq('status', 'active').not('pinned_at', 'is', null).order('pinned_at', { ascending: false }).limit(3) : null;
+      var both = await Promise.all([q.range(st.offset, st.offset + PAGE - 1), pinQ || Promise.resolve({ data: [] })]);
+      var res = both[0], pinned = both[1].error ? [] : (both[1].data || []);
       if (my !== seq) return;
       if (res.error) {
         $('cmList').innerHTML = '<div class="empty">' + PS.sticker('working', 100) + '<b>이야기를 준비 중이에요</b>잠시 후 다시 들어와 주세요</div>';
@@ -243,10 +245,13 @@
       var got = rows.length;
       var blocks = await PS.myBlocks();
       rows = rows.filter(function (p) { return !blocks[p.author_id]; }); // 차단한 사람 글은 안 보임
-      var names = await PS.publicProfiles(rows.map(function (p) { return p.author_id; }));
+      pinned = pinned.filter(function (p) { return !blocks[p.author_id]; });
+      var names = await PS.publicProfiles(rows.concat(pinned).map(function (p) { return p.author_id; }));
       if (my !== seq) return;
-      if (reset) $('cmList').innerHTML = '';
-      if (reset && !rows.length) {
+      if (reset) $('cmList').innerHTML = pinned.map(function (p) { // 운영자가 고정한 글: 항상 맨 위
+        return PS.communityRowHtml(p, names).replace('<span class="cm-topic">', '<span class="cm-topic" style="background:var(--primary);color:var(--text)">📌 고정</span> <span class="cm-topic">');
+      }).join('');
+      if (reset && !rows.length && !pinned.length) {
         $('cmList').innerHTML = '<div class="empty">' + PS.sticker('hello', 110) + '<b>' + (st.mine ? '아직 쓴 글이 없어요' : '아직 이야기가 없어요') + '</b>' +
           (st.mine ? '궁금한 걸 편하게 물어보세요' : '첫 이야기를 남겨 보세요. 장비 질문, 현장 이야기 뭐든 좋아요') + '</div>';
       }
@@ -329,11 +334,41 @@
     });
 
     // 더보기: 내 글이면 수정·삭제, 아니면 신고
+    // 운영자: 맨 위 고정 / 고정 풀기
+    var adminPin = null; // null 이면 운영자 아님, 아니면 지금 고정 여부
+    if (user) sb.rpc('is_app_admin').then(async function (a) {
+      if (a.data !== true) return;
+      var r = await sb.from('story_posts').select('pinned_at').eq('id', p.id).maybeSingle();
+      adminPin = !!(r.data && r.data.pinned_at);
+    });
+    function pinBtn() {
+      return adminPin === null ? '' : '<button type="button" class="btn white" id="shPin" style="margin-top:10px">' + (adminPin ? '📌 고정 풀기' : '📌 이야기 맨 위에 고정') + '</button>';
+    }
+    function bindPin() {
+      var b = document.getElementById('shPin'); if (!b) return;
+      b.onclick = async function () {
+        b.disabled = true;
+        var r = await sb.rpc('story_admin_pin', { p_id: p.id, p_on: !adminPin });
+        b.disabled = false;
+        if (r.error || r.data !== 'ok') { PS.toast('바꾸지 못했어요'); return; }
+        adminPin = !adminPin; closeSheet();
+        PS.toast(adminPin ? '이야기 맨 위에 고정했어요' : '고정을 풀었어요');
+      };
+    }
+
     $('pvMenu').addEventListener('click', function () {
+      if (!mine && adminPin !== null) { // 운영자가 남의 글을 볼 때: 고정 + 신고
+        sheet('<h3 style="font-size:18px;font-weight:800">운영</h3>' + pinBtn() +
+          '<button type="button" class="btn white" id="shRepGo" style="margin-top:10px">신고하기</button>');
+        bindPin();
+        document.getElementById('shRepGo').onclick = function () { report({ post_id: p.id }); };
+        return;
+      }
       if (mine) {
-        sheet('<h3 style="font-size:18px;font-weight:800">내 글</h3>' +
+        sheet('<h3 style="font-size:18px;font-weight:800">내 글</h3>' + pinBtn() +
           '<a class="btn white" href="/community/write?id=' + p.id + '" style="margin-top:14px">수정하기</a>' +
           '<button type="button" class="btn danger" id="shDel" style="margin-top:10px">삭제하기</button>');
+        bindPin();
         document.getElementById('shDel').onclick = async function () {
           if (!confirm('이 글을 삭제할까요? 댓글도 함께 보이지 않게 돼요.')) return;
           var r = await sb.from('story_posts').update({ status: 'deleted' }).eq('id', p.id);
