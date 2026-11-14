@@ -842,7 +842,8 @@
     if (p.comment_count) stats.push('<span>' + PS.icon('chat', 14) + ' ' + p.comment_count + '</span>');
     return '<a class="cm-row" href="' + PS.communityUrl(p.id) + '">' +
       '<div class="cm-info"><span class="cm-topic">' + PS.esc(PS.COMMUNITY_TOPICS[p.topic] || '') + '</span>' +
-        '<div class="cm-body">' + PS.esc(String(p.body || '').slice(0, 200)) + '</div>' +
+        // 목록 미리보기는 빈 줄을 빼고 두 줄 (빈 줄이 두 줄 중 한 줄을 차지하지 않게)
+        '<div class="cm-body">' + PS.esc(String(p.body || '').replace(/\n\s*\n+/g, '\n').trim().slice(0, 200)) + '</div>' +
         '<div class="cm-meta">' + PS.esc([who, p.region ? PS.townKey(p.region) : '', PS.ago(p.created_at)].filter(Boolean).join(' · ')) + '</div>' +
         (stats.length ? '<div class="cm-stats">' + stats.join('') + '</div>' : '') +
       '</div>' + (img ? '<div class="cm-ph"><img src="' + PS.esc(img) + '" alt="" loading="lazy"></div>' : '') + '</a>';
