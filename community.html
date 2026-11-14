@@ -292,6 +292,7 @@
       (imgs.length ? '<div class="pv-imgs">' + imgs.map(function (u) { return '<a href="' + PS.esc(u) + '" target="_blank" rel="noopener" aria-label="사진 크게 보기"><img src="' + PS.esc(u) + '" alt="" loading="lazy" decoding="async"></a>'; }).join('') + '</div>' : '') +
       (mine ? '<div id="pvPush"></div>' : '') +
       '<div class="pv-acts"><button type="button" class="pv-like' + (liked ? ' on' : '') + '" id="pvLike" aria-pressed="' + liked + '">' + PS.icon('heart', 16) + ' 공감 <span id="pvLikeN">' + (p.like_count || '') + '</span></button>' +
+        '<button type="button" class="pv-like" id="pvShare">' + PS.icon('send', 16) + ' 공유</button>' +
         '<span class="views">조회 ' + ((p.view_count || 0) + 1) + '</span></div>' +
       '<section class="cmts"><h2>댓글 <span id="cmtN">' + (p.comment_count || '') + '</span></h2><div id="cmtList"></div></section>' +
       '<div class="pv-pad"></div>' +
@@ -319,6 +320,12 @@
       var uid = b.dataset.who;
       var who = names[uid] || people[uid] || {};
       userSheet(uid, who);
+    });
+
+    // 공유 (내 초대 링크가 붙어서, 친구가 가입하면 초대로 기록)
+    $('pvShare').addEventListener('click', async function () {
+      var how = await psShare(preview + ' - 판다산다 이야기', preview, '/community/' + p.id);
+      if (how === 'copied') PS.toast('링크를 복사했어요');
     });
 
     // 더보기: 내 글이면 수정·삭제, 아니면 신고
