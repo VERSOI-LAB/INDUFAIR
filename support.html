@@ -217,7 +217,7 @@
   function alertSheet() {
     if (!sh) {
       shBg = document.createElement('div'); shBg.className = 'sheet-bg';
-      sh = document.createElement('div'); sh.className = 'sheet'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-label', '마감 임박 알림');
+      sh = document.createElement('div'); sh.className = 'sheet'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-label', '마감 임박 알림'); sh.style.maxHeight = '88vh'; sh.style.overflowY = 'auto';
       document.body.appendChild(shBg); document.body.appendChild(sh);
       shBg.addEventListener('click', closeSheet);
     }
