@@ -766,7 +766,9 @@
   // ---- 지원사업 (기업마당 공고를 매일 자동 수집: Edge Function sync-support-programs) ----
   PS.SUPPORT_COLUMNS = 'id,title,agency,executor,category,region,target,apply_text,apply_start,apply_end,url,posted_at';
   PS.SUPPORT_CATEGORIES = ['금융', '기술', '인력', '수출', '내수', '창업', '경영', '기타'];
-  PS.SUPPORT_REGIONS = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+  // 기업마당 지역 구분과 같게: 광주·전남은 '전남광주' 하나 (화면에는 '광주·전남')
+  PS.SUPPORT_REGIONS = ['서울', '부산', '대구', '인천', '전남광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '경북', '경남', '제주'];
+  PS.supportRegionLabel = function (r) { return r === '전남광주' ? '광주·전남' : r; };
   PS.supportUrl = function (id) { return '/support/' + encodeURIComponent(id); };
   PS.todayKST = function () { return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); };
   // 마감까지 남은 날: { label: 'D-3', cls: 'soon' }  (cls: today·soon·open·always·closed·upcoming)
@@ -789,7 +791,7 @@
     return '<a class="sp-row" href="' + PS.supportUrl(p.id) + '">' +
       '<span class="sp-dday sp-' + d.cls + '">' + d.label + '</span>' +
       '<div class="sp-info"><div class="sp-t">' + (isNew ? '<span class="badge reserved" style="background:var(--danger)">NEW</span>' : '') + PS.esc(p.title) + '</div>' +
-      '<div class="sp-m">' + PS.esc([p.category, p.region !== '전국' ? p.region : '', p.agency].filter(Boolean).join(' · ')) + '</div>' +
+      '<div class="sp-m">' + PS.esc([p.category, p.region !== '전국' ? PS.supportRegionLabel(p.region) : '', p.agency].filter(Boolean).join(' · ')) + '</div>' +
       '<div class="sp-m">신청 ' + PS.esc(PS.supportPeriod(p)) + '</div></div></a>';
   };
 

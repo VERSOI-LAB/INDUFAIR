@@ -59,6 +59,8 @@
     var st = { q: PS.param('q') || '', cat: PS.param('cat') || '', region: '', open: true, sort: 'end', offset: 0 };
     var PAGE = 30;
     try { st.region = localStorage.getItem('ps_sp_region') || ''; } catch (e) {}
+    if (st.region === '광주' || st.region === '전남') st.region = '전남광주'; // 예전에 저장된 선택
+    if (st.region && PS.SUPPORT_REGIONS.indexOf(st.region) < 0) st.region = '';
     body.innerHTML =
       '<p class="lead">정부·지자체 지원사업 공고를 기업마당에서 매일 자동으로 모아요. 신청은 공고 원문에서 해 주세요.</p>' +
       '<div class="sp-filter">' +
@@ -69,7 +71,7 @@
         }).join('') + '</div>' +
         '<div class="sp-opts">' +
           '<select id="spRegion" aria-label="지역"><option value="">모든 지역</option>' + PS.SUPPORT_REGIONS.map(function (r) {
-            return '<option' + (r === st.region ? ' selected' : '') + '>' + r + '</option>';
+            return '<option value="' + r + '"' + (r === st.region ? ' selected' : '') + '>' + PS.supportRegionLabel(r) + '</option>';
           }).join('') + '</select>' +
           '<select id="spSort" aria-label="정렬"><option value="end">마감 임박순</option><option value="new">최신 공고순</option></select>' +
           '<label><input type="checkbox" id="spOpen" checked> 마감 제외</label>' +
@@ -149,7 +151,7 @@
       ['소관 기관', PS.esc(p.agency || '')],
       ['수행 기관', PS.esc(p.executor || '')],
       ['지원 대상', PS.esc(p.target || '')],
-      ['지역', PS.esc(p.region || '전국')]
+      ['지역', PS.esc(PS.supportRegionLabel(p.region || '전국'))]
     ].filter(function (r) { return r[1]; });
     body.innerHTML =
       '<div class="sd-cat">' + PS.esc(['지원사업', p.category].filter(Boolean).join(' · ')) + '</div>' +
