@@ -234,7 +234,17 @@
       (p.summary ? '<h2 class="sd-h">사업 개요</h2><div class="sd-sum">' + PS.esc(p.summary) + '</div>' : '') +
       '<a class="btn sd-go" href="' + PS.esc(p.url) + '" target="_blank" rel="noopener">공고 원문 보고 신청하기</a>' +
       '<p class="sd-note">이 정보는 기업마당(bizinfo.go.kr) 공고를 자동으로 모은 거예요. 신청 자격·서류·기간은 꼭 원문에서 확인해 주세요.</p>' +
-      '<a class="btn white small" href="/support" style="margin-top:16px">다른 지원사업 보기</a>';
+      '<button type="button" class="btn white small" id="sdShare" style="margin-top:16px">' + PS.icon('send', 18) + ' 동료에게 공유하기</button>' +
+      '<a class="btn white small" href="/support" style="margin-top:10px">다른 지원사업 보기</a>';
+    shareBtn(p.title, '/support/' + p.id);
+  }
+
+  function shareBtn(title, path) {
+    var b = document.getElementById('sdShare'); if (!b) return;
+    b.onclick = async function () {
+      var how = await psShare(title + ' - 판다산다', title, path);
+      if (how === 'copied') PS.toast('링크를 복사했어요. 카톡에 붙여 넣어 보내 주세요');
+    };
   }
 
   // ---- 교육·행사 상세 ----
@@ -259,7 +269,9 @@
       (e.origin_url ? '<a class="btn sd-go" href="' + PS.esc(e.origin_url) + '" target="_blank" rel="noopener">주최 기관 페이지에서 신청하기</a>' : '') +
       '<a class="btn ' + (e.origin_url ? 'white small' : 'sd-go') + '" href="' + PS.esc(e.url) + '" target="_blank" rel="noopener"' + (e.origin_url ? ' style="margin-top:10px"' : '') + '>기업마당에서 자세히 보기</a>' +
       '<p class="sd-note">이 정보는 기업마당(bizinfo.go.kr) 행사정보를 자동으로 모은 거예요. 일정·장소·참가 방법은 꼭 원문에서 확인해 주세요.</p>' +
-      '<a class="btn white small" href="/events" style="margin-top:16px">다른 교육·행사 보기</a>';
+      '<button type="button" class="btn white small" id="sdShare" style="margin-top:16px">' + PS.icon('send', 18) + ' 동료에게 공유하기</button>' +
+      '<a class="btn white small" href="/events" style="margin-top:10px">다른 교육·행사 보기</a>';
+    shareBtn(e.title, '/events/' + e.id);
   }
 
   function notFound() {
