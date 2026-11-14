@@ -1,7 +1,8 @@
 // /sitemap.xml — 고정 페이지 + 판매중인 물건 + 공개된 업체 주소를 매번 DB 에서 만들어 준다.
 var L = require('./_lib');
+var G = require('./landing');
 
-var STATIC = ['/', '/buy', '/community', '/support', '/events', '/terms', '/privacy', '/policy'];
+var STATIC = ['/', '/buy', '/business', '/community', '/support', '/events', '/terms', '/privacy', '/policy'];
 var PAGE = 1000;     // Supabase REST 한 번에 받는 최대 행 수
 var MAX = 40000;     // 사이트맵 하나에 넣을 수 있는 주소는 50,000개까지
 
@@ -35,6 +36,9 @@ module.exports = async function (req, res) {
 
   var xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
     STATIC.map(function (p) { return entry(L.SITE + p); }).join('') +
+    // 지원사업 모아보기: 지역, 분야 (지역×분야는 지역 페이지에서 링크로 이어짐)
+    G.REGIONS.map(function (r) { return entry(L.SITE + G.areaUrl(r), today); }).join('') +
+    G.FIELDS.map(function (f) { return entry(L.SITE + G.fieldUrl(f), today); }).join('') +
     got[0].map(function (p) { return entry(L.SITE + '/product/' + p.id, p.created_at); }).join('') +
     got[1].map(function (b) { return entry(L.SITE + '/biz/' + b.id, b.bumped_at); }).join('') +
     got[2].map(function (s) { return entry(L.SITE + '/support/' + s.id, s.updated_at); }).join('') +
