@@ -4,8 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>정부 지원사업 - 판다산다</title>
+<title>정부 지원사업 모음 (매일 자동 업데이트) - 판다산다</title>
+<!--list-meta-->
 <meta name="description" content="중소기업·제조업·소상공인을 위한 정부·지자체 지원사업 공고와 교육·세미나·전시회 정보를 매일 자동으로 모아 보여드려요.">
+<link rel="canonical" href="https://www.pandasanda.com/support">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="판다산다">
+<meta property="og:title" content="정부 지원사업 모음 (매일 자동 업데이트) - 판다산다">
+<meta property="og:description" content="중소기업·제조업·소상공인을 위한 정부·지자체 지원사업 공고와 교육·세미나·전시회 정보를 매일 자동으로 모아 보여드려요.">
+<meta property="og:url" content="https://www.pandasanda.com/support">
+<meta property="og:image" content="https://www.pandasanda.com/이미지/web/logo.jpg">
+<!--/list-meta-->
 <link rel="icon" href="/이미지/web/logo.jpg">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/이미지/app/icon-180.png">
@@ -87,10 +96,16 @@
       empty: '교육·행사 정보를 준비 중이에요', count: '행사'
     }
   };
+  // 지역·분야 모아보기 (/support/area/…, /support/field/…): 서버가 그린 목록을 그대로 둔다
+  if (body.dataset.ssr === 'landing') { document.getElementById('back').href = '/support'; return; }
   var isEvent = /^\/events(\/|$)/.test(location.pathname) || PS.param('tab') === 'events';
   var K = KINDS[isEvent ? 'events' : 'support'];
   var id = PS.idFromUrl(isEvent ? 'events' : 'support');
   document.getElementById('head').textContent = K.title;
+  if (isEvent) { // /events 는 같은 틀을 쓰므로 대표 주소를 바로잡음
+    var cn = document.querySelector('link[rel=canonical]'); if (cn) cn.href = location.origin + '/events';
+    var ou = document.querySelector('meta[property="og:url"]'); if (ou) ou.content = location.origin + '/events';
+  }
   document.title = K.title + ' - 판다산다';
   if (id) (isEvent ? eventDetail : detail)(id); else list();
 
@@ -105,6 +120,9 @@
       '<nav class="sp-tabs" aria-label="정보 종류"><a href="/support"' + (isEvent ? '' : ' class="on" aria-current="page"') + '>지원사업</a>' +
         '<a href="/events"' + (isEvent ? ' class="on" aria-current="page"' : '') + '>교육·행사</a></nav>' +
       '<p class="lead">' + K.lead + '</p>' +
+      (isEvent ? '' : '<p class="sp-count" style="margin-top:8px;line-height:1.9">지역별 모아보기: ' + PS.SUPPORT_REGIONS.filter(function (r) { return r !== '전국'; }).map(function (r) {
+        return '<a href="/support/area/' + encodeURIComponent(r) + '" style="text-decoration:underline;margin-right:8px">' + PS.esc(PS.supportRegionLabel(r)) + '</a>';
+      }).join('') + '</p>') +
       '<div class="sp-filter">' +
         '<form class="search" id="spForm" role="search"><span aria-hidden="true" style="display:flex">' + PS.icon('search', 20) + '</span>' +
           '<input id="spQ" type="search" placeholder="' + K.placeholder + '" value="' + PS.esc(st.q) + '" autocomplete="off" aria-label="' + K.title + ' 검색"></form>' +

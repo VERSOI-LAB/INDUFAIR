@@ -206,6 +206,7 @@ module.exports = async function (req, res) {
   }
 
   var v = type === 'biz' ? businessView(row) : type === 'support' ? supportView(row) : type === 'event' ? eventView(row) : type === 'community' ? communityView(row) : productView(row);
+  html = swap(html, /<!--list-meta-->[\s\S]*?<!--\/list-meta-->\n?/, ''); // 목록 페이지용 메타는 빼고
   html = swap(html, /<title>[^<]*<\/title>/, head(v));
   if (v.slider) html = swap(html, /(<div class="slider" id="slider">)[\s\S]*?(<\/div>\s*<div class="dots")/, '<div class="slider" id="slider">' + v.slider + '</div>\n    <div class="dots"');
   html = swap(html, /<main class="page" id="body"><\/main>/, '<main class="page" id="body">' + v.body + '</main>');

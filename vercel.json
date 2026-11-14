@@ -18,6 +18,18 @@
       "destination": "/api/page?type=product&id=:id"
     },
     {
+      "source": "/support/area/:v/:f",
+      "destination": "/api/landing?kind=area&v=:v&f=:f"
+    },
+    {
+      "source": "/support/area/:v",
+      "destination": "/api/landing?kind=area&v=:v"
+    },
+    {
+      "source": "/support/field/:v",
+      "destination": "/api/landing?kind=field&v=:v"
+    },
+    {
       "source": "/support/:id",
       "destination": "/api/page?type=support&id=:id"
     },
@@ -57,6 +69,9 @@
   "functions": {
     "api/page.js": {
       "includeFiles": "{product,business,support,community}.html"
+    },
+    "api/landing.js": {
+      "includeFiles": "support.html"
     }
   }
 }
