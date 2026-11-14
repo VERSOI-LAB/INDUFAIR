@@ -12,6 +12,14 @@
 | `/chat`, `/chat/:id` | `chat.html` | 채팅 목록 / 채팅방 (실시간, 읽음 표시) |
 | `/mypage` | `mypage.html` | 내 물건(판매중·판매완료), 통계, 찜 |
 | `/login` | `login.html` | 이메일 로그인/가입 한 화면 |
+| `/support`, `/support/:id` | `support.html` | 정부 지원사업 공고 (기업마당에서 매일 2번 자동 수집, 마감 임박순·분야·지역 필터) |
+
+### 지원사업 자동 수집 켜기
+1. 기업마당(bizinfo.go.kr) > 정책정보 개방 API 에서 인증키 발급
+2. Supabase Edge Function 비밀값에 `BIZINFO_API_KEY` 추가
+3. `supabase/functions/sync-support-programs` 배포 (Verify JWT 끔)
+4. `supabase/migrations/20261114_support_programs.sql` 실행 (테이블 + 매일 06시·18시 자동 실행)
+5. 처음 한 번은 지난 공고까지 채우기: 함수에 `{"pages": 20}` 로 POST
 | `/pay-seller` | `pay-seller.html` | 안전결제 판매자 신청 (사업자 인증 + 통신판매업 신고 확인) |
 
 검색 노출: `/product/:id`·`/biz/:id` 는 `api/page.js` 가 제목·설명·사진을 html 에 미리 채워 내려주고, `/sitemap.xml` 은 `api/sitemap.js` 가 DB 에서 만든다 (Vercel 함수, 로컬 서버에서는 동작하지 않음).

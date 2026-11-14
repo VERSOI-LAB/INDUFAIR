@@ -88,6 +88,7 @@
       '<section class="mcard"><h3>나의 관심</h3>' +
         row('/favorites', 'heart', '관심목록') +
         row('/keywords', 'tag', '키워드 알림 설정', '<span class="badge-n" id="kwBadge" hidden></span>') +
+        row('/support', 'receipt', '정부 지원사업') +
       '</section>';
     // "내 동네" 글자가 있으면 화살표와 겹치지 않게
     main.querySelectorAll('.mrow span[style*="margin-left:auto"] + .go').forEach(function (g) { g.style.marginLeft = '6px'; });
@@ -125,10 +126,14 @@
     try { since = localStorage.getItem('ps_kw_seen'); } catch (e) {}
     since = since || new Date(Date.now() - 7 * 86400000).toISOString();
     var ors = kw.data.map(function (k) { return 'title.ilike.%' + k.keyword.replace(/[%_,()]/g, ' ') + '%'; }).join(',');
-    var res = await sb.from('products').select('id', { count: 'exact', head: true })
-      .in('status', ['selling', 'reserved']).neq('seller_profile_id', PS.user.id).gt('created_at', since).or(ors);
+    var got = await Promise.all([
+      sb.from('products').select('id', { count: 'exact', head: true })
+        .in('status', ['selling', 'reserved']).neq('seller_profile_id', PS.user.id).gt('created_at', since).or(ors),
+      sb.from('support_programs').select('id', { count: 'exact', head: true }).gt('posted_at', since).or(ors)
+    ]);
+    var n = (got[0].count || 0) + (got[1].error ? 0 : got[1].count || 0);
     var b = document.getElementById('kwBadge');
-    if (b && res.count) { b.textContent = res.count > 99 ? '99+' : res.count; b.hidden = false; }
+    if (b && n) { b.textContent = n > 99 ? '99+' : n; b.hidden = false; }
   }
 })();
 </script>

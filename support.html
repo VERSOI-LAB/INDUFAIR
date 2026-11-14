@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>정부 지원사업 - 판다산다</title>
+<meta name="description" content="중소기업·제조업·소상공인을 위한 정부·지자체 지원사업 공고를 매일 자동으로 모아 마감 순으로 보여드려요.">
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/이미지/app/icon-180.png">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .lead{color:var(--sub);margin-top:12px;line-height:1.6;font-size:15px;}
+  .sp-filter{display:grid;gap:10px;margin-top:14px;}
+  .sp-filter .search{height:48px;}
+  .sp-filter .search input{font-size:16px;}
+  .sp-opts{display:flex;gap:8px;align-items:center;}
+  .sp-opts select{height:40px;padding:0 10px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-size:15px;appearance:auto;}
+  .sp-opts label{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);margin-left:auto;white-space:nowrap;}
+  .sp-count{font-size:13px;color:var(--sub);margin-top:6px;}
+  .more{margin:16px 0 8px;}
+  /* 상세 */
+  .sd-cat{font-size:14px;color:var(--sub);margin-top:16px;}
+  .sd-title{font-size:22px;font-weight:800;line-height:1.4;margin-top:6px;}
+  .sd-box{margin-top:18px;border-radius:16px;background:#F7F8FA;padding:6px 16px;}
+  .sd-box dl{display:grid;grid-template-columns:76px 1fr;gap:0;margin:0;}
+  .sd-box dt,.sd-box dd{padding:10px 0;border-bottom:1px solid #ECEDEF;font-size:15px;line-height:1.5;margin:0;}
+  .sd-box dt{color:var(--sub);}
+  .sd-box dl > :nth-last-child(-n+2){border-bottom:none;}
+  .sd-sum{margin-top:20px;font-size:15px;line-height:1.75;white-space:pre-line;color:#333;}
+  .sd-h{font-size:17px;font-weight:800;margin-top:24px;}
+  .sd-go{margin-top:24px;}
+  .sd-note{font-size:13px;color:var(--hint);margin-top:10px;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/" id="back" aria-label="돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1 id="head">정부 지원사업</h1>
+  </header>
+  <main class="page" id="body"></main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('home');
+  var body = document.getElementById('body');
+  var id = PS.idFromUrl('support');
+  if (id) detail(id); else list();
+
+  // ---- 목록 ----
+  function list() {
+    var st = { q: PS.param('q') || '', cat: PS.param('cat') || '', region: '', open: true, sort: 'end', offset: 0 };
+    var PAGE = 30;
+    try { st.region = localStorage.getItem('ps_sp_region') || ''; } catch (e) {}
+    body.innerHTML =
+      '<p class="lead">정부·지자체 지원사업 공고를 기업마당에서 매일 자동으로 모아요. 신청은 공고 원문에서 해 주세요.</p>' +
+      '<div class="sp-filter">' +
+        '<form class="search" id="spForm" role="search"><span aria-hidden="true" style="display:flex">' + PS.icon('search', 20) + '</span>' +
+          '<input id="spQ" type="search" placeholder="예) 스마트공장, 수출, 자동화" value="' + PS.esc(st.q) + '" autocomplete="off" aria-label="지원사업 검색"></form>' +
+        '<div class="chips" id="spCats" role="group" aria-label="분야">' + [''].concat(PS.SUPPORT_CATEGORIES).map(function (c) {
+          return '<button type="button" class="chip' + (c === st.cat ? ' on' : '') + '" data-cat="' + c + '" aria-pressed="' + (c === st.cat) + '">' + (c || '전체') + '</button>';
+        }).join('') + '</div>' +
+        '<div class="sp-opts">' +
+          '<select id="spRegion" aria-label="지역"><option value="">모든 지역</option>' + PS.SUPPORT_REGIONS.map(function (r) {
+            return '<option' + (r === st.region ? ' selected' : '') + '>' + r + '</option>';
+          }).join('') + '</select>' +
+          '<select id="spSort" aria-label="정렬"><option value="end">마감 임박순</option><option value="new">최신 공고순</option></select>' +
+          '<label><input type="checkbox" id="spOpen" checked> 마감 제외</label>' +
+        '</div>' +
+      '</div>' +
+      '<p class="sp-count" id="spCount"></p>' +
+      '<div class="list" id="spList"></div>' +
+      '<div class="more" id="spMore" hidden><button class="btn white small" type="button">더 보기</button></div>';
+
+    var $ = function (x) { return document.getElementById(x); };
+    var timer = null;
+    $('spForm').addEventListener('submit', function (e) { e.preventDefault(); st.q = $('spQ').value.trim(); load(true); });
+    $('spQ').addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { st.q = $('spQ').value.trim(); load(true); }, 300); });
+    $('spCats').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-cat]'); if (!b) return;
+      st.cat = b.dataset.cat;
+      $('spCats').querySelectorAll('.chip').forEach(function (c) { var on = c === b; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on); });
+      load(true);
+    });
+    $('spRegion').addEventListener('change', function () {
+      st.region = this.value;
+      try { localStorage.setItem('ps_sp_region', st.region); } catch (e) {}
+      load(true);
+    });
+    $('spSort').addEventListener('change', function () { st.sort = this.value; load(true); });
+    $('spOpen').addEventListener('change', function () { st.open = this.checked; load(true); });
+    $('spMore').querySelector('button').addEventListener('click', function () { load(false); });
+
+    var seq = 0;
+    async function load(reset) {
+      if (reset) {
+        st.offset = 0;
+        $('spList').innerHTML = Array(5).join('.').split('.').map(function () {
+          return '<div class="sp-row"><div class="skeleton" style="width:62px;height:28px"></div><div style="flex:1"><div class="skeleton" style="height:18px"></div><div class="skeleton" style="height:14px;width:60%;margin-top:8px"></div></div></div>';
+        }).join('');
+      }
+      var my = ++seq;
+      var q = sb.from('support_programs').select(PS.SUPPORT_COLUMNS, { count: 'exact' });
+      if (st.open) q = q.or('apply_end.gte.' + PS.todayKST() + ',apply_end.is.null');
+      if (st.cat) q = q.eq('category', st.cat);
+      if (st.region) q = q.in('region', [st.region, '전국']);
+      if (st.q) q = q.ilike('title', '%' + st.q.replace(/[%_,()]/g, ' ') + '%');
+      q = st.sort === 'end'
+        ? q.order('apply_end', { ascending: true, nullsFirst: false }).order('posted_at', { ascending: false })
+        : q.order('posted_at', { ascending: false, nullsFirst: false });
+      var res = await q.range(st.offset, st.offset + PAGE - 1);
+      if (my !== seq) return; // 더 최근 요청이 있음
+      if (res.error) {
+        $('spList').innerHTML = '<div class="empty">' + PS.sticker('working', 100) + '<b>지원사업을 준비 중이에요</b>곧 매일 새 공고를 모아 보여 드릴게요</div>';
+        $('spCount').textContent = ''; $('spMore').hidden = true;
+        return;
+      }
+      var rows = res.data || [];
+      if (reset) $('spList').innerHTML = '';
+      if (reset && !rows.length) {
+        $('spList').innerHTML = '<div class="empty">' + PS.sticker('searching', 100) + '<b>맞는 공고가 없어요</b>검색어나 분야를 바꿔 보세요</div>';
+      }
+      $('spList').insertAdjacentHTML('beforeend', rows.map(function (p) { return PS.supportRowHtml(p); }).join(''));
+      st.offset += rows.length;
+      $('spCount').textContent = res.count != null ? '공고 ' + res.count.toLocaleString('ko-KR') + '건' : '';
+      $('spMore').hidden = rows.length < PAGE;
+    }
+    load(true);
+  }
+
+  // ---- 상세 ----
+  async function detail(id) {
+    document.getElementById('back').href = '/support';
+    if (!/^\d+$/.test(id)) return notFound();
+    var res = await sb.from('support_programs').select(PS.SUPPORT_COLUMNS + ',summary').eq('id', id).maybeSingle();
+    var p = res.data;
+    if (!p) return notFound();
+    var d = PS.supportDday(p);
+    document.title = p.title + ' - 판다산다 지원사업';
+    var rows = [
+      ['신청 기간', PS.esc(PS.supportPeriod(p)) + ' <span class="sp-dday sp-' + d.cls + '" style="height:24px;min-width:0;margin-left:4px">' + d.label + '</span>'],
+      ['소관 기관', PS.esc(p.agency || '')],
+      ['수행 기관', PS.esc(p.executor || '')],
+      ['지원 대상', PS.esc(p.target || '')],
+      ['지역', PS.esc(p.region || '전국')]
+    ].filter(function (r) { return r[1]; });
+    body.innerHTML =
+      '<div class="sd-cat">' + PS.esc(['지원사업', p.category].filter(Boolean).join(' · ')) + '</div>' +
+      '<h1 class="sd-title">' + PS.esc(p.title) + '</h1>' +
+      '<div class="sd-box"><dl>' + rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('') + '</dl></div>' +
+      (p.summary ? '<h2 class="sd-h">사업 개요</h2><div class="sd-sum">' + PS.esc(p.summary) + '</div>' : '') +
+      '<a class="btn sd-go" href="' + PS.esc(p.url) + '" target="_blank" rel="noopener">공고 원문 보고 신청하기</a>' +
+      '<p class="sd-note">이 정보는 기업마당(bizinfo.go.kr) 공고를 자동으로 모은 거예요. 신청 자격·서류·기간은 꼭 원문에서 확인해 주세요.</p>' +
+      '<a class="btn white small" href="/support" style="margin-top:16px">다른 지원사업 보기</a>';
+  }
+
+  function notFound() {
+    body.innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>공고를 찾을 수 없어요</b>마감이 오래 지나 정리된 공고일 수 있어요</div>' +
+      '<a class="btn white small" href="/support">지원사업 목록 보기</a>';
+  }
+})();
+</script>
+</body>
+</html>
