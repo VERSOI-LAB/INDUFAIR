@@ -29,12 +29,14 @@ end $$;
 -- 운영자: 고정 / 고정 풀기
 create or replace function public.story_admin_pin(p_id bigint, p_on boolean)
 returns text language plpgsql security definer set search_path = public as $$
+declare n integer;
 begin
   if not public.is_app_admin() then return 'forbidden'; end if;
   perform set_config('ps.internal', '1', true);
   update story_posts set pinned_at = case when p_on then now() else null end where id = p_id and status = 'active';
+  get diagnostics n = row_count;
   perform set_config('ps.internal', '', true);
-  return case when found then 'ok' else 'not_found' end;
+  return case when n > 0 then 'ok' else 'not_found' end;
 end $$;
 revoke execute on function public.story_admin_pin(bigint, boolean) from anon, public;
 grant execute on function public.story_admin_pin(bigint, boolean) to authenticated;
