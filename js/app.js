@@ -823,6 +823,31 @@
       '<div class="sp-m">일정 ' + PS.esc(PS.eventPeriod(e) + apply) + '</div></div></a>';
   };
 
+  // ---- 이야기 (커뮤니티) ----
+  PS.COMMUNITY_TOPICS = { question: '궁금해요', daily: '일상·잡담', seek: '구해요·소개해요', tip: '정보·노하우' };
+  PS.COMMUNITY_POST_COLUMNS = 'id,author_id,topic,body,images,region,like_count,comment_count,view_count,status,created_at,updated_at';
+  PS.communityUrl = function (id) { return '/community/' + encodeURIComponent(id); };
+  // "경기 시흥시 정왕동" → "시흥시" (시·군 단위로 '내 동네' 묶기). 없으면 첫 단어
+  PS.townKey = function (region) {
+    var words = String(region || '').trim().split(/\s+/).filter(Boolean);
+    var city = words.filter(function (w) { return /(시|군)$/.test(w) && w.length >= 2; })[0];
+    return city || words.slice(0, 2).join(' ') || '';
+  };
+  // 목록 한 줄: 주제 · 본문 두 줄 · 사진 · 동네·시간 · 공감/댓글
+  PS.communityRowHtml = function (p, names) {
+    var img = Array.isArray(p.images) && p.images[0];
+    var who = (names && names[p.author_id] && names[p.author_id].name) || '이웃';
+    var stats = [];
+    if (p.like_count) stats.push('<span>' + PS.icon('heart', 14) + ' ' + p.like_count + '</span>');
+    if (p.comment_count) stats.push('<span>' + PS.icon('chat', 14) + ' ' + p.comment_count + '</span>');
+    return '<a class="cm-row" href="' + PS.communityUrl(p.id) + '">' +
+      '<div class="cm-info"><span class="cm-topic">' + PS.esc(PS.COMMUNITY_TOPICS[p.topic] || '') + '</span>' +
+        '<div class="cm-body">' + PS.esc(String(p.body || '').slice(0, 200)) + '</div>' +
+        '<div class="cm-meta">' + PS.esc([who, p.region ? PS.townKey(p.region) : '', PS.ago(p.created_at)].filter(Boolean).join(' · ')) + '</div>' +
+        (stats.length ? '<div class="cm-stats">' + stats.join('') + '</div>' : '') +
+      '</div>' + (img ? '<div class="cm-ph"><img src="' + PS.esc(img) + '" alt="" loading="lazy"></div>' : '') + '</a>';
+  };
+
   // ---- 최근 본 물건 (이 기기에만 저장) ----
   PS.recentIds = function () {
     try { return JSON.parse(localStorage.getItem('ps_recent') || '[]'); } catch (e) { return []; }
@@ -961,13 +986,14 @@
   if (/^\/(index(\.html)?)?$|^\/(product|business|biz\/(?!new|verify)|profile)/.test(location.pathname)) document.documentElement.classList.add('pc-wide');
 
   // PC 에서 홈과 같은 좌우 여백(내용 폭 70%)을 쓰는 페이지: 채팅·마이와 마이 하위 화면, 결제, 물건 수정 (app.css 의 html.pc-70)
-  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|support|events|settings|neighborhood|price|shipping|cart|checkout|edit|pay-seller|my-biz|biz-premium|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
+  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|support|events|community|settings|neighborhood|price|shipping|cart|checkout|edit|pay-seller|my-biz|biz-premium|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
 
   // ---- 하단 탭바 ----
   var TABS = [
     { key: 'home', href: '/', icon: 'home', label: '홈' },
     { key: 'sell', href: '/sell', icon: 'sell', label: '판다' },
     { key: 'buy', href: '/buy', icon: 'buy', label: '산다' },
+    { key: 'community', href: '/community', icon: 'handshake', label: '이야기' },
     { key: 'chat', href: '/chat', icon: 'chat', label: '채팅' },
     { key: 'my', href: '/mypage', icon: 'user', label: '마이' }
   ];
@@ -1136,6 +1162,7 @@
       : /^\/sell/.test(path) ? 'sell'
       : /^\/(buy|product|checkout|pay-(?!seller)|biz\/(?!new|verify)|business)/.test(path) ? 'buy'
       : /^\/chat/.test(path) ? 'chat'
+      : /^\/community/.test(path) ? 'community'
       : /^\/(mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|pay-seller|my-biz|biz-premium|biz\/new|biz\/verify|biz-new|biz-verify)/.test(path) ? 'my' : '';
     PS.renderTabbar(key);
   }

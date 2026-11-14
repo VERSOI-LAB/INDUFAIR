@@ -22,6 +22,14 @@
       "destination": "/api/page?type=support&id=:id"
     },
     {
+      "source": "/community/write",
+      "destination": "/community"
+    },
+    {
+      "source": "/community/:id",
+      "destination": "/api/page?type=community&id=:id"
+    },
+    {
       "source": "/events",
       "destination": "/support"
     },
@@ -44,7 +52,7 @@
   ],
   "functions": {
     "api/page.js": {
-      "includeFiles": "{product,business,support}.html"
+      "includeFiles": "{product,business,support,community}.html"
     }
   }
 }

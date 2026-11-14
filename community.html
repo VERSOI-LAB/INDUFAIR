@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>이야기 - 판다산다</title>
+<meta name="description" content="산업 현장 사람들이 편하게 묻고, 수다 떨고, 서로 소개하는 판다산다 이야기">
+<link rel="icon" href="/이미지/web/logo.jpg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/이미지/app/icon-180.png">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .cm-head{display:flex;align-items:center;justify-content:space-between;padding:20px 4px 4px;}
+  .cm-head h1{font-size:26px;font-weight:800;}
+  .cm-head a{font-size:14px;font-weight:600;color:var(--sub);}
+  .cm-town{display:flex;align-items:center;gap:8px;margin:8px 0 2px;font-size:14px;color:var(--sub);}
+  .cm-town label{display:flex;align-items:center;gap:6px;margin-left:auto;white-space:nowrap;}
+  .cm-town b{color:var(--text);}
+  .cm-write{position:fixed;right:max(16px, calc((100vw - var(--app-w)) / 2 + 16px));bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 18px);z-index:25;
+    display:flex;align-items:center;gap:6px;height:52px;padding:0 20px;border-radius:26px;background:var(--primary);font-size:17px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.18);}
+  .more{margin:16px 0 90px;}
+  /* 글 */
+  .pv-author{display:flex;align-items:center;gap:10px;margin-top:16px;}
+  .pv-av{width:44px;height:44px;border-radius:50%;overflow:hidden;background:var(--primary-light);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+  .pv-av img{width:100%;height:100%;object-fit:cover;}
+  .pv-author b{display:block;font-size:16px;}
+  .pv-author span{font-size:13px;color:var(--hint);}
+  .pv-menu{margin-left:auto;width:40px;height:40px;border-radius:50%;font-size:20px;color:var(--sub);}
+  .pv-body{margin-top:16px;font-size:17px;line-height:1.7;white-space:pre-line;word-break:break-word;}
+  .pv-imgs{display:grid;gap:8px;margin-top:14px;}
+  .pv-imgs img{width:100%;border-radius:12px;background:#F2F2F2;}
+  .pv-acts{display:flex;align-items:center;gap:10px;margin-top:18px;padding-bottom:16px;border-bottom:1px solid var(--line);font-size:14px;color:var(--sub);}
+  .pv-like{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:18px;border:1.5px solid var(--line);font-size:14px;font-weight:700;color:var(--sub);}
+  .pv-like.on{border-color:var(--danger);color:var(--danger);background:#FFF0EF;}
+  .pv-like.on .ico{fill:currentColor;}
+  .pv-acts .views{margin-left:auto;}
+  .cmts h2{font-size:16px;font-weight:800;margin:18px 0 4px;}
+  .cmt{display:flex;gap:10px;padding:12px 0;}
+  .cmt .pv-av{width:34px;height:34px;}
+  .cmt-main{flex:1;min-width:0;}
+  .cmt-top{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--hint);}
+  .cmt-top b{font-size:14px;color:var(--text);}
+  .cmt-top .me{font-size:11px;font-weight:700;color:#8A6400;background:var(--primary-light);border-radius:5px;padding:1px 5px;}
+  .cmt-top button{margin-left:auto;font-size:12px;color:var(--hint);padding:4px;}
+  .cmt-body{margin-top:3px;font-size:15px;line-height:1.55;white-space:pre-line;word-break:break-word;}
+  .composer{position:fixed;left:0;right:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));z-index:25;max-width:var(--app-w);margin:0 auto;
+    display:flex;gap:8px;align-items:flex-end;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface);}
+  .composer textarea{flex:1;min-height:44px;max-height:120px;padding:11px 16px;border-radius:22px;border:1.5px solid var(--line);resize:none;font-size:16px;line-height:1.4;}
+  .composer textarea:focus{outline:none;border-color:var(--primary);}
+  .composer button{height:44px;padding:0 16px;border-radius:22px;background:var(--primary);font-size:15px;font-weight:800;flex-shrink:0;}
+  .composer button:disabled{background:#E5E5E5;color:#AAA;}
+  .pv-pad{height:96px;}
+  /* 글쓰기 */
+  .wr-topics{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .wr-text{width:100%;min-height:220px;margin-top:14px;padding:14px 16px;border:1.5px solid var(--line);border-radius:14px;font-size:17px;line-height:1.6;resize:vertical;}
+  .wr-text:focus{outline:none;border-color:var(--primary);}
+  .wr-count{text-align:right;font-size:12px;color:var(--hint);margin-top:4px;}
+  .wr-photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .wr-photos .ph{position:relative;width:76px;height:76px;border-radius:10px;overflow:hidden;background:#F2F2F2;}
+  .wr-photos .ph img{width:100%;height:100%;object-fit:cover;}
+  .wr-photos .ph button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px;}
+  .wr-photos .add{width:76px;height:76px;border-radius:10px;border:1.5px dashed #CCC;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;color:var(--sub);}
+  .wr-where{margin-top:14px;font-size:14px;color:var(--sub);}
+  .wr-where a{text-decoration:underline;}
+  .wr-tips{margin-top:14px;padding:12px 14px;border-radius:12px;background:#F7F8FA;font-size:13px;color:var(--sub);line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar" id="topbar" hidden>
+    <a class="back" href="/community" id="back" aria-label="이야기로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1 id="head">이야기</h1>
+  </header>
+  <main class="page" id="body"></main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  PS.renderTabbar('community');
+  var body = document.getElementById('body');
+  var T = PS.COMMUNITY_TOPICS;
+  var path = location.pathname;
+  var isWrite = /^\/community\/write/.test(path) || PS.param('write') === '1';
+  var id = isWrite ? null : PS.idFromUrl('community');
+
+  if (isWrite) writePage(PS.param('id'));
+  else if (id) postPage(id);
+  else listPage();
+
+  function topbar(title, back) {
+    document.getElementById('topbar').hidden = false;
+    document.getElementById('head').textContent = title;
+    if (back) document.getElementById('back').href = back;
+  }
+  function avatar(p) { return '<div class="pv-av">' + PS.avatarHtml(p && p.avatar_url) + '</div>'; }
+
+  // ---------------- 목록 ----------------
+  async function listPage() {
+    var st = { topic: PS.param('topic') || '', mine: PS.param('mine') === '1', town: false, offset: 0 };
+    var home = PS.getHome();
+    try { st.town = localStorage.getItem('ps_cm_town') === '1' && !!home; } catch (e) {}
+    var PAGE = 30;
+    body.innerHTML =
+      '<div class="cm-head"><h1>' + (st.mine ? '내 이야기' : '이야기') + '</h1>' + (st.mine ? '<a href="/community">전체 보기 ›</a>' : '<a href="/community?mine=1">내 글</a>') + '</div>' +
+      '<div class="chips" id="cmTopics" role="group" aria-label="주제">' + [''].concat(Object.keys(T)).map(function (k) {
+        return '<button type="button" class="chip' + (k === st.topic ? ' on' : '') + '" data-t="' + k + '" aria-pressed="' + (k === st.topic) + '">' + (k ? T[k] : '전체') + '</button>';
+      }).join('') + '</div>' +
+      (st.mine ? '' : '<div class="cm-town">' + (home ? '<span>내 동네 <b>' + PS.esc(PS.townKey(home.region)) + '</b></span><label><input type="checkbox" id="cmTown"' + (st.town ? ' checked' : '') + '> 내 동네 글만</label>'
+        : '<span>내 동네를 정하면 가까운 이웃 글만 볼 수 있어요</span><a href="/neighborhood?next=/community" style="margin-left:auto;text-decoration:underline">동네 정하기</a>') + '</div>') +
+      '<div class="list" id="cmList"></div>' +
+      '<div class="more" id="cmMore" hidden><button class="btn white small" type="button">더 보기</button></div>' +
+      '<a class="cm-write" href="/community/write">' + PS.icon('plus', 20) + ' 글쓰기</a>';
+    var $ = function (x) { return document.getElementById(x); };
+    $('cmTopics').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-t]'); if (!b) return;
+      st.topic = b.dataset.t;
+      $('cmTopics').querySelectorAll('.chip').forEach(function (c) { var on = c === b; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on); });
+      load(true);
+    });
+    if ($('cmTown')) $('cmTown').addEventListener('change', function () {
+      st.town = this.checked;
+      try { localStorage.setItem('ps_cm_town', st.town ? '1' : '0'); } catch (e) {}
+      load(true);
+    });
+    $('cmMore').querySelector('button').addEventListener('click', function () { load(false); });
+
+    if (st.mine) { var user = await PS.ready; if (!user) return PS.goLogin(); }
+
+    var seq = 0;
+    async function load(reset) {
+      if (reset) {
+        st.offset = 0;
+        $('cmList').innerHTML = Array(4).join('.').split('.').map(function () {
+          return '<div class="cm-row"><div style="flex:1"><div class="skeleton" style="height:16px;width:60px"></div><div class="skeleton" style="height:18px;margin-top:8px"></div><div class="skeleton" style="height:14px;width:50%;margin-top:8px"></div></div></div>';
+        }).join('');
+      }
+      var my = ++seq;
+      var q = sb.from('story_posts').select(PS.COMMUNITY_POST_COLUMNS).order('created_at', { ascending: false });
+      q = st.mine ? q.eq('author_id', PS.user.id).neq('status', 'deleted') : q.eq('status', 'active');
+      if (st.topic) q = q.eq('topic', st.topic);
+      if (st.town && home) q = q.ilike('region', '%' + PS.townKey(home.region).replace(/[%_,()]/g, ' ') + '%');
+      var res = await q.range(st.offset, st.offset + PAGE - 1);
+      if (my !== seq) return;
+      if (res.error) {
+        $('cmList').innerHTML = '<div class="empty">' + PS.sticker('working', 100) + '<b>이야기를 준비 중이에요</b>잠시 후 다시 들어와 주세요</div>';
+        $('cmMore').hidden = true; return;
+      }
+      var rows = res.data || [];
+      var names = await PS.publicProfiles(rows.map(function (p) { return p.author_id; }));
+      if (my !== seq) return;
+      if (reset) $('cmList').innerHTML = '';
+      if (reset && !rows.length) {
+        $('cmList').innerHTML = '<div class="empty">' + PS.sticker('hello', 110) + '<b>' + (st.mine ? '아직 쓴 글이 없어요' : '아직 이야기가 없어요') + '</b>' +
+          (st.mine ? '궁금한 걸 편하게 물어보세요' : '첫 이야기를 남겨 보세요. 장비 질문, 현장 이야기 뭐든 좋아요') + '</div>';
+      }
+      $('cmList').insertAdjacentHTML('beforeend', rows.map(function (p) {
+        var html = PS.communityRowHtml(p, names);
+        return p.status === 'hidden' ? html.replace('<span class="cm-topic">', '<span class="cm-topic" style="background:#FFF0EF;color:var(--danger)">신고로 숨겨짐</span> <span class="cm-topic">') : html;
+      }).join(''));
+      st.offset += rows.length;
+      $('cmMore').hidden = rows.length < PAGE;
+    }
+    load(true);
+  }
+
+  // ---------------- 글 보기 ----------------
+  async function postPage(id) {
+    topbar('이야기', '/community');
+    if (!/^\d+$/.test(id)) return notFound();
+    var user = await PS.ready;
+    var res = await sb.from('story_posts').select(PS.COMMUNITY_POST_COLUMNS).eq('id', id).maybeSingle();
+    var p = res.data;
+    if (!p || p.status === 'deleted') return notFound();
+    PS.fire(sb.rpc('story_view', { p_id: Number(id) }));
+    var mine = user && user.id === p.author_id;
+    var liked = false;
+    if (user) {
+      var lk = await sb.from('story_likes').select('post_id').eq('post_id', id).eq('profile_id', user.id).maybeSingle();
+      liked = !!lk.data;
+    }
+    var people = await PS.publicProfiles([p.author_id]);
+    var author = people[p.author_id] || {};
+    var preview = String(p.body).replace(/\s+/g, ' ').slice(0, 40);
+    document.title = preview + ' - 판다산다 이야기';
+    var imgs = Array.isArray(p.images) ? p.images : [];
+    body.innerHTML =
+      (p.status === 'hidden' ? '<div class="trust-warn" style="margin-top:12px"><b>신고가 쌓여 숨겨진 글이에요</b>글쓴이에게만 보여요.</div>' : '') +
+      '<div class="pv-author">' + avatar(author) + '<div style="min-width:0"><b>' + PS.esc(author.name || '이웃') + '</b>' +
+        '<span>' + PS.esc([p.region ? PS.townKey(p.region) : '', PS.ago(p.created_at), p.updated_at && new Date(p.updated_at) - new Date(p.created_at) > 60000 ? '수정됨' : ''].filter(Boolean).join(' · ')) + '</span></div>' +
+        '<button type="button" class="pv-menu" id="pvMenu" aria-label="더보기">⋯</button></div>' +
+      '<span class="cm-topic" style="display:inline-block;margin-top:14px">' + PS.esc(T[p.topic] || '') + '</span>' +
+      '<div class="pv-body">' + PS.esc(p.body) + '</div>' +
+      (imgs.length ? '<div class="pv-imgs">' + imgs.map(function (u) { return '<img src="' + PS.esc(u) + '" alt="" loading="lazy">'; }).join('') + '</div>' : '') +
+      '<div class="pv-acts"><button type="button" class="pv-like' + (liked ? ' on' : '') + '" id="pvLike" aria-pressed="' + liked + '">' + PS.icon('heart', 16) + ' 공감 <span id="pvLikeN">' + (p.like_count || '') + '</span></button>' +
+        '<span class="views">조회 ' + ((p.view_count || 0) + 1) + '</span></div>' +
+      '<section class="cmts"><h2>댓글 <span id="cmtN">' + (p.comment_count || '') + '</span></h2><div id="cmtList"></div></section>' +
+      '<div class="pv-pad"></div>' +
+      '<form class="composer" id="cmtForm"><textarea id="cmtText" rows="1" maxlength="1000" placeholder="' + (user ? '따뜻한 댓글을 남겨 주세요' : '로그인하고 댓글을 남겨 보세요') + '" aria-label="댓글"></textarea>' +
+        '<button type="submit" id="cmtSend" disabled>등록</button></form>';
+    var $ = function (x) { return document.getElementById(x); };
+
+    // 공감
+    $('pvLike').addEventListener('click', async function () {
+      if (!PS.requireLogin()) return;
+      var b = this; b.disabled = true;
+      var on = !b.classList.contains('on');
+      var r = on ? await sb.from('story_likes').insert({ post_id: Number(id), profile_id: PS.user.id })
+        : await sb.from('story_likes').delete().eq('post_id', id).eq('profile_id', PS.user.id);
+      b.disabled = false;
+      if (r.error && !(on && r.error.code === '23505')) { PS.toast('잠시 후 다시 눌러 주세요'); return; }
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+      var n = Number($('pvLikeN').textContent || 0) + (on ? 1 : -1);
+      $('pvLikeN').textContent = n > 0 ? n : '';
+    });
+
+    // 더보기: 내 글이면 수정·삭제, 아니면 신고
+    $('pvMenu').addEventListener('click', function () {
+      if (mine) {
+        sheet('<h3 style="font-size:18px;font-weight:800">내 글</h3>' +
+          '<a class="btn white" href="/community/write?id=' + p.id + '" style="margin-top:14px">수정하기</a>' +
+          '<button type="button" class="btn danger" id="shDel" style="margin-top:10px">삭제하기</button>');
+        document.getElementById('shDel').onclick = async function () {
+          if (!confirm('이 글을 삭제할까요? 댓글도 함께 보이지 않게 돼요.')) return;
+          var r = await sb.from('story_posts').update({ status: 'deleted' }).eq('id', p.id);
+          if (r.error) { PS.toast('삭제하지 못했어요'); return; }
+          location.replace('/community?mine=1');
+        };
+      } else report({ post_id: p.id });
+    });
+
+    // 댓글
+    var names = {};
+    async function loadComments() {
+      var r = await sb.from('story_comments').select('id,author_id,body,created_at').eq('post_id', id).order('created_at', { ascending: true }).limit(300);
+      var rows = r.data || [];
+      Object.assign(names, await PS.publicProfiles(rows.map(function (c) { return c.author_id; })));
+      $('cmtN').textContent = rows.length || '';
+      $('cmtList').innerHTML = rows.length ? rows.map(function (c) {
+        var who = names[c.author_id] || {};
+        var isMe = user && c.author_id === user.id;
+        return '<div class="cmt">' + avatar(who) + '<div class="cmt-main"><div class="cmt-top"><b>' + PS.esc(who.name || '이웃') + '</b>' +
+          (c.author_id === p.author_id ? '<span class="me">글쓴이</span>' : '') + '<span>' + PS.ago(c.created_at) + '</span>' +
+          '<button type="button" data-' + (isMe ? 'del' : 'rep') + '="' + c.id + '">' + (isMe ? '삭제' : '신고') + '</button></div>' +
+          '<div class="cmt-body">' + PS.esc(c.body) + '</div></div></div>';
+      }).join('') : '<p style="color:var(--hint);font-size:14px;padding:12px 0">첫 댓글을 남겨 보세요</p>';
+    }
+    loadComments();
+    $('cmtList').addEventListener('click', async function (e) {
+      var d = e.target.closest('[data-del]'), rp = e.target.closest('[data-rep]');
+      if (d) {
+        if (!confirm('댓글을 삭제할까요?')) return;
+        var r = await sb.from('story_comments').update({ status: 'deleted' }).eq('id', d.dataset.del);
+        if (r.error) { PS.toast('삭제하지 못했어요'); return; }
+        loadComments();
+      }
+      if (rp) report({ comment_id: Number(rp.dataset.rep) });
+    });
+    $('cmtText').addEventListener('focus', function () { if (!PS.user) PS.goLogin(); });
+    $('cmtText').addEventListener('input', function () {
+      this.style.height = 'auto'; this.style.height = Math.min(120, this.scrollHeight) + 'px';
+      $('cmtSend').disabled = !this.value.trim();
+    });
+    $('cmtForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (!PS.requireLogin()) return;
+      var text = $('cmtText').value.trim(); if (!text) return;
+      $('cmtSend').disabled = true;
+      var r = await sb.from('story_comments').insert({ post_id: Number(id), author_id: PS.user.id, body: text });
+      if (r.error) { $('cmtSend').disabled = false; PS.toast('댓글을 남기지 못했어요. 잠시 후 다시 해 주세요'); return; }
+      $('cmtText').value = ''; $('cmtText').style.height = '';
+      await loadComments();
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+  }
+
+  // 신고 (글 또는 댓글)
+  function report(target) {
+    if (!PS.requireLogin()) return;
+    var reasons = ['광고·홍보', '욕설·비방', '사기 의심', '도배·관계없는 글', '기타'];
+    sheet('<h3 style="font-size:18px;font-weight:800">신고하기</h3><p style="color:var(--sub);font-size:14px;margin-top:4px">여러 이웃이 신고하면 자동으로 숨겨져요.</p>' +
+      reasons.map(function (r, i) { return '<label style="display:flex;gap:8px;align-items:center;padding:10px 0;font-size:16px"><input type="radio" name="shR" value="' + r + '"' + (i ? '' : ' checked') + '>' + r + '</label>'; }).join('') +
+      '<button type="button" class="btn" id="shRep" style="margin-top:8px">신고하기</button>');
+    document.getElementById('shRep').onclick = async function () {
+      this.disabled = true;
+      var row = Object.assign({ reporter_id: PS.user.id, reason: (document.querySelector('input[name=shR]:checked') || {}).value }, target);
+      var r = await sb.from('story_reports').insert(row);
+      closeSheet();
+      PS.toast(r.error ? (r.error.code === '23505' ? '이미 신고했어요' : '신고하지 못했어요') : '신고했어요. 고마워요');
+    };
+  }
+
+  var sh = null, shBg = null;
+  function sheet(html) {
+    if (!sh) {
+      shBg = document.createElement('div'); shBg.className = 'sheet-bg';
+      sh = document.createElement('div'); sh.className = 'sheet'; sh.setAttribute('role', 'dialog');
+      document.body.appendChild(shBg); document.body.appendChild(sh);
+      shBg.addEventListener('click', closeSheet);
+    }
+    sh.innerHTML = '<div class="handle"></div>' + html;
+    shBg.classList.add('show'); sh.classList.add('show');
+  }
+  function closeSheet() { if (sh) { sh.classList.remove('show'); shBg.classList.remove('show'); } }
+
+  // ---------------- 글쓰기 / 수정 ----------------
+  async function writePage(editId) {
+    topbar(editId ? '글 수정' : '이야기 쓰기', editId ? '/community/' + editId : '/community');
+    var user = await PS.ready;
+    if (!user) return PS.goLogin();
+    var st = { topic: '', photos: [], kept: [] }; // photos: 새로 고른 {blob,url}, kept: 이미 올린 사진 주소
+    var post = null;
+    if (editId) {
+      var r = await sb.from('story_posts').select(PS.COMMUNITY_POST_COLUMNS).eq('id', editId).maybeSingle();
+      post = r.data;
+      if (!post || post.author_id !== user.id || post.status !== 'active') return notFound();
+      st.topic = post.topic; st.kept = Array.isArray(post.images) ? post.images.slice() : [];
+    }
+    var home = PS.getHome();
+    body.innerHTML =
+      '<div class="wr-topics" id="wrTopics" role="group" aria-label="주제">' + Object.keys(T).map(function (k) {
+        return '<button type="button" class="chip' + (k === st.topic ? ' on' : '') + '" data-t="' + k + '">' + T[k] + '</button>';
+      }).join('') + '</div>' +
+      '<textarea class="wr-text" id="wrText" maxlength="3000" placeholder="편하게 이야기해 주세요.\n\n예) 중고 컴프레셔 살 때 꼭 확인할 게 뭘까요?\n예) 오늘 현장에서 있었던 일\n예) 시흥 쪽 레이저 가공 잘하는 곳 소개해 주세요"></textarea>' +
+      '<div class="wr-count"><span id="wrN">0</span> / 3000</div>' +
+      '<div class="wr-photos" id="wrPhotos"></div>' +
+      '<input type="file" id="wrFile" accept="image/*" multiple hidden>' +
+      (editId ? '' : '<p class="wr-where">' + (home ? '<b>' + PS.esc(PS.townKey(home.region)) + '</b> 이웃에게 보여요 · ' : '동네를 정하지 않았어요 · ') + '<a href="/neighborhood?next=/community/write">동네 ' + (home ? '바꾸기' : '정하기') + '</a></p>') +
+      '<div class="wr-tips">서로 존중하는 말로 이야기해 주세요. 광고·욕설·개인정보(전화번호·계좌)는 신고로 숨겨질 수 있어요.</div>' +
+      '<button type="button" class="btn" id="wrSend" style="margin:18px 0 24px">' + (editId ? '수정 완료' : '올리기') + '</button>';
+    var $ = function (x) { return document.getElementById(x); };
+    if (post) $('wrText').value = post.body;
+    $('wrN').textContent = $('wrText').value.length;
+    $('wrText').addEventListener('input', function () { $('wrN').textContent = this.value.length; });
+    $('wrTopics').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-t]'); if (!b) return;
+      st.topic = b.dataset.t;
+      $('wrTopics').querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('on', c === b); });
+    });
+    function drawPhotos() {
+      var all = st.kept.map(function (u, i) { return { url: u, kept: i }; }).concat(st.photos.map(function (p, i) { return { url: p.url, fresh: i }; }));
+      $('wrPhotos').innerHTML = all.map(function (x) {
+        return '<div class="ph"><img src="' + PS.esc(x.url) + '" alt=""><button type="button" aria-label="사진 빼기" ' + (x.kept != null ? 'data-k="' + x.kept + '"' : 'data-f="' + x.fresh + '"') + '>✕</button></div>';
+      }).join('') + (all.length < 4 ? '<button type="button" class="add" id="wrAdd">' + PS.icon('camera', 22) + '<span>' + all.length + '/4</span></button>' : '');
+    }
+    drawPhotos();
+    $('wrPhotos').addEventListener('click', function (e) {
+      if (e.target.closest('#wrAdd')) return $('wrFile').click();
+      var k = e.target.closest('[data-k]'), f = e.target.closest('[data-f]');
+      if (k) st.kept.splice(Number(k.dataset.k), 1);
+      if (f) { URL.revokeObjectURL(st.photos[Number(f.dataset.f)].url); st.photos.splice(Number(f.dataset.f), 1); }
+      drawPhotos();
+    });
+    $('wrFile').addEventListener('change', async function () {
+      var files = Array.prototype.slice.call(this.files || []); this.value = '';
+      for (var i = 0; i < files.length && st.kept.length + st.photos.length < 4; i++) {
+        try { var blob = await resize(files[i], 1280, 0.85); st.photos.push({ blob: blob, url: URL.createObjectURL(blob) }); }
+        catch (err) { PS.toast('사진을 읽지 못했어요'); }
+      }
+      drawPhotos();
+    });
+
+    $('wrSend').addEventListener('click', async function () {
+      var text = $('wrText').value.trim();
+      if (!st.topic) { PS.toast('주제를 골라 주세요'); return; }
+      if (!text) { PS.toast('내용을 써 주세요'); return; }
+      var btn = this; btn.disabled = true; btn.textContent = '올리는 중…';
+      var postId = editId;
+      if (!editId) {
+        var ins = await sb.from('story_posts').insert({ author_id: user.id, topic: st.topic, body: text, region: home ? home.region : null }).select('id').single();
+        if (ins.error) { btn.disabled = false; btn.textContent = '올리기'; PS.toast(/row-level/.test(ins.error.message) ? '오늘은 글을 더 올릴 수 없어요' : '올리지 못했어요. 다시 눌러 주세요'); return; }
+        postId = ins.data.id;
+      }
+      var urls = st.kept.slice(), failed = 0;
+      for (var i = 0; i < st.photos.length; i++) {
+        try {
+          var path = user.id + '/community/' + postId + '/' + Date.now() + '-' + i + '.jpg';
+          var up = await sb.storage.from('product-images').upload(path, st.photos[i].blob, { contentType: 'image/jpeg' });
+          if (up.error) throw up.error;
+          urls.push(sb.storage.from('product-images').getPublicUrl(path).data.publicUrl);
+        } catch (err) { failed++; console.error('[이야기] 사진 올리기 실패', err); }
+      }
+      var upd = editId ? { topic: st.topic, body: text, images: urls } : { images: urls };
+      if (editId || urls.length) {
+        var u = await sb.from('story_posts').update(upd).eq('id', postId);
+        if (u.error) { btn.disabled = false; btn.textContent = editId ? '수정 완료' : '올리기'; PS.toast('저장하지 못했어요. 다시 눌러 주세요'); return; }
+      }
+      if (failed) PS.toast('사진 ' + failed + '장은 올리지 못했어요');
+      location.replace('/community/' + postId);
+    });
+  }
+
+  function resize(file, max, quality) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var s = Math.min(1, max / Math.max(img.width, img.height));
+        var c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { b ? resolve(b) : reject(new Error('toBlob')); }, 'image/jpeg', quality);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('read')); };
+      img.src = url;
+    });
+  }
+
+  function notFound() {
+    topbar('이야기', '/community');
+    body.innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>글을 찾을 수 없어요</b>삭제됐거나 숨겨진 글일 수 있어요</div><a class="btn white small" href="/community">이야기 목록 보기</a>';
+  }
+})();
+</script>
+</body>
+</html>
