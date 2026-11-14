@@ -254,8 +254,9 @@
       var d = e.target.closest('[data-del]'), rp = e.target.closest('[data-rep]');
       if (d) {
         if (!confirm('댓글을 삭제할까요?')) return;
-        var r = await sb.from('story_comments').update({ status: 'deleted' }).eq('id', d.dataset.del);
-        if (r.error) { PS.toast('삭제하지 못했어요'); return; }
+        var r = await sb.rpc('story_delete_comment', { p_id: Number(d.dataset.del) });
+        if (r.error || r.data !== 'ok') { PS.toast('삭제하지 못했어요. 잠시 후 다시 해 주세요'); return; }
+        PS.toast('댓글을 삭제했어요');
         loadComments();
       }
       if (rp) report({ comment_id: Number(rp.dataset.rep) });
