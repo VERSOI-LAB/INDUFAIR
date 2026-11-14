@@ -12,7 +12,12 @@
 <link rel="stylesheet" href="/app.css">
 <style>
   /* 목록 */
-  .chat-item{display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);}
+  .chat-row{position:relative;overflow:hidden;border-bottom:1px solid var(--line);}
+  .chat-row .leave{position:absolute;top:0;right:0;bottom:0;width:88px;background:var(--danger);color:#fff;font-size:16px;font-weight:800;}
+  .chat-item{position:relative;z-index:1;display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--surface);transition:transform .2s ease;touch-action:pan-y;user-select:none;-webkit-user-drag:none;}
+  .chat-item.dragging{transition:none;}
+  .chat-item img{-webkit-user-drag:none;pointer-events:none;}
+  .left-note{text-align:center;font-size:13px;color:var(--hint);margin:14px 0;}
   .chat-item:active{background:var(--bg);}
   .chat-item .avatar{width:52px;height:52px;border-radius:50%;background:var(--primary-light);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;overflow:hidden;}
   .chat-item .avatar img{width:100%;height:100%;object-fit:cover;}
@@ -101,13 +106,17 @@
 
   async function loadList() {
     var me = PS.user.id;
-    var listCols = 'id,buyer_id,seller_id,product_id,last_message,last_message_at,created_at,products(id,title,status,product_images(url,sort_order))';
+    var listCols = 'id,buyer_id,seller_id,product_id,buyer_left_at,seller_left_at,last_message,last_message_at,created_at,products(id,title,status,product_images(url,sort_order))';
     var listQuery = function (cols) {
       return sb.from('chats').select(cols).or('buyer_id.eq.' + me + ',seller_id.eq.' + me).order('last_message_at', { ascending: false, nullsFirst: false });
     };
     var res = await listQuery(listCols + ',business_id,businesses(id,name,tagline,business_images(url,sort_order))');
     if (res.error) res = await listQuery(listCols); // 업체 채팅 컬럼이 아직 없을 때
-    var chats = (res.data || []).filter(function (c) { return c.last_message || c.buyer_id === me; });
+    var chats = (res.data || []).filter(function (c) {
+      var left = c.buyer_id === me ? c.buyer_left_at : c.seller_left_at;
+      if (left && (!c.last_message_at || new Date(c.last_message_at) <= new Date(left))) return false; // 내가 나간 방 (새 메시지 없으면 숨김)
+      return c.last_message || c.buyer_id === me;
+    });
     var list = document.getElementById('list');
     if (!chats.length) {
       list.innerHTML = '<div class="empty">' + PS.icon3d('chat', 96) + '<b>아직 채팅이 없어요</b>마음에 드는 물건에서 채팅하기를 눌러 보세요<div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div></div>';
@@ -127,7 +136,7 @@
       var p = c.businesses ? { title: '🏢 ' + c.businesses.name, product_images: c.businesses.business_images } : direct ? { title: '💬 이야기에서 시작한 대화' } : (c.products || {});
       var img = PS.firstImage(p);
       var n = unread[c.id] || 0;
-      return '<a class="chat-item" href="/chat/' + c.id + '">' +
+      return '<div class="chat-row" data-id="' + c.id + '"><button type="button" class="leave" data-leave="' + c.id + '" tabindex="-1">나가기</button><a class="chat-item" href="/chat/' + c.id + '" draggable="false">' +
         '<div class="avatar">' + PS.avatarHtml(o.avatar_url) + '</div>' +
         '<div class="mid">' +
           '<div class="top"><span class="who">' + PS.esc(o.name || '이웃') + '</span><span class="when">' + (c.last_message_at ? PS.ago(c.last_message_at) : '') + '</span></div>' +
@@ -136,12 +145,71 @@
         '</div>' +
         (n ? '<span class="unread">' + n + '</span>' : '') +
         '<div class="thumb">' + (img ? '<img src="' + PS.esc(img) + '" alt="">' : '') + '</div>' +
-        '</a>';
+        '</a></div>';
     }).join('');
+    bindSwipe(list);
+  }
+
+  // 목록: 왼쪽으로 밀면 '나가기' 버튼 (휴대폰은 손가락, PC 는 마우스로 끌기)
+  var OPEN_X = -88;
+  function bindSwipe(list) {
+    if (list.dataset.swipe) return;
+    list.dataset.swipe = '1';
+    var drag = null, opened = null;
+    var setX = function (item, x) { item.style.transform = x ? 'translateX(' + x + 'px)' : ''; };
+    var closeOpened = function () { if (opened) { setX(opened, 0); opened = null; } };
+    list.addEventListener('pointerdown', function (e) {
+      var item = e.target.closest('.chat-item'); if (!item || e.button > 0) return;
+      if (opened && opened !== item) closeOpened();
+      drag = { item: item, x0: e.clientX, y0: e.clientY, base: item === opened ? OPEN_X : 0, dx: 0, moved: false, id: e.pointerId };
+    });
+    list.addEventListener('pointermove', function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+      if (!drag.moved) {
+        if (Math.abs(dx) < 8) return;
+        if (Math.abs(dy) > Math.abs(dx)) { drag = null; return; } // 세로 스크롤은 그대로
+        drag.moved = true; drag.item.classList.add('dragging');
+        try { drag.item.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+      drag.dx = dx;
+      setX(drag.item, Math.max(OPEN_X - 24, Math.min(0, drag.base + dx)));
+    });
+    var end = function () {
+      if (!drag) return;
+      var d = drag; drag = null;
+      d.item.classList.remove('dragging');
+      if (!d.moved) return;
+      d.item.dataset.swiped = '1'; // 끌고 난 뒤의 클릭은 채팅방으로 가지 않게
+      var x = d.base + d.dx;
+      if (x < OPEN_X / 2) { setX(d.item, OPEN_X); opened = d.item; } else { setX(d.item, 0); if (opened === d.item) opened = null; }
+    };
+    list.addEventListener('pointerup', end);
+    list.addEventListener('pointercancel', end);
+    list.addEventListener('click', async function (e) {
+      var item = e.target.closest('.chat-item');
+      if (item && (item.dataset.swiped || item === opened)) {
+        e.preventDefault();
+        if (!item.dataset.swiped) closeOpened(); // 열린 줄을 누르면 닫기만
+        delete item.dataset.swiped;
+        return;
+      }
+      var lv = e.target.closest('[data-leave]'); if (!lv) return;
+      if (!confirm('채팅방을 나갈까요?\n대화 내용이 내 목록에서 사라져요.')) return;
+      lv.disabled = true;
+      var r = await sb.rpc('leave_chat', { p_chat_id: lv.dataset.leave });
+      if (r.error || r.data !== 'ok') { lv.disabled = false; PS.toast('나가지 못했어요. 잠시 후 다시 해 주세요'); return; }
+      var row = lv.closest('.chat-row'); opened = null;
+      row.style.transition = 'opacity .2s'; row.style.opacity = '0';
+      setTimeout(function () { row.remove(); if (!list.querySelector('.chat-row')) loadList(); }, 200);
+      PS.toast('채팅방을 나갔어요');
+      if (PS.refreshChatDot) PS.refreshChatDot();
+    });
   }
 
   // ---------- 채팅방 ----------
   var messages = [];
+  var otherLeft = null; // 상대가 나간 시각
   var roomTop = ''; // 메시지 위에 고정으로 보이는 주의 표시·안전 수칙
 
   async function openRoom(id) {
@@ -158,7 +226,7 @@
     document.querySelector('.room .back').style.fontSize = '28px';
 
     var me = PS.user.id;
-    var roomCols = 'id,buyer_id,seller_id,product_id,products(id,title,price,status,product_images(url,sort_order))';
+    var roomCols = 'id,buyer_id,seller_id,product_id,buyer_left_at,seller_left_at,products(id,title,price,status,product_images(url,sort_order))';
     var res = await sb.from('chats').select(roomCols + ',business_id,businesses(id,name,tagline,business_images(url,sort_order))').eq('id', id).maybeSingle();
     if (res.error) res = await sb.from('chats').select(roomCols).eq('id', id).maybeSingle();
     if (!res.data) {
@@ -205,9 +273,19 @@
     acts.innerHTML = '<span class="trust-line">' + (PS.trustLine(trust) || '아직 받은 후기가 없어요') + '</span>' +
       (bz || direct ? '' : '<button type="button" id="reviewBtn"' + (reviewed ? ' disabled' : '') + '>' + (reviewed ? '후기 남김' : '거래 후기') + '</button>') +
       '<button type="button" class="report" id="blockBtn">' + (iBlocked ? '차단 풀기' : '차단') + '</button>' +
-      '<button type="button" class="report" id="reportBtn">신고</button>';
+      '<button type="button" class="report" id="reportBtn">신고</button>' +
+      '<button type="button" id="leaveBtn">나가기</button>';
     acts.addEventListener('click', function (e) {
       if (e.target.closest('#blockBtn')) PS.toggleBlock(otherId, otherName, function () { location.reload(); });
+      if (e.target.closest('#leaveBtn')) {
+        if (!confirm('채팅방을 나갈까요?\n대화 내용이 내 목록에서 사라져요.')) return;
+        sb.rpc('leave_chat', { p_chat_id: id }).then(function (r) {
+          if (r.error || r.data !== 'ok') { PS.toast('나가지 못했어요. 잠시 후 다시 해 주세요'); return; }
+          PS.toast('채팅방을 나갔어요');
+          location.replace('/chat');
+        });
+        return;
+      }
       if (e.target.closest('#reportBtn')) PS.openReport(otherId, { name: otherName, productId: chat.products && chat.products.id, chatId: id });
       var rb = e.target.closest('#reviewBtn');
       if (rb && !rb.disabled) PS.openReview({ chatId: id, name: otherName, onDone: function () { rb.disabled = true; rb.textContent = '후기 남김'; } });
@@ -240,7 +318,10 @@
     }
 
     var msgRes = await sb.from('messages').select('id,sender_id,message,read_at,created_at').eq('chat_id', id).order('created_at', { ascending: true }).limit(500);
-    messages = msgRes.data || [];
+    // 내가 예전에 나갔던 방이면 그 뒤 메시지만, 상대가 나갔으면 그 자리에 안내
+    var myLeft = chat.buyer_id === me ? chat.buyer_left_at : chat.seller_left_at;
+    otherLeft = chat.buyer_id === me ? chat.seller_left_at : chat.buyer_left_at;
+    messages = (msgRes.data || []).filter(function (m) { return !myLeft || new Date(m.created_at) > new Date(myLeft); });
     renderMessages(true);
     PS.fire(sb.rpc('mark_chat_read', { p_chat_id: id })).then(PS.refreshChatDot);
 
@@ -311,7 +392,9 @@
     messages.forEach(function (m, i) { if (m.sender_id === me && m.read_at) lastReadMine = i; });
     var html = roomTop ? '<div class="room-top">' + roomTop + '</div>' : '';
     var lastDay = '';
+    var leftNote = '<div class="left-note">상대방이 채팅방을 나갔어요</div>', leftShown = !otherLeft;
     messages.forEach(function (m, i) {
+      if (!leftShown && new Date(m.created_at) > new Date(otherLeft)) { html += leftNote; leftShown = true; }
       var d = new Date(m.created_at);
       var day = d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일';
       if (day !== lastDay) { html += '<div class="day">' + day + '</div>'; lastDay = day; }
@@ -324,6 +407,7 @@
       html += '<div class="msg' + (mine ? ' me' : '') + '"><div class="bubble">' + PS.esc(m.message) + warn + '</div>' +
         '<div class="side">' + status + '<span>' + timeLabel(m.created_at) + '</span></div></div>';
     });
+    if (!leftShown) html += leftNote;
     var nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
     box.innerHTML = html;
     if (scroll || nearBottom) box.scrollTop = box.scrollHeight;
