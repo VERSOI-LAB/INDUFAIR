@@ -90,12 +90,17 @@
         row('/keywords', 'tag', '키워드 알림 설정', '<span class="badge-n" id="kwBadge" hidden></span>') +
         row('/support', 'receipt', '정부 지원사업') +
         row('/events', 'receipt', '교육·세미나·행사') +
+      '</section>' +
+      '<section class="mcard"><h3>설정</h3>' +
+        '<button type="button" class="mrow" id="blocksBtn" style="width:100%;text-align:left">' + PS.icon('gear', 26) + '<span>차단한 사용자</span><span style="margin-left:auto;font-size:14px;color:var(--sub)" id="blocksN"></span><span class="go" style="margin-left:6px">' + PS.icon('chevron', 20) + '</span></button>' +
+        '<div id="blocksList" hidden></div>' +
       '</section>';
     // "내 동네" 글자가 있으면 화살표와 겹치지 않게
     main.querySelectorAll('.mrow span[style*="margin-left:auto"] + .go').forEach(function (g) { g.style.marginLeft = '6px'; });
     loadKeywordBadge();
     loadPaySeller();
     loadStoryAdmin();
+    loadBlocks();
   });
 
   // 사업자 인증을 했는데 정산 계좌가 없으면 등록 안내. 안전결제 판매자 상태 표시
@@ -118,6 +123,30 @@
     document.getElementById('payoutBtn').addEventListener('click', function () {
       PS.openPayoutAccount({ onSaved: function () { box.innerHTML = ''; if (v.pay_status === 'none' || v.pay_status === 'rejected') location.href = '/pay-seller'; } });
     });
+  }
+
+  // 차단한 사용자: 수 표시, 누르면 목록 펼치고 '차단 풀기'
+  async function loadBlocks() {
+    var r = await sb.from('user_blocks').select('blocked_id,created_at').order('created_at', { ascending: false });
+    var rows = r.error ? [] : (r.data || []);
+    var n = document.getElementById('blocksN'); if (n) n.textContent = rows.length ? rows.length + '명' : '';
+    var box = document.getElementById('blocksList');
+    var people = await PS.publicProfiles(rows.map(function (b) { return b.blocked_id; }));
+    box.innerHTML = rows.length ? rows.map(function (b) {
+      var o = people[b.blocked_id] || {};
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 4px">' +
+        '<a href="' + PS.profileUrl(b.blocked_id) + '" style="flex:1;min-width:0;font-size:16px;font-weight:700">' + PS.esc(o.name || '이웃') + '</a>' +
+        '<button type="button" class="btn white small" data-unblock="' + b.blocked_id + '" style="width:auto;padding:0 14px">차단 풀기</button></div>';
+    }).join('') : '<p style="color:var(--sub);font-size:14px;padding:10px 4px">차단한 사용자가 없어요</p>';
+    document.getElementById('blocksBtn').onclick = function () { box.hidden = !box.hidden; };
+    box.onclick = async function (e) {
+      var u = e.target.closest('[data-unblock]'); if (!u) return;
+      u.disabled = true;
+      var d = await sb.from('user_blocks').delete().eq('blocker_id', PS.user.id).eq('blocked_id', u.dataset.unblock);
+      if (d.error) { u.disabled = false; PS.toast('잠시 후 다시 해 주세요'); return; }
+      PS.toast('차단을 풀었어요');
+      await loadBlocks(); box.hidden = false;
+    };
   }
 
   // 운영자: 이야기 신고 검토 메뉴 + 처리할 신고 수

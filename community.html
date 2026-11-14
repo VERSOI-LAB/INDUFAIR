@@ -50,6 +50,11 @@
   .cmt-top b{font-size:14px;color:var(--text);}
   .cmt-top .me{font-size:11px;font-weight:700;color:#8A6400;background:var(--primary-light);border-radius:5px;padding:1px 5px;}
   .cmt-top button{margin-left:auto;font-size:12px;color:var(--hint);padding:4px;}
+  .who-btn{display:flex;align-items:center;gap:10px;min-width:0;text-align:left;}
+  .cmt .who-btn{gap:0;align-self:flex-start;}
+  .cmt-top .who-name{font-size:14px;font-weight:700;color:var(--text);margin:0;padding:0;}
+  .us-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .us-row b{font-size:18px;font-weight:800;}
   .cmt-body{margin-top:3px;font-size:15px;line-height:1.55;white-space:pre-line;word-break:break-word;}
   .composer{position:fixed;left:0;right:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));z-index:25;max-width:var(--app-w);margin:0 auto;
     display:flex;gap:8px;align-items:flex-end;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface);}
@@ -85,6 +90,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/js/supabase-client.js"></script>
 <script src="/js/app.js"></script>
+<script src="/js/people.js"></script>
 <script>
 (function () {
   PS.renderTabbar('community');
@@ -225,6 +231,9 @@
         $('cmMore').hidden = true; return;
       }
       var rows = res.data || [];
+      var got = rows.length;
+      var blocks = await PS.myBlocks();
+      rows = rows.filter(function (p) { return !blocks[p.author_id]; }); // 차단한 사람 글은 안 보임
       var names = await PS.publicProfiles(rows.map(function (p) { return p.author_id; }));
       if (my !== seq) return;
       if (reset) $('cmList').innerHTML = '';
@@ -236,8 +245,8 @@
         var html = PS.communityRowHtml(p, names);
         return p.status === 'hidden' ? html.replace('<span class="cm-topic">', '<span class="cm-topic" style="background:#FFF0EF;color:var(--danger)">신고로 숨겨짐</span> <span class="cm-topic">') : html;
       }).join(''));
-      st.offset += rows.length;
-      $('cmMore').hidden = rows.length < PAGE;
+      st.offset += got;
+      $('cmMore').hidden = got < PAGE;
     }
     load(true);
   }
@@ -259,13 +268,15 @@
     }
     var people = await PS.publicProfiles([p.author_id]);
     var author = people[p.author_id] || {};
+    var blockedAuthor = await PS.isBlocked(p.author_id);
     var preview = String(p.body).replace(/\s+/g, ' ').slice(0, 40);
     document.title = preview + ' - 판다산다 이야기';
     var imgs = Array.isArray(p.images) ? p.images : [];
     body.innerHTML =
       (p.status === 'hidden' ? '<div class="trust-warn" style="margin-top:12px"><b>신고가 쌓여 숨겨진 글이에요</b>글쓴이에게만 보여요.</div>' : '') +
-      '<div class="pv-author">' + avatar(author) + '<div style="min-width:0"><b>' + PS.esc(author.name || '이웃') + '</b>' +
-        '<span>' + PS.esc([p.region ? PS.townKey(p.region) : '', PS.ago(p.created_at), p.updated_at && new Date(p.updated_at) - new Date(p.created_at) > 60000 ? '수정됨' : ''].filter(Boolean).join(' · ')) + '</span></div>' +
+      (!mine && blockedAuthor ? '<div class="trust-warn" style="margin-top:12px"><b>차단한 사용자의 글이에요</b>프로필을 눌러 차단을 풀 수 있어요.</div>' : '') +
+      '<div class="pv-author"><button type="button" class="who-btn" data-who="' + p.author_id + '" aria-label="' + PS.esc(author.name || '이웃') + ' 프로필 메뉴">' + avatar(author) + '<div style="min-width:0"><b>' + PS.esc(author.name || '이웃') + '</b>' +
+        '<span>' + PS.esc([p.region ? PS.townKey(p.region) : '', PS.ago(p.created_at), p.updated_at && new Date(p.updated_at) - new Date(p.created_at) > 60000 ? '수정됨' : ''].filter(Boolean).join(' · ')) + '</span></div></button>' +
         '<button type="button" class="pv-menu" id="pvMenu" aria-label="더보기">⋯</button></div>' +
       '<span class="cm-topic" style="display:inline-block;margin-top:14px">' + PS.esc(T[p.topic] || '') + '</span>' +
       '<div class="pv-body">' + PS.esc(p.body) + '</div>' +
@@ -293,6 +304,14 @@
       $('pvLikeN').textContent = n > 0 ? n : '';
     });
 
+    // 프로필(사진·이름)을 누르면: 프로필 보기 / 채팅하기 / 차단
+    body.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-who]'); if (!b) return;
+      var uid = b.dataset.who;
+      var who = names[uid] || people[uid] || {};
+      userSheet(uid, who);
+    });
+
     // 더보기: 내 글이면 수정·삭제, 아니면 신고
     $('pvMenu').addEventListener('click', function () {
       if (mine) {
@@ -312,13 +331,15 @@
     var names = {};
     async function loadComments() {
       var r = await sb.from('story_comments').select('id,author_id,body,created_at').eq('post_id', id).order('created_at', { ascending: true }).limit(300);
-      var rows = r.data || [];
+      var blocks = await PS.myBlocks();
+      var rows = (r.data || []).filter(function (c) { return !blocks[c.author_id]; }); // 차단한 사람 댓글은 안 보임
       Object.assign(names, await PS.publicProfiles(rows.map(function (c) { return c.author_id; })));
       $('cmtN').textContent = rows.length || '';
       $('cmtList').innerHTML = rows.length ? rows.map(function (c) {
         var who = names[c.author_id] || {};
         var isMe = user && c.author_id === user.id;
-        return '<div class="cmt">' + avatar(who) + '<div class="cmt-main"><div class="cmt-top"><b>' + PS.esc(who.name || '이웃') + '</b>' +
+        var whoBtn = function (inner, cls) { return '<button type="button" class="' + cls + '" data-who="' + c.author_id + '" aria-label="' + PS.esc(who.name || '이웃') + ' 프로필 메뉴">' + inner + '</button>'; };
+        return '<div class="cmt">' + whoBtn(avatar(who), 'who-btn') + '<div class="cmt-main"><div class="cmt-top">' + whoBtn('<b>' + PS.esc(who.name || '이웃') + '</b>', 'who-name') +
           (c.author_id === p.author_id ? '<span class="me">글쓴이</span>' : '') + '<span>' + PS.ago(c.created_at) + '</span>' +
           '<button type="button" data-' + (isMe ? 'del' : 'rep') + '="' + c.id + '">' + (isMe ? '삭제' : '신고') + '</button></div>' +
           '<div class="cmt-body">' + PS.esc(c.body) + '</div></div></div>';
@@ -381,6 +402,24 @@
       await loadComments();
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
+  }
+
+  // 사람 메뉴: 프로필 보기, 채팅하기, 차단하기/풀기
+  async function userSheet(uid, who) {
+    var name = who.name || '이웃';
+    var isMe = PS.user && PS.user.id === uid;
+    var blocked = !isMe && await PS.isBlocked(uid);
+    sheet('<div class="us-row"><div class="pv-av">' + PS.avatarHtml(who.avatar_url) + '</div><b>' + PS.esc(name) + '</b></div>' +
+      '<a class="btn white" href="' + PS.profileUrl(uid) + '">프로필 보기</a>' +
+      (isMe ? '' :
+        (blocked ? '' : '<button type="button" class="btn" id="usChat" style="margin-top:10px">' + PS.icon('chat', 20) + ' 채팅하기</button>') +
+        '<button type="button" class="btn white" id="usBlock" style="margin-top:10px;color:' + (blocked ? 'var(--text)' : 'var(--danger)') + '">' + (blocked ? '차단 풀기' : '차단하기') + '</button>'));
+    var c = document.getElementById('usChat');
+    if (c) c.onclick = function () { c.disabled = true; PS.startDirectChat(uid).then(function () { c.disabled = false; }); };
+    var bl = document.getElementById('usBlock');
+    if (bl) bl.onclick = function () {
+      PS.toggleBlock(uid, name, function () { closeSheet(); location.reload(); });
+    };
   }
 
   // 신고 (글 또는 댓글)
