@@ -1,4 +1,4 @@
-// /product/:id, /biz/:id, /support/:id, /events/:id — 검색 로봇과 공유 미리보기가 읽을 수 있게 제목·설명·사진을 html 에 미리 채워 내려준다.
+// /product/:id, /biz/:id, /support/:id, /events/:id, /community/:id — 검색 로봇과 공유 미리보기가 읽을 수 있게 제목·설명·사진을 html 에 미리 채워 내려준다.
 // 화면 자체는 기존처럼 product.html / business.html 의 스크립트가 다시 그린다.
 var L = require('./_lib');
 
@@ -136,6 +136,36 @@ function eventView(e) {
   };
 }
 
+var TOPICS = { question: '궁금해요', daily: '일상·잡담', seek: '구해요·소개해요', tip: '정보·노하우' }; // js/app.js 의 PS.COMMUNITY_TOPICS 와 같게
+
+async function loadCommunity(id) {
+  var rows = await L.rest('story_posts?id=eq.' + id + '&status=eq.active&select=id,topic,body,images,region,like_count,comment_count,created_at,updated_at');
+  return rows && rows[0] || null;
+}
+
+function communityView(p) {
+  var url = L.SITE + '/community/' + p.id;
+  var topic = TOPICS[p.topic] || '이야기';
+  var imgs = Array.isArray(p.images) ? p.images : [];
+  var headline = L.clip(String(p.body).split('\n')[0], 60);
+  var ld = {
+    '@context': 'https://schema.org', '@type': 'DiscussionForumPosting', headline: headline, url: url,
+    text: L.clip(p.body, 1000), datePublished: p.created_at, dateModified: p.updated_at || p.created_at,
+    interactionStatistic: [
+      { '@type': 'InteractionCounter', interactionType: 'https://schema.org/LikeAction', userInteractionCount: p.like_count || 0 },
+      { '@type': 'InteractionCounter', interactionType: 'https://schema.org/CommentAction', userInteractionCount: p.comment_count || 0 }
+    ]
+  };
+  if (imgs.length) ld.image = imgs;
+  return {
+    title: headline + ' - 판다산다 이야기', desc: L.clip(topic + ' · ' + p.body, 160),
+    url: url, image: imgs[0] || '', ogType: 'article', ld: ld, slider: '',
+    body: '<span class="cm-topic" style="display:inline-block;margin-top:14px">' + L.esc(topic) + '</span>' +
+      '<div class="pv-body">' + L.esc(p.body) + '</div>' +
+      imgs.map(function (u) { return '<img src="' + L.esc(u) + '" alt="" style="width:100%;border-radius:12px;margin-top:8px">'; }).join('')
+  };
+}
+
 function head(v) {
   return '<title>' + L.esc(v.title) + '</title>\n' +
     '<meta name="description" content="' + L.esc(v.desc) + '">\n' +
@@ -155,14 +185,15 @@ function swap(html, re, to) {
 }
 
 module.exports = async function (req, res) {
-  var type = ['biz', 'support', 'event'].indexOf(req.query.type) !== -1 ? req.query.type : 'product';
+  var type = ['biz', 'support', 'event', 'community'].indexOf(req.query.type) !== -1 ? req.query.type : 'product';
   var id = String(req.query.id || '');
-  var html = await L.template({ biz: 'business', support: 'support', event: 'support', product: 'product' }[type], req);
+  var html = await L.template({ biz: 'business', support: 'support', event: 'support', community: 'community', product: 'product' }[type], req);
   if (!html) { res.status(500).send('template missing'); return; }
 
   var numeric = /^\d{1,18}$/.test(id);
   var row = type === 'support' ? (numeric ? await loadSupport(id) : null)
     : type === 'event' ? (numeric ? await loadEvent(id) : null)
+    : type === 'community' ? (numeric ? await loadCommunity(id) : null)
     : UUID.test(id) ? await (type === 'biz' ? loadBusiness(id) : loadProduct(id)) : null;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
@@ -173,7 +204,7 @@ module.exports = async function (req, res) {
     return;
   }
 
-  var v = type === 'biz' ? businessView(row) : type === 'support' ? supportView(row) : type === 'event' ? eventView(row) : productView(row);
+  var v = type === 'biz' ? businessView(row) : type === 'support' ? supportView(row) : type === 'event' ? eventView(row) : type === 'community' ? communityView(row) : productView(row);
   html = swap(html, /<title>[^<]*<\/title>/, head(v));
   if (v.slider) html = swap(html, /(<div class="slider" id="slider">)[\s\S]*?(<\/div>\s*<div class="dots")/, '<div class="slider" id="slider">' + v.slider + '</div>\n    <div class="dots"');
   html = swap(html, /<main class="page" id="body"><\/main>/, '<main class="page" id="body">' + v.body + '</main>');
