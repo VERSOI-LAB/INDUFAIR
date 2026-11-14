@@ -38,11 +38,15 @@ function period(text: string | null) {
   return { start: found[0] || null, end: found.length > 1 ? found[found.length - 1] : null };
 }
 
-function regionOf(tags: string | null) {
-  const list = String(tags || "").split(/[,#\s]+/).filter(Boolean);
-  // 예전 표기("광주", "전남")도 같은 지역으로
-  if (list.some((t) => t === "광주" || t === "전남")) return "전남광주";
-  return REGIONS.find((r) => list.includes(r)) || "전국";
+// 지역 정하기: ① 제목 앞 "[울산]" ② 지역 해시태그가 딱 하나일 때 그 지역 ③ 그 밖(태그 없음·여러 지역)은 전국
+//   전국 사업은 해시태그에 16개 지역이 모두 붙어 오므로 첫 번째 태그를 쓰면 안 됨
+const toRegion = (t: string) => (t === "광주" || t === "전남" || t.startsWith("전남광주") ? "전남광주" : REGIONS.includes(t) ? t : null);
+function regionOf(tags: string | null, title = "") {
+  const head = title.match(/^\s*\[([^\]]+)\]/);
+  const fromTitle = head ? toRegion(head[1].trim()) : null;
+  if (fromTitle) return fromTitle;
+  const found = new Set(String(tags || "").split(/[,#\s]+/).map((t) => toRegion(t)).filter(Boolean));
+  return found.size === 1 ? [...found][0] as string : "전국";
 }
 
 function toRow(it: Item) {
@@ -62,7 +66,7 @@ function toRow(it: Item) {
     source: "bizinfo", external_id: id, title,
     agency: str(it.jrsdInsttNm ?? it.author, 200), executor: str(it.excInsttNm, 200),
     category: str(it.pldirSportRealmLclasCodeNm ?? it.lcategory, 50),
-    region: regionOf(tags), target: str(it.trgetNm, 500),
+    region: regionOf(tags, title), target: str(it.trgetNm, 500),
     summary: plain(it.bsnsSumryCn ?? it.description, 2000), hashtags: tags,
     apply_text: applyText, apply_start: p.start, apply_end: p.end,
     url, posted_at: postedAt, updated_at: new Date().toISOString(),
