@@ -146,7 +146,8 @@ async function loadCommunity(id) {
 function communityView(p) {
   var url = L.SITE + '/community/' + p.id;
   var topic = TOPICS[p.topic] || '이야기';
-  var imgs = Array.isArray(p.images) ? p.images : [];
+  // 사이트 안 사진(/이미지/...)도 검색·공유 미리보기에서 열리게 전체 주소로
+  var imgs = (Array.isArray(p.images) ? p.images : []).map(function (u) { return L.absUrl(u); });
   var headline = L.clip(String(p.body).split('\n')[0], 60);
   var ld = {
     '@context': 'https://schema.org', '@type': 'DiscussionForumPosting', headline: headline, url: url,
@@ -162,7 +163,7 @@ function communityView(p) {
     url: url, image: imgs[0] || '', ogType: 'article', ld: ld, slider: '',
     body: '<span class="cm-topic" style="display:inline-block;margin-top:14px">' + L.esc(topic) + '</span>' +
       '<div class="pv-body">' + L.esc(p.body) + '</div>' +
-      imgs.map(function (u) { return '<img src="' + L.esc(u) + '" alt="" style="width:100%;border-radius:12px;margin-top:8px">'; }).join('')
+      (imgs.length ? '<div class="pv-imgs">' + imgs.map(function (u) { return '<a href="' + L.esc(u) + '"><img src="' + L.esc(u) + '" alt=""></a>'; }).join('') + '</div>' : '')
   };
 }
 

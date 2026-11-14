@@ -30,7 +30,13 @@
   .pv-menu{margin-left:auto;width:40px;height:40px;border-radius:50%;font-size:20px;color:var(--sub);}
   .pv-body{margin-top:16px;font-size:17px;line-height:1.7;white-space:pre-line;word-break:break-word;}
   .pv-imgs{display:grid;gap:8px;margin-top:14px;}
-  .pv-imgs img{width:100%;border-radius:12px;background:#F2F2F2;}
+  .pv-imgs img{width:100%;height:auto;border-radius:12px;background:#F2F2F2;}
+  .pv-imgs a{display:block;}
+  /* PC: 사진이 화면 폭만큼 커지지 않게 1/4 크기로 한 줄에 4장, 누르면 원본 */
+  @media (min-width:1101px){
+    .pv-imgs{grid-template-columns:repeat(4,minmax(0,1fr));}
+    .pv-imgs img{aspect-ratio:4/3;object-fit:cover;cursor:zoom-in;}
+  }
   .pv-acts{display:flex;align-items:center;gap:10px;margin-top:18px;padding-bottom:16px;border-bottom:1px solid var(--line);font-size:14px;color:var(--sub);}
   .pv-like{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:18px;border:1.5px solid var(--line);font-size:14px;font-weight:700;color:var(--sub);}
   .pv-like.on{border-color:var(--danger);color:var(--danger);background:#FFF0EF;}
@@ -195,7 +201,7 @@
         '<button type="button" class="pv-menu" id="pvMenu" aria-label="더보기">⋯</button></div>' +
       '<span class="cm-topic" style="display:inline-block;margin-top:14px">' + PS.esc(T[p.topic] || '') + '</span>' +
       '<div class="pv-body">' + PS.esc(p.body) + '</div>' +
-      (imgs.length ? '<div class="pv-imgs">' + imgs.map(function (u) { return '<img src="' + PS.esc(u) + '" alt="" loading="lazy">'; }).join('') + '</div>' : '') +
+      (imgs.length ? '<div class="pv-imgs">' + imgs.map(function (u) { return '<a href="' + PS.esc(u) + '" target="_blank" rel="noopener" aria-label="사진 크게 보기"><img src="' + PS.esc(u) + '" alt="" loading="lazy" decoding="async"></a>'; }).join('') + '</div>' : '') +
       (mine ? '<div id="pvPush"></div>' : '') +
       '<div class="pv-acts"><button type="button" class="pv-like' + (liked ? ' on' : '') + '" id="pvLike" aria-pressed="' + liked + '">' + PS.icon('heart', 16) + ' 공감 <span id="pvLikeN">' + (p.like_count || '') + '</span></button>' +
         '<span class="views">조회 ' + ((p.view_count || 0) + 1) + '</span></div>' +
