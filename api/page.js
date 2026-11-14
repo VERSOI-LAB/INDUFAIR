@@ -86,6 +86,7 @@ async function loadSupport(id) {
 }
 
 function supportView(s) {
+  if (s.region === '전남광주') s.region = '광주·전남';
   var url = L.SITE + '/support/' + s.id;
   var period = s.apply_start || s.apply_end ? (s.apply_start || '') + ' ~ ' + (s.apply_end || '') : (s.apply_text || '');
   var meta = [s.category, s.region, s.agency].filter(Boolean).join(' · ');

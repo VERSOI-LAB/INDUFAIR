@@ -7,7 +7,8 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const API = "https://www.bizinfo.go.kr/uss/rss/bizinfoApi.do";
 const SITE = "https://www.bizinfo.go.kr";
 const PAGE_UNIT = 100;
-const REGIONS = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
+// 기업마당 지역 해시태그 그대로 (광주·전남은 "전남광주" 하나로 묶여 있음)
+const REGIONS = ["서울", "부산", "대구", "인천", "전남광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "경북", "경남", "제주"];
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
@@ -39,7 +40,9 @@ function period(text: string | null) {
 
 function regionOf(tags: string | null) {
   const list = String(tags || "").split(/[,#\s]+/).filter(Boolean);
-  return REGIONS.find((r) => list.some((t) => t.startsWith(r))) || "전국";
+  // 예전 표기("광주", "전남")도 같은 지역으로
+  if (list.some((t) => t === "광주" || t === "전남")) return "전남광주";
+  return REGIONS.find((r) => list.includes(r)) || "전국";
 }
 
 function toRow(it: Item) {
