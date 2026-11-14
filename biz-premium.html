@@ -107,7 +107,7 @@
 
   PS.ready.then(async function (user) {
     if (!user) return PS.goLogin();
-    var r = bizId ? await sb.from('businesses').select('id,name,owner_id,status').eq('id', bizId).maybeSingle() : { data: null };
+    var r = bizId ? await sb.from('businesses').select('id,name,owner_id,status,premium_until').eq('id', bizId).maybeSingle() : { data: null };
     biz = r.data;
     if (!biz || biz.owner_id !== user.id || biz.status === 'deleted') {
       main.innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>업체를 찾을 수 없어요</b><div style="margin-top:20px"><a class="btn" href="/my-biz">업체 소개 관리로</a></div></div>';
@@ -189,8 +189,12 @@
       if (sub.status === 'past_due') html += '<div class="msg err">카드 결제가 되지 않았어요. 카드를 다시 등록하면 바로 결제하고 프리미엄을 이어가요.</div>';
     }
 
+    // 결제 없이 친구 초대 보상으로 프리미엄인 경우
+    var bonus = !live && biz.premium_until && new Date(biz.premium_until).getTime() > now;
+    if (bonus) html += '<div class="msg ok" role="status">🎁 친구 초대 보상으로 <b>' + day(biz.premium_until) + '까지</b> 프리미엄이 적용되고 있어요. 결제는 필요 없어요.</div>';
+
     // 프리미엄이 적용되는 동안 추천 물건 고르기
-    if (live && picksReady) html += '<section class="picks" id="picks">' + picksHtml() + '</section>';
+    if ((live || bonus) && picksReady) html += '<section class="picks" id="picks">' + picksHtml() + '</section>';
 
     html += '<div class="plan"><div class="price">월 ' + PRICE.toLocaleString('ko-KR') + '원<small>부가세 포함</small></div><ul>' +
       '<li><span class="ck">✓</span><div><b>매일 자동 끌어올리기</b><span>직접 누르지 않아도 매일 맨 위로 올라가요</span></div></li>' +

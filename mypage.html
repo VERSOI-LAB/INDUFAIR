@@ -74,7 +74,7 @@
       '<div id="payoutNeed"></div>' +
       '<section class="mcard" style="display:flex;align-items:center;gap:12px">' +
         '<div style="flex:1;min-width:0"><b style="display:block;font-size:17px">친구 초대하기</b>' +
-        '<span style="font-size:14px;color:var(--sub)" id="inviteN">같은 일 하는 동료에게 판다산다를 알려 주세요</span></div>' +
+        '<span style="font-size:14px;color:var(--sub);line-height:1.5;display:block" id="inviteN">친구가 가입하면 <b style="color:var(--text)">내 업체가 7일 동안 맨 위</b>에 보여요</span></div>' +
         '<button type="button" class="btn small" id="inviteBtn" style="width:auto;padding:0 16px;flex-shrink:0">초대 링크 보내기</button>' +
       '</section>' +
       '<section class="mcard"><h3>자주 사용</h3>' +
@@ -158,8 +158,13 @@
   // 친구 초대: 내 링크 보내기 + 가입한 친구 수
   async function loadInvite() {
     var r = await sb.rpc('my_invite');
-    var n = r.data && r.data.invited;
-    if (n) document.getElementById('inviteN').textContent = '지금까지 ' + n + '명이 내 초대로 가입했어요';
+    var d = r.data || {};
+    var parts = [];
+    if (d.invited) parts.push(d.invited + '명이 내 초대로 가입했어요');
+    if (d.reward_days) parts.push('업체 상위 노출 ' + d.reward_days + '일 받음');
+    if (d.pending_days) parts.push('업체를 등록하면 상위 노출 ' + d.pending_days + '일이 바로 적용돼요');
+    if (parts.length) document.getElementById('inviteN').innerHTML = PS.esc(parts.join(' · ')) +
+      '<br><span style="font-size:12px;color:var(--hint)">친구 1명당 7일, 한 달에 4명(28일)까지</span>';
     document.getElementById('inviteBtn').onclick = async function () {
       var how = await psShare('판다산다', '산업용품 사고팔기, 정부 지원사업 마감 알림까지. 판다산다 같이 써요!', '/');
       if (how === 'copied') PS.toast('초대 링크를 복사했어요. 카톡에 붙여 넣어 보내 주세요');
