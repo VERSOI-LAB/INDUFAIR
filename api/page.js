@@ -1,4 +1,4 @@
-// /product/:id, /biz/:id, /support/:id — 검색 로봇과 공유 미리보기가 읽을 수 있게 제목·설명·사진을 html 에 미리 채워 내려준다.
+// /product/:id, /biz/:id, /support/:id, /events/:id — 검색 로봇과 공유 미리보기가 읽을 수 있게 제목·설명·사진을 html 에 미리 채워 내려준다.
 // 화면 자체는 기존처럼 product.html / business.html 의 스크립트가 다시 그린다.
 var L = require('./_lib');
 
@@ -109,6 +109,33 @@ function supportView(s) {
   };
 }
 
+async function loadEvent(id) {
+  var rows = await L.rest('biz_events?id=eq.' + id + '&select=id,title,event_type,category,region,organizer,summary,apply_text,apply_start,apply_end,event_text,event_start,event_end,url,origin_url,posted_at');
+  return rows && rows[0] || null;
+}
+
+function eventView(e) {
+  if (e.region === '전남광주') e.region = '광주·전남';
+  var url = L.SITE + '/events/' + e.id;
+  var when = e.event_start ? e.event_start + (e.event_end && e.event_end !== e.event_start ? ' ~ ' + e.event_end : '') : (e.event_text || '');
+  var apply = e.apply_start || e.apply_end ? (e.apply_start || '') + ' ~ ' + (e.apply_end || '') : (e.apply_text || '');
+  var ld = { '@context': 'https://schema.org', '@type': 'Event', name: e.title, url: url, description: L.clip(e.summary || e.title, 500) };
+  if (e.event_start) ld.startDate = e.event_start;
+  if (e.event_end) ld.endDate = e.event_end;
+  if (e.organizer) ld.organizer = { '@type': 'Organization', name: e.organizer };
+  return {
+    title: e.title + ' - 판다산다 교육·행사',
+    desc: L.clip([[e.event_type, e.region, e.organizer].filter(Boolean).join(' · '), when ? '일정 ' + when : '', L.clip(e.summary, 100)].filter(Boolean).join(' · '), 160),
+    url: url, image: '', ogType: 'article', ld: ld, slider: '',
+    body: '<div class="sd-cat">' + L.esc([e.event_type || '행사', e.category].filter(Boolean).join(' · ')) + '</div>' +
+      '<h1 class="sd-title">' + L.esc(e.title) + '</h1>' +
+      '<div class="sd-box"><dl>' + [['행사 일정', when], ['접수 기간', apply], ['주최', e.organizer], ['지역', e.region]]
+        .filter(function (r) { return r[1]; }).map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + L.esc(r[1]) + '</dd>'; }).join('') + '</dl></div>' +
+      (e.summary ? '<h2 class="sd-h">행사 내용</h2><div class="sd-sum">' + L.esc(e.summary) + '</div>' : '') +
+      '<a class="btn sd-go" href="' + L.esc(e.origin_url || e.url) + '" target="_blank" rel="noopener">자세히 보고 신청하기</a>'
+  };
+}
+
 function head(v) {
   return '<title>' + L.esc(v.title) + '</title>\n' +
     '<meta name="description" content="' + L.esc(v.desc) + '">\n' +
@@ -128,12 +155,14 @@ function swap(html, re, to) {
 }
 
 module.exports = async function (req, res) {
-  var type = req.query.type === 'biz' ? 'biz' : req.query.type === 'support' ? 'support' : 'product';
+  var type = ['biz', 'support', 'event'].indexOf(req.query.type) !== -1 ? req.query.type : 'product';
   var id = String(req.query.id || '');
-  var html = await L.template({ biz: 'business', support: 'support', product: 'product' }[type], req);
+  var html = await L.template({ biz: 'business', support: 'support', event: 'support', product: 'product' }[type], req);
   if (!html) { res.status(500).send('template missing'); return; }
 
-  var row = type === 'support' ? (/^\d{1,18}$/.test(id) ? await loadSupport(id) : null)
+  var numeric = /^\d{1,18}$/.test(id);
+  var row = type === 'support' ? (numeric ? await loadSupport(id) : null)
+    : type === 'event' ? (numeric ? await loadEvent(id) : null)
     : UUID.test(id) ? await (type === 'biz' ? loadBusiness(id) : loadProduct(id)) : null;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
@@ -144,7 +173,7 @@ module.exports = async function (req, res) {
     return;
   }
 
-  var v = type === 'biz' ? businessView(row) : type === 'support' ? supportView(row) : productView(row);
+  var v = type === 'biz' ? businessView(row) : type === 'support' ? supportView(row) : type === 'event' ? eventView(row) : productView(row);
   html = swap(html, /<title>[^<]*<\/title>/, head(v));
   if (v.slider) html = swap(html, /(<div class="slider" id="slider">)[\s\S]*?(<\/div>\s*<div class="dots")/, '<div class="slider" id="slider">' + v.slider + '</div>\n    <div class="dots"');
   html = swap(html, /<main class="page" id="body"><\/main>/, '<main class="page" id="body">' + v.body + '</main>');

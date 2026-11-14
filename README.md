@@ -13,14 +13,16 @@
 | `/mypage` | `mypage.html` | 내 물건(판매중·판매완료), 통계, 찜 |
 | `/login` | `login.html` | 이메일 로그인/가입 한 화면 |
 | `/support`, `/support/:id` | `support.html` | 정부 지원사업 공고 (기업마당에서 매일 2번 자동 수집, 마감 임박순·분야·지역 필터) |
-
-### 지원사업 자동 수집 켜기
-1. 기업마당(bizinfo.go.kr) > 정책정보 개방 API 에서 인증키 발급
-2. Supabase Edge Function 비밀값에 `BIZINFO_API_KEY` 추가
-3. `supabase/functions/sync-support-programs` 배포 (Verify JWT 끔)
-4. `supabase/migrations/20261114_support_programs.sql` 실행 (테이블 + 매일 06시·18시 자동 실행)
-5. 처음 한 번은 지난 공고까지 채우기: 함수에 `{"pages": 20}` 로 POST
+| `/events`, `/events/:id` | `support.html` | 교육·세미나·전시회·설명회 (기업마당 행사정보, 같은 함수가 같이 수집) |
 | `/pay-seller` | `pay-seller.html` | 안전결제 판매자 신청 (사업자 인증 + 통신판매업 신고 확인) |
+
+### 지원사업·교육 행사 자동 수집
+1. 기업마당(bizinfo.go.kr) > 정책정보 개방 API 에서 인증키 발급 (지원사업·행사정보 같은 키로 동작)
+2. Supabase Edge Function 비밀값에 `BIZINFO_API_KEY` 추가 (행사 키를 따로 받으면 `BIZINFO_EVENT_API_KEY`)
+3. `supabase/functions/sync-support-programs` 배포 (Verify JWT 끔)
+4. `supabase/migrations/20261114_support_programs.sql`, `20261114_biz_events.sql` 실행 (테이블 + 매일 06시·18시 자동 실행)
+5. 처음 한 번은 지난 공고까지 채우기: 함수에 `{"pages": 20}` 로 POST (30분 안 재실행은 무시)
+6. 필드 점검: `{"probe": "events"}` 또는 `{"probe": "programs"}` 로 POST 하면 원본 응답 한 건을 돌려줌 (저장 없음)
 
 검색 노출: `/product/:id`·`/biz/:id` 는 `api/page.js` 가 제목·설명·사진을 html 에 미리 채워 내려주고, `/sitemap.xml` 은 `api/sitemap.js` 가 DB 에서 만든다 (Vercel 함수, 로컬 서버에서는 동작하지 않음).
 
