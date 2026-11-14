@@ -2,8 +2,8 @@
 //   { comment_id } 새 댓글 → 글쓴이에게 웹 푸시 + 댓글 자동 검토
 //   { post_id }    새 글   → 글 자동 검토
 //   { report_id }  새 신고 → 신고된 글/댓글 자동 검토 + 운영자(app_admins)에게 웹 푸시
-// 자동 검토: ANTHROPIC_API_KEY 가 있으면 Claude 가 판단(hide/keep/review), 없으면 간단한 규칙으로 '검토 필요'만 표시
-//   hide 판정이면 바로 숨김(story_record_review), hide·review 는 운영자에게 알림
+// 자동 검토: 먼저 규칙(욕설·계좌·링크 여러 개·전화번호)에 걸리면 바로 숨김. 아니면 ANTHROPIC_API_KEY 가 있을 때 Claude 가 판단(hide/keep/review)
+//   hide 판정이면 바로 숨김(story_record_review). AI 의 hide·review 는 운영자에게 알림, 규칙 숨김은 알림 없음
 // 비밀값: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT(채팅 알림과 같음), ANTHROPIC_API_KEY(선택)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
@@ -72,22 +72,27 @@ async function aiReview(text: string, context: string): Promise<Verdict | null> 
   }
 }
 
-// 키가 없거나 AI 가 실패했을 때: 숨기지는 않고, 의심스러우면 '검토 필요'
+// 규칙 검토: 욕설·계좌번호·링크 여러 개·전화번호가 있으면 바로 숨김 (운영자가 '숨겨진 것'에서 되살릴 수 있음)
 const BAD_WORDS = /씨발|시발(?!점)|ㅅㅂ|병신|ㅄ|개새끼|좆|느금|니애미|꺼져/;
 function ruleReview(text: string): Verdict {
   const t = String(text || "");
   const links = (t.match(/https?:\/\/|www\.|\.com\b|\.kr\b|open\.kakao|t\.me\//gi) || []).length;
   const phone = /01[016789][- .]?\d{3,4}[- .]?\d{4}/.test(t);
   const account = /(?:^|\D)\d{2,6}-\d{2,6}-\d{2,8}(?:\D|$)/.test(t) && /계좌|입금|송금|은행/.test(t);
-  if (BAD_WORDS.test(t)) return { verdict: "review", reason: "욕설로 보이는 단어가 있어요", reviewer: "rule" };
-  if (account) return { verdict: "review", reason: "계좌번호로 보이는 내용이 있어요", reviewer: "rule" };
-  if (links >= 2) return { verdict: "review", reason: "외부 링크가 여러 개 있어요(광고 의심)", reviewer: "rule" };
-  if (phone) return { verdict: "review", reason: "전화번호가 들어 있어요", reviewer: "rule" };
+  if (BAD_WORDS.test(t)) return { verdict: "hide", reason: "욕설로 보이는 단어가 있어요", reviewer: "rule" };
+  if (account) return { verdict: "hide", reason: "계좌번호로 보이는 내용이 있어요", reviewer: "rule" };
+  if (links >= 2) return { verdict: "hide", reason: "외부 링크가 여러 개 있어요(광고 의심)", reviewer: "rule" };
+  if (phone) return { verdict: "hide", reason: "전화번호가 들어 있어요", reviewer: "rule" };
   return { verdict: "keep", reason: "규칙상 문제 없음", reviewer: "rule" };
 }
 
+// 운영자 알림: 사람이 판단해야 할 때만. 규칙으로 숨긴 건 조용히 숨김
+const needsAdmin = (v: Verdict) => v.verdict === "review" || (v.verdict === "hide" && v.reviewer === "ai");
+
 async function review(admin: SupabaseClient, kind: "post" | "comment", id: number, text: string, trigger: "new" | "report", context: string) {
-  const v = (await aiReview(text, context)) || ruleReview(text);
+  // 규칙에 걸리면 AI 를 부르지 않고 바로 숨김 (비용 없음). 나머지만 AI(키가 있을 때)
+  const r = ruleReview(text);
+  const v = r.verdict === "hide" ? r : (await aiReview(text, context)) || r;
   await admin.rpc("story_record_review", { p_kind: kind, p_id: id, p_trigger: trigger, p_verdict: v.verdict, p_reason: v.reason, p_reviewer: v.reviewer });
   return v;
 }
@@ -135,7 +140,7 @@ Deno.serve(async (req) => {
     const { data: p } = await admin.from("story_posts").select("id,body,status,created_at").eq("id", id).maybeSingle();
     if (!p || p.status !== "active" || !fresh(p.created_at)) return json({ code: "skip" });
     const v = await review(admin, "post", id, p.body, "new", "새로 올라온 글입니다.");
-    if (v.verdict !== "keep") await pushTo(admin, await adminIds(admin), { title: "이야기 새 글 · " + VERDICT_KO[v.verdict], body: clip(v.reason + " — " + p.body, 110), url: "/community/admin", tag: "story-admin" });
+    if (needsAdmin(v)) await pushTo(admin, await adminIds(admin), { title: "이야기 새 글 · " + VERDICT_KO[v.verdict], body: clip(v.reason + " — " + p.body, 110), url: "/community/admin", tag: "story-admin" });
     return json({ ok: true, verdict: v });
   }
 
@@ -170,7 +175,7 @@ Deno.serve(async (req) => {
   if (!fresh(c.created_at)) return json({ code: "too_old" });
 
   const v = await review(admin, "comment", c.id, c.body, "new", "새로 달린 댓글입니다.");
-  if (v.verdict !== "keep") await pushTo(admin, await adminIds(admin), { title: "이야기 새 댓글 · " + VERDICT_KO[v.verdict], body: clip(v.reason + " — " + c.body, 110), url: "/community/admin", tag: "story-admin" });
+  if (needsAdmin(v)) await pushTo(admin, await adminIds(admin), { title: "이야기 새 댓글 · " + VERDICT_KO[v.verdict], body: clip(v.reason + " — " + c.body, 110), url: "/community/admin", tag: "story-admin" });
   if (v.verdict === "hide") return json({ ok: true, sent: 0, reason: "hidden", verdict: v }); // 숨긴 댓글은 글쓴이에게 알리지 않음
 
   const { data: post } = await admin.from("story_posts").select("id,author_id,status").eq("id", c.post_id).maybeSingle();
