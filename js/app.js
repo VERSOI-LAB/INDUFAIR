@@ -763,6 +763,36 @@
     return { count: items.length, items: items, lo: man(mid * 0.9), hi: man(mid * 1.1), rec: man(mid) };
   };
 
+  // ---- 지원사업 (기업마당 공고를 매일 자동 수집: Edge Function sync-support-programs) ----
+  PS.SUPPORT_COLUMNS = 'id,title,agency,executor,category,region,target,apply_text,apply_start,apply_end,url,posted_at';
+  PS.SUPPORT_CATEGORIES = ['금융', '기술', '인력', '수출', '내수', '창업', '경영', '기타'];
+  PS.SUPPORT_REGIONS = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+  PS.supportUrl = function (id) { return '/support/' + encodeURIComponent(id); };
+  PS.todayKST = function () { return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); };
+  // 마감까지 남은 날: { label: 'D-3', cls: 'soon' }  (cls: today·soon·open·always·closed·upcoming)
+  PS.supportDday = function (p) {
+    var today = PS.todayKST();
+    if (p.apply_start && p.apply_start > today) return { label: '접수 예정', cls: 'upcoming' };
+    if (!p.apply_end) return { label: '상시', cls: 'always' };
+    var days = Math.round((Date.parse(p.apply_end) - Date.parse(today)) / 86400000);
+    if (days < 0) return { label: '마감', cls: 'closed' };
+    if (days === 0) return { label: '오늘 마감', cls: 'today' };
+    return { label: 'D-' + days, cls: days <= 7 ? 'soon' : 'open' };
+  };
+  PS.supportPeriod = function (p) {
+    var f = function (d) { return d ? d.slice(2).replace(/-/g, '.') : ''; };
+    if (p.apply_start || p.apply_end) return f(p.apply_start) + ' ~ ' + (p.apply_end ? f(p.apply_end) : '');
+    return p.apply_text || '기간은 공고문을 확인해 주세요';
+  };
+  PS.supportRowHtml = function (p, isNew) {
+    var d = PS.supportDday(p);
+    return '<a class="sp-row" href="' + PS.supportUrl(p.id) + '">' +
+      '<span class="sp-dday sp-' + d.cls + '">' + d.label + '</span>' +
+      '<div class="sp-info"><div class="sp-t">' + (isNew ? '<span class="badge reserved" style="background:var(--danger)">NEW</span>' : '') + PS.esc(p.title) + '</div>' +
+      '<div class="sp-m">' + PS.esc([p.category, p.region !== '전국' ? p.region : '', p.agency].filter(Boolean).join(' · ')) + '</div>' +
+      '<div class="sp-m">신청 ' + PS.esc(PS.supportPeriod(p)) + '</div></div></a>';
+  };
+
   // ---- 최근 본 물건 (이 기기에만 저장) ----
   PS.recentIds = function () {
     try { return JSON.parse(localStorage.getItem('ps_recent') || '[]'); } catch (e) { return []; }
@@ -901,7 +931,7 @@
   if (/^\/(index(\.html)?)?$|^\/(product|business|biz\/(?!new|verify)|profile)/.test(location.pathname)) document.documentElement.classList.add('pc-wide');
 
   // PC 에서 홈과 같은 좌우 여백(내용 폭 70%)을 쓰는 페이지: 채팅·마이와 마이 하위 화면, 결제, 물건 수정 (app.css 의 html.pc-70)
-  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|settings|neighborhood|price|shipping|cart|checkout|edit|pay-seller|my-biz|biz-premium|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
+  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|support|settings|neighborhood|price|shipping|cart|checkout|edit|pay-seller|my-biz|biz-premium|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
 
   // ---- 하단 탭바 ----
   var TABS = [

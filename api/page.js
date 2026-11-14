@@ -1,4 +1,4 @@
-// /product/:id, /biz/:id — 검색 로봇과 공유 미리보기가 읽을 수 있게 제목·설명·사진을 html 에 미리 채워 내려준다.
+// /product/:id, /biz/:id, /support/:id — 검색 로봇과 공유 미리보기가 읽을 수 있게 제목·설명·사진을 html 에 미리 채워 내려준다.
 // 화면 자체는 기존처럼 product.html / business.html 의 스크립트가 다시 그린다.
 var L = require('./_lib');
 
@@ -80,6 +80,34 @@ function businessView(b) {
   };
 }
 
+async function loadSupport(id) {
+  var rows = await L.rest('support_programs?id=eq.' + id + '&select=id,title,agency,executor,category,region,target,summary,apply_text,apply_start,apply_end,url,posted_at');
+  return rows && rows[0] || null;
+}
+
+function supportView(s) {
+  var url = L.SITE + '/support/' + s.id;
+  var period = s.apply_start || s.apply_end ? (s.apply_start || '') + ' ~ ' + (s.apply_end || '') : (s.apply_text || '');
+  var meta = [s.category, s.region, s.agency].filter(Boolean).join(' · ');
+  var ld = {
+    '@context': 'https://schema.org', '@type': 'GovernmentService', name: s.title, url: url,
+    description: L.clip(s.summary || s.title, 500), serviceType: s.category || '지원사업'
+  };
+  if (s.agency) ld.provider = { '@type': 'GovernmentOrganization', name: s.agency };
+  if (s.region && s.region !== '전국') ld.areaServed = s.region;
+  return {
+    title: s.title + ' - 판다산다 지원사업',
+    desc: L.clip([meta, period ? '신청 ' + period : '', L.clip(s.summary, 100)].filter(Boolean).join(' · '), 160),
+    url: url, image: '', ogType: 'article', ld: ld, slider: '',
+    body: '<div class="sd-cat">' + L.esc(['지원사업', s.category].filter(Boolean).join(' · ')) + '</div>' +
+      '<h1 class="sd-title">' + L.esc(s.title) + '</h1>' +
+      '<div class="sd-box"><dl>' + [['신청 기간', period], ['소관 기관', s.agency], ['수행 기관', s.executor], ['지원 대상', s.target], ['지역', s.region]]
+        .filter(function (r) { return r[1]; }).map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + L.esc(r[1]) + '</dd>'; }).join('') + '</dl></div>' +
+      (s.summary ? '<h2 class="sd-h">사업 개요</h2><div class="sd-sum">' + L.esc(s.summary) + '</div>' : '') +
+      '<a class="btn sd-go" href="' + L.esc(s.url) + '" target="_blank" rel="noopener">공고 원문 보고 신청하기</a>'
+  };
+}
+
 function head(v) {
   return '<title>' + L.esc(v.title) + '</title>\n' +
     '<meta name="description" content="' + L.esc(v.desc) + '">\n' +
@@ -99,12 +127,13 @@ function swap(html, re, to) {
 }
 
 module.exports = async function (req, res) {
-  var isBiz = req.query.type === 'biz';
+  var type = req.query.type === 'biz' ? 'biz' : req.query.type === 'support' ? 'support' : 'product';
   var id = String(req.query.id || '');
-  var html = await L.template(isBiz ? 'business' : 'product', req);
+  var html = await L.template({ biz: 'business', support: 'support', product: 'product' }[type], req);
   if (!html) { res.status(500).send('template missing'); return; }
 
-  var row = UUID.test(id) ? await (isBiz ? loadBusiness(id) : loadProduct(id)) : null;
+  var row = type === 'support' ? (/^\d{1,18}$/.test(id) ? await loadSupport(id) : null)
+    : UUID.test(id) ? await (type === 'biz' ? loadBusiness(id) : loadProduct(id)) : null;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
   if (!row) {
@@ -114,7 +143,7 @@ module.exports = async function (req, res) {
     return;
   }
 
-  var v = isBiz ? businessView(row) : productView(row);
+  var v = type === 'biz' ? businessView(row) : type === 'support' ? supportView(row) : productView(row);
   html = swap(html, /<title>[^<]*<\/title>/, head(v));
   if (v.slider) html = swap(html, /(<div class="slider" id="slider">)[\s\S]*?(<\/div>\s*<div class="dots")/, '<div class="slider" id="slider">' + v.slider + '</div>\n    <div class="dots"');
   html = swap(html, /<main class="page" id="body"><\/main>/, '<main class="page" id="body">' + v.body + '</main>');

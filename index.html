@@ -36,6 +36,8 @@
   .pick-card.buy{background:#EAF2FE;}
   .pick-card.buy .go{background:#2F5BD3;color:#fff;}
   .more{margin:24px 0 8px;}
+  .sp-head{display:flex;align-items:baseline;justify-content:space-between;}
+  .sp-head a{font-size:14px;font-weight:600;color:var(--sub);}
   /* PC: 화면 좌우를 꽉 채움. 소개 → 판다/산다(화면 폭의 70%) → 방금 올라온 물건(2칸) */
   @media (min-width:1101px){
     :root{--wide-w:100%;} /* 홈은 헤더·본문 모두 화면 폭 전체 */
@@ -55,6 +57,8 @@
       -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
     .pick-card .go{height:64px;font-size:20px;}
     /* 방금 올라온 물건도 판다/산다 버튼과 같은 폭(70%)으로 가운데 */
+    #spHome .list{grid-template-columns:repeat(3,minmax(0,1fr));}
+    #spHome .sp-row{border-bottom:none;}
     .sec-title,.list,.page > .empty{width:70vw;max-width:100%;margin-left:auto;margin-right:auto;}
     .sec-title{margin-top:44px;font-size:24px;}
     .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;}
@@ -87,6 +91,11 @@
         <span class="go"><i data-icon3d="buy" data-size="30"></i> 구매하기</span>
       </a>
     </div>
+
+    <section id="spHome" hidden>
+      <h2 class="sec-title sp-head"><span>마감 임박 지원사업</span><a href="/support">전체 보기 ›</a></h2>
+      <div class="list" id="spHomeList"></div>
+    </section>
 
     <h2 class="sec-title">방금 올라온 물건</h2>
     <div class="list" id="recentGrid"></div>
@@ -130,6 +139,15 @@
 
   document.getElementById('moreBtn').addEventListener('click', load);
   load();
+
+  // 마감이 가까운 지원사업 3개 (오늘 이후 마감)
+  (async function () {
+    var r = await sb.from('support_programs').select(PS.SUPPORT_COLUMNS).gte('apply_end', PS.todayKST())
+      .order('apply_end', { ascending: true }).limit(3);
+    if (r.error || !(r.data || []).length) return;
+    document.getElementById('spHomeList').innerHTML = r.data.map(function (p) { return PS.supportRowHtml(p); }).join('');
+    document.getElementById('spHome').hidden = false;
+  })();
 })();
 </script>
 </body>

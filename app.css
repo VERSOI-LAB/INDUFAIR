@@ -410,3 +410,15 @@ p{margin:0;}
 .lfilter .lf-d .input{height:44px;font-size:15px;padding:0 10px;}
 .lfilter .lf-d span{color:var(--hint);}
 .lf-count{font-size:13px;color:var(--sub);margin:4px 0 0;}
+
+/* 지원사업 목록 한 줄 (지원사업·홈·키워드 알림) */
+.sp-row{display:flex;gap:12px;align-items:flex-start;padding:16px 0;border-bottom:1px solid var(--line);min-width:0;}
+.sp-row:last-child{border-bottom:none;}
+.sp-dday{flex-shrink:0;min-width:62px;height:28px;padding:0 8px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:#F2F3F5;color:var(--sub);}
+.sp-dday.sp-today,.sp-dday.sp-soon{background:#FFF0EF;color:var(--danger);}
+.sp-dday.sp-open{background:#EAF2FE;color:#2F5BD3;}
+.sp-dday.sp-always{background:var(--primary-light);color:#8A6400;}
+.sp-dday.sp-upcoming{background:#E9F8EE;color:#1E8E45;}
+.sp-info{flex:1;min-width:0;}
+.sp-t{font-size:16px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.sp-m{font-size:13px;color:var(--hint);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
