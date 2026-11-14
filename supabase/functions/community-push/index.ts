@@ -1,55 +1,108 @@
-// 이야기 댓글 알림: 새 댓글이 저장되면 DB 트리거(on_story_comment_push)가 { comment_id } 로 호출
-// 글쓴이의 모든 브라우저 구독(push_subscriptions)으로 웹 푸시. 같은 댓글은 한 번만(story_push_sent), 내 글에 내가 단 댓글은 보내지 않음
-// 비밀값은 chat-push 와 같음: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT. 트리거가 JWT 없이 부르므로 'Verify JWT' 를 끈다
+// 이야기 알림 + 자동 검토. DB 트리거가 JWT 없이 부르므로 'Verify JWT' 를 끈다
+//   { comment_id } 새 댓글 → 글쓴이에게 웹 푸시 + 댓글 자동 검토
+//   { post_id }    새 글   → 글 자동 검토
+//   { report_id }  새 신고 → 신고된 글/댓글 자동 검토 + 운영자(app_admins)에게 웹 푸시
+// 자동 검토: ANTHROPIC_API_KEY 가 있으면 Claude 가 판단(hide/keep/review), 없으면 간단한 규칙으로 '검토 필요'만 표시
+//   hide 판정이면 바로 숨김(story_record_review), hide·review 는 운영자에게 알림
+// 비밀값: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT(채팅 알림과 같음), ANTHROPIC_API_KEY(선택)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3.6.7";
+import Anthropic from "npm:@anthropic-ai/sdk";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
-Deno.serve(async (req) => {
-  if (req.method !== "POST") return json({ code: "method_not_allowed" }, 405);
+type Verdict = { verdict: "hide" | "keep" | "review"; reason: string; reviewer: "ai" | "rule" };
+
+// ---- 자동 검토 ----
+const GUIDE = `당신은 산업용품 거래 사이트 '판다산다'의 커뮤니티 '이야기' 검토자입니다.
+이야기는 공장·현장·산업 종사자들이 장비 질문, 현장 이야기, 업체 소개, 정보 공유를 하는 곳입니다.
+아래 글이 운영 기준을 어기는지 판단해 JSON 으로만 답하세요.
+
+숨김(hide) - 분명하게 해당할 때만:
+- 사이트와 관계없는 광고·홍보 도배, 불법 대출·도박·성인 광고, 피싱 링크
+- 특정인을 향한 욕설·비하·혐오 표현, 협박
+- 돈을 먼저 보내게 하는 등 사기를 유도하는 내용
+- 다른 사람의 전화번호·계좌·주소 같은 개인정보를 본인 동의 없이 올린 것
+- 음란한 내용
+
+검토 필요(review) - 위반일 수도 있지만 확실하지 않을 때 (예: 본인 업체 홍보인지 정보 공유인지 애매함, 가벼운 비속어, 글쓴이 본인 연락처)
+그대로 두기(keep) - 위에 해당하지 않는 평범한 질문·잡담·정보·업체 소개·신고가 부당해 보이는 경우
+
+거친 현장 말투나 불만, 다른 업체·제품에 대한 솔직한 후기는 그 자체로 위반이 아닙니다. 애매하면 hide 대신 review 를 고르세요.
+reason 은 운영자가 읽을 한국어 한 문장(60자 이내)으로 쓰세요.`;
+
+const SCHEMA = {
+  type: "object",
+  properties: {
+    verdict: { type: "string", enum: ["hide", "keep", "review"] },
+    reason: { type: "string" },
+  },
+  required: ["verdict", "reason"],
+  additionalProperties: false,
+};
+
+async function aiReview(text: string, context: string): Promise<Verdict | null> {
+  const key = Deno.env.get("ANTHROPIC_API_KEY");
+  if (!key) return null;
+  try {
+    const client = new Anthropic({ apiKey: key, maxRetries: 1, timeout: 60_000 });
+    // deno-lint-ignore no-explicit-any
+    const params: any = {
+      model: "claude-opus-5-5",
+      max_tokens: 4000,
+      betas: ["server-side-fallback-2026-07-01"],
+      fallbacks: "default", // 안전 분류기가 거절하면 서버가 다른 모델로 다시 시도
+      output_config: { effort: "low", format: { type: "json_schema", schema: SCHEMA } },
+      system: GUIDE,
+      messages: [{ role: "user", content: `${context}\n\n<글>\n${text.slice(0, 3000)}\n</글>` }],
+    };
+    const res = await client.beta.messages.create(params);
+    if (res.stop_reason === "refusal") return { verdict: "review", reason: "자동 검토가 판단을 거절했어요. 직접 확인해 주세요", reviewer: "ai" };
+    // deno-lint-ignore no-explicit-any
+    const block = (res.content as any[]).find((b) => b.type === "text");
+    if (!block) return null;
+    const out = JSON.parse(block.text);
+    if (!["hide", "keep", "review"].includes(out.verdict)) return null;
+    return { verdict: out.verdict, reason: String(out.reason || "").slice(0, 120), reviewer: "ai" };
+  } catch (e) {
+    console.error("ai review", (e as Error).message);
+    return null;
+  }
+}
+
+// 키가 없거나 AI 가 실패했을 때: 숨기지는 않고, 의심스러우면 '검토 필요'
+const BAD_WORDS = /씨발|시발(?!점)|ㅅㅂ|병신|ㅄ|개새끼|좆|느금|니애미|꺼져/;
+function ruleReview(text: string): Verdict {
+  const t = String(text || "");
+  const links = (t.match(/https?:\/\/|www\.|\.com\b|\.kr\b|open\.kakao|t\.me\//gi) || []).length;
+  const phone = /01[016789][- .]?\d{3,4}[- .]?\d{4}/.test(t);
+  const account = /(?:^|\D)\d{2,6}-\d{2,6}-\d{2,8}(?:\D|$)/.test(t) && /계좌|입금|송금|은행/.test(t);
+  if (BAD_WORDS.test(t)) return { verdict: "review", reason: "욕설로 보이는 단어가 있어요", reviewer: "rule" };
+  if (account) return { verdict: "review", reason: "계좌번호로 보이는 내용이 있어요", reviewer: "rule" };
+  if (links >= 2) return { verdict: "review", reason: "외부 링크가 여러 개 있어요(광고 의심)", reviewer: "rule" };
+  if (phone) return { verdict: "review", reason: "전화번호가 들어 있어요", reviewer: "rule" };
+  return { verdict: "keep", reason: "규칙상 문제 없음", reviewer: "rule" };
+}
+
+async function review(admin: SupabaseClient, kind: "post" | "comment", id: number, text: string, trigger: "new" | "report", context: string) {
+  const v = (await aiReview(text, context)) || ruleReview(text);
+  await admin.rpc("story_record_review", { p_kind: kind, p_id: id, p_trigger: trigger, p_verdict: v.verdict, p_reason: v.reason, p_reviewer: v.reviewer });
+  return v;
+}
+
+// ---- 웹 푸시 ----
+async function pushTo(admin: SupabaseClient, profileIds: string[], payload: Record<string, unknown>) {
+  if (!profileIds.length) return 0;
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
-  if (!pub || !priv) return json({ code: "not_configured" }, 503);
+  if (!pub || !priv) return 0;
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "mailto:admin@pandasanda.com", pub, priv);
-
-  let b: Record<string, unknown>;
-  try { b = await req.json(); } catch { return json({ code: "bad_request" }, 400); }
-  const commentId = Number(b.comment_id);
-  if (!Number.isSafeInteger(commentId) || commentId <= 0) return json({ code: "bad_request" }, 400);
-
-  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const { data: c } = await admin.from("story_comments")
-    .select("id,post_id,author_id,body,created_at,status").eq("id", commentId).maybeSingle();
-  if (!c || c.status !== "active") return json({ code: "not_found" }, 404);
-  // 방금 저장된 댓글만 (오래된 댓글로 다시 부르는 것 막기)
-  if (Date.now() - new Date(c.created_at).getTime() > 5 * 60 * 1000) return json({ code: "too_old" });
-
-  const { data: post } = await admin.from("story_posts").select("id,author_id,body,status").eq("id", c.post_id).maybeSingle();
-  if (!post || post.status !== "active") return json({ code: "post_not_found" }, 404);
-  if (post.author_id === c.author_id) return json({ ok: true, sent: 0, reason: "own_post" });
-
-  // 한 번만 보냄
-  const { error: dup } = await admin.from("story_push_sent").insert({ comment_id: c.id });
-  if (dup) return json({ code: "already_sent" });
-
-  const { data: subs } = await admin.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("profile_id", post.author_id);
-  if (!subs || !subs.length) return json({ ok: true, sent: 0 });
-
-  const { data: who } = await admin.from("profiles").select("name").eq("id", c.author_id).maybeSingle();
-  const text = String(c.body || "").replace(/\s+/g, " ").trim();
-  const payload = JSON.stringify({
-    title: "내 이야기에 댓글이 달렸어요",
-    body: (who?.name || "이웃") + ": " + (text.length > 100 ? text.slice(0, 100) + "…" : text),
-    url: "/community/" + post.id,
-    tag: "community-" + post.id, // 같은 글 알림은 하나로 묶임
-  });
-
+  const { data: subs } = await admin.from("push_subscriptions").select("id,endpoint,p256dh,auth").in("profile_id", profileIds);
   let sent = 0;
-  await Promise.all(subs.map(async (s) => {
+  await Promise.all((subs || []).map(async (s) => {
     try {
-      await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, payload, { TTL: 60 * 60 * 24 });
+      await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 60 * 60 * 24 });
       sent++;
       await admin.from("push_subscriptions").update({ last_used_at: new Date().toISOString() }).eq("id", s.id);
     } catch (e) {
@@ -58,5 +111,80 @@ Deno.serve(async (req) => {
       else console.error("push", code, (e as Error).message);
     }
   }));
-  return json({ ok: true, sent });
+  return sent;
+}
+
+async function adminIds(admin: SupabaseClient) {
+  const { data } = await admin.from("app_admins").select("profile_id");
+  return (data || []).map((r) => r.profile_id as string);
+}
+
+const clip = (s: string, n: number) => { const t = String(s || "").replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n) + "…" : t; };
+const VERDICT_KO = { hide: "자동으로 숨겼어요", review: "검토가 필요해요", keep: "문제 없어 보여요" };
+
+Deno.serve(async (req) => {
+  if (req.method !== "POST") return json({ code: "method_not_allowed" }, 405);
+  let b: Record<string, unknown>;
+  try { b = await req.json(); } catch { return json({ code: "bad_request" }, 400); }
+  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const fresh = (iso: string) => Date.now() - new Date(iso).getTime() < 5 * 60 * 1000; // 방금 생긴 것만 (다시 부르기 막기)
+
+  // ---- 새 글: 자동 검토 ----
+  if (b.post_id != null) {
+    const id = Number(b.post_id);
+    const { data: p } = await admin.from("story_posts").select("id,body,status,created_at").eq("id", id).maybeSingle();
+    if (!p || p.status !== "active" || !fresh(p.created_at)) return json({ code: "skip" });
+    const v = await review(admin, "post", id, p.body, "new", "새로 올라온 글입니다.");
+    if (v.verdict !== "keep") await pushTo(admin, await adminIds(admin), { title: "이야기 새 글 · " + VERDICT_KO[v.verdict], body: clip(v.reason + " — " + p.body, 110), url: "/community/admin", tag: "story-admin" });
+    return json({ ok: true, verdict: v });
+  }
+
+  // ---- 새 신고: 자동 검토 + 운영자 알림 ----
+  if (b.report_id != null) {
+    const { data: r } = await admin.from("story_reports").select("id,post_id,comment_id,reason,created_at").eq("id", Number(b.report_id)).maybeSingle();
+    if (!r || !fresh(r.created_at)) return json({ code: "skip" });
+    const kind = r.post_id ? "post" : "comment";
+    const id = Number(r.post_id || r.comment_id);
+    const { data: t } = await admin.from(kind === "post" ? "story_posts" : "story_comments").select("id,body,status").eq("id", id).maybeSingle();
+    if (!t) return json({ code: "target_not_found" }, 404);
+    // 같은 대상을 최근 1시간 안에 이미 검토했으면 다시 부르지 않음 (신고가 몰려도 비용 한 번)
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { data: recent } = await admin.from("story_moderation").select("verdict,reason,reviewer").eq("target_kind", kind).eq("target_id", id).eq("trigger", "report").gt("created_at", since).order("created_at", { ascending: false }).limit(1);
+    const v: Verdict = t.status === "active" && !(recent && recent.length)
+      ? await review(admin, kind, id, t.body, "report", `이 ${kind === "post" ? "글" : "댓글"}은 이용자에게 '${r.reason || "기타"}'(으)로 신고됐습니다. 신고가 맞는지 판단하세요.`)
+      : (recent && recent[0]) as Verdict || { verdict: "review", reason: "이미 숨겨진 상태예요", reviewer: "rule" };
+    const sent = await pushTo(admin, await adminIds(admin), {
+      title: `이야기 신고 · ${VERDICT_KO[v.verdict] || "확인해 주세요"}`,
+      body: clip(`[${r.reason || "기타"}] ${t.body}`, 110),
+      url: "/community/admin",
+      tag: "story-admin",
+    });
+    return json({ ok: true, verdict: v, sent });
+  }
+
+  // ---- 새 댓글: 글쓴이 알림 + 자동 검토 ----
+  const commentId = Number(b.comment_id);
+  if (!Number.isSafeInteger(commentId) || commentId <= 0) return json({ code: "bad_request" }, 400);
+  const { data: c } = await admin.from("story_comments").select("id,post_id,author_id,body,created_at,status").eq("id", commentId).maybeSingle();
+  if (!c || c.status !== "active") return json({ code: "not_found" }, 404);
+  if (!fresh(c.created_at)) return json({ code: "too_old" });
+
+  const v = await review(admin, "comment", c.id, c.body, "new", "새로 달린 댓글입니다.");
+  if (v.verdict !== "keep") await pushTo(admin, await adminIds(admin), { title: "이야기 새 댓글 · " + VERDICT_KO[v.verdict], body: clip(v.reason + " — " + c.body, 110), url: "/community/admin", tag: "story-admin" });
+  if (v.verdict === "hide") return json({ ok: true, sent: 0, reason: "hidden", verdict: v }); // 숨긴 댓글은 글쓴이에게 알리지 않음
+
+  const { data: post } = await admin.from("story_posts").select("id,author_id,status").eq("id", c.post_id).maybeSingle();
+  if (!post || post.status !== "active") return json({ code: "post_not_found" }, 404);
+  if (post.author_id === c.author_id) return json({ ok: true, sent: 0, reason: "own_post", verdict: v });
+  const { error: dup } = await admin.from("story_push_sent").insert({ comment_id: c.id });
+  if (dup) return json({ code: "already_sent" });
+
+  const { data: who } = await admin.from("profiles").select("name").eq("id", c.author_id).maybeSingle();
+  const sent = await pushTo(admin, [post.author_id], {
+    title: "내 이야기에 댓글이 달렸어요",
+    body: (who?.name || "이웃") + ": " + clip(c.body, 100),
+    url: "/community/" + post.id,
+    tag: "community-" + post.id, // 같은 글 알림은 하나로 묶임
+  });
+  return json({ ok: true, sent, verdict: v });
 });

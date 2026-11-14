@@ -26,6 +26,10 @@
       "destination": "/community"
     },
     {
+      "source": "/community/admin",
+      "destination": "/community"
+    },
+    {
       "source": "/community/:id",
       "destination": "/api/page?type=community&id=:id"
     },
