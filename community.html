@@ -196,6 +196,7 @@
       '<span class="cm-topic" style="display:inline-block;margin-top:14px">' + PS.esc(T[p.topic] || '') + '</span>' +
       '<div class="pv-body">' + PS.esc(p.body) + '</div>' +
       (imgs.length ? '<div class="pv-imgs">' + imgs.map(function (u) { return '<img src="' + PS.esc(u) + '" alt="" loading="lazy">'; }).join('') + '</div>' : '') +
+      (mine ? '<div id="pvPush"></div>' : '') +
       '<div class="pv-acts"><button type="button" class="pv-like' + (liked ? ' on' : '') + '" id="pvLike" aria-pressed="' + liked + '">' + PS.icon('heart', 16) + ' 공감 <span id="pvLikeN">' + (p.like_count || '') + '</span></button>' +
         '<span class="views">조회 ' + ((p.view_count || 0) + 1) + '</span></div>' +
       '<section class="cmts"><h2>댓글 <span id="cmtN">' + (p.comment_count || '') + '</span></h2><div id="cmtList"></div></section>' +
@@ -250,6 +251,35 @@
       }).join('') : '<p style="color:var(--hint);font-size:14px;padding:12px 0">첫 댓글을 남겨 보세요</p>';
     }
     loadComments();
+
+    // 이 글을 보고 있는 동안 새 댓글이 달리면 바로 보여 줌 (이때는 웹 푸시 대신 화면에서 알림)
+    sb.channel('story-comments-' + id)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'story_comments', filter: 'post_id=eq.' + id }, async function (payload) {
+        var c = payload.new || {};
+        if (user && c.author_id === user.id) return; // 내가 단 댓글은 등록할 때 이미 다시 불러옴
+        await loadComments();
+        PS.toast('새 댓글이 달렸어요');
+      })
+      .subscribe();
+
+    // 내 글: 댓글 알림이 꺼져 있으면 켜기 안내 (채팅 알림과 같은 구독을 씀)
+    function drawPush() {
+      var box = $('pvPush'); if (!box) return;
+      var st = PS.push.state();
+      box.innerHTML = st === 'granted' || st === 'unsupported' ? ''
+        : st === 'ios_install' ? '<div class="push-prompt" style="margin:14px 0 0"><div><b>댓글 알림을 받으려면</b><span>Safari 아래 공유 버튼 → "홈 화면에 추가" 후, 홈 화면의 판다산다에서 알림을 켜 주세요</span></div></div>'
+        : st === 'denied' ? '<div class="push-prompt" style="margin:14px 0 0"><div><b>알림이 꺼져 있어요</b><span>브라우저 주소창 옆 사이트 설정에서 알림을 허용하면 댓글이 달릴 때 알려 드려요</span></div></div>'
+        : '<div class="push-prompt" style="margin:14px 0 0"><div><b>댓글이 달리면 알려 드릴까요?</b><span>사이트를 닫아도 휴대폰·PC로 알림이 와요</span></div><button type="button" class="btn small" id="pvPushOn">알림 켜기</button></div>';
+      var on = $('pvPushOn');
+      if (on) on.onclick = async function () {
+        on.disabled = true;
+        var r = await PS.push.enable();
+        PS.toast(r === 'ok' ? '알림을 켰어요! 댓글이 달리면 알려 드릴게요' : r === 'denied' ? '알림이 허용되지 않았어요' : '이 브라우저에서는 알림을 켤 수 없어요');
+        drawPush();
+      };
+    }
+    if (mine) drawPush();
+
     $('cmtList').addEventListener('click', async function (e) {
       var d = e.target.closest('[data-del]'), rp = e.target.closest('[data-rep]');
       if (d) {

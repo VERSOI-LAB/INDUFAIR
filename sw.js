@@ -1,4 +1,5 @@
-// 판다산다 서비스 워커: 채팅 웹 푸시 알림만 처리 (캐시는 하지 않음)
+// 판다산다 서비스 워커: 채팅·이야기 댓글 웹 푸시 알림만 처리 (캐시는 하지 않음)
+// 알림이 가리키는 화면(채팅방·이야기 글)을 지금 보고 있으면 띄우지 않음 — 그 화면이 실시간으로 직접 보여 줌
 self.addEventListener('install', function () { self.skipWaiting(); });
 self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
 
