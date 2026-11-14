@@ -222,7 +222,7 @@
     }
     if (biz) await sb.from('business_images').delete().eq('business_id', bid);
     if (urls.length) await sb.from('business_images').insert(urls.map(function (u, i) { return { business_id: bid, url: u, sort_order: i }; }));
-    location.href = PS.bizUrl(bid);
+    location.href = editId ? PS.bizUrl(bid) : '/my-biz?created=1'; // 처음 등록이면 관리 화면에서 초대 안내
   }
 })();
 </script>
