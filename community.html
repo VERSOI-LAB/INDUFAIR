@@ -92,11 +92,79 @@
   var T = PS.COMMUNITY_TOPICS;
   var path = location.pathname;
   var isWrite = /^\/community\/write/.test(path) || PS.param('write') === '1';
-  var id = isWrite ? null : PS.idFromUrl('community');
+  var isAdmin = /^\/community\/admin/.test(path) || PS.param('admin') === '1';
+  var id = isWrite || isAdmin ? null : PS.idFromUrl('community');
 
-  if (isWrite) writePage(PS.param('id'));
+  if (isAdmin) adminPage();
+  else if (isWrite) writePage(PS.param('id'));
   else if (id) postPage(id);
   else listPage();
+
+  // ---------------- 신고 검토 (운영자만) ----------------
+  async function adminPage() {
+    topbar('신고 검토', '/mypage');
+    var user = await PS.ready;
+    if (!user) return PS.goLogin();
+    var ok = await sb.rpc('is_app_admin');
+    if (ok.error || ok.data !== true) {
+      body.innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>운영자만 볼 수 있어요</b></div>';
+      return;
+    }
+    var tab = 'open';
+    var VERDICT = { hide: ['자동 숨김', 'var(--danger)'], review: ['검토 필요', '#8A6400'], keep: ['문제 없음', '#1E8E45'] };
+    body.innerHTML =
+      '<p class="lead" style="color:var(--sub);font-size:14px;line-height:1.6;margin-top:12px">새 글·댓글과 신고는 자동으로 검토돼요. 분명한 위반은 바로 숨기고, 애매한 건 여기에 모아 알림을 보내요.</p>' +
+      '<div class="chips" id="adTabs" style="margin-top:10px"><button type="button" class="chip on" data-t="open">처리할 것</button><button type="button" class="chip" data-t="hidden">숨겨진 것</button></div>' +
+      '<div id="adList"></div>';
+    var $ = function (x) { return document.getElementById(x); };
+    $('adTabs').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-t]'); if (!b) return;
+      tab = b.dataset.t;
+      $('adTabs').querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('on', c === b); });
+      load();
+    });
+    $('adList').addEventListener('click', async function (e) {
+      var b = e.target.closest('[data-act]'); if (!b) return;
+      var label = { hide: '숨길까요?', keep: '그대로 둘까요? 열린 신고는 처리 끝으로 바뀌어요.', restore: '되살릴까요? 다시 모두에게 보이고 신고 수가 0이 돼요.' }[b.dataset.act];
+      if (!confirm(label)) return;
+      b.disabled = true;
+      var r = await sb.rpc('story_admin_decide', { p_kind: b.dataset.kind, p_id: Number(b.dataset.id), p_action: b.dataset.act });
+      if (r.error || r.data !== 'ok') { b.disabled = false; PS.toast('처리하지 못했어요'); return; }
+      PS.toast({ hide: '숨겼어요', keep: '그대로 두었어요', restore: '되살렸어요' }[b.dataset.act]);
+      load();
+    });
+    async function load() {
+      $('adList').innerHTML = '<div class="skeleton" style="height:120px;margin-top:12px"></div>';
+      var r = await sb.rpc('story_admin_queue');
+      var all = r.error ? [] : (r.data || []);
+      var rows = all.filter(function (x) {
+        var needs = x.open_reports > 0 || (x.review && x.review.verdict === 'review');
+        return tab === 'hidden' ? x.status === 'hidden' : (x.status === 'active' && needs) || (x.status === 'hidden' && x.open_reports > 0);
+      });
+      if (!rows.length) {
+        $('adList').innerHTML = '<div class="empty" style="padding:40px 0">' + PS.sticker('good', 90) + '<b>' + (tab === 'open' ? '처리할 신고가 없어요' : '숨겨진 글이 없어요') + '</b></div>';
+        return;
+      }
+      $('adList').innerHTML = rows.map(function (x) {
+        var v = x.review && VERDICT[x.review.verdict];
+        var acts = x.status === 'hidden'
+          ? '<button type="button" class="btn small" data-act="restore" data-kind="' + x.kind + '" data-id="' + x.id + '">되살리기</button><button type="button" class="btn white small" data-act="keep" data-kind="' + x.kind + '" data-id="' + x.id + '">숨김 유지</button>'
+          : '<button type="button" class="btn danger small" data-act="hide" data-kind="' + x.kind + '" data-id="' + x.id + '">숨기기</button><button type="button" class="btn white small" data-act="keep" data-kind="' + x.kind + '" data-id="' + x.id + '">그대로 두기</button>';
+        return '<article style="padding:16px 0;border-bottom:1px solid var(--line)">' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px">' +
+            '<span class="cm-topic">' + (x.kind === 'post' ? '글' : '댓글') + '</span>' +
+            '<span class="cm-topic" style="' + (x.status === 'hidden' ? 'background:#FFF0EF;color:var(--danger)' : '') + '">' + (x.status === 'hidden' ? '숨김' : '공개') + '</span>' +
+            (x.open_reports ? '<span class="cm-topic" style="background:#FFF0EF;color:var(--danger)">신고 ' + x.open_reports + '건</span>' : '') +
+            ((x.reasons || []).filter(Boolean).map(function (s) { return '<span class="cm-topic">' + PS.esc(s) + '</span>'; }).join('')) +
+          '</div>' +
+          (v ? '<p style="margin-top:8px;font-size:13px;color:' + v[1] + '"><b>' + (x.review.reviewer === 'ai' ? '자동 검토(AI)' : '자동 검토') + ' · ' + v[0] + '</b> — ' + PS.esc(x.review.reason || '') + '</p>' : '') +
+          '<div class="cm-body" style="margin-top:8px;-webkit-line-clamp:4">' + PS.esc(x.body) + '</div>' +
+          '<div class="cm-meta" style="margin-top:6px">' + PS.esc((x.author_name || '이웃') + ' · ' + PS.ago(x.created_at)) + ' · <a href="/community/' + x.post_id + '" style="text-decoration:underline">글 보기</a></div>' +
+          '<div style="display:flex;gap:8px;margin-top:10px">' + acts + '</div></article>';
+      }).join('');
+    }
+    load();
+  }
 
   function topbar(title, back) {
     document.getElementById('topbar').hidden = false;

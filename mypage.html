@@ -95,6 +95,7 @@
     main.querySelectorAll('.mrow span[style*="margin-left:auto"] + .go').forEach(function (g) { g.style.marginLeft = '6px'; });
     loadKeywordBadge();
     loadPaySeller();
+    loadStoryAdmin();
   });
 
   // 사업자 인증을 했는데 정산 계좌가 없으면 등록 안내. 안전결제 판매자 상태 표시
@@ -117,6 +118,16 @@
     document.getElementById('payoutBtn').addEventListener('click', function () {
       PS.openPayoutAccount({ onSaved: function () { box.innerHTML = ''; if (v.pay_status === 'none' || v.pay_status === 'rejected') location.href = '/pay-seller'; } });
     });
+  }
+
+  // 운영자: 이야기 신고 검토 메뉴 + 처리할 신고 수
+  async function loadStoryAdmin() {
+    var ok = await sb.rpc('is_app_admin');
+    if (ok.error || ok.data !== true) return;
+    var n = await sb.rpc('story_admin_open_count');
+    var cnt = n.error ? 0 : (n.data || 0);
+    main.insertAdjacentHTML('beforeend', '<section class="mcard"><h3>운영</h3>' +
+      row('/community/admin', 'chat', '이야기 신고 검토', cnt ? '<span class="badge-n">' + (cnt > 99 ? '99+' : cnt) + '</span>' : '') + '</section>');
   }
 
   // 키워드 알림: 마지막으로 본 뒤 새로 올라온, 키워드가 들어간 물건 수
