@@ -25,7 +25,7 @@
     <h1>키워드 알림 설정</h1>
   </header>
   <main class="page">
-    <p style="color:var(--sub);margin-top:16px;line-height:1.6">찾는 물건 이름이나 관심 분야(예: 스마트공장)를 등록하면, 새로 올라온 물건과 지원사업을 여기와 마이 메뉴에 빨간 숫자로 알려드려요.</p>
+    <p style="color:var(--sub);margin-top:16px;line-height:1.6">찾는 물건 이름이나 관심 분야(예: 스마트공장)를 등록하면, 새로 올라온 물건·지원사업·교육 행사를 여기와 마이 메뉴에 빨간 숫자로 알려드려요.</p>
     <form id="form" style="display:flex;gap:8px;margin-top:16px">
       <input class="input" id="kw" maxlength="30" placeholder="예) 레귤레이터, 컴프레샤" autocomplete="off" aria-label="키워드" style="flex:1">
       <button class="btn" type="submit" style="width:88px">등록</button>
@@ -37,6 +37,10 @@
     <section id="spWrap" hidden>
       <h3 class="sec-title" style="font-size:18px">키워드 지원사업</h3>
       <div class="list" id="spList"></div>
+    </section>
+    <section id="evWrap" hidden>
+      <h3 class="sec-title" style="font-size:18px">키워드 교육·행사</h3>
+      <div class="list" id="evList"></div>
     </section>
   </main>
 </div>
@@ -106,6 +110,14 @@
     var rows = res.error ? [] : (res.data || []);
     $('spWrap').hidden = !rows.length;
     $('spList').innerHTML = rows.map(function (p) { return PS.supportRowHtml(p, !seenBefore || (p.posted_at && p.posted_at > seenBefore)); }).join('');
+
+    // 키워드가 들어간, 아직 안 끝난 교육·행사
+    var ev = await sb.from('biz_events').select(PS.EVENT_COLUMNS)
+      .or('event_end.gte.' + PS.todayKST() + ',event_end.is.null').or(ors)
+      .order('event_start', { ascending: true, nullsFirst: false }).limit(30);
+    var evRows = ev.error ? [] : (ev.data || []);
+    $('evWrap').hidden = !evRows.length;
+    $('evList').innerHTML = evRows.map(function (e) { return PS.eventRowHtml(e, !seenBefore || (e.posted_at && e.posted_at > seenBefore)); }).join('');
   }
 
   $('form').addEventListener('submit', async function (e) {

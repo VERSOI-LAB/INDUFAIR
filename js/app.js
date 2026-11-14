@@ -795,6 +795,34 @@
       '<div class="sp-m">신청 ' + PS.esc(PS.supportPeriod(p)) + '</div></div></a>';
   };
 
+  // ---- 교육·세미나·전시회·설명회 (기업마당 행사정보, 같은 함수가 매일 수집) ----
+  PS.EVENT_COLUMNS = 'id,title,event_type,category,region,organizer,apply_text,apply_start,apply_end,event_text,event_start,event_end,url,posted_at';
+  PS.eventUrl = function (id) { return '/events/' + encodeURIComponent(id); };
+  PS.eventDday = function (e) {
+    var today = PS.todayKST();
+    if (!e.event_start) return { label: '일정 확인', cls: 'always' };
+    var end = e.event_end || e.event_start;
+    if (end < today) return { label: '종료', cls: 'closed' };
+    if (e.event_start === today) return { label: '오늘', cls: 'today' };
+    if (e.event_start < today) return { label: '진행 중', cls: 'upcoming' };
+    var days = Math.round((Date.parse(e.event_start) - Date.parse(today)) / 86400000);
+    return { label: days === 1 ? '내일' : 'D-' + days, cls: days <= 7 ? 'soon' : 'open' };
+  };
+  PS.eventPeriod = function (e) {
+    var f = function (d) { return d ? d.slice(2).replace(/-/g, '.') : ''; };
+    if (!e.event_start) return e.event_text || '일정은 원문을 확인해 주세요';
+    return f(e.event_start) + (e.event_end && e.event_end !== e.event_start ? ' ~ ' + f(e.event_end) : '');
+  };
+  PS.eventRowHtml = function (e, isNew) {
+    var d = PS.eventDday(e);
+    var apply = e.apply_end && e.apply_end >= PS.todayKST() ? ' · 접수 ~' + e.apply_end.slice(5).replace('-', '.') : '';
+    return '<a class="sp-row" href="' + PS.eventUrl(e.id) + '">' +
+      '<span class="sp-dday sp-' + d.cls + '">' + d.label + '</span>' +
+      '<div class="sp-info"><div class="sp-t">' + (isNew ? '<span class="badge reserved" style="background:var(--danger)">NEW</span>' : '') + PS.esc(e.title) + '</div>' +
+      '<div class="sp-m">' + PS.esc([e.event_type, e.region !== '전국' ? PS.supportRegionLabel(e.region) : '', e.organizer].filter(Boolean).join(' · ')) + '</div>' +
+      '<div class="sp-m">일정 ' + PS.esc(PS.eventPeriod(e) + apply) + '</div></div></a>';
+  };
+
   // ---- 최근 본 물건 (이 기기에만 저장) ----
   PS.recentIds = function () {
     try { return JSON.parse(localStorage.getItem('ps_recent') || '[]'); } catch (e) { return []; }
@@ -933,7 +961,7 @@
   if (/^\/(index(\.html)?)?$|^\/(product|business|biz\/(?!new|verify)|profile)/.test(location.pathname)) document.documentElement.classList.add('pc-wide');
 
   // PC 에서 홈과 같은 좌우 여백(내용 폭 70%)을 쓰는 페이지: 채팅·마이와 마이 하위 화면, 결제, 물건 수정 (app.css 의 html.pc-70)
-  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|support|settings|neighborhood|price|shipping|cart|checkout|edit|pay-seller|my-biz|biz-premium|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
+  if (/^\/(chat|mypage|sales|purchases|favorites|recent|keywords|support|events|settings|neighborhood|price|shipping|cart|checkout|edit|pay-seller|my-biz|biz-premium|biz-new|biz-verify|biz\/(new|verify))(\/|\.html|$)/.test(location.pathname)) document.documentElement.classList.add('pc-70');
 
   // ---- 하단 탭바 ----
   var TABS = [

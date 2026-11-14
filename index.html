@@ -57,8 +57,8 @@
       -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
     .pick-card .go{height:64px;font-size:20px;}
     /* 방금 올라온 물건도 판다/산다 버튼과 같은 폭(70%)으로 가운데 */
-    #spHome .list{grid-template-columns:repeat(3,minmax(0,1fr));}
-    #spHome .sp-row{border-bottom:none;}
+    #spHome .list,#evHome .list{grid-template-columns:repeat(3,minmax(0,1fr));}
+    #spHome .sp-row,#evHome .sp-row{border-bottom:none;}
     .sec-title,.list,.page > .empty{width:70vw;max-width:100%;margin-left:auto;margin-right:auto;}
     .sec-title{margin-top:44px;font-size:24px;}
     .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;}
@@ -95,6 +95,11 @@
     <section id="spHome" hidden>
       <h2 class="sec-title sp-head"><span>마감 임박 지원사업</span><a href="/support">전체 보기 ›</a></h2>
       <div class="list" id="spHomeList"></div>
+    </section>
+
+    <section id="evHome" hidden>
+      <h2 class="sec-title sp-head"><span>다가오는 교육·행사</span><a href="/events">전체 보기 ›</a></h2>
+      <div class="list" id="evHomeList"></div>
     </section>
 
     <h2 class="sec-title">방금 올라온 물건</h2>
@@ -147,6 +152,15 @@
     if (r.error || !(r.data || []).length) return;
     document.getElementById('spHomeList').innerHTML = r.data.map(function (p) { return PS.supportRowHtml(p); }).join('');
     document.getElementById('spHome').hidden = false;
+  })();
+
+  // 가까운 일정의 교육·행사 3개 (오늘 이후 시작)
+  (async function () {
+    var r = await sb.from('biz_events').select(PS.EVENT_COLUMNS).gte('event_start', PS.todayKST())
+      .order('event_start', { ascending: true }).limit(3);
+    if (r.error || !(r.data || []).length) return;
+    document.getElementById('evHomeList').innerHTML = r.data.map(function (e) { return PS.eventRowHtml(e); }).join('');
+    document.getElementById('evHome').hidden = false;
   })();
 })();
 </script>

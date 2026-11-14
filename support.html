@@ -5,13 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light">
 <title>정부 지원사업 - 판다산다</title>
-<meta name="description" content="중소기업·제조업·소상공인을 위한 정부·지자체 지원사업 공고를 매일 자동으로 모아 마감 순으로 보여드려요.">
+<meta name="description" content="중소기업·제조업·소상공인을 위한 정부·지자체 지원사업 공고와 교육·세미나·전시회 정보를 매일 자동으로 모아 보여드려요.">
 <link rel="icon" href="/이미지/web/logo.jpg">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="apple-touch-icon" href="/이미지/app/icon-180.png">
 <meta name="theme-color" content="#FFFFFF">
 <link rel="stylesheet" href="/app.css">
 <style>
+  .sp-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);margin:0 -16px;padding:0 16px;}
+  .sp-tabs a{height:48px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
+  .sp-tabs a.on{color:var(--text);border-bottom-color:var(--text);}
   .lead{color:var(--sub);margin-top:12px;line-height:1.6;font-size:15px;}
   .sp-filter{display:grid;gap:10px;margin-top:14px;}
   .sp-filter .search{height:48px;}
@@ -51,30 +54,67 @@
 (function () {
   PS.renderTabbar('home');
   var body = document.getElementById('body');
-  var id = PS.idFromUrl('support');
-  if (id) detail(id); else list();
+  var today = PS.todayKST();
+
+  // 지원사업(/support) 과 교육·행사(/events) 를 같은 틀로 보여 준다
+  var KINDS = {
+    support: {
+      table: 'support_programs', cols: PS.SUPPORT_COLUMNS, row: function (p) { return PS.supportRowHtml(p); },
+      title: '정부 지원사업', path: '/support',
+      lead: '정부·지자체 지원사업 공고를 기업마당에서 매일 자동으로 모아요. 신청은 공고 원문에서 해 주세요.',
+      placeholder: '예) 스마트공장, 수출, 자동화', chipField: 'category', chipLabel: '분야',
+      sorts: { end: '마감 임박순', new: '최신 공고순' }, openLabel: '마감 제외',
+      openFilter: 'apply_end.gte.' + today + ',apply_end.is.null',
+      order: function (q, sort) {
+        return sort === 'end' ? q.order('apply_end', { ascending: true, nullsFirst: false }).order('posted_at', { ascending: false })
+          : q.order('posted_at', { ascending: false, nullsFirst: false });
+      },
+      empty: '지원사업을 준비 중이에요', count: '공고'
+    },
+    events: {
+      table: 'biz_events', cols: PS.EVENT_COLUMNS, row: function (e) { return PS.eventRowHtml(e); },
+      title: '교육·세미나·행사', path: '/events',
+      lead: '중소기업이 참여할 수 있는 교육·세미나·전시회·설명회를 기업마당에서 매일 자동으로 모아요.',
+      placeholder: '예) 스마트공장 교육, 수출 설명회', chipField: 'event_type', chipLabel: '행사 유형',
+      // 1년짜리 상시 교육이 맨 위를 차지하지 않게 '곧 시작'과 '진행 중'을 나눔
+      sorts: { soon: '곧 시작하는 순', ongoing: '진행 중', new: '최신 등록순' }, openLabel: '지난 행사 제외',
+      openFilter: 'event_end.gte.' + today + ',event_end.is.null',
+      order: function (q, sort) {
+        if (sort === 'soon') return q.gte('event_start', today).order('event_start', { ascending: true }).order('posted_at', { ascending: false });
+        if (sort === 'ongoing') return q.lt('event_start', today).gte('event_end', today).order('event_end', { ascending: true });
+        return q.order('posted_at', { ascending: false, nullsFirst: false });
+      },
+      empty: '교육·행사 정보를 준비 중이에요', count: '행사'
+    }
+  };
+  var isEvent = /^\/events(\/|$)/.test(location.pathname) || PS.param('tab') === 'events';
+  var K = KINDS[isEvent ? 'events' : 'support'];
+  var id = PS.idFromUrl(isEvent ? 'events' : 'support');
+  document.getElementById('head').textContent = K.title;
+  document.title = K.title + ' - 판다산다';
+  if (id) (isEvent ? eventDetail : detail)(id); else list();
 
   // ---- 목록 ----
-  function list() {
-    var st = { q: PS.param('q') || '', cat: PS.param('cat') || '', region: '', open: true, sort: 'end', offset: 0 };
+  async function list() {
+    var st = { q: PS.param('q') || '', chip: PS.param('cat') || '', region: '', open: true, sort: Object.keys(K.sorts)[0], offset: 0 };
     var PAGE = 30;
     try { st.region = localStorage.getItem('ps_sp_region') || ''; } catch (e) {}
     if (st.region === '광주' || st.region === '전남') st.region = '전남광주'; // 예전에 저장된 선택
     if (st.region && PS.SUPPORT_REGIONS.indexOf(st.region) < 0) st.region = '';
     body.innerHTML =
-      '<p class="lead">정부·지자체 지원사업 공고를 기업마당에서 매일 자동으로 모아요. 신청은 공고 원문에서 해 주세요.</p>' +
+      '<nav class="sp-tabs" aria-label="정보 종류"><a href="/support"' + (isEvent ? '' : ' class="on" aria-current="page"') + '>지원사업</a>' +
+        '<a href="/events"' + (isEvent ? ' class="on" aria-current="page"' : '') + '>교육·행사</a></nav>' +
+      '<p class="lead">' + K.lead + '</p>' +
       '<div class="sp-filter">' +
         '<form class="search" id="spForm" role="search"><span aria-hidden="true" style="display:flex">' + PS.icon('search', 20) + '</span>' +
-          '<input id="spQ" type="search" placeholder="예) 스마트공장, 수출, 자동화" value="' + PS.esc(st.q) + '" autocomplete="off" aria-label="지원사업 검색"></form>' +
-        '<div class="chips" id="spCats" role="group" aria-label="분야">' + [''].concat(PS.SUPPORT_CATEGORIES).map(function (c) {
-          return '<button type="button" class="chip' + (c === st.cat ? ' on' : '') + '" data-cat="' + c + '" aria-pressed="' + (c === st.cat) + '">' + (c || '전체') + '</button>';
-        }).join('') + '</div>' +
+          '<input id="spQ" type="search" placeholder="' + K.placeholder + '" value="' + PS.esc(st.q) + '" autocomplete="off" aria-label="' + K.title + ' 검색"></form>' +
+        '<div class="chips" id="spCats" role="group" aria-label="' + K.chipLabel + '"></div>' +
         '<div class="sp-opts">' +
           '<select id="spRegion" aria-label="지역"><option value="">모든 지역</option>' + PS.SUPPORT_REGIONS.map(function (r) {
             return '<option value="' + r + '"' + (r === st.region ? ' selected' : '') + '>' + PS.supportRegionLabel(r) + '</option>';
           }).join('') + '</select>' +
-          '<select id="spSort" aria-label="정렬"><option value="end">마감 임박순</option><option value="new">최신 공고순</option></select>' +
-          '<label><input type="checkbox" id="spOpen" checked> 마감 제외</label>' +
+          '<select id="spSort" aria-label="정렬">' + Object.keys(K.sorts).map(function (k) { return '<option value="' + k + '">' + K.sorts[k] + '</option>'; }).join('') + '</select>' +
+          '<label><input type="checkbox" id="spOpen" checked> ' + K.openLabel + '</label>' +
         '</div>' +
       '</div>' +
       '<p class="sp-count" id="spCount"></p>' +
@@ -82,12 +122,27 @@
       '<div class="more" id="spMore" hidden><button class="btn white small" type="button">더 보기</button></div>';
 
     var $ = function (x) { return document.getElementById(x); };
+    function drawChips(list) {
+      $('spCats').innerHTML = [''].concat(list).map(function (c) {
+        return '<button type="button" class="chip' + (c === st.chip ? ' on' : '') + '" data-cat="' + PS.esc(c) + '" aria-pressed="' + (c === st.chip) + '">' + PS.esc(c || '전체') + '</button>';
+      }).join('');
+    }
+    // 지원사업은 정해진 분야, 행사는 실제 데이터에 많은 유형 순으로
+    if (isEvent) {
+      drawChips([]);
+      sb.from('biz_events').select('event_type').or(K.openFilter).limit(2000).then(function (r) {
+        var n = {};
+        (r.data || []).forEach(function (x) { if (x.event_type) n[x.event_type] = (n[x.event_type] || 0) + 1; });
+        drawChips(Object.keys(n).sort(function (a, b) { return n[b] - n[a]; }).slice(0, 8));
+      });
+    } else drawChips(PS.SUPPORT_CATEGORIES);
+
     var timer = null;
     $('spForm').addEventListener('submit', function (e) { e.preventDefault(); st.q = $('spQ').value.trim(); load(true); });
     $('spQ').addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { st.q = $('spQ').value.trim(); load(true); }, 300); });
     $('spCats').addEventListener('click', function (e) {
       var b = e.target.closest('[data-cat]'); if (!b) return;
-      st.cat = b.dataset.cat;
+      st.chip = b.dataset.cat;
       $('spCats').querySelectorAll('.chip').forEach(function (c) { var on = c === b; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on); });
       load(true);
     });
@@ -109,63 +164,89 @@
         }).join('');
       }
       var my = ++seq;
-      var q = sb.from('support_programs').select(PS.SUPPORT_COLUMNS, { count: 'exact' });
-      if (st.open) q = q.or('apply_end.gte.' + PS.todayKST() + ',apply_end.is.null');
-      if (st.cat) q = q.eq('category', st.cat);
+      var q = sb.from(K.table).select(K.cols, { count: 'exact' });
+      if (st.open) q = q.or(K.openFilter);
+      if (st.chip) q = q.eq(K.chipField, st.chip);
       if (st.region) q = q.in('region', [st.region, '전국']);
       if (st.q) q = q.ilike('title', '%' + st.q.replace(/[%_,()]/g, ' ') + '%');
-      q = st.sort === 'end'
-        ? q.order('apply_end', { ascending: true, nullsFirst: false }).order('posted_at', { ascending: false })
-        : q.order('posted_at', { ascending: false, nullsFirst: false });
-      var res = await q.range(st.offset, st.offset + PAGE - 1);
+      var res = await K.order(q, st.sort).range(st.offset, st.offset + PAGE - 1);
       if (my !== seq) return; // 더 최근 요청이 있음
       if (res.error) {
-        $('spList').innerHTML = '<div class="empty">' + PS.sticker('working', 100) + '<b>지원사업을 준비 중이에요</b>곧 매일 새 공고를 모아 보여 드릴게요</div>';
+        $('spList').innerHTML = '<div class="empty">' + PS.sticker('working', 100) + '<b>' + K.empty + '</b>곧 매일 새 정보를 모아 보여 드릴게요</div>';
         $('spCount').textContent = ''; $('spMore').hidden = true;
         return;
       }
       var rows = res.data || [];
       if (reset) $('spList').innerHTML = '';
       if (reset && !rows.length) {
-        $('spList').innerHTML = '<div class="empty">' + PS.sticker('searching', 100) + '<b>맞는 공고가 없어요</b>검색어나 분야를 바꿔 보세요</div>';
+        $('spList').innerHTML = '<div class="empty">' + PS.sticker('searching', 100) + '<b>맞는 정보가 없어요</b>검색어나 조건을 바꿔 보세요</div>';
       }
-      $('spList').insertAdjacentHTML('beforeend', rows.map(function (p) { return PS.supportRowHtml(p); }).join(''));
+      $('spList').insertAdjacentHTML('beforeend', rows.map(K.row).join(''));
       st.offset += rows.length;
-      $('spCount').textContent = res.count != null ? '공고 ' + res.count.toLocaleString('ko-KR') + '건' : '';
+      $('spCount').textContent = res.count != null ? K.count + ' ' + res.count.toLocaleString('ko-KR') + '건' : '';
       $('spMore').hidden = rows.length < PAGE;
     }
     load(true);
   }
 
-  // ---- 상세 ----
+  function box(rows) {
+    rows = rows.filter(function (r) { return r[1]; });
+    return '<div class="sd-box"><dl>' + rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('') + '</dl></div>';
+  }
+  function badge(d) { return ' <span class="sp-dday sp-' + d.cls + '" style="height:24px;min-width:0;margin-left:4px">' + d.label + '</span>'; }
+
+  // ---- 지원사업 상세 ----
   async function detail(id) {
     document.getElementById('back').href = '/support';
     if (!/^\d+$/.test(id)) return notFound();
     var res = await sb.from('support_programs').select(PS.SUPPORT_COLUMNS + ',summary').eq('id', id).maybeSingle();
     var p = res.data;
     if (!p) return notFound();
-    var d = PS.supportDday(p);
     document.title = p.title + ' - 판다산다 지원사업';
-    var rows = [
-      ['신청 기간', PS.esc(PS.supportPeriod(p)) + ' <span class="sp-dday sp-' + d.cls + '" style="height:24px;min-width:0;margin-left:4px">' + d.label + '</span>'],
-      ['소관 기관', PS.esc(p.agency || '')],
-      ['수행 기관', PS.esc(p.executor || '')],
-      ['지원 대상', PS.esc(p.target || '')],
-      ['지역', PS.esc(PS.supportRegionLabel(p.region || '전국'))]
-    ].filter(function (r) { return r[1]; });
     body.innerHTML =
       '<div class="sd-cat">' + PS.esc(['지원사업', p.category].filter(Boolean).join(' · ')) + '</div>' +
       '<h1 class="sd-title">' + PS.esc(p.title) + '</h1>' +
-      '<div class="sd-box"><dl>' + rows.map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + r[1] + '</dd>'; }).join('') + '</dl></div>' +
+      box([
+        ['신청 기간', PS.esc(PS.supportPeriod(p)) + badge(PS.supportDday(p))],
+        ['소관 기관', PS.esc(p.agency || '')],
+        ['수행 기관', PS.esc(p.executor || '')],
+        ['지원 대상', PS.esc(p.target || '')],
+        ['지역', PS.esc(PS.supportRegionLabel(p.region || '전국'))]
+      ]) +
       (p.summary ? '<h2 class="sd-h">사업 개요</h2><div class="sd-sum">' + PS.esc(p.summary) + '</div>' : '') +
       '<a class="btn sd-go" href="' + PS.esc(p.url) + '" target="_blank" rel="noopener">공고 원문 보고 신청하기</a>' +
       '<p class="sd-note">이 정보는 기업마당(bizinfo.go.kr) 공고를 자동으로 모은 거예요. 신청 자격·서류·기간은 꼭 원문에서 확인해 주세요.</p>' +
       '<a class="btn white small" href="/support" style="margin-top:16px">다른 지원사업 보기</a>';
   }
 
+  // ---- 교육·행사 상세 ----
+  async function eventDetail(id) {
+    document.getElementById('back').href = '/events';
+    if (!/^\d+$/.test(id)) return notFound();
+    var res = await sb.from('biz_events').select(PS.EVENT_COLUMNS + ',summary,origin_url').eq('id', id).maybeSingle();
+    var e = res.data;
+    if (!e) return notFound();
+    document.title = e.title + ' - 판다산다 교육·행사';
+    var applyText = e.apply_start || e.apply_end ? PS.supportPeriod(e) : (e.apply_text || '');
+    body.innerHTML =
+      '<div class="sd-cat">' + PS.esc([e.event_type || '행사', e.category].filter(Boolean).join(' · ')) + '</div>' +
+      '<h1 class="sd-title">' + PS.esc(e.title) + '</h1>' +
+      box([
+        ['행사 일정', PS.esc(PS.eventPeriod(e)) + badge(PS.eventDday(e))],
+        ['접수 기간', PS.esc(applyText)],
+        ['주최', PS.esc(e.organizer || '')],
+        ['지역', PS.esc(PS.supportRegionLabel(e.region || '전국'))]
+      ]) +
+      (e.summary ? '<h2 class="sd-h">행사 내용</h2><div class="sd-sum">' + PS.esc(e.summary) + '</div>' : '') +
+      (e.origin_url ? '<a class="btn sd-go" href="' + PS.esc(e.origin_url) + '" target="_blank" rel="noopener">주최 기관 페이지에서 신청하기</a>' : '') +
+      '<a class="btn ' + (e.origin_url ? 'white small' : 'sd-go') + '" href="' + PS.esc(e.url) + '" target="_blank" rel="noopener"' + (e.origin_url ? ' style="margin-top:10px"' : '') + '>기업마당에서 자세히 보기</a>' +
+      '<p class="sd-note">이 정보는 기업마당(bizinfo.go.kr) 행사정보를 자동으로 모은 거예요. 일정·장소·참가 방법은 꼭 원문에서 확인해 주세요.</p>' +
+      '<a class="btn white small" href="/events" style="margin-top:16px">다른 교육·행사 보기</a>';
+  }
+
   function notFound() {
-    body.innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>공고를 찾을 수 없어요</b>마감이 오래 지나 정리된 공고일 수 있어요</div>' +
-      '<a class="btn white small" href="/support">지원사업 목록 보기</a>';
+    body.innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>정보를 찾을 수 없어요</b>기간이 오래 지나 정리된 정보일 수 있어요</div>' +
+      '<a class="btn white small" href="' + K.path + '">목록 보기</a>';
   }
 })();
 </script>

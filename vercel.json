@@ -22,6 +22,14 @@
       "destination": "/api/page?type=support&id=:id"
     },
     {
+      "source": "/events",
+      "destination": "/support"
+    },
+    {
+      "source": "/events/:id",
+      "destination": "/api/page?type=event&id=:id"
+    },
+    {
       "source": "/chat/:id",
       "destination": "/chat?id=:id"
     },
