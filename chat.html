@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="/app.css">
 <style>
   /* 목록 */
-  .chat-row{position:relative;overflow:hidden;border-bottom:1px solid var(--line);}
+  .chat-row{position:relative;overflow:hidden;border-bottom:1px solid var(--line);user-select:none;-webkit-user-select:none;}
   .chat-row .leave{position:absolute;top:0;right:0;bottom:0;width:88px;background:var(--danger);color:#fff;font-size:16px;font-weight:800;}
   .chat-item{position:relative;z-index:1;display:flex;gap:12px;align-items:center;padding:14px 16px;background:var(--surface);transition:transform .2s ease;touch-action:pan-y;user-select:none;-webkit-user-drag:none;}
   .chat-item.dragging{transition:none;}
