@@ -2,7 +2,7 @@
 //   { comment_id } 새 댓글 → 글쓴이에게 웹 푸시 + 댓글 자동 검토
 //   { post_id }    새 글   → 글 자동 검토
 //   { report_id }  새 신고 → 신고된 글/댓글 자동 검토 + 운영자(app_admins)에게 웹 푸시
-// 자동 검토: ANTHROPIC_API_KEY 가 있으면 Claude 가 판단(hide/keep/review), 없으면 간단한 규칙으로 바로 숨김
+// 자동 검토: 먼저 규칙(욕설·계좌·링크 여러 개·전화번호)에 걸리면 바로 숨김. 아니면 ANTHROPIC_API_KEY 가 있을 때 Claude 가 판단(hide/keep/review)
 //   hide 판정이면 바로 숨김(story_record_review). AI 의 hide·review 는 운영자에게 알림, 규칙 숨김은 알림 없음
 // 비밀값: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT(채팅 알림과 같음), ANTHROPIC_API_KEY(선택)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
@@ -72,7 +72,7 @@ async function aiReview(text: string, context: string): Promise<Verdict | null> 
   }
 }
 
-// 키가 없거나 AI 가 실패했을 때: 욕설·계좌번호·링크 여러 개·전화번호가 있으면 바로 숨김 (운영자가 '숨겨진 것'에서 되살릴 수 있음)
+// 규칙 검토: 욕설·계좌번호·링크 여러 개·전화번호가 있으면 바로 숨김 (운영자가 '숨겨진 것'에서 되살릴 수 있음)
 const BAD_WORDS = /씨발|시발(?!점)|ㅅㅂ|병신|ㅄ|개새끼|좆|느금|니애미|꺼져/;
 function ruleReview(text: string): Verdict {
   const t = String(text || "");
@@ -90,7 +90,9 @@ function ruleReview(text: string): Verdict {
 const needsAdmin = (v: Verdict) => v.verdict === "review" || (v.verdict === "hide" && v.reviewer === "ai");
 
 async function review(admin: SupabaseClient, kind: "post" | "comment", id: number, text: string, trigger: "new" | "report", context: string) {
-  const v = (await aiReview(text, context)) || ruleReview(text);
+  // 규칙에 걸리면 AI 를 부르지 않고 바로 숨김 (비용 없음). 나머지만 AI(키가 있을 때)
+  const r = ruleReview(text);
+  const v = r.verdict === "hide" ? r : (await aiReview(text, context)) || r;
   await admin.rpc("story_record_review", { p_kind: kind, p_id: id, p_trigger: trigger, p_verdict: v.verdict, p_reason: v.reason, p_reviewer: v.reviewer });
   return v;
 }
