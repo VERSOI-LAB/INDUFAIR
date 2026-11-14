@@ -2,6 +2,7 @@
 //   { comment_id } 새 댓글 → 글쓴이에게 웹 푸시 + 댓글 자동 검토
 //   { post_id }    새 글   → 글 자동 검토
 //   { report_id }  새 신고 → 신고된 글/댓글 자동 검토 + 운영자(app_admins)에게 웹 푸시
+//   { deadline_digest: true } 매일 아침 cron → 지원사업 마감 임박 알림 (support_alerts)
 // 자동 검토: 먼저 규칙(욕설·계좌·링크 여러 개·전화번호)에 걸리면 바로 숨김. 아니면 ANTHROPIC_API_KEY 가 있을 때 Claude 가 판단(hide/keep/review)
 //   hide 판정이면 바로 숨김(story_record_review). AI 의 hide·review 는 운영자에게 알림, 규칙 숨김은 알림 없음
 // 비밀값: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT(채팅 알림과 같음), ANTHROPIC_API_KEY(선택)
@@ -127,12 +128,55 @@ async function adminIds(admin: SupabaseClient) {
 const clip = (s: string, n: number) => { const t = String(s || "").replace(/\s+/g, " ").trim(); return t.length > n ? t.slice(0, n) + "…" : t; };
 const VERDICT_KO = { hide: "자동으로 숨겼어요", review: "검토가 필요해요", keep: "문제 없어 보여요" };
 
+// 관심 지역·분야 공고가 마감 N일 안으로 들어오면 한 번 알림. 한 사람에게 하루 한 통으로 묶음
+const regionLabel = (r: string) => r === "전남광주" ? "광주·전남" : r;
+async function deadlineDigest(admin: SupabaseClient) {
+  const today = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10);
+  const plus = (n: number) => new Date(Date.parse(today) + n * 86400_000).toISOString().slice(0, 10);
+  const { data: alerts } = await admin.from("support_alerts").select("profile_id,regions,fields,days");
+  if (!alerts || !alerts.length) return { ok: true, people: 0 };
+  const { data: progs } = await admin.from("support_programs").select("id,title,region,category,apply_end")
+    .gte("apply_end", today).lte("apply_end", plus(14)).order("apply_end", { ascending: true }).limit(2000);
+  let people = 0, pushes = 0;
+  for (const a of alerts) {
+    const until = plus(a.days || 3);
+    const hits = (progs || []).filter((p) =>
+      p.apply_end <= until &&
+      (!a.regions?.length || p.region === "전국" || a.regions.includes(p.region)) &&
+      (!a.fields?.length || a.fields.includes(p.category)));
+    if (!hits.length) continue;
+    const { data: sent } = await admin.from("support_alert_sent").select("program_id")
+      .eq("profile_id", a.profile_id).in("program_id", hits.map((p) => p.id));
+    const done = new Set((sent || []).map((x) => x.program_id));
+    const fresh = hits.filter((p) => !done.has(p.id));
+    if (!fresh.length) continue;
+    const first = fresh[0];
+    const d = Math.round((Date.parse(first.apply_end) - Date.parse(today)) / 86400_000);
+    const where = a.regions?.length === 1 ? regionLabel(a.regions[0]) + " " : "";
+    const n = await pushTo(admin, [a.profile_id], {
+      title: fresh.length === 1 ? `${where}지원사업 마감 ${d === 0 ? "오늘" : "D-" + d}` : `${where}관심 지원사업 ${fresh.length}건이 곧 마감돼요`,
+      body: clip(first.title, 80) + (fresh.length > 1 ? ` 외 ${fresh.length - 1}건` : ""),
+      url: fresh.length === 1 ? "/support/" + first.id : (a.regions?.length === 1 ? "/support/area/" + encodeURIComponent(a.regions[0]) : "/support"),
+      tag: "support-deadline",
+    });
+    people++;
+    if (n > 0) { // 알림이 실제로 간 사람만 기록 (나중에 알림을 켜면 그때 받도록)
+      pushes += n;
+      await admin.from("support_alert_sent").insert(fresh.map((p) => ({ profile_id: a.profile_id, program_id: p.id })));
+    }
+  }
+  return { ok: true, people, pushes };
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ code: "method_not_allowed" }, 405);
   let b: Record<string, unknown>;
   try { b = await req.json(); } catch { return json({ code: "bad_request" }, 400); }
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const fresh = (iso: string) => Date.now() - new Date(iso).getTime() < 5 * 60 * 1000; // 방금 생긴 것만 (다시 부르기 막기)
+
+  // ---- 지원사업 마감 임박 알림 (매일 아침 cron) ----
+  if (b.deadline_digest === true) return json(await deadlineDigest(admin));
 
   // ---- 새 글: 자동 검토 ----
   if (b.post_id != null) {
