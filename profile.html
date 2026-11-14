@@ -51,6 +51,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/js/supabase-client.js"></script>
 <script src="/js/app.js"></script>
+<script src="/js/people.js"></script>
 <script>
 (function () {
   PS.renderTabbar('');
@@ -83,6 +84,7 @@
     trust = (await PS.trust([id]))[id];
 
     var mine = PS.user && PS.user.id === id;
+    var blocked = !mine && PS.user ? await PS.isBlocked(id) : false;
     var region = (products.find(function (p) { return p.region; }) || {}).region;
     var sold = products.filter(function (p) { return p.status === 'sold'; }).length;
     var likes = products.reduce(function (a, p) { return a + (p.like_count || 0); }, 0);
@@ -101,11 +103,19 @@
         '<div><b>' + sold + '</b><span>거래 완료</span></div>' +
         '<div><b>' + likes + '</b><span>받은 찜</span></div>' +
       '</div>' +
-      (mine ? '<a class="btn white small" href="/mypage" style="margin-top:12px">내 정보 바꾸기</a>' : '') +
+      (mine ? '<a class="btn white small" href="/mypage" style="margin-top:12px">내 정보 바꾸기</a>'
+        : blocked ? '<div class="trust-warn" style="margin-top:12px"><b>차단한 사용자예요</b>아래 \'차단 풀기\'를 누르면 다시 채팅할 수 있어요.</div>'
+        : '<button type="button" class="btn small" id="chatBtn" style="margin-top:12px">' + PS.icon('chat', 20) + ' 채팅하기</button>') +
       '<div class="tabs" id="tabs" role="tablist"></div>' +
       '<div id="list"></div>' +
-      (mine ? '' : '<button type="button" class="report-link" id="reportBtn">이 사용자 신고하기</button>');
-    if (!mine) document.getElementById('reportBtn').addEventListener('click', function () { PS.openReport(id, { name: name }); });
+      (mine ? '' : '<div style="display:flex;justify-content:center;gap:18px"><button type="button" class="report-link" id="blockBtn">' + (blocked ? '차단 풀기' : '이 사용자 차단하기') + '</button>' +
+        '<button type="button" class="report-link" id="reportBtn">이 사용자 신고하기</button></div>');
+    if (!mine) {
+      document.getElementById('reportBtn').addEventListener('click', function () { PS.openReport(id, { name: name }); });
+      document.getElementById('blockBtn').addEventListener('click', function () { PS.toggleBlock(id, name, function () { location.reload(); }); });
+      var cb = document.getElementById('chatBtn');
+      if (cb) cb.addEventListener('click', function () { cb.disabled = true; PS.startDirectChat(id).then(function () { cb.disabled = false; }); });
+    }
     renderList();
   }
 

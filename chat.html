@@ -67,6 +67,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/js/supabase-client.js"></script>
 <script src="/js/app.js"></script>
+<script src="/js/people.js"></script>
 <script>
 (function () {
   var app = document.getElementById('app');
@@ -100,7 +101,7 @@
 
   async function loadList() {
     var me = PS.user.id;
-    var listCols = 'id,buyer_id,seller_id,last_message,last_message_at,created_at,products(id,title,status,product_images(url,sort_order))';
+    var listCols = 'id,buyer_id,seller_id,product_id,last_message,last_message_at,created_at,products(id,title,status,product_images(url,sort_order))';
     var listQuery = function (cols) {
       return sb.from('chats').select(cols).or('buyer_id.eq.' + me + ',seller_id.eq.' + me).order('last_message_at', { ascending: false, nullsFirst: false });
     };
@@ -122,7 +123,8 @@
     list.innerHTML = chats.map(function (c) {
       var otherId = c.buyer_id === me ? c.seller_id : c.buyer_id;
       var o = names[otherId] || {};
-      var p = c.businesses ? { title: '🏢 ' + c.businesses.name, product_images: c.businesses.business_images } : (c.products || {});
+      var direct = !c.product_id && !c.business_id;
+      var p = c.businesses ? { title: '🏢 ' + c.businesses.name, product_images: c.businesses.business_images } : direct ? { title: '💬 이야기에서 시작한 대화' } : (c.products || {});
       var img = PS.firstImage(p);
       var n = unread[c.id] || 0;
       return '<a class="chat-item" href="/chat/' + c.id + '">' +
@@ -156,7 +158,7 @@
     document.querySelector('.room .back').style.fontSize = '28px';
 
     var me = PS.user.id;
-    var roomCols = 'id,buyer_id,seller_id,products(id,title,price,status,product_images(url,sort_order))';
+    var roomCols = 'id,buyer_id,seller_id,product_id,products(id,title,price,status,product_images(url,sort_order))';
     var res = await sb.from('chats').select(roomCols + ',business_id,businesses(id,name,tagline,business_images(url,sort_order))').eq('id', id).maybeSingle();
     if (res.error) res = await sb.from('chats').select(roomCols).eq('id', id).maybeSingle();
     if (!res.data) {
@@ -173,7 +175,10 @@
 
     var strip = document.getElementById('strip');
     var bz = chat.businesses;
-    if (bz) {
+    var direct = !chat.product_id && !chat.business_id;
+    if (direct) {
+      strip.hidden = true;
+    } else if (bz) {
       var bimg = PS.firstImage({ product_images: bz.business_images });
       strip.href = PS.bizUrl(bz.id);
       strip.innerHTML = '<div class="thumb">' + (bimg ? '<img src="' + PS.esc(bimg) + '" alt="">' : '') + '</div>' +
@@ -190,16 +195,19 @@
     // 신뢰: 상대 후기 요약 + 거래 후기 / 신고 버튼, 직접 거래 안전 수칙
     var otherName = (names[otherId] && names[otherId].name) || '이웃';
     var reviewed = false;
-    if (!bz) {
+    if (!bz && !direct) {
       var rv = await sb.from('trade_reviews').select('id').eq('chat_id', id).eq('reviewer_id', me).maybeSingle();
       reviewed = !rv.error && !!rv.data;
     }
+    var iBlocked = await PS.isBlocked(otherId);
     var acts = document.getElementById('roomActs');
     acts.hidden = false;
     acts.innerHTML = '<span class="trust-line">' + (PS.trustLine(trust) || '아직 받은 후기가 없어요') + '</span>' +
-      (bz ? '' : '<button type="button" id="reviewBtn"' + (reviewed ? ' disabled' : '') + '>' + (reviewed ? '후기 남김' : '거래 후기') + '</button>') +
+      (bz || direct ? '' : '<button type="button" id="reviewBtn"' + (reviewed ? ' disabled' : '') + '>' + (reviewed ? '후기 남김' : '거래 후기') + '</button>') +
+      '<button type="button" class="report" id="blockBtn">' + (iBlocked ? '차단 풀기' : '차단') + '</button>' +
       '<button type="button" class="report" id="reportBtn">신고</button>';
     acts.addEventListener('click', function (e) {
+      if (e.target.closest('#blockBtn')) PS.toggleBlock(otherId, otherName, function () { location.reload(); });
       if (e.target.closest('#reportBtn')) PS.openReport(otherId, { name: otherName, productId: chat.products && chat.products.id, chatId: id });
       var rb = e.target.closest('#reviewBtn');
       if (rb && !rb.disabled) PS.openReview({ chatId: id, name: otherName, onDone: function () { rb.disabled = true; rb.textContent = '후기 남김'; } });
@@ -210,7 +218,8 @@
         return '<li>' + PS.esc(t).replace('경찰청 사이버범죄 신고시스템', '<a href="' + PS.CYBER_COP_URL + '" target="_blank" rel="noopener">경찰청 사이버범죄 신고시스템</a>') + '</li>';
       }).join('') + '</ul>');
 
-    var quick = bz
+    var quick = direct ? ['안녕하세요! 이야기 보고 연락드려요', '궁금한 게 있어서요', '감사합니다!']
+      : bz
       ? (chat.buyer_id === me
           ? ['안녕하세요! 문의드려요', '견적 받을 수 있을까요?', '방문 가능한 날짜가 언제인가요?', '위치가 어디인가요?']
           : ['네, 말씀하세요!', '견적 보내드릴게요', '언제 방문하시면 될까요?'])
@@ -222,6 +231,13 @@
       var b = e.target.closest('button');
       if (b) send(b.textContent);
     });
+
+    // 내가 차단한 상대면 입력창 대신 안내
+    if (iBlocked) {
+      document.getElementById('composer').hidden = true;
+      document.getElementById('quick').hidden = true;
+      roomTop = '<div class="trust-warn"><b>차단한 사용자예요</b>위의 \'차단 풀기\'를 누르면 다시 대화할 수 있어요.</div>' + roomTop;
+    }
 
     var msgRes = await sb.from('messages').select('id,sender_id,message,read_at,created_at').eq('chat_id', id).order('created_at', { ascending: true }).limit(500);
     messages = msgRes.data || [];
@@ -274,7 +290,11 @@
       if (!text) return;
       var ins = await sb.from('messages').insert({ chat_id: id, sender_id: me, message: text.slice(0, 2000) })
         .select('id,sender_id,message,read_at,created_at').single();
-      if (ins.error) { PS.toast('보내지 못했어요. 다시 해 주세요'); return; }
+      if (ins.error) {
+        var bk = await sb.rpc('is_blocked_between', { a: me, b: otherId });
+        PS.toast(bk.data === true ? '이 사용자에게는 메시지를 보낼 수 없어요' : '보내지 못했어요. 다시 해 주세요');
+        return;
+      }
       if (!messages.some(function (x) { return x.id === ins.data.id; })) messages.push(ins.data);
       renderMessages(true);
     }
