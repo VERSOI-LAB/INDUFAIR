@@ -36,8 +36,11 @@
   .pick-card.buy{background:#EAF2FE;}
   .pick-card.buy .go{background:#2F5BD3;color:#fff;}
   .more{margin:24px 0 8px;}
-  .sp-head{display:flex;align-items:baseline;justify-content:space-between;}
-  .sp-head a{font-size:14px;font-weight:600;color:var(--sub);}
+  .info-home{margin-top:28px;}
+  .info-tabs{display:flex;border-bottom:1px solid var(--line);}
+  .info-tabs button{flex:1;height:48px;font-size:16px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;margin-bottom:-1px;}
+  .info-tabs button.on{color:var(--text);border-bottom-color:var(--text);}
+  .info-all{display:block;text-align:right;font-size:14px;font-weight:600;color:var(--sub);padding:4px 0 0;}
   /* PC: 화면 좌우를 꽉 채움. 소개 → 판다/산다(화면 폭의 70%) → 방금 올라온 물건(2칸) */
   @media (min-width:1101px){
     :root{--wide-w:100%;} /* 홈은 헤더·본문 모두 화면 폭 전체 */
@@ -57,8 +60,10 @@
       -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);}
     .pick-card .go{height:64px;font-size:20px;}
     /* 방금 올라온 물건도 판다/산다 버튼과 같은 폭(70%)으로 가운데 */
-    #spHome .list,#evHome .list{grid-template-columns:repeat(3,minmax(0,1fr));}
-    #spHome .sp-row,#evHome .sp-row{border-bottom:none;}
+    .info-home{width:70vw;max-width:100%;margin:44px auto 0;}
+    .info-tabs button{font-size:19px;height:56px;}
+    .info-home .list{width:auto;grid-template-columns:repeat(3,minmax(0,1fr));}
+    .info-home .sp-row{border-bottom:none;}
     .sec-title,.list,.page > .empty{width:70vw;max-width:100%;margin-left:auto;margin-right:auto;}
     .sec-title{margin-top:44px;font-size:24px;}
     .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;}
@@ -92,14 +97,15 @@
       </a>
     </div>
 
-    <section id="spHome" hidden>
-      <h2 class="sec-title sp-head"><span>마감 임박 지원사업</span><a href="/support">전체 보기 ›</a></h2>
-      <div class="list" id="spHomeList"></div>
-    </section>
-
-    <section id="evHome" hidden>
-      <h2 class="sec-title sp-head"><span>다가오는 교육·행사</span><a href="/events">전체 보기 ›</a></h2>
-      <div class="list" id="evHomeList"></div>
+    <!-- 지원사업 / 교육·행사: 한 칸에 탭으로 (둘 다 펼치면 너무 길어서) -->
+    <section class="info-home" id="infoHome" hidden>
+      <div class="info-tabs" role="tablist" aria-label="지원사업과 교육·행사">
+        <button type="button" role="tab" id="tabSp" class="on" aria-selected="true" aria-controls="spHomeList" hidden>마감 임박 지원사업</button>
+        <button type="button" role="tab" id="tabEv" aria-selected="false" aria-controls="evHomeList" hidden>다가오는 교육·행사</button>
+      </div>
+      <div class="list" id="spHomeList" role="tabpanel" aria-labelledby="tabSp"></div>
+      <div class="list" id="evHomeList" role="tabpanel" aria-labelledby="tabEv" hidden></div>
+      <a class="info-all" id="infoAll" href="/support">지원사업 전체 보기 ›</a>
     </section>
 
     <h2 class="sec-title">방금 올라온 물건</h2>
@@ -145,22 +151,32 @@
   document.getElementById('moreBtn').addEventListener('click', load);
   load();
 
-  // 마감이 가까운 지원사업 3개 (오늘 이후 마감)
+  // 지원사업(마감 임박 3개) / 교육·행사(곧 시작 3개)를 한 칸에 탭으로. 데이터가 있는 탭만 보임
   (async function () {
-    var r = await sb.from('support_programs').select(PS.SUPPORT_COLUMNS).gte('apply_end', PS.todayKST())
-      .order('apply_end', { ascending: true }).limit(3);
-    if (r.error || !(r.data || []).length) return;
-    document.getElementById('spHomeList').innerHTML = r.data.map(function (p) { return PS.supportRowHtml(p); }).join('');
-    document.getElementById('spHome').hidden = false;
-  })();
-
-  // 가까운 일정의 교육·행사 3개 (오늘 이후 시작)
-  (async function () {
-    var r = await sb.from('biz_events').select(PS.EVENT_COLUMNS).gte('event_start', PS.todayKST())
-      .order('event_start', { ascending: true }).limit(3);
-    if (r.error || !(r.data || []).length) return;
-    document.getElementById('evHomeList').innerHTML = r.data.map(function (e) { return PS.eventRowHtml(e); }).join('');
-    document.getElementById('evHome').hidden = false;
+    var $ = function (id) { return document.getElementById(id); };
+    var today = PS.todayKST();
+    var got = await Promise.all([
+      sb.from('support_programs').select(PS.SUPPORT_COLUMNS).gte('apply_end', today).order('apply_end', { ascending: true }).limit(3),
+      sb.from('biz_events').select(PS.EVENT_COLUMNS).gte('event_start', today).order('event_start', { ascending: true }).limit(3)
+    ]);
+    var sp = got[0].error ? [] : got[0].data || [], ev = got[1].error ? [] : got[1].data || [];
+    if (!sp.length && !ev.length) return;
+    $('spHomeList').innerHTML = sp.map(function (p) { return PS.supportRowHtml(p); }).join('');
+    $('evHomeList').innerHTML = ev.map(function (e) { return PS.eventRowHtml(e); }).join('');
+    $('tabSp').hidden = !sp.length;
+    $('tabEv').hidden = !ev.length;
+    function show(which) {
+      var isEv = which === 'ev';
+      $('tabSp').classList.toggle('on', !isEv); $('tabSp').setAttribute('aria-selected', !isEv);
+      $('tabEv').classList.toggle('on', isEv); $('tabEv').setAttribute('aria-selected', isEv);
+      $('spHomeList').hidden = isEv; $('evHomeList').hidden = !isEv;
+      $('infoAll').href = isEv ? '/events' : '/support';
+      $('infoAll').textContent = (isEv ? '교육·행사' : '지원사업') + ' 전체 보기 ›';
+    }
+    $('tabSp').addEventListener('click', function () { show('sp'); });
+    $('tabEv').addEventListener('click', function () { show('ev'); });
+    show(sp.length ? 'sp' : 'ev');
+    $('infoHome').hidden = false;
   })();
 })();
 </script>
