@@ -1,4 +1,5 @@
 // 회원 탈퇴: 올린 물건·업체 소개를 내리고, 내 정보를 지운 뒤 계정을 닫는다.
+//   - 본문 { password } 로 비밀번호를 한 번 더 확인 (틀리면 wrong_password)
 //   - 결제 후 수령 완료·정산이 끝나지 않은 거래가 있으면 탈퇴할 수 없음 (orders_in_progress)
 //   - 거래·채팅 기록은 법정 보관 기간 때문에 남기고, 프로필만 '탈퇴한 회원'으로 바꿈
 //   - 계정은 soft delete: 다시 로그인할 수 없고, 같은 이메일로 새로 가입할 수 있음
@@ -23,6 +24,23 @@ Deno.serve(async (req) => {
   const user = who?.user;
   if (!user) return json({ code: "login_required" }, 401);
   const uid = user.id;
+
+  // 비밀번호를 한 번 더 확인 (실수·남이 쓰던 기기에서 탈퇴하는 걸 막기)
+  let body: { password?: unknown } = {};
+  try { body = await req.json(); } catch { /* 빈 본문 */ }
+  const password = typeof body.password === "string" ? body.password : "";
+  if (!password) return json({ code: "password_required" }, 400);
+  if (!user.email) return json({ code: "failed" }, 500);
+  const checker = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { data: signed, error: pwErr } = await checker.auth.signInWithPassword({ email: user.email, password });
+  if (pwErr || !signed?.session) {
+    const status = (pwErr as { status?: number } | null)?.status;
+    return json({ code: status === 429 ? "too_many_tries" : "wrong_password" }, status === 429 ? 429 : 401);
+  }
+  // 확인용으로 생긴 세션은 바로 닫음
+  await admin.auth.admin.signOut(signed.session.access_token, "local").catch(() => {});
 
   // 끝나지 않은 거래: 결제됐는데 구매자가 아직 수령 완료를 안 했거나, 판매자 정산이 남은 주문
   const { data: orders, error: oErr } = await admin.from("market_orders")

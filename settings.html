@@ -122,30 +122,60 @@
     orders_in_progress: '아직 끝나지 않은 거래가 있어요. 수령 완료와 정산이 끝난 뒤에 탈퇴할 수 있어요',
     login_required: '다시 로그인한 뒤 시도해 주세요'
   };
-  $('withdrawBtn').addEventListener('click', async function () {
-    var btn = this;
-    if (!confirm('정말 탈퇴할까요?\n\n올린 물건과 업체 소개가 모두 내려가고, 내 정보는 지워져요. 되돌릴 수 없어요.')) return;
-    btn.disabled = true;
+  // 탈퇴는 비밀번호를 한 번 더 입력해야 진행
+  var sh = null, shBg = null;
+  function closeSheet() { if (sh) { sh.classList.remove('show'); shBg.classList.remove('show'); } }
+  $('withdrawBtn').addEventListener('click', function () {
+    if (!sh) {
+      shBg = document.createElement('div'); shBg.className = 'sheet-bg';
+      sh = document.createElement('div'); sh.className = 'sheet'; sh.setAttribute('role', 'dialog'); sh.setAttribute('aria-label', '회원 탈퇴');
+      document.body.appendChild(shBg); document.body.appendChild(sh);
+      shBg.addEventListener('click', closeSheet);
+    }
+    sh.innerHTML = '<div class="handle"></div>' +
+      '<h3 style="font-size:20px;font-weight:800">정말 탈퇴할까요?</h3>' +
+      '<p style="color:var(--sub);font-size:15px;line-height:1.6;margin-top:6px">올린 물건과 업체 소개가 모두 내려가고, 내 정보는 지워져요. <b style="color:var(--danger)">되돌릴 수 없어요.</b></p>' +
+      '<form id="wdForm" style="margin-top:16px">' +
+        '<label for="wdPw" style="display:block;font-size:15px;font-weight:700;margin-bottom:6px">본인 확인을 위해 비밀번호를 입력해 주세요</label>' +
+        '<input type="password" id="wdPw" class="input" autocomplete="current-password" placeholder="비밀번호" required style="width:100%;height:52px;padding:0 16px;border:1.5px solid var(--line);border-radius:12px;font-size:17px">' +
+        '<p id="wdErr" role="alert" style="color:var(--danger);font-size:14px;margin-top:8px;min-height:20px"></p>' +
+        '<button type="submit" class="btn danger" id="wdGo" style="margin-top:4px">탈퇴하기</button>' +
+        '<button type="button" class="btn white" id="wdCancel" style="margin-top:10px">취소</button>' +
+      '</form>';
+    shBg.classList.add('show'); sh.classList.add('show');
+    setTimeout(function () { $('wdPw').focus(); }, 150);
+    $('wdCancel').onclick = closeSheet;
+    $('wdForm').onsubmit = function (e) { e.preventDefault(); withdraw($('wdPw').value); };
+  });
+
+  async function withdraw(password) {
+    var btn = $('wdGo'), err = $('wdErr');
+    if (!password) { err.textContent = '비밀번호를 입력해 주세요'; return; }
+    btn.disabled = true; btn.textContent = '확인하는 중…'; err.textContent = '';
     var code = 'failed';
     try {
       var token = await PS.accessToken();
       var res = await fetch(PS.FUNCTIONS_URL + '/delete-account', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: '{}'
+        body: JSON.stringify({ password: password })
       });
       var out = await res.json().catch(function () { return {}; });
       code = out.ok ? null : (out.code || 'failed');
     } catch (e) {}
     if (code) {
-      btn.disabled = false;
+      btn.disabled = false; btn.textContent = '탈퇴하기';
+      if (code === 'wrong_password' || code === 'password_required') { err.textContent = '비밀번호가 맞지 않아요. 다시 입력해 주세요'; $('wdPw').select(); return; }
+      if (code === 'too_many_tries') { err.textContent = '여러 번 틀렸어요. 잠시 후 다시 해 주세요'; return; }
+      closeSheet();
       PS.toast(WITHDRAW_ERR[code] || '탈퇴를 마치지 못했어요. 고객센터(' + PS.BIZ.phone + ')로 알려 주세요');
       return;
     }
+    closeSheet();
     alert('탈퇴가 끝났어요. 그동안 이용해 주셔서 고맙습니다.');
     await sb.auth.signOut().catch(function () {});
     location.href = '/';
-  });
+  }
 })();
 </script>
 </body>
