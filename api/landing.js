@@ -88,7 +88,7 @@ module.exports = async function (req, res) {
     '<link rel="canonical" href="' + L.esc(url) + '">\n' +
     '<meta property="og:type" content="website">\n<meta property="og:site_name" content="판다산다">\n' +
     '<meta property="og:title" content="' + L.esc(title) + '">\n<meta property="og:description" content="' + L.esc(desc) + '">\n' +
-    '<meta property="og:url" content="' + L.esc(url) + '">\n<meta property="og:image" content="' + L.SITE + '/이미지/web/logo.jpg">\n' +
+    '<meta property="og:url" content="' + L.esc(url) + '">\n<meta property="og:image" content="' + L.SITE + '/이미지/web/og-share.jpg">\n' +
     (rows.length ? '' : '<meta name="robots" content="noindex">\n') + L.jsonLd(ld);
 
   html = html.replace(/<!--list-meta-->[\s\S]*?<!--\/list-meta-->\n?/, '').replace(/<title>[^<]*<\/title>/, function () { return head; })

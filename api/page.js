@@ -176,7 +176,9 @@ function head(v) {
     '<meta property="og:title" content="' + L.esc(v.title) + '">\n' +
     '<meta property="og:description" content="' + L.esc(v.desc) + '">\n' +
     '<meta property="og:url" content="' + L.esc(v.url) + '">\n' +
-    (v.image ? '<meta property="og:image" content="' + L.esc(v.image) + '">\n' : '') +
+    // 사진이 없는 글·지원사업도 카톡 미리보기에 기본 공유 이미지(1200×630)가 나오게
+    (v.image ? '<meta property="og:image" content="' + L.esc(v.image) + '">\n'
+      : '<meta property="og:image" content="' + L.SITE + '/이미지/web/og-share.jpg">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n') +
     L.jsonLd(v.ld);
 }
 
