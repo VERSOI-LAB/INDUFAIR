@@ -190,7 +190,7 @@
     try { st.town = localStorage.getItem('ps_cm_town') === '1' && !!home; } catch (e) {}
     var PAGE = 30;
     body.innerHTML =
-      '<div class="cm-head"><h1>' + (st.mine ? '내 이야기' : '이야기') + '</h1>' + (st.mine ? '<a href="/community">전체 보기 ›</a>' : '<a href="/community?mine=1">내 글</a>') + '</div>' +
+      '<div class="cm-head"><h1>' + (st.mine ? '내 이야기' : 'STORY') + '</h1>' + (st.mine ? '<a href="/community">전체 보기 ›</a>' : '<a href="/community?mine=1">내 글</a>') + '</div>' +
       '<div class="chips" id="cmTopics" role="group" aria-label="주제">' + [''].concat(Object.keys(T)).map(function (k) {
         return '<button type="button" class="chip' + (k === st.topic ? ' on' : '') + '" data-t="' + k + '" aria-pressed="' + (k === st.topic) + '">' + (k ? T[k] : '전체') + '</button>';
       }).join('') + '</div>' +

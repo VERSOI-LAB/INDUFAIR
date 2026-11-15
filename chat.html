@@ -93,7 +93,7 @@
   // ---------- 채팅 목록 ----------
   function openList() {
     PS.renderTabbar('chat');
-    app.innerHTML = '<header class="topbar"><h1>채팅</h1></header><div id="pushPrompt"></div><div id="list"><div class="skeleton" style="height:64px;margin:16px"></div><div class="skeleton" style="height:64px;margin:16px"></div></div>';
+    app.innerHTML = '<header class="topbar"><h1 class="page-h">CHAT</h1></header><div id="pushPrompt"></div><div id="list"><div class="skeleton" style="height:64px;margin:16px"></div><div class="skeleton" style="height:64px;margin:16px"></div></div>';
     // 채팅 알림 켜기 안내 (켤 수 있을 때만)
     var renderPrompt = function () { document.getElementById('pushPrompt').innerHTML = PS.push.promptHtml(); };
     renderPrompt();
