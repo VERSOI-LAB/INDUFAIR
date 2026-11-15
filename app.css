@@ -229,7 +229,7 @@ p{margin:0;}
 .ocard .oitems li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:16px;font-weight:600;}
 .ocard .oitems li a,.ocard .oitems li span{min-width:0;overflow-wrap:anywhere;}
 .ocard .oitems small{display:block;font-size:13px;font-weight:500;color:var(--sub);}
-.ocard .oitems em{font-style:normal;font-weight:700;white-space:nowrap;flex-shrink:0;}
+.ocard .oitems em{font-style:normal;font-weight:800;white-space:nowrap;flex-shrink:0;}
 .ocard dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:12px 0 0;padding-top:12px;border-top:1px solid var(--line);font-size:15px;}
 .ocard dt{color:var(--sub);white-space:nowrap;}
 .ocard dd{margin:0;text-align:right;overflow-wrap:anywhere;}
