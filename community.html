@@ -37,7 +37,7 @@
   .pv-author b{display:block;font-size:16px;}
   .pv-author span{font-size:13px;color:var(--hint);}
   .pv-menu{margin-left:auto;width:40px;height:40px;border-radius:50%;font-size:20px;color:var(--sub);}
-  .pv-body{margin-top:16px;font-size:17px;line-height:1.7;white-space:pre-line;word-break:break-word;}
+  .pv-body{margin-top:16px;font-size:17px;line-height:1.7;white-space:pre-line;word-break:keep-all;overflow-wrap:break-word;}
   /* 사진: 옆으로 넘겨 보기, 누르면 크게 */
   .pv-gal{--gal-h:300px;margin-top:14px;}
   @media (min-width:1101px){ .pv-gal{--gal-h:360px;} }
@@ -59,7 +59,7 @@
   .cmt-top .who-name{font-size:14px;font-weight:700;color:var(--text);margin:0;padding:0;}
   .us-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
   .us-row b{font-size:18px;font-weight:800;}
-  .cmt-body{margin-top:3px;font-size:15px;line-height:1.55;white-space:pre-line;word-break:break-word;}
+  .cmt-body{margin-top:3px;font-size:15px;line-height:1.55;white-space:pre-line;word-break:keep-all;overflow-wrap:break-word;}
   .composer{position:fixed;left:0;right:0;bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom));z-index:25;max-width:var(--app-w);margin:0 auto;
     display:flex;gap:8px;align-items:flex-end;padding:10px 12px;border-top:1px solid var(--line);background:var(--surface);}
   .composer textarea{flex:1;min-height:44px;max-height:120px;padding:11px 16px;border-radius:22px;border:1.5px solid var(--line);resize:none;font-size:16px;line-height:1.4;}
