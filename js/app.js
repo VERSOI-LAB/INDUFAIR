@@ -1071,7 +1071,7 @@
   // ---- 하단 탭바 ----
   var TABS = [
     { key: 'home', href: '/', icon: 'home', label: '홈' },
-    { key: 'sell', href: '/sell', icon: 'sell', label: '판다' },
+    // '판다'(/sell) 탭은 숨김: 홈의 판매하기 카드·마이의 "판다 · 새 물건 팔기"로 들어감 (메뉴 6개 → 5개)
     { key: 'buy', href: '/buy', icon: 'buy', label: '산다' },
     { key: 'community', href: '/community', icon: 'handshake', label: '이야기' },
     { key: 'chat', href: '/chat', icon: 'chat', label: '채팅' },
