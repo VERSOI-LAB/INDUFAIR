@@ -444,7 +444,7 @@ p{margin:0;}
 .cm-ph img{width:100%;height:100%;object-fit:cover;}
 
 /* 이야기 글 본문 글꼴 (크기는 그대로) */
-.story-font,.cm-body,.pv-body,.cmt-body{font-family:"Gowun Dodum","Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;letter-spacing:-.01em;}
+.story-font,.cm-body,.pv-body,.cmt-body,.wr-text,.composer textarea{font-family:"Gowun Dodum","Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;letter-spacing:-.01em;}
 
 /* 사진 여러 장: 옆으로 넘겨 보기 */
 .ps-gal{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;min-width:0;}
