@@ -835,7 +835,7 @@
   };
   // 목록 한 줄: 주제 · 본문 두 줄 · 사진 · 동네·시간 · 공감/댓글
   PS.communityRowHtml = function (p, names) {
-    var img = Array.isArray(p.images) && p.images[0];
+    var imgs = Array.isArray(p.images) ? p.images : [];
     var who = (names && names[p.author_id] && names[p.author_id].name) || '이웃';
     var stats = [];
     if (p.like_count) stats.push('<span>' + PS.icon('heart', 14) + ' ' + p.like_count + '</span>');
@@ -844,9 +844,87 @@
       '<div class="cm-info"><span class="cm-topic">' + PS.esc(PS.COMMUNITY_TOPICS[p.topic] || '') + '</span>' +
         // 목록 미리보기는 빈 줄을 빼고 두 줄 (빈 줄이 두 줄 중 한 줄을 차지하지 않게)
         '<div class="cm-body">' + PS.esc(String(p.body || '').replace(/\n\s*\n+/g, '\n').trim().slice(0, 200)) + '</div>' +
+        PS.galleryHtml(imgs, 'cm-gal') +
         '<div class="cm-meta">' + PS.esc([who, p.region ? PS.townKey(p.region) : '', PS.ago(p.created_at)].filter(Boolean).join(' · ')) + '</div>' +
         (stats.length ? '<div class="cm-stats">' + stats.join('') + '</div>' : '') +
-      '</div>' + (img ? '<div class="cm-ph"><img src="' + PS.esc(img) + '" alt="" loading="lazy"></div>' : '') + '</a>';
+      '</div></a>';
+  };
+
+  // 사진 여러 장: 옆으로 넘겨 보는 줄. 누르면 크게 보기 (PS.openGallery)
+  PS.galleryHtml = function (urls, cls) {
+    urls = (urls || []).filter(Boolean);
+    if (!urls.length) return '';
+    return '<div class="ps-gal' + (urls.length === 1 ? ' one' : '') + (cls ? ' ' + cls : '') + '" data-gal>' + urls.map(function (u, i) {
+      return '<span class="ps-gal-it" role="button" tabindex="0" data-gal-i="' + i + '" aria-label="사진 ' + (i + 1) + '/' + urls.length + ' 크게 보기">' +
+        '<img src="' + PS.esc(u) + '" alt="" loading="lazy" decoding="async" draggable="false"></span>';
+    }).join('') + '</div>';
+  };
+  function galleryOpenFrom(e) {
+    var it = e.target.closest && e.target.closest('[data-gal-i]'); if (!it) return;
+    var box = it.closest('[data-gal]'); if (!box) return;
+    if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault(); e.stopPropagation(); // 목록 줄(링크) 안에서도 글로 넘어가지 않고 사진만 크게
+    var urls = Array.prototype.map.call(box.querySelectorAll('[data-gal-i] img'), function (im) { return im.getAttribute('src'); });
+    PS.openGallery(urls, Number(it.dataset.galI) || 0);
+  }
+  document.addEventListener('click', galleryOpenFrom, true);
+  document.addEventListener('keydown', galleryOpenFrom, true);
+
+  PS.openGallery = function (urls, start) {
+    if (!urls || !urls.length) return;
+    var n = urls.length, cur = Math.min(Math.max(start || 0, 0), n - 1), closed = false;
+    var lb = document.createElement('div');
+    lb.className = 'ps-lb';
+    lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-modal', 'true'); lb.setAttribute('aria-label', '사진 크게 보기');
+    lb.innerHTML = '<div class="ps-lb-bar"><span class="ps-lb-n"></span><button type="button" class="ps-lb-x" aria-label="닫기">×</button></div>' +
+      '<div class="ps-lb-track">' + urls.map(function (u) { return '<div class="ps-lb-slide"><img src="' + PS.esc(u) + '" alt="" draggable="false"></div>'; }).join('') + '</div>' +
+      (n > 1 ? '<button type="button" class="ps-lb-nav prev" aria-label="이전 사진">‹</button><button type="button" class="ps-lb-nav next" aria-label="다음 사진">›</button>' : '');
+    var track = lb.querySelector('.ps-lb-track'), num = lb.querySelector('.ps-lb-n');
+    var prev = lb.querySelector('.prev'), next = lb.querySelector('.next');
+    var prevOverflow = document.documentElement.style.overflow;
+    function show() {
+      num.textContent = n > 1 ? (cur + 1) + ' / ' + n : '';
+      if (prev) { prev.disabled = cur === 0; next.disabled = cur === n - 1; }
+    }
+    function go(i, smooth) {
+      cur = Math.min(Math.max(i, 0), n - 1);
+      track.scrollTo({ left: cur * track.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
+      show();
+    }
+    track.addEventListener('scroll', function () {
+      var i = Math.round(track.scrollLeft / (track.clientWidth || 1));
+      if (i !== cur) { cur = Math.min(Math.max(i, 0), n - 1); show(); }
+    }, { passive: true });
+    function close(fromBack) {
+      if (closed) return; closed = true;
+      lb.remove();
+      document.documentElement.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('popstate', onPop);
+      window.removeEventListener('resize', onResize);
+      if (!fromBack && history.state && history.state.psGallery) history.back();
+    }
+    function onPop() { close(true); } // 휴대폰 뒤로 가기로 닫기
+    function onResize() { go(cur, false); }
+    function onKey(e) {
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') go(cur - 1, true);
+      else if (e.key === 'ArrowRight') go(cur + 1, true);
+    }
+    lb.querySelector('.ps-lb-x').addEventListener('click', function () { close(); });
+    if (prev) {
+      prev.addEventListener('click', function () { go(cur - 1, true); });
+      next.addEventListener('click', function () { go(cur + 1, true); });
+    }
+    track.addEventListener('click', function (e) { if (!e.target.closest('img')) close(); }); // 사진 바깥 누르면 닫기
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('popstate', onPop);
+    window.addEventListener('resize', onResize);
+    try { history.pushState({ psGallery: 1 }, ''); } catch (e) {}
+    document.documentElement.style.overflow = 'hidden';
+    document.body.appendChild(lb);
+    go(cur, false);
+    lb.querySelector('.ps-lb-x').focus({ preventScroll: true });
   };
 
   // ---- 최근 본 물건 (이 기기에만 저장) ----
