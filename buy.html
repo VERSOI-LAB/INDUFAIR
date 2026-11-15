@@ -30,7 +30,7 @@
 
   /* 지도 핀 */
   .map-pin{position:relative;display:inline-flex;align-items:center;height:32px;padding:0 10px;border-radius:16px;background:#fff;border:2px solid var(--primary);
-    font:700 13px/1 "Pretendard Variable",Pretendard,sans-serif;color:var(--text);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;}
+    font:700 13px/1 var(--font);letter-spacing:-.02em;color:var(--text);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.18);cursor:pointer;}
   .map-pin::after{content:"";position:absolute;left:50%;bottom:-7px;width:10px;height:10px;background:#fff;border-right:2px solid var(--primary);border-bottom:2px solid var(--primary);transform:translateX(-50%) rotate(45deg);}
   .map-pin.on{background:var(--primary);transform:scale(1.12);}
   .map-pin.on::after{background:var(--primary);}

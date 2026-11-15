@@ -1,7 +1,10 @@
 /* 판다산다 — 산업용품 당근마켓. 모바일 우선, 토스+당근 스타일 */
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
-/* 이야기 글 본문용 둥근 손글씨 느낌 글꼴 */
-@import url("https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap");
+/* 사이트 글꼴: 나눔스퀘어 라운드 (NAVER, SIL OFL 1.1). 굵기 3개만 씀: 400·500 → R, 600·700 → B, 800·900 → EB */
+@font-face{font-family:"NanumSquareRound";src:url("/fonts/NanumSquareRoundR.woff2") format("woff2");font-weight:100 500;font-display:swap;}
+@font-face{font-family:"NanumSquareRound";src:url("/fonts/NanumSquareRoundB.woff2") format("woff2");font-weight:600 700;font-display:swap;}
+@font-face{font-family:"NanumSquareRound";src:url("/fonts/NanumSquareRoundEB.woff2") format("woff2");font-weight:800 900;font-display:swap;}
+/* 나눔스퀘어 라운드의 가운뎃점(·)은 전각이라 "시흥시 · 40분 전"이 너무 벌어짐 → 가운뎃점만 좁은 글꼴(Pretendard 일부)로 */
+@font-face{font-family:"PS Dot";src:url("/fonts/PretendardDot.woff2") format("woff2");font-weight:45 920;font-display:swap;unicode-range:U+00B7,U+2022,U+2027,U+2219;}
 
 :root{
   --primary:#FFB800;
@@ -17,6 +20,7 @@
   --danger:#FF3B30;
   --radius:16px;
   --tabbar-h:64px;
+  --font:"PS Dot","NanumSquareRound","나눔스퀘어라운드",-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
   --app-w:480px; /* PC 등 큰 화면에서는 가운데 480px */
   color-scheme:light;
 }
@@ -26,13 +30,14 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;}
 body{
-  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  font-family:var(--font);
+  letter-spacing:-.02em; /* 나눔스퀘어 라운드는 글자 폭이 넓어서 살짝 좁힘 (가독성 유지 범위) */
   font-size:17px;line-height:1.5;color:var(--text);background:var(--bg);
   word-break:keep-all;overflow-wrap:anywhere;
 }
 a{color:inherit;text-decoration:none;}
-button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0;}
-input,textarea,select{font:inherit;color:var(--text);}
+button{font:inherit;letter-spacing:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0;}
+input,textarea,select{font:inherit;letter-spacing:inherit;color:var(--text);}
 img{display:block;max-width:100%;height:auto;}
 [hidden]{display:none !important;}
 h1,h2,h3{margin:0;}
@@ -68,7 +73,7 @@ p{margin:0;}
 
 /* 버튼 */
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:56px;border-radius:14px;
-  font-size:18px;font-weight:700;background:var(--primary);color:var(--text);transition:transform .08s ease,background .15s ease;}
+  font-size:18px;font-weight:800;background:var(--primary);color:var(--text);transition:transform .08s ease,background .15s ease;}
 .btn:active{transform:scale(.98);background:var(--primary-press);}
 .btn:disabled{background:#E5E5E5;color:#AAAAAA;transform:none;}
 .btn.white{background:var(--surface);border:1.5px solid var(--line);}
@@ -443,8 +448,7 @@ p{margin:0;}
 .cm-ph{width:84px;height:84px;flex-shrink:0;border-radius:10px;overflow:hidden;background:#F2F2F2;}
 .cm-ph img{width:100%;height:100%;object-fit:cover;}
 
-/* 이야기 글 본문 글꼴 (크기는 그대로) */
-.story-font,.cm-body,.pv-body,.cmt-body,.wr-text,.composer textarea{font-family:"Gowun Dodum","Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;letter-spacing:-.01em;}
+h1,h2{letter-spacing:-.03em;} /* 큰 제목은 조금 더 좁혀야 덩어리져 보임 */
 
 /* 사진 여러 장: 옆으로 넘겨 보기 */
 .ps-gal{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;min-width:0;}
