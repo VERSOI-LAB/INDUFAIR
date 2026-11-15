@@ -275,7 +275,9 @@ p{margin:0;}
 .quick a + a{border-left:1px solid var(--line);}
 .page-title{display:flex;align-items:center;justify-content:space-between;padding:20px 4px 16px;}
 .page-title h1{font-size:26px;font-weight:800;}
-.topbar h1.page-h{font-size:26px;font-weight:800;} /* PANDA·CHAT 처럼 메뉴 첫 화면 제목: MY PAGE 와 같은 크기 */
+/* PANDA·CHAT 처럼 상단 바 안의 메뉴 첫 화면 제목: STORY·MY PAGE 와 같은 크기·같은 왼쪽 위치
+   (.page-title 글자 시작 = .page 좌우 여백 + 4px, 상단 바 글자 시작 = 16px → 차이만큼 밀기) */
+.topbar h1.page-h{font-size:26px;font-weight:800;margin-left:4px;}
 
 @media (min-width:481px){
   body{background:#F0F0F0;}
@@ -299,6 +301,8 @@ p{margin:0;}
   .app > .topbar{padding-left:max(16px, calc((100% - var(--app-w)) / 2 + 16px));padding-right:max(8px, calc((100% - var(--app-w)) / 2 + 8px));}
   .page{padding:0 24px;}
   html.pc-70 .page{padding:0;} /* 내용 양끝이 홈의 판다/산다 카드와 같은 위치 */
+  .topbar h1.page-h{margin-left:12px;}          /* .page 여백 24 + 4 − 16 */
+  html.pc-70 .topbar h1.page-h{margin-left:-12px;} /* .page 여백 0 + 4 − 16 */
   .topbar{top:var(--head-h);}
 
   /* 상단 헤더 */

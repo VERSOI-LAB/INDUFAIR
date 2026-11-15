@@ -78,6 +78,7 @@
   .pc-side{display:none;}
   @media (min-width:1101px){
     :root{--app-w:70vw;--col-gap:20px;}
+    .topbar h1.page-h{margin-left:-12px;} /* 내용 폭이 70vw(마이와 같음) → PANDA 제목도 MY PAGE 와 같은 위치 */
     .pc-side{display:block;position:fixed;left:15vw;top:calc(var(--head-h) + 92px);margin:0;border-radius:20px;height:auto;
       width:min(35vw - var(--col-gap) / 2, (100vh - var(--head-h) - 140px) * .75, 480px);}
     .pc-side.prod{aspect-ratio:3/4;object-fit:contain;background:#F7F7F7;border:1px solid var(--line);} /* 올린 대표 사진 */
@@ -101,8 +102,8 @@
 <body>
 <div class="app no-tabbar">
   <header class="topbar">
-    <a class="back" href="/" aria-label="닫기"><i data-icon="close" data-size="24"></i></a>
     <h1 class="page-h">PANDA</h1>
+    <a class="back" href="/" aria-label="닫기" style="margin:0 -4px 0 0"><i data-icon="close" data-size="24"></i></a>
   </header>
   <div class="progress" aria-hidden="true"><i id="bar"></i></div>
   <img class="pc-side" id="pcSide" src="/이미지/web/panda-sell.jpg" alt="" width="600" height="800">
