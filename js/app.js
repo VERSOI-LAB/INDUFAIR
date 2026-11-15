@@ -833,20 +833,21 @@
     var city = words.filter(function (w) { return /(시|군)$/.test(w) && w.length >= 2; })[0];
     return city || words.slice(0, 2).join(' ') || '';
   };
-  // 목록 한 줄: 주제 · 본문 두 줄 · 사진 · 동네·시간 · 공감/댓글
+  // 목록(피드) 글 하나: 프사 · 이름·동네·시간·주제 / 본문 / 사진(옆으로 넘김) / 공감·댓글. 다음 글은 아래로 이어짐
   PS.communityRowHtml = function (p, names) {
     var imgs = Array.isArray(p.images) ? p.images : [];
-    var who = (names && names[p.author_id] && names[p.author_id].name) || '이웃';
-    var stats = [];
-    if (p.like_count) stats.push('<span>' + PS.icon('heart', 14) + ' ' + p.like_count + '</span>');
-    if (p.comment_count) stats.push('<span>' + PS.icon('chat', 14) + ' ' + p.comment_count + '</span>');
+    var person = (names && names[p.author_id]) || {};
+    var who = person.name || '이웃';
     return '<a class="cm-row" href="' + PS.communityUrl(p.id) + '">' +
-      '<div class="cm-info"><span class="cm-topic">' + PS.esc(PS.COMMUNITY_TOPICS[p.topic] || '') + '</span>' +
-        // 목록 미리보기는 빈 줄을 빼고 두 줄 (빈 줄이 두 줄 중 한 줄을 차지하지 않게)
-        '<div class="cm-body">' + PS.esc(String(p.body || '').replace(/\n\s*\n+/g, '\n').trim().slice(0, 200)) + '</div>' +
+      '<div class="cm-av">' + PS.avatarHtml(person.avatar_url) + '</div>' +
+      '<div class="cm-info">' +
+        '<div class="cm-top"><b class="cm-name">' + PS.esc(who) + '</b>' +
+          '<span class="cm-meta">' + PS.esc([p.region ? PS.townKey(p.region) : '', PS.ago(p.created_at)].filter(Boolean).join(' · ')) + '</span>' +
+          '<span class="cm-topic">' + PS.esc(PS.COMMUNITY_TOPICS[p.topic] || '') + '</span></div>' +
+        '<div class="cm-body">' + PS.esc(String(p.body || '').replace(/\n{3,}/g, '\n\n').trim().slice(0, 1500)) + '</div>' +
         PS.galleryHtml(imgs, 'cm-gal') +
-        '<div class="cm-meta">' + PS.esc([who, p.region ? PS.townKey(p.region) : '', PS.ago(p.created_at)].filter(Boolean).join(' · ')) + '</div>' +
-        (stats.length ? '<div class="cm-stats">' + stats.join('') + '</div>' : '') +
+        '<div class="cm-stats"><span>' + PS.icon('heart', 20) + (p.like_count ? ' ' + p.like_count : '') + '</span>' +
+          '<span>' + PS.icon('chat', 20) + (p.comment_count ? ' ' + p.comment_count : '') + '</span></div>' +
       '</div></a>';
   };
 
