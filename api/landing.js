@@ -57,11 +57,13 @@ module.exports = async function (req, res) {
 
   var name = [region ? label(region) : '', field ? field + ' 분야' : ''].filter(Boolean).join(' ');
   var who = region ? label(region) + ' 지역 중소기업·소상공인' : '중소기업·소상공인';
-  var title = name + ' 지원사업 모음 (마감 임박순) - 판다산다';
+  var year = today.slice(0, 4);
+  // 검색어 "2026 경기 정부지원사업", "제조 분야 지원사업 공고" 에 맞춤
+  var title = year + ' ' + name + ' 정부지원사업 공고 · 마감 임박순 - 판다산다';
   var url = L.SITE + (kind === 'area' ? areaUrl(region, field) : fieldUrl(field));
   var soon = rows.filter(function (p) { return p.apply_end && p.apply_end <= new Date(Date.parse(today) + 7 * 86400000).toISOString().slice(0, 10); }).length;
-  var desc = L.clip(who + '이 지금 신청할 수 있는 ' + (field ? field + ' 분야 ' : '') + '정부·지자체 지원사업 ' + rows.length + '건' +
-    (soon ? ' (일주일 안 마감 ' + soon + '건)' : '') + '. 기업마당 공고를 매일 자동으로 모아 마감 임박순으로 보여 드려요.', 160);
+  var desc = L.clip(year + '년 ' + who + '이 지금 신청할 수 있는 ' + (field ? field + ' 분야 ' : '') + '정부·지자체 지원사업 ' + rows.length + '건' +
+    (soon ? '(일주일 안 마감 ' + soon + '건)' : '') + '. 지원금·보조금 공고를 기업마당에서 매일 모아 마감 임박순으로 정리했어요.', 160);
 
   var ld = {
     '@context': 'https://schema.org', '@type': 'ItemList', name: name + ' 지원사업', url: url, numberOfItems: rows.length,
@@ -69,7 +71,7 @@ module.exports = async function (req, res) {
   };
 
   var body =
-    '<h1 style="font-size:24px;font-weight:800;margin-top:18px;line-height:1.35">' + L.esc(name) + ' 지원사업</h1>' +
+    '<h1 style="font-size:24px;font-weight:800;margin-top:18px;line-height:1.35">' + L.esc(name) + ' 정부지원사업</h1>' +
     '<p class="lead">' + L.esc(who) + '이 지금 신청할 수 있는 공고 <b>' + rows.length + '건</b>' + (soon ? ', 그중 <b style="color:var(--danger)">일주일 안 마감 ' + soon + '건</b>' : '') +
       '이에요. 기업마당 공고를 매일 자동으로 모아요.</p>' +
     (kind === 'area'

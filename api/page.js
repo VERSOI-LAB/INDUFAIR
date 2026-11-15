@@ -97,8 +97,9 @@ function supportView(s) {
   if (s.agency) ld.provider = { '@type': 'GovernmentOrganization', name: s.agency };
   if (s.region && s.region !== '전국') ld.areaServed = s.region;
   return {
-    title: s.title + ' - 판다산다 지원사업',
-    desc: L.clip([meta, period ? '신청 ' + period : '', L.clip(s.summary, 100)].filter(Boolean).join(' · '), 160),
+    // 검색어 "○○ 지원사업 신청 기간/지원 대상" 에 맞춤. 설명은 마감일·대상을 앞에 (검색 결과에서 잘리기 전에 보이게)
+    title: s.title + ' 신청 기간·지원 대상 - 판다산다',
+    desc: L.clip([period ? '신청 기간 ' + period : '', s.target ? '지원 대상 ' + L.clip(s.target, 40) : '', meta, L.clip(s.summary, 80)].filter(Boolean).join(' · '), 160),
     url: url, image: '', ogType: 'article', ld: ld, slider: '',
     body: '<div class="sd-cat">' + L.esc(['지원사업', s.category].filter(Boolean).join(' · ')) + '</div>' +
       '<h1 class="sd-title">' + L.esc(s.title) + '</h1>' +
@@ -124,8 +125,8 @@ function eventView(e) {
   if (e.event_end) ld.endDate = e.event_end;
   if (e.organizer) ld.organizer = { '@type': 'Organization', name: e.organizer };
   return {
-    title: e.title + ' - 판다산다 교육·행사',
-    desc: L.clip([[e.event_type, e.region, e.organizer].filter(Boolean).join(' · '), when ? '일정 ' + when : '', L.clip(e.summary, 100)].filter(Boolean).join(' · '), 160),
+    title: e.title + ' 일정·신청 방법 - 판다산다',
+    desc: L.clip([when ? '일정 ' + when : '', apply ? '접수 ' + apply : '', [e.event_type, e.region, e.organizer].filter(Boolean).join(' · '), L.clip(e.summary, 80)].filter(Boolean).join(' · '), 160),
     url: url, image: '', ogType: 'article', ld: ld, slider: '',
     body: '<div class="sd-cat">' + L.esc([e.event_type || '행사', e.category].filter(Boolean).join(' · ')) + '</div>' +
       '<h1 class="sd-title">' + L.esc(e.title) + '</h1>' +

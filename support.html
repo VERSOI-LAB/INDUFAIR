@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>정부 지원사업 모음 (매일 자동 업데이트) - 판다산다</title>
+<title>정부지원사업 공고 모음 · 마감 임박순 (매일 업데이트) - 판다산다</title>
 <!--list-meta-->
-<meta name="description" content="중소기업·제조업·소상공인을 위한 정부·지자체 지원사업 공고와 교육·세미나·전시회 정보를 매일 자동으로 모아 보여드려요.">
+<meta name="description" content="오늘 마감·이번 주 마감 정부지원사업을 한눈에. 중소기업·제조업·소상공인 대상 정부·지자체 지원금·보조금 공고와 교육·세미나·전시회를 기업마당에서 매일 모아 마감 임박순으로 보여드려요.">
 <link rel="canonical" href="https://www.pandasanda.com/support">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="판다산다">
-<meta property="og:title" content="정부 지원사업 모음 (매일 자동 업데이트) - 판다산다">
-<meta property="og:description" content="중소기업·제조업·소상공인을 위한 정부·지자체 지원사업 공고와 교육·세미나·전시회 정보를 매일 자동으로 모아 보여드려요.">
+<meta property="og:title" content="정부지원사업 공고 모음 · 마감 임박순 (매일 업데이트) - 판다산다">
+<meta property="og:description" content="오늘 마감·이번 주 마감 정부지원사업을 한눈에. 중소기업·제조업·소상공인 대상 정부·지자체 지원금·보조금 공고와 교육·세미나·전시회를 기업마당에서 매일 모아 마감 임박순으로 보여드려요.">
 <meta property="og:url" content="https://www.pandasanda.com/support">
 <meta property="og:image" content="https://www.pandasanda.com/이미지/web/og-share.jpg">
 <meta property="og:image:width" content="1200">
@@ -108,7 +108,7 @@
     var cn = document.querySelector('link[rel=canonical]'); if (cn) cn.href = location.origin + '/events';
     var ou = document.querySelector('meta[property="og:url"]'); if (ou) ou.content = location.origin + '/events';
   }
-  document.title = K.title + ' - 판다산다';
+  if (isEvent) document.title = K.title + ' - 판다산다'; // 지원사업 목록은 <title>(검색용 문구) 그대로
   if (id) (isEvent ? eventDetail : detail)(id); else list();
 
   // ---- 목록 ----
@@ -305,7 +305,7 @@
     var res = await sb.from('support_programs').select(PS.SUPPORT_COLUMNS + ',summary').eq('id', id).maybeSingle();
     var p = res.data;
     if (!p) return notFound();
-    document.title = p.title + ' - 판다산다 지원사업';
+    document.title = p.title + ' 신청 기간·지원 대상 - 판다산다'; // api/page.js 의 supportView 제목과 같게
     body.innerHTML =
       '<div class="sd-cat">' + PS.esc(['지원사업', p.category].filter(Boolean).join(' · ')) + '</div>' +
       '<h1 class="sd-title">' + PS.esc(p.title) + '</h1>' +
@@ -339,7 +339,7 @@
     var res = await sb.from('biz_events').select(PS.EVENT_COLUMNS + ',summary,origin_url').eq('id', id).maybeSingle();
     var e = res.data;
     if (!e) return notFound();
-    document.title = e.title + ' - 판다산다 교육·행사';
+    document.title = e.title + ' 일정·신청 방법 - 판다산다'; // api/page.js 의 eventView 제목과 같게
     var applyText = e.apply_start || e.apply_end ? PS.supportPeriod(e) : (e.apply_text || '');
     body.innerHTML =
       '<div class="sd-cat">' + PS.esc([e.event_type || '행사', e.category].filter(Boolean).join(' · ')) + '</div>' +
