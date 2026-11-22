@@ -170,8 +170,11 @@ select s.props->>'journey' as journey, count(*) as sent,
 - 상품 화면 아래 "○○ 시세 보기 · ○○구 매물 더 보기" 링크로 이어짐
 - 방문은 `seo_view` 이벤트로 기록 (`kind`: price / area / cat / weekly)
 
-### 인스타그램·스레드 자동 발행 (매주 월요일 10:00)
-- 이미지: `/support/weekly.jpg` (`api/weekly-image.js`, 1080×1350 JPEG, `@napi-rs/canvas` + 사이트 글꼴). `/weekly-card` 와 같은 그림
+### 인스타그램·스레드 자동 발행 (매주 월요일 10:00, 여러 장 슬라이드)
+- 목표: 지원사업으로 눈길 → 매물 구경 → 판매자 모집 → 가입. 슬라이드: 표지 훅 · 지원금 TOP3 · 새 지원사업 · (구해요·처분 요청이 있으면) 찾는 사람 · 판다산다 픽(매주 다른 매물 4개) · 판매자 모집 · 가입 혜택
+- 표지 문구 4종이 주마다 돌아감 (마감 N건 / 새 공고 N건 / 안 쓰는 장비 돈이 됩니다 / TOP3). 농업·어업·음식점 공고는 강조 자리에서 뺌 (`api/_social.js` 의 `OFF`)
+- 주소: `/social/weekly.json`(슬라이드 목록·캡션), `/social/weekly/1.jpg …` (`api/social.js` → `api/_social.js`, 판다 스티커 `이미지/stickers`)
+- 예전 한 장 카드 `/support/weekly.jpg` 는 그대로 둠
 - 발행: Edge Function `social-publish` (Verify JWT 끔) + `supabase/migrations/20261123_social_publish.sql` (토큰·발행 기록 표, 월요일 cron)
 - 같은 주·같은 곳은 한 번만 (`social_posts`), 실패한 주는 다음 호출 때 다시. 토큰은 30일마다 자동 갱신(`social_accounts`)
 - 비밀값: `INSTAGRAM_ACCESS_TOKEN`(인스타그램 로그인 방식 장기 토큰, 프로페셔널 계정 + `instagram_business_content_publish`), `THREADS_ACCESS_TOKEN`(스레드 장기 토큰 + `threads_content_publish`). 있는 쪽만 올림

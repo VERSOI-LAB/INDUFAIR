@@ -38,6 +38,14 @@
       "destination": "/api/seo?kind=buy&area=:a"
     },
     {
+      "source": "/social/weekly.json",
+      "destination": "/api/social?manifest=1"
+    },
+    {
+      "source": "/social/weekly/:file",
+      "destination": "/api/social?file=:file"
+    },
+    {
       "source": "/support/weekly.jpg",
       "destination": "/api/weekly-image"
     },
@@ -107,6 +115,10 @@
     },
     "api/weekly-image.js": {
       "includeFiles": "fonts/NanumSquareRound*.woff2",
+      "memory": 1024
+    },
+    "api/social.js": {
+      "includeFiles": "{fonts/NanumSquareRound*.woff2,이미지/stickers/*.webp}",
       "memory": 1024
     }
   },
