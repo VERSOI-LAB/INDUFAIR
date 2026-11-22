@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="robots" content="noindex">
+<title>이메일 수신 설정 - 판다산다</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .us{padding:48px 0 24px;text-align:center;}
+  .us b{display:block;margin-top:12px;font-size:20px;font-weight:800;line-height:1.4;}
+  .us p{margin-top:10px;color:var(--sub);line-height:1.6;}
+  .us .btn{margin-top:14px;}
+  .us .btn:first-of-type{margin-top:28px;}
+</style>
+</head>
+<body>
+<div class="app no-tabbar">
+  <header class="topbar"><a class="back" href="/" aria-label="홈으로"><i data-icon="back" data-size="24"></i></a><h1>이메일 수신 설정</h1></header>
+  <main class="page"><section class="us" id="box"></section></main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+// 자동 메시지 이메일의 '수신거부' 링크: /unsubscribe?t=토큰 (광고 메일) · &k=all (정보성 메일 링크 → 둘 다 끄기를 고를 수 있음)
+// 로그인 없이 토큰으로 처리 (supabase/migrations/20261122_journeys.sql 의 email_unsubscribe)
+(function () {
+  var box = document.getElementById('box');
+  var token = PS.param('t') || '';
+  var fromInfo = PS.param('k') === 'all';
+  // 토큰을 주소에서 지움 (방문 기록·브라우저 기록에 남지 않게)
+  try { history.replaceState(null, '', '/unsubscribe' + (fromInfo ? '?k=all' : '')); } catch (e) {}
+  if (!/^[0-9a-f-]{36}$/i.test(token)) {
+    box.innerHTML = PS.sticker('sorry', 110) + '<b>링크가 올바르지 않아요</b><p>메일에 있는 링크를 다시 눌러 주세요.<br>로그인했다면 설정에서 바로 바꿀 수 있어요.</p><a class="btn" href="/settings">알림 설정으로</a>';
+    return;
+  }
+  function ask() {
+    box.innerHTML = PS.sticker('curious', 110) + '<b>판다산다 이메일을 그만 받을까요?</b>' +
+      '<p>' + (fromInfo ? '내 물건·업체 소식 메일과 혜택 메일을 모두 끌 수 있어요.' : '혜택·이벤트 메일(광고)을 더 이상 보내지 않아요.') + '<br>채팅·거래 알림에는 영향이 없어요.</p>' +
+      '<button class="btn" data-k="ads">혜택·이벤트 메일 그만 받기</button>' +
+      (fromInfo ? '<button class="btn white" data-k="all">모든 판다산다 메일 그만 받기</button>' : '');
+  }
+  box.addEventListener('click', async function (e) {
+    var b = e.target.closest('[data-k]');
+    if (!b) return;
+    b.disabled = true;
+    var r = await sb.rpc('email_unsubscribe', { p_token: token, p_kind: b.dataset.k });
+    if (r.error || r.data !== 'ok') {
+      b.disabled = false;
+      PS.toast(r.data === 'not_found' ? '이미 처리됐거나 없는 링크예요' : '처리하지 못했어요. 잠시 후 다시 해 주세요');
+      return;
+    }
+    PS.track('consent_change', { kind: b.dataset.k === 'all' ? 'email_all' : 'ads_email', on: false, from: 'unsubscribe' });
+    box.innerHTML = PS.sticker('thanks', 110) + '<b>' + PS.esc(PS.consent.notice(b.dataset.k === 'all' ? '이메일' : '광고성 정보(이메일)', false)) + '</b>' +
+      '<p>다시 받고 싶으면 로그인 후 설정 › 알림 받기에서 켤 수 있어요.</p><a class="btn white" href="/">판다산다 홈으로</a>';
+  });
+  ask();
+})();
+</script>
+</body>
+</html>

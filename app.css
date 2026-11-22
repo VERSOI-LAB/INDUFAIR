@@ -491,3 +491,17 @@ h1,h2{letter-spacing:-.03em;} /* 큰 제목은 조금 더 좁혀야 덩어리져
 .dg-banner .dg-tx span{display:block;margin-top:2px;font-size:13px;color:var(--sub);}
 .dg-banner .dg-arrow{flex-shrink:0;font-size:20px;color:#2F5BD3;font-weight:800;}
 .dg-banner:active{transform:scale(.99);}
+
+/* 켜고 끄는 스위치 (설정 > 알림 받기) */
+.sw-row{display:flex;align-items:center;gap:12px;padding:14px 20px;cursor:pointer;}
+.sw-row .sw-tx{flex:1;min-width:0;}
+.sw-row .sw-tx b{display:block;font-size:17px;font-weight:500;}
+.sw-row .sw-tx span{display:block;margin-top:2px;font-size:13px;color:var(--hint);line-height:1.45;}
+.sw{position:relative;flex-shrink:0;width:52px;height:32px;}
+.sw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;}
+.sw i{position:absolute;inset:0;border-radius:16px;background:#D1D6DB;transition:background .15s;pointer-events:none;}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .15s;}
+.sw input:checked + i{background:var(--primary);}
+.sw input:checked + i::after{transform:translateX(20px);}
+.sw input:focus-visible + i{outline:2px solid var(--text);outline-offset:2px;}
+.sw input:disabled + i{opacity:.5;}

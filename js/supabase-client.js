@@ -119,16 +119,28 @@
       clean[clip(k, 30)] = typeof v === 'number' || typeof v === 'boolean' ? v : clip(v, 120);
     });
     if (window.gtag) { try { window.gtag('event', name, clean); } catch (e) {} }
+    // 기록에 남기면 안 되는 주소 값(수신거부 토큰, 결제 키 등)은 빼고
+    var sp = new URLSearchParams(location.search);
+    ['t', 'token', 'paymentKey', 'authKey', 'customerKey', 'orderId', 'code'].forEach(function (k) { sp.delete(k); });
+    var at = clip(location.pathname + (sp.toString() ? '?' + sp : ''), 300);
     try {
       var s = await window.sb.auth.getSession();
       var token = s.data && s.data.session ? s.data.session.access_token : SUPABASE_ANON_KEY;
       fetch(SUPABASE_URL + '/rest/v1/marketing_events', {
         method: 'POST', keepalive: true,
         headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY, Authorization: 'Bearer ' + token, Prefer: 'return=minimal' },
-        body: JSON.stringify({ anon_id: anonId(), name: name, path: clip(location.pathname + location.search, 300), props: clean, utm: firstTouch || {} })
+        body: JSON.stringify({ anon_id: anonId(), name: name, path: at, props: clean, utm: firstTouch || {} })
       }).catch(function () {});
     } catch (e) {}
   };
+
+  // 자동 메시지(푸시·이메일)를 눌러 들어옴: ?jm=메시지이름 → 기록하고 주소에서 지움 (supabase/functions/journeys)
+  var jm = qs.get('jm');
+  if (jm && /^[a-z0-9_]{2,40}$/.test(jm)) {
+    window.psTrack('journey_click', { journey: jm });
+    qs.delete('jm');
+    try { history.replaceState(history.state, '', location.pathname + (qs.toString() ? '?' + qs : '') + location.hash); } catch (e) {}
+  }
 
   // 방문 시작 (브라우저 탭 세션마다 한 번): 어디서 왔는지
   if (!session.get('ps_ss')) {

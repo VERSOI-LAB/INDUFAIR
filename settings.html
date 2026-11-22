@@ -40,8 +40,18 @@
       <label class="field"><span>전화번호 (전화하기 버튼에 쓰여요, 안 써도 돼요)</span><input class="input" id="phoneInput" inputmode="tel" maxlength="20" placeholder="010-0000-0000"></label>
       <button class="btn" id="saveBtn" style="margin-top:20px">저장하기</button>
     </section>
+    <section class="mcard" id="consentCard">
+      <h3 style="padding:14px 20px 2px">알림 받기</h3>
+      <button class="mrow" id="pushRow"><span>이 기기 알림<small style="display:block;font-size:13px;color:var(--hint)">채팅·지원사업 마감·내 물건 소식</small></span><span class="go" id="pushState" style="color:var(--sub);font-size:15px"></span></button>
+      <label class="sw-row"><span class="sw-tx"><b>내 물건·업체 소식 이메일</b><span>문의 없는 물건, 업체 주간 조회수, 프리미엄 만료 안내</span></span>
+        <span class="sw"><input type="checkbox" id="cInfoEmail" disabled><i></i></span></label>
+      <label class="sw-row"><span class="sw-tx"><b>(선택) 혜택·이벤트 푸시</b><span>할인·새 기능·놓친 지원사업 소식 (광고성 정보)</span></span>
+        <span class="sw"><input type="checkbox" id="cAdsPush" disabled><i></i></span></label>
+      <label class="sw-row"><span class="sw-tx"><b>(선택) 혜택·이벤트 이메일</b><span>밤 9시~아침 8시에는 보내지 않아요</span></span>
+        <span class="sw"><input type="checkbox" id="cAdsEmail" disabled><i></i></span></label>
+      <p id="consentNote" style="padding:4px 20px 12px;font-size:13px;color:var(--hint);line-height:1.5"></p>
+    </section>
     <section class="mcard">
-      <button class="mrow" id="pushRow"><span>채팅 알림</span><span class="go" id="pushState" style="color:var(--sub);font-size:15px"></span></button>
       <a class="mrow" href="/reset-password"><span>비밀번호 바꾸기</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
       <a class="mrow" href="/terms"><span>이용약관</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
       <a class="mrow" href="/privacy"><span>개인정보처리방침</span><span class="go"><i data-icon="chevron" data-size="20"></i></span></a>
@@ -114,6 +124,38 @@
       PS.toast(r === 'ok' ? '채팅 알림을 켰어요' : r === 'denied' ? '알림이 허용되지 않았어요' : '알림을 켜지 못했어요');
     }
     pushLabel();
+  });
+
+  // 알림 받기 설정 (정보성 이메일 / 광고성 푸시·이메일)
+  var C = { cInfoEmail: ['info_email', '정보성 이메일'], cAdsPush: ['ads_push', '광고성 정보(푸시)'], cAdsEmail: ['ads_email', '광고성 정보(이메일)'] };
+  function drawNote(c) {
+    var ad = c.ads_push || c.ads_email;
+    $('consentNote').textContent = ad && c.agreed_at
+      ? new Date(c.agreed_at).toLocaleDateString('ko-KR') + '에 혜택 소식 받기에 동의했어요. 언제든 끌 수 있어요.'
+      : '혜택 소식은 동의한 경우에만 보내요. 거래·채팅 알림과 상관없이 끌 수 있어요.';
+  }
+  PS.ready.then(async function (user) {
+    if (!user) return;
+    var c = await PS.consent.get();
+    if (!c) { $('consentCard').querySelectorAll('.sw-row').forEach(function (r) { r.hidden = true; }); return; } // 표가 아직 없을 때(SQL 실행 전)
+    Object.keys(C).forEach(function (id) {
+      var el = $(id);
+      el.checked = !!c[C[id][0]];
+      el.disabled = false;
+      el.addEventListener('change', async function () {
+        el.disabled = true;
+        var patch = {}; patch[C[id][0]] = el.checked;
+        var saved = await PS.consent.set(patch);
+        el.disabled = false;
+        if (!saved) { el.checked = !el.checked; PS.toast('저장하지 못했어요. 잠시 후 다시 해 주세요'); return; }
+        PS.track('consent_change', { kind: C[id][0], on: el.checked });
+        PS.toast(PS.consent.notice(C[id][1], el.checked));
+        if (el.checked && id === 'cAdsPush' && PS.push.state() === 'default') PS.push.enable();
+        c = Object.assign(c, saved, (saved.ads_push || saved.ads_email) && !(c.ads_push || c.ads_email) ? { agreed_at: new Date().toISOString() } : {});
+        drawNote(c);
+      });
+    });
+    drawNote(c);
   });
   $('supportRow').href = 'tel:' + PS.BIZ.phone;
   $('supportNo').textContent = PS.BIZ.phone;
