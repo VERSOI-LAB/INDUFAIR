@@ -64,7 +64,9 @@
 
   function render() {
     var count = function (t) { return t === 'orders' ? orders.length : chats.length; };
-    $('tabs').innerHTML = Object.keys(TABS).map(function (t) {
+    // 안전결제를 끈 뒤에는 예전 결제 주문이 있을 때만 '결제한 주문' 탭을 보여줌
+    if (!PS.SAFE_PAY && !orders.length) tab = 'all';
+    $('tabs').innerHTML = Object.keys(TABS).filter(function (t) { return t !== 'orders' || PS.SAFE_PAY || orders.length; }).map(function (t) {
       return '<button role="tab" aria-selected="' + (t === tab) + '" class="' + (t === tab ? 'on' : '') + '" data-t="' + t + '">' + TABS[t] + '<em>' + count(t) + '</em></button>';
     }).join('');
     $('tabs').onclick = function (e) {
