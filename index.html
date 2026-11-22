@@ -80,8 +80,8 @@
   <main class="page">
     <section class="hero">
       <h2 class="brand"><img src="/이미지/web/logo-wordmark.png" alt="판다산다 PANDA SANDA" width="1091" height="120"></h2>
-      <h1>산업용품 신품부터 중고까지 가장 쉽게</h1>
-      <p>사진 찍고, 가격 쓰면 끝!</p>
+      <h1 id="heroTitle">산업용품 신품부터 중고까지 가장 쉽게</h1>
+      <p id="heroSub">사진 찍고, 가격 쓰면 끝!</p>
     </section>
 
     <form class="search home-search" action="/buy" method="get" role="search">
@@ -124,6 +124,33 @@
 <script>
 (function () {
   PS.renderTabbar('home');
+
+  // 홈 첫 문구 A/B 테스트: 방문자마다 한 번 정해서 계속 같은 문구. 결과는 README '홈 문구 A/B 테스트' 의 SQL 로 확인
+  //   A: 지금 문구(거래 중심) / B: 물건 + 지원금 한 곳에서 (검색 로봇은 html 에 적힌 A 를 봄)
+  var HERO = {
+    a: null,
+    b: { title: '공장에 필요한 물건과 지원금, 한 곳에서', sub: '중고 설비 사고팔기부터 정부 지원사업 마감 알림까지' }
+  };
+  var variant;
+  try { variant = localStorage.getItem('ps_ab_home'); } catch (e) {}
+  if (!HERO.hasOwnProperty(variant)) {
+    variant = Math.random() < 0.5 ? 'a' : 'b';
+    try { localStorage.setItem('ps_ab_home', variant); } catch (e) {}
+  }
+  if (HERO[variant]) {
+    document.getElementById('heroTitle').textContent = HERO[variant].title;
+    document.getElementById('heroSub').textContent = HERO[variant].sub;
+  }
+  PS.track('home_view', { variant: variant });
+  // 홈에서 누른 곳 (판매·구매·검색·지원사업·행사·물건)
+  document.querySelector('.page').addEventListener('click', function (e) {
+    var a = e.target.closest('a[href]');
+    if (!a) return;
+    var h = a.getAttribute('href');
+    var cta = h === '/sell' ? 'sell' : h === '/buy' ? 'buy' : /^\/support/.test(h) ? 'support' : /^\/events/.test(h) ? 'event' : /^\/product\//.test(h) ? 'product' : null;
+    if (cta) PS.track('home_cta_click', { variant: variant, cta: cta });
+  });
+  document.querySelector('.home-search').addEventListener('submit', function () { PS.track('home_cta_click', { variant: variant, cta: 'search' }); });
   var PAGE = 20;
   var offset = 0;
   var grid = document.getElementById('recentGrid');

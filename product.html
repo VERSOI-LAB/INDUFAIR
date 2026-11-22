@@ -104,6 +104,7 @@
 <div class="app no-tabbar" id="app">
   <div class="slider-wrap">
     <button class="float-back" id="backBtn" aria-label="뒤로"><i data-icon="back" data-size="24"></i></button>
+    <button type="button" class="float-back" id="shareBtn" aria-label="공유하기" style="left:auto;right:62px" hidden><i data-icon="send" data-size="22"></i></button>
     <a class="float-back" href="/cart" aria-label="장바구니" style="left:auto;right:10px"><i data-icon="bag" data-size="22"></i><span class="cart-n" id="cartN" hidden></span></a>
     <div class="slider" id="slider"><div class="skeleton" style="flex:0 0 100%;border-radius:0"></div></div>
     <div class="dots" id="dots"></div>
@@ -153,6 +154,7 @@
     product = res.data;
     PS.addRecent(product.id);
     document.title = product.title + ' - 판다산다';
+    PS.bindShare(document.getElementById('shareBtn'), product.title + ' - 판다산다', product.title + ' ' + PS.won(product.price), PS.productUrl(product.id));
     await PS.ready;
 
     var sellerMap = await PS.publicProfiles([product.seller_profile_id]);
@@ -318,6 +320,7 @@
       var ins = await sb.from('chats').insert({ product_id: id, buyer_id: PS.user.id, seller_id: product.seller_profile_id }).select('id').single();
       if (ins.error) { btn.disabled = false; PS.toast('채팅을 열지 못했어요. 다시 해 주세요'); return; }
       chatId = ins.data.id;
+      await PS.track('chat_start', { product_id: id });
     }
     location.href = '/chat/' + chatId;
   }

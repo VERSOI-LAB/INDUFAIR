@@ -61,3 +61,50 @@ python3 dev-server.py   # http://localhost:8743 (vercel.json 의 clean URL 흉�
   - 아이폰은 Safari에서 "홈 화면에 추가"한 뒤 홈 화면 앱에서만 켤 수 있음 (iOS 16.4+)
   - 그 채팅방을 보고 있으면 알림을 띄우지 않음. 로그아웃하면 그 기기 알림은 꺼짐
   - Edge Function 비밀값: `VAPID_PUBLIC_KEY`(= `js/app.js` 의 `PS.VAPID_PUBLIC_KEY`), `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`(mailto:...). `chat-push` 는 Verify JWT 끔
+
+## 마케팅 측정
+`supabase/migrations/20261122_marketing_events.sql` 실행 → 사이트 안 행동이 `marketing_events` 에 쌓인다 (쿠키 없음, 로봇 제외, 90일 뒤 자동 삭제).
+브라우저에서 `PS.track('이름', { ... })` (`js/supabase-client.js` 의 `psTrack`). 들어온 경로(UTM·외부 사이트·초대 링크)가 모든 기록에 `utm` 으로 붙는다 (새 UTM 링크로 다시 오면 그걸로 바뀜).
+
+| 이벤트 | 언제 |
+|---|---|
+| `session_start` | 방문 시작 (탭 세션마다 한 번, 들어온 경로) |
+| `sign_up` | 가입 (이메일·카카오, 초대 여부) |
+| `login_start` | 카카오 로그인 버튼 누름 |
+| `home_view`, `home_cta_click` | 홈 보기 / 홈에서 판매·구매·검색·지원사업·물건 누름 (A/B 문구 포함) |
+| `product_create` | 물건 등록 |
+| `chat_start` | 물건에서 새 채팅 시작 |
+| `biz_create` | 업체 소개 처음 등록 |
+| `alert_subscribe` | 키워드 알림 / 지원사업 마감 알림 켬 |
+| `share` | 공유 (물건·업체·지원사업·이야기·초대) |
+| `premium_view`, `premium_purchase` | 업체 프리미엄 화면 / 결제 |
+| `purchase` | 안전결제 완료 |
+
+운영자 확인 (SQL Editor):
+- 단계별 사람 수: `select * from marketing_funnel(7);`
+- 채널별 가입: `select * from marketing_signups_by_source(30);`
+
+외부 홍보 링크에는 UTM 을 붙인다. 예) `/support?utm_source=naver_blog&utm_medium=content&utm_campaign=weekly_support`
+
+**GA4**: `js/supabase-client.js` 의 `GA4_ID` 에 측정 ID 를 넣으면 같은 이벤트가 GA4 로도 간다. 켜기 전에 개인정보처리방침의 쿠키 항목("광고나 추적을 위한 쿠키를 쓰지 않습니다")과 처리 위탁(Google)을 먼저 고칠 것.
+
+### 홈 문구 A/B 테스트
+`index.html` 의 `HERO`. 방문자마다 a(거래 중심) / b(물건 + 지원금) 중 하나로 고정. 2주 정도 쌓은 뒤:
+```sql
+select v.props->>'variant' as variant,
+       count(distinct v.anon_id) as viewers,
+       count(distinct c.anon_id) as clickers,
+       round(100.0 * count(distinct c.anon_id) / nullif(count(distinct v.anon_id), 0), 1) as click_rate
+  from marketing_events v
+  left join marketing_events c on c.name = 'home_cta_click' and c.anon_id = v.anon_id and c.props->>'variant' = v.props->>'variant'
+ where v.name = 'home_view' and v.created_at > now() - interval '14 days'
+ group by 1;
+```
+이긴 문구를 html 의 h1 으로 옮기고 테스트를 끝낸다.
+
+## 카카오 로그인
+1. Kakao Developers > 내 애플리케이션(지도에 쓰는 앱) > 카카오 로그인 활성화, Redirect URI 에 Supabase 콜백 주소(`<프로젝트 주소>/auth/v1/callback`) 추가
+2. 동의항목: 닉네임(필수), 프로필 사진(선택). 이메일은 비즈 앱 전환 후에만 받을 수 있으니, 전이라면 Supabase 에서 "Allow users without an email" 을 켠다
+3. 앱 키 > REST API 키 = Client ID, 보안 > Client Secret 발급·활성화 → Supabase > Authentication > Sign In / Providers > Kakao 에 넣고 켬
+4. Supabase > Authentication > URL Configuration 의 Redirect URLs 에 사이트의 `/login**` 주소 추가
+5. `js/app.js` 의 `PS.KAKAO_LOGIN = true` 로 바꾸면 로그인 화면에 노란 버튼이 나타난다

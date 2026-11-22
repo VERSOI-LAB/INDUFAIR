@@ -129,6 +129,7 @@
     if (keywords.some(function (k) { return k.keyword === kw; })) { PS.toast('이미 등록한 키워드예요'); return; }
     var res = await sb.from('keyword_alerts').insert({ profile_id: PS.user.id, keyword: kw });
     if (res.error) { PS.toast('등록하지 못했어요'); return; }
+    PS.track('alert_subscribe', { kind: 'keyword', keyword: kw });
     $('kw').value = '';
     PS.toast('"' + kw + '" 키워드를 등록했어요');
     load();

@@ -22,6 +22,11 @@
   .switch button{color:var(--text);font-weight:800;text-decoration:underline;padding:8px;}
   .legal{text-align:center;font-size:13px;color:var(--hint);margin-top:24px;}
   .legal a{text-decoration:underline;}
+  /* 카카오 로그인 버튼 (카카오 디자인 가이드: 노란 바탕 #FEE500, 검정 85% 글씨) */
+  .kakao-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:56px;margin-top:20px;border-radius:12px;background:#FEE500;color:rgba(0,0,0,.85);font-size:17px;font-weight:700;}
+  .kakao-btn:disabled{opacity:.6;}
+  .or{display:flex;align-items:center;gap:12px;margin:20px 0 4px;color:var(--hint);font-size:14px;}
+  .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line);}
 </style>
 </head>
 <body>
@@ -33,6 +38,14 @@
       <h1 id="heading">반가워요!</h1>
       <p id="subheading">이메일로 바로 시작해요</p>
     </section>
+
+    <div id="kakaoWrap" hidden>
+      <button type="button" class="kakao-btn" id="kakaoBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3C6.48 3 2 6.54 2 10.9c0 2.8 1.86 5.27 4.66 6.67l-.95 3.5c-.08.3.26.55.52.38l4.15-2.75c.53.06 1.07.1 1.62.1 5.52 0 10-3.54 10-7.9S17.52 3 12 3z"/></svg>
+        카카오로 3초 만에 시작하기
+      </button>
+      <div class="or"><span>또는 이메일로</span></div>
+    </div>
 
     <form id="form" novalidate>
       <label class="field" id="nameField" hidden><span>이름 (다른 사람에게 보여요)</span>
@@ -87,7 +100,8 @@
     var stk = document.querySelector('#loginStk img');
     if (stk) stk.src = '/이미지/stickers/' + (signup ? 'fighting' : reset ? 'curious' : 'hello') + '.webp';
     $('heading').textContent = signup ? '처음 오셨군요!' : reset ? '비밀번호를 잊었나요?' : '반가워요!';
-    $('subheading').textContent = signup ? '이름, 이메일, 비밀번호만 쓰면 끝' : reset ? '가입한 이메일로 새 비밀번호 링크를 보내드려요' : '이메일로 바로 시작해요';
+    $('subheading').textContent = signup ? '이름, 이메일, 비밀번호만 쓰면 끝' : reset ? '가입한 이메일로 새 비밀번호 링크를 보내드려요' : PS.KAKAO_LOGIN ? '카카오나 이메일로 바로 시작해요' : '이메일로 바로 시작해요';
+    $('kakaoWrap').hidden = !PS.KAKAO_LOGIN || reset;
     $('submit').textContent = signup ? '가입하고 시작하기' : reset ? '메일 받기' : '로그인';
     $('password').autocomplete = signup ? 'new-password' : 'current-password';
     $('switch').innerHTML = signup
@@ -97,6 +111,24 @@
     $('err').hidden = true;
     $('info').hidden = true;
     (signup ? $('name') : $('email')).focus();
+  }
+
+  // 카카오 로그인: 카카오 → Supabase → 이 화면(#access_token) 으로 돌아오면 PS.ready 가 로그인시키고 위에서 next 로 보냄
+  if (PS.KAKAO_LOGIN) {
+    $('kakaoWrap').hidden = false;
+    if (PS.hashParams.get('error') || PS.param('error')) {
+      var q = new URLSearchParams(location.search);
+      ['error', 'error_code', 'error_description'].forEach(function (k) { q.delete(k); });
+      history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : ''));
+      setTimeout(function () { showErr('카카오 로그인을 마치지 못했어요. 다시 눌러 주세요'); }, 0);
+    }
+    $('kakaoBtn').addEventListener('click', async function () {
+      var btn = this;
+      btn.disabled = true;
+      PS.track('login_start', { method: 'kakao' });
+      var r = await sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: location.origin + '/login?next=' + encodeURIComponent(nextUrl()) } });
+      if (r.error) { btn.disabled = false; showErr('카카오 로그인을 열지 못했어요. 잠시 후 다시 해 주세요'); }
+    });
   }
 
   $('forgotBtn').addEventListener('click', function () { setMode('reset'); });

@@ -114,6 +114,7 @@
       main.innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>업체를 찾을 수 없어요</b><div style="margin-top:20px"><a class="btn" href="/my-biz">업체 소개 관리로</a></div></div>';
       return;
     }
+    if (!PS.param('authKey')) PS.track('premium_view', { business_id: bizId, is_premium: !!(biz.premium_until && Date.parse(biz.premium_until) > Date.now()) });
 
     // 토스 카드 등록 창에서 돌아왔을 때
     var authKey = PS.param('authKey'), customerKey = PS.param('customerKey');
@@ -121,6 +122,7 @@
     if (authKey && customerKey) {
       main.innerHTML = '<div class="empty" style="padding-top:60px"><div class="skeleton" style="width:120px;height:120px;border-radius:50%;margin:0 auto 16px"></div><b>결제를 확인하고 있어요</b>창을 닫지 말고 잠시만 기다려 주세요</div>';
       var res = await call({ action: 'subscribe', businessId: bizId, authKey: authKey, customerKey: customerKey });
+      if (res.ok) PS.track('premium_purchase', { business_id: bizId, amount: res.data.charged === false ? 0 : PRICE });
       if (res.ok) notice = { ok: true, text: res.data.charged === false ? '프리미엄을 다시 시작했어요. 다음 결제일부터 청구돼요.' : '결제가 끝났어요! 지금부터 프리미엄이 적용돼요.' };
       else notice = { ok: false, text: res.data.code === 'not_configured' ? '결제가 아직 준비 중이에요. 곧 열릴 거예요!' : (res.data.message || '결제를 마치지 못했어요. 돈이 빠져나갔다면 고객센터로 알려 주세요.') };
     }
