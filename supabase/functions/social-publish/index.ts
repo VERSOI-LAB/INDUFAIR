@@ -3,14 +3,19 @@
 //   { dry_run: true }                     올릴 이미지 주소·캡션만 돌려줌 (운영자만)
 //   { run: true, force: true, only? }     요일·중복 상관없이 지금 올림 (운영자만, only: "instagram" | "threads")
 //   운영자 = Authorization: Bearer <service_role 키>
-// 비밀값: INSTAGRAM_ACCESS_TOKEN (인스타그램 로그인 방식 장기 토큰), THREADS_ACCESS_TOKEN (스레드 장기 토큰)
-//         둘 중 있는 것만 올림. 처음 쓴 뒤로는 social_accounts 에 저장된 토큰을 30일마다 자동 갱신해서 씀
+// 비밀값: INSTAGRAM_ACCESS_TOKEN, THREADS_ACCESS_TOKEN — 둘 중 있는 것만 올림
+//   인스타 토큰은 두 방식 모두 됨 (앞글자로 구분):
+//     · 통합 로그인(Facebook 로그인, 새 앱의 기본) — 시스템 사용자 토큰(EAA…, 만료 없음) → graph.facebook.com.
+//       인스타 계정 id 는 INSTAGRAM_USER_ID 비밀값, 없으면 연결된 페이지에서 찾음
+//     · 인스타그램 로그인(IG…, 60일) → graph.instagram.com, 30일마다 자동 갱신
+//   스레드 토큰(60일)은 30일마다 자동 갱신. 갱신한 토큰은 social_accounts 에 저장
 // 이미지: https://www.pandasanda.com/support/weekly.jpg (api/weekly-image.js, 1080×1350 JPEG)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 const SITE = "https://www.pandasanda.com";
 const IG = "https://graph.instagram.com";
+const FB = "https://graph.facebook.com";
 const TH = "https://graph.threads.net/v1.0";
 const REFRESH_AFTER_DAYS = 30;  // 장기 토큰은 60일. 반쯤 지나면 갱신
 const HASHTAGS = "#정부지원사업 #지원사업 #중소기업 #소상공인 #제조업 #스마트공장 #창업지원 #판다산다";
@@ -59,8 +64,11 @@ async function account(admin: SupabaseClient, p: Platform) {
     if (!token) return null;
     refreshedAt = new Date().toISOString();
   }
-  // 30일 지나면 갱신 (실패하면 쓰던 토큰으로 계속)
-  if (refreshedAt && Date.now() - Date.parse(refreshedAt) > REFRESH_AFTER_DAYS * 86400_000) {
+  // 인스타 토큰 종류: IG… = 인스타그램 로그인(graph.instagram.com), 그 밖(EAA… 시스템 사용자 등) = 통합 로그인(graph.facebook.com, 만료 없음)
+  const fb = p === "instagram" && !token.startsWith("IG");
+  const host = p === "threads" ? TH : fb ? FB : IG;
+  // 30일 지나면 갱신 (실패하면 쓰던 토큰으로 계속). 시스템 사용자 토큰은 만료가 없어 갱신하지 않음
+  if (!fb && refreshedAt && Date.now() - Date.parse(refreshedAt) > REFRESH_AFTER_DAYS * 86400_000) {
     const url = p === "instagram"
       ? `${IG}/refresh_access_token?grant_type=ig_refresh_token&access_token=${encodeURIComponent(token)}`
       : `https://graph.threads.net/refresh_access_token?grant_type=th_refresh_token&access_token=${encodeURIComponent(token)}`;
@@ -68,14 +76,21 @@ async function account(admin: SupabaseClient, p: Platform) {
     if (r?.access_token) { token = r.access_token; refreshedAt = new Date().toISOString(); }
     else console.error("token refresh", p, safe(JSON.stringify(r)));
   }
+  if (fb) userId = Deno.env.get("INSTAGRAM_USER_ID") || userId;
   if (!userId) {
-    const me = await fetch(p === "instagram" ? `${IG}/me?fields=user_id,username&access_token=${encodeURIComponent(token!)}` : `${TH}/me?fields=id,username&access_token=${encodeURIComponent(token!)}`)
-      .then((x) => x.json()).catch(() => null);
-    userId = (p === "instagram" ? me?.user_id || me?.id : me?.id) || null;
-    if (!userId) throw new Error("계정 확인 실패: " + safe(JSON.stringify(me?.error || me)));
+    let me;
+    if (fb) { // 통합 로그인: 토큰이 볼 수 있는 페이지에 연결된 인스타 비즈니스 계정
+      me = await fetch(`${FB}/me/accounts?fields=instagram_business_account{id,username}&access_token=${encodeURIComponent(token!)}`).then((x) => x.json()).catch(() => null);
+      userId = (me?.data || []).map((a: { instagram_business_account?: { id: string } }) => a.instagram_business_account?.id).find(Boolean) || null;
+    } else {
+      me = await fetch(p === "instagram" ? `${IG}/me?fields=user_id,username&access_token=${encodeURIComponent(token!)}` : `${TH}/me?fields=id,username&access_token=${encodeURIComponent(token!)}`)
+        .then((x) => x.json()).catch(() => null);
+      userId = (p === "instagram" ? me?.user_id || me?.id : me?.id) || null;
+    }
+    if (!userId) throw new Error("계정 확인 실패" + (fb ? " (INSTAGRAM_USER_ID 비밀값에 인스타 계정 id 를 넣어 주세요)" : "") + ": " + safe(JSON.stringify(me?.error || me)));
   }
   await admin.from("social_accounts").upsert({ platform: p, user_id: userId, access_token: token, token_refreshed_at: refreshedAt, updated_at: new Date().toISOString() });
-  return { token: token!, userId };
+  return { token: token!, userId, host };
 }
 
 async function post(url: string, params: Record<string, string>) {
@@ -95,11 +110,11 @@ async function waitReady(base: string, id: string, token: string) {
   }
 }
 
-async function publish(p: Platform, acc: { token: string; userId: string }, imageUrl: string, caption: string) {
-  if (p === "instagram") {
-    const c = await post(`${IG}/${acc.userId}/media`, { image_url: imageUrl, caption, access_token: acc.token });
-    await waitReady(IG, c.id, acc.token);
-    const m = await post(`${IG}/${acc.userId}/media_publish`, { creation_id: c.id, access_token: acc.token });
+async function publish(p: Platform, acc: { token: string; userId: string; host: string }, imageUrl: string, caption: string) {
+  if (p === "instagram") { // graph.instagram.com 또는 graph.facebook.com — 경로는 같음
+    const c = await post(`${acc.host}/${acc.userId}/media`, { image_url: imageUrl, caption, access_token: acc.token });
+    await waitReady(acc.host, c.id, acc.token);
+    const m = await post(`${acc.host}/${acc.userId}/media_publish`, { creation_id: c.id, access_token: acc.token });
     return m.id as string;
   }
   const c = await post(`${TH}/${acc.userId}/threads`, { media_type: "IMAGE", image_url: imageUrl, text: caption, access_token: acc.token });
