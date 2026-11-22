@@ -5,6 +5,34 @@
 --   견적은 구매자와 그 견적을 낸 업체만 봄
 --   알림: 새 요청 → 같은 분류·지역 업체에게, 새 견적 → 구매자에게 (Edge Function rfq-push, Verify JWT 끔)
 
+-- 0) 같은 이름인데 구조가 다른 테이블이 이미 있으면 (예전에 대시보드에서 만든 것 등) 지우지 않고 이름만 바꿔 보관
+--    rfq_requests → rfq_requests_old_20261122 (buyer_id 가 없을 때), rfq_quotes → rfq_quotes_old_20261122 (seller_id 가 없을 때)
+--    그 테이블의 인덱스도 같이 이름을 바꿔서 아래 새 인덱스와 겹치지 않게. 필요 없으면 나중에 직접 drop
+do $$
+declare t text; col text; idx record;
+begin
+  foreach t in array array['rfq_quotes', 'rfq_requests'] loop
+    col := case t when 'rfq_requests' then 'buyer_id' else 'seller_id' end;
+    if to_regclass('public.' || t) is not null
+       and not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = t and column_name = col) then
+      for idx in select indexname from pg_indexes where schemaname = 'public' and tablename = t loop
+        execute format('alter index public.%I rename to %I', idx.indexname, left(idx.indexname, 40) || '_old_20261122');
+      end loop;
+      execute format('alter table public.%I rename to %I', t, t || '_old_20261122');
+      raise notice '기존 % 테이블을 %_old_20261122 로 이름을 바꿔 보관했어요', t, t;
+    end if;
+  end loop;
+end $$;
+
+-- 예전에 같은 이름으로 만든 함수가 있으면 결과 형식이 달라 바꿀 수 없으므로 먼저 지움 (아래에서 다시 만듦)
+drop function if exists public.rfq_quota(uuid);
+drop function if exists public.rfq_view(uuid);
+drop function if exists public.my_rfqs();
+drop function if exists public.rfq_targets(uuid);
+drop function if exists public.create_rfq(text, text, text, text, text, integer, text);
+drop function if exists public.submit_quote(uuid, integer, text, text);
+drop function if exists public.close_rfq(uuid);
+
 -- 1) 요청 -----------------------------------------------------------------------
 create table if not exists public.rfq_requests (
   id uuid primary key default gen_random_uuid(),
