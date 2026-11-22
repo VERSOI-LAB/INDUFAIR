@@ -122,6 +122,13 @@ p{margin:0;}
 .list{display:flex;flex-direction:column;}
 .row{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);min-width:0;}
 .row:last-child{border-bottom:none;}
+/* 목록 줄 아래 버튼 (판매관리·찜·구매내역): 정보 아래 별도 줄에 둬서 가격·채팅 수를 가리지 않게 (글자를 키워도 안 겹침) */
+.row-wrap{position:relative;border-bottom:1px solid var(--line);}
+.row-wrap:last-child{border-bottom:none;}
+.row-wrap .row{border-bottom:none;padding-bottom:10px;}
+.row-wrap .row .s{justify-content:flex-start;}
+.row-acts{display:flex;gap:6px;padding:0 0 16px 122px;}
+.row-acts .chg{flex:1;max-width:200px;min-width:0;height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;}
 .row .ph{width:108px;height:108px;flex-shrink:0;border-radius:12px;overflow:hidden;background:#F2F2F2;position:relative;}
 .row .ph img{width:100%;height:100%;object-fit:cover;}
 .row .info{flex:1;min-width:0;display:flex;flex-direction:column;}
@@ -411,7 +418,7 @@ p{margin:0;}
 .push-prompt .pp-x{flex-shrink:0;width:28px;height:28px;color:var(--hint);font-size:14px;}
 
 /* 목록 검색 (판매완료·주문 내역) */
-.lfilter{display:grid;gap:8px;margin:12px 0 4px;}
+.lfilter{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:12px 0 4px;}
 .lfilter .lf-q{display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border-radius:12px;background:#F2F2F2;color:var(--hint);}
 .lfilter .lf-q input{flex:1;min-width:0;height:100%;border:0;background:none;font-size:15px;color:var(--text);outline:none;}
 .lfilter .lf-p{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;}

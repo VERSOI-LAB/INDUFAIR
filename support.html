@@ -28,11 +28,11 @@
   .sp-tabs a{height:48px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
   .sp-tabs a.on{color:var(--text);border-bottom-color:var(--text);}
   .lead{color:var(--sub);margin-top:12px;line-height:1.6;font-size:15px;}
-  .sp-filter{display:grid;gap:10px;margin-top:14px;}
+  .sp-filter{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin-top:14px;}
   .sp-filter .search{height:48px;}
   .sp-filter .search input{font-size:16px;}
-  .sp-opts{display:flex;gap:8px;align-items:center;}
-  .sp-opts select{height:40px;padding:0 10px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-size:15px;appearance:auto;}
+  .sp-opts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .sp-opts select{height:40px;padding:0 10px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-size:15px;appearance:auto;min-width:0;max-width:100%;}
   .sp-opts label{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--sub);margin-left:auto;white-space:nowrap;}
   .sp-count{font-size:13px;color:var(--sub);margin-top:6px;}
   .more{margin:16px 0 8px;}
@@ -124,7 +124,7 @@
         '<a href="/events"' + (isEvent ? ' class="on" aria-current="page"' : '') + '>교육·행사</a></nav>' +
       '<p class="lead">' + K.lead + '</p>' +
       (isEvent ? '' : '<p class="sp-count" style="margin-top:8px;line-height:1.9">지역별 모아보기: ' + PS.SUPPORT_REGIONS.filter(function (r) { return r !== '전국'; }).map(function (r) {
-        return '<a href="/support/area/' + encodeURIComponent(r) + '" style="text-decoration:underline;margin-right:8px">' + PS.esc(PS.supportRegionLabel(r)) + '</a>';
+        return '<a href="/support/area/' + encodeURIComponent(r) + '" style="text-decoration:underline;margin-right:8px;white-space:nowrap;display:inline-block">' + PS.esc(PS.supportRegionLabel(r)) + '</a>';
       }).join('') + '</p>') +
       (isEvent ? '' : '<p class="sp-count" style="margin-top:6px"><a href="/support/weekly" style="text-decoration:underline;font-weight:700">📢 이번 주 마감 지원사업 브리핑 보기</a></p>') +
       (isEvent ? '' : '<a class="dg-banner" href="/diagnose?from=support"><span class="dg-ico" aria-hidden="true">✓</span><span class="dg-tx"><b>우리 회사 맞춤 공고만 보기</b><span>업종·지역·규모만 고르면 30초 진단</span></span><span class="dg-arrow" aria-hidden="true">›</span></a>') +
