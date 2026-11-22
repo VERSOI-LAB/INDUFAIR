@@ -105,7 +105,7 @@
   <div class="slider-wrap">
     <button class="float-back" id="backBtn" aria-label="뒤로"><i data-icon="back" data-size="24"></i></button>
     <button type="button" class="float-back" id="shareBtn" aria-label="공유하기" style="left:auto;right:62px" hidden><i data-icon="send" data-size="22"></i></button>
-    <a class="float-back" href="/cart" aria-label="장바구니" style="left:auto;right:10px"><i data-icon="bag" data-size="22"></i><span class="cart-n" id="cartN" hidden></span></a>
+    <a class="float-back" id="cartLink" href="/cart" aria-label="장바구니" style="left:auto;right:10px" hidden><i data-icon="bag" data-size="22"></i><span class="cart-n" id="cartN" hidden></span></a>
     <div class="slider" id="slider"><div class="skeleton" style="flex:0 0 100%;border-radius:0"></div></div>
     <div class="dots" id="dots"></div>
   </div>
@@ -161,8 +161,10 @@
     freeMin = (await PS.freeShipMins([product.seller_profile_id]))[product.seller_profile_id] || 0;
     payableSeller = await PS.canPay(product.seller_profile_id);
     sellerTrust = (await PS.trust([product.seller_profile_id]))[product.seller_profile_id];
+    if (PS.SAFE_PAY) document.getElementById('cartLink').hidden = false;
+    else document.getElementById('shareBtn').style.right = '10px';
     var cn = PS.cart.count();
-    if (cn) { document.getElementById('cartN').textContent = cn; document.getElementById('cartN').hidden = false; }
+    if (cn && PS.SAFE_PAY) { document.getElementById('cartN').textContent = cn; document.getElementById('cartN').hidden = false; }
     // 조회수: 판매자 본인은 빼고, 같은 브라우저 세션에서는 한 번만
     var viewKey = 'ps_viewed_' + id;
     var seen = false;
@@ -223,7 +225,7 @@
       (facts.length ? '<div class="facts">' + facts.join('') + '</div>' : '') +
       (p.description ? '<div class="desc">' + PS.esc(p.description) + '</div>' : '') +
       (payableSeller ? PS.policyHtml(true)
-        : '<div class="direct-note"><b>채팅으로 직접 거래하는 물건이에요</b>판다산다 안전결제를 쓰지 않는 판매자예요. 판다산다는 개인과의 직접 거래의 돈을 보관하지 않으니 아래를 꼭 지켜 주세요.' +
+        : '<div class="direct-note"><b>채팅으로 직접 거래하는 물건이에요</b>' + (PS.SAFE_PAY ? '판다산다 안전결제를 쓰지 않는 판매자예요. 판다산다는 개인과의 직접 거래의 돈을 보관하지 않으니 아래를 꼭 지켜 주세요.' : '판매자와 채팅으로 가격·배송·결제 방법을 정하고 직접 거래해요. 판다산다는 회원 간 거래의 대금을 받거나 보관하지 않으니 아래를 꼭 지켜 주세요.') +
           '<ul style="margin:6px 0 0;padding-left:18px">' + PS.SAFE_TRADE_TIPS.map(function (t) { return '<li>' + PS.esc(t).replace('경찰청 사이버범죄 신고시스템', '<a href="' + PS.CYBER_COP_URL + '" target="_blank" rel="noopener" style="text-decoration:underline">경찰청 사이버범죄 신고시스템</a>') + '</li>'; }).join('') + '</ul></div>') +
       '<div class="stats">채팅 ' + (p.inquiry_count || 0) + ' · 찜 ' + (p.like_count || 0) + ' · 조회 ' + (p.view_count || 0) +
         (PS.user && PS.user.id === p.seller_profile_id ? '' : ' · <button type="button" id="reportSeller" style="color:var(--sub);text-decoration:underline;font-size:inherit">판매자 신고</button>') + '</div>' +
@@ -250,9 +252,10 @@
     var canBuy = product.status === 'selling' && (product.price > 0 || PS.options(product).some(function (_, i) { return PS.optionPrice(product, i) > 0; })); // 가격 협의(0원)는 문의로
     var payable = payableSeller; // 안전결제 대상(승인된 사업자 판매자)이 아닌 물건은 채팅으로 직접 거래
     var heart = '<button class="heart' + (liked ? ' on' : '') + '" id="heartBtn" aria-label="찜하기" aria-pressed="' + liked + '">' + PS.icon3d('heart', 34) + '</button>';
-    if (product.status === 'selling' && !(canBuy && payable)) {
-      // 안전결제가 없는 물건(개인 판매자·가격 협의): 채팅 버튼 하나로
-      bar.innerHTML = heart + '<button class="btn" id="chatBtn">' + PS.icon3d('chat', 28) + ' ' + (canBuy ? '채팅으로 거래하기' : '채팅으로 가격 묻기') + '</button>';
+    if (!PS.SAFE_PAY || (product.status === 'selling' && !(canBuy && payable))) {
+      // 안전결제가 없는 물건(안전결제 꺼짐·개인 판매자·가격 협의): 채팅 버튼 하나로
+      var open = product.status === 'selling';
+      bar.innerHTML = heart + '<button class="btn" id="chatBtn"' + (open ? '' : ' disabled') + '>' + (open ? PS.icon3d('chat', 28) + ' ' + (canBuy ? '채팅으로 거래하기' : '채팅으로 가격 묻기') : PS.STATUS[product.status] || '거래 불가') + '</button>';
       document.getElementById('heartBtn').addEventListener('click', toggleLike);
       document.getElementById('chatBtn').addEventListener('click', startChat);
       return;

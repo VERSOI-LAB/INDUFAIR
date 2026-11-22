@@ -182,7 +182,7 @@
 
   function priceHint() {
     var el = $('priceHint');
-    if (el) el.textContent = $('fNego') && $('fNego').checked ? '화면에 "가격 협의"로 보이고, 구매하기 대신 문의를 받아요' : form.price ? '화면에는 ' + PS.won(form.price) + '으로 보여요' : '';
+    if (el) el.textContent = $('fNego') && $('fNego').checked ? '화면에 "가격 협의"로 보이고, 채팅으로 가격 문의를 받아요' : form.price ? '화면에는 ' + PS.won(form.price) + '으로 보여요' : '';
   }
 
   function syncText() {

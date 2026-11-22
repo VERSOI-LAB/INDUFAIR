@@ -50,6 +50,7 @@
 <script src="/js/app.js"></script>
 <script>
 (function () {
+  if (PS.safePayOffPage()) return; // 안전결제 꺼짐: 채팅 직거래 안내만
   var $ = function (id) { return document.getElementById(id); };
   var products = {};
   var names = {}, mins = {}, pays = {}; // pays: 안전결제 판매자 여부

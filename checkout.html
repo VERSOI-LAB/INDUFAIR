@@ -70,6 +70,7 @@
 <script src="/js/app.js"></script>
 <script>
 (function () {
+  if (PS.safePayOffPage()) return; // 안전결제 꺼짐: 채팅 직거래 안내만
   var $ = function (id) { return document.getElementById(id); };
   var productId = PS.param('id');      // 바로 구매: 물건 하나
   var sellerId = PS.param('seller');   // 장바구니: 이 판매자 물건 묶음

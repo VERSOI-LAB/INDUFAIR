@@ -69,7 +69,7 @@
       '<div class="quick">' +
         '<a href="/favorites">' + PS.icon('heart', 28) + '관심목록</a>' +
         '<a href="/recent">' + PS.icon('clock', 28) + '최근 본</a>' +
-        '<a href="/cart">' + PS.icon('bag', 28) + '장바구니</a>' +
+        (PS.SAFE_PAY ? '<a href="/cart">' + PS.icon('bag', 28) + '장바구니</a>' : '<a href="/rfq/new">' + PS.icon('search', 28) + '구해요</a>') +
       '</div>' +
 
       '<div id="payoutNeed"></div>' +
@@ -88,7 +88,7 @@
         row('/rfq?mine=1', 'search', '구해요 · 받은 견적') +
         row('/price', 'scan', '내 물건 가격 찾기') +
         row('/my-biz', 'receipt', '업체 소개 관리') +
-        row('/pay-seller', 'receipt', '안전결제 판매자', '<span style="margin-left:auto;font-size:14px;color:var(--sub)" id="payState"></span>') +
+        (PS.SAFE_PAY ? row('/pay-seller', 'receipt', '안전결제 판매자', '<span style="margin-left:auto;font-size:14px;color:var(--sub)" id="payState"></span>') : '') +
         row('/shipping', 'bag', '배송비 설정') +
       '</section>' +
 
@@ -105,7 +105,7 @@
     // "내 동네" 글자가 있으면 화살표와 겹치지 않게
     main.querySelectorAll('.mrow span[style*="margin-left:auto"] + .go').forEach(function (g) { g.style.marginLeft = '6px'; });
     loadKeywordBadge();
-    loadPaySeller();
+    if (PS.SAFE_PAY) loadPaySeller();
     loadStoryAdmin();
     loadInvite();
     loadBlocks();

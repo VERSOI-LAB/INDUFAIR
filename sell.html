@@ -580,7 +580,7 @@
     });
     $('shipRow').hidden = !form.shipSep;
     $('shipHint').textContent = locked ? PS.won(freeMin) + ' 이상은 배송비 무료로 정해 두셔서 배송비 포함으로 등록돼요'
-      : form.shipSep ? '사는 사람이 결제할 때 물건 가격에 더해져요' : '물건 가격에 배송비가 들어 있어요';
+      : form.shipSep ? '물건 화면에 배송비가 따로 표시돼요' : '물건 가격에 배송비가 들어 있어요';
   }
   $('shipChips').addEventListener('click', function (e) {
     var b = e.target.closest('.chip');
