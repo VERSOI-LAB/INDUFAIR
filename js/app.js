@@ -24,7 +24,8 @@
 
   // 카카오맵 JavaScript 키 (Kakao Developers > 앱 키). 비어 있으면 무료 지도(OpenStreetMap)로 보여준다.
   PS.KAKAO_JS_KEY = 'eed04d223c75e55f7d445b88ca168023';
-  // 카카오 로그인 버튼. Supabase > Authentication > Sign In / Providers 에서 Kakao 를 켠 뒤 true 로 (README '카카오 로그인')
+  // 간편 로그인 버튼(카카오·구글)은 Supabase > Authentication > Sign In / Providers 에서 켜면 로그인 화면에 자동으로 나타난다.
+  // (login.html 이 /auth/v1/settings 를 읽음) 이 값은 강제로 카카오 버튼을 보이게 할 때만 true
   PS.KAKAO_LOGIN = false;
   // 토스페이먼츠 클라이언트 키 (공개용). 비어 있으면 결제 버튼이 '준비 중'으로 안내
   //   test_gck_/live_gck_ : 결제위젯(주문서형) 연동 키 → 결제 화면에 토스 결제위젯을 그림

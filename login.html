@@ -24,7 +24,10 @@
   .legal a{text-decoration:underline;}
   /* 카카오 로그인 버튼 (카카오 디자인 가이드: 노란 바탕 #FEE500, 검정 85% 글씨) */
   .kakao-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:56px;margin-top:20px;border-radius:12px;background:#FEE500;color:rgba(0,0,0,.85);font-size:17px;font-weight:700;}
-  .kakao-btn:disabled{opacity:.6;}
+  .kakao-btn:disabled,.google-btn:disabled{opacity:.6;}
+  /* 구글 로그인 버튼 (구글 브랜드 가이드: 흰 바탕, 회색 테두리, 4색 G 로고) */
+  .google-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:56px;margin-top:10px;border-radius:12px;background:#fff;border:1px solid #DADCE0;color:#1F1F1F;font-size:17px;font-weight:700;}
+  #socialWrap > button:first-child{margin-top:20px;}
   .ads-ok{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:15px;line-height:1.5;cursor:pointer;}
   .ads-ok input{width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--primary);}
   .ads-ok small{display:block;font-size:13px;color:var(--hint);}
@@ -42,10 +45,14 @@
       <p id="subheading">이메일로 바로 시작해요</p>
     </section>
 
-    <div id="kakaoWrap" hidden>
-      <button type="button" class="kakao-btn" id="kakaoBtn">
+    <div id="socialWrap" hidden>
+      <button type="button" class="kakao-btn" id="kakaoBtn" data-provider="kakao" hidden>
         <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3C6.48 3 2 6.54 2 10.9c0 2.8 1.86 5.27 4.66 6.67l-.95 3.5c-.08.3.26.55.52.38l4.15-2.75c.53.06 1.07.1 1.62.1 5.52 0 10-3.54 10-7.9S17.52 3 12 3z"/></svg>
         카카오로 3초 만에 시작하기
+      </button>
+      <button type="button" class="google-btn" id="googleBtn" data-provider="google" hidden>
+        <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        구글(Gmail)로 시작하기
       </button>
       <div class="or"><span>또는 이메일로</span></div>
     </div>
@@ -94,7 +101,10 @@
 
   PS.ready.then(function (user) { if (user) location.replace(nextUrl()); });
 
-  function setMode(m) {
+  var social = []; // 켜진 간편 로그인 (아래에서 Supabase 설정을 읽어 채움)
+  var LABEL = { kakao: '카카오', google: '구글' };
+
+  function setMode(m, keepFocus) {
     mode = m;
     var signup = m === 'signup';
     var reset = m === 'reset';
@@ -105,36 +115,48 @@
     var stk = document.querySelector('#loginStk img');
     if (stk) stk.src = '/이미지/stickers/' + (signup ? 'fighting' : reset ? 'curious' : 'hello') + '.webp';
     $('heading').textContent = signup ? '처음 오셨군요!' : reset ? '비밀번호를 잊었나요?' : '반가워요!';
-    $('subheading').textContent = signup ? '이름, 이메일, 비밀번호만 쓰면 끝' : reset ? '가입한 이메일로 새 비밀번호 링크를 보내드려요' : PS.KAKAO_LOGIN ? '카카오나 이메일로 바로 시작해요' : '이메일로 바로 시작해요';
-    $('kakaoWrap').hidden = !PS.KAKAO_LOGIN || reset;
+    var names = social.map(function (p) { return LABEL[p]; });
+    $('subheading').textContent = reset ? '가입한 이메일로 새 비밀번호 링크를 보내드려요'
+      : names.length ? names.join('·') + ' 계정이나 이메일로 바로 시작해요'
+      : signup ? '이름, 이메일, 비밀번호만 쓰면 끝' : '이메일로 바로 시작해요';
+    $('socialWrap').hidden = !social.length || reset;
     $('submit').textContent = signup ? '가입하고 시작하기' : reset ? '메일 받기' : '로그인';
     $('password').autocomplete = signup ? 'new-password' : 'current-password';
     $('switch').innerHTML = signup
       ? '이미 가입했나요? <button type="button" data-m="login">로그인</button>'
       : reset ? '비밀번호가 생각났나요? <button type="button" data-m="login">로그인</button>'
       : '처음이에요? <button type="button" data-m="signup">새로 가입하기</button>';
+    if (keepFocus) return; // 버튼만 새로 보여줄 때는 입력 중인 내용·안내를 건드리지 않음
     $('err').hidden = true;
     $('info').hidden = true;
     (signup ? $('name') : $('email')).focus();
   }
 
-  // 카카오 로그인: 카카오 → Supabase → 이 화면(#access_token) 으로 돌아오면 PS.ready 가 로그인시키고 위에서 next 로 보냄
-  if (PS.KAKAO_LOGIN) {
-    $('kakaoWrap').hidden = false;
-    if (PS.hashParams.get('error') || PS.param('error')) {
-      var q = new URLSearchParams(location.search);
-      ['error', 'error_code', 'error_description'].forEach(function (k) { q.delete(k); });
-      history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : ''));
-      setTimeout(function () { showErr('카카오 로그인을 마치지 못했어요. 다시 눌러 주세요'); }, 0);
-    }
-    $('kakaoBtn').addEventListener('click', async function () {
-      var btn = this;
-      btn.disabled = true;
-      PS.track('login_start', { method: 'kakao' });
-      var r = await sb.auth.signInWithOAuth({ provider: 'kakao', options: { redirectTo: location.origin + '/login?next=' + encodeURIComponent(nextUrl()) } });
-      if (r.error) { btn.disabled = false; showErr('카카오 로그인을 열지 못했어요. 잠시 후 다시 해 주세요'); }
-    });
+  // 간편 로그인(카카오·구글): Supabase 에서 켜진 것만 버튼을 보여준다 (켜고 끄는 데 코드 수정·배포 필요 없음)
+  //   카카오/구글 → Supabase → 이 화면(#access_token) 으로 돌아오면 PS.ready 가 로그인시키고 위에서 next 로 보냄
+  if (PS.hashParams.get('error') || PS.param('error')) {
+    var q = new URLSearchParams(location.search);
+    ['error', 'error_code', 'error_description'].forEach(function (k) { q.delete(k); });
+    history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : ''));
+    setTimeout(function () { showErr('간편 로그인을 마치지 못했어요. 다시 눌러 주세요. 계속 안 되면 이메일로 가입해 주세요'); }, 0);
   }
+  ['kakaoBtn', 'googleBtn'].forEach(function (id) {
+    $(id).addEventListener('click', async function () {
+      var btn = this, provider = btn.dataset.provider;
+      btn.disabled = true;
+      PS.track(mode === 'signup' ? 'signup_start' : 'login_start', { method: provider });
+      var opts = { redirectTo: location.origin + '/login?next=' + encodeURIComponent(nextUrl()) };
+      if (provider === 'google') opts.queryParams = { prompt: 'select_account' };
+      var r = await sb.auth.signInWithOAuth({ provider: provider, options: opts });
+      if (r.error) { btn.disabled = false; showErr(LABEL[provider] + ' 로그인을 열지 못했어요. 잠시 후 다시 해 주세요'); }
+    });
+  });
+  (window.sbAuthProviders ? sbAuthProviders() : Promise.resolve({})).then(function (ext) {
+    social = ['kakao', 'google'].filter(function (p) { return ext[p] || (p === 'kakao' && PS.KAKAO_LOGIN); });
+    $('kakaoBtn').hidden = social.indexOf('kakao') === -1;
+    $('googleBtn').hidden = social.indexOf('google') === -1;
+    if (social.length) setMode(mode, true);
+  });
 
   $('forgotBtn').addEventListener('click', function () { setMode('reset'); });
 

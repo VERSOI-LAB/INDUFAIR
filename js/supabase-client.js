@@ -12,6 +12,13 @@
   window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
   });
+  // 켜져 있는 간편 로그인 (Supabase > Authentication > Sign In / Providers). { kakao: true, google: false, ... }
+  window.sbAuthProviders = function () {
+    return fetch(SUPABASE_URL + '/auth/v1/settings', { headers: { apikey: SUPABASE_ANON_KEY } })
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (j) { return j.external || {}; })
+      .catch(function () { return {}; });
+  };
 
   // ---- 친구 초대: ?ref=코드 로 들어오면 기억했다가, 가입(로그인)하면 '누가 데려왔는지' 기록 ----
   var store = {
