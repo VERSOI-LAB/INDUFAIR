@@ -194,3 +194,10 @@ select title, category, region, notified_count, quote_count, status, created_at 
 select category, count(*) as requests, count(*) filter (where quote_count = 0) as no_quote from rfq_requests group by 1 order by 2 desc;
 ```
 설정: 마이그레이션 실행 → `supabase functions deploy rfq-push --no-verify-jwt`
+
+### 설비 일괄 처분 (처분해요)
+구해요를 뒤집은 것: 공장이 설비 목록·사진(10장)·처분 사유·희망 시기를 올리면 매입 업체가 **매입 제안가**를 보냄. 같은 표(`rfq_requests.kind = 'sell'`)·견적·한도(무료 30일 3건, 프리미엄 무제한)·채팅·알림을 씀. 30일 동안 열림.
+- 화면: `/rfq?k=sell`(목록 탭), `/rfq/new?kind=sell`(올리기), 상세는 같은 `/rfq/:id`. 안내 페이지 `/liquidation`(검색 유입용, FAQ 구조화 데이터)
+- 들어오는 곳: 판다(물건 올리기) 첫 화면 "공장 정리·이전으로 설비가 많나요?", 마이 › 구해요·처분, 구해요 목록 탭
+- SQL: `supabase/migrations/20261123_rfq_sell.sql` (열 추가 + `create_rfq`·`rfq_view`·`my_rfqs` 확장, 예전 호출도 그대로 동작). **SQL 실행 → `rfq-push` 다시 배포 → 사이트 배포** 순서
+- 측정: `liquidation_view`, `rfq_create`(kind=sell, reason, photos), `rfq_cta`(from=liquidation_*)
