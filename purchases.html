@@ -16,9 +16,6 @@
   .tabs button{height:52px;font-size:17px;font-weight:700;color:var(--hint);border-bottom:3px solid transparent;}
   .tabs button.on{color:var(--text);border-bottom-color:var(--text);}
   .tabs button em{font-style:normal;font-weight:600;margin-left:4px;}
-  .row-wrap{position:relative;}
-  .row-wrap .row .s{justify-content:flex-start;}
-  .row-wrap .chg{position:absolute;right:0;bottom:16px;height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
 </style>
 </head>
 <body>
@@ -97,7 +94,7 @@
           // 지역·등록 시각 대신 판매자와 마지막 채팅 날짜
           var html = PS.rowHtml(c.products).replace(/<div class="m">[\s\S]*?<\/div>/, '<div class="m">' + PS.esc(name) + ' · ' +
             '채팅 ' + day(when(c)) + '</div>');
-          return '<div class="row-wrap">' + html + '<a class="chg" href="/chat/' + c.id + '">' + PS.icon('chat', 16) + ' 채팅 보기</a></div>';
+          return '<div class="row-wrap">' + html + '<div class="row-acts"><a class="chg" href="/chat/' + c.id + '">' + PS.icon('chat', 16) + ' 채팅 보기</a></div></div>';
         }).join('')
       : '<div class="empty">' + PS.icon3d('buy', 96) + '<b>아직 물어본 물건이 없어요</b>' +
         '마음에 드는 물건에서 채팅하기를 눌러 보세요<div style="margin-top:20px"><a class="btn" href="/buy">물건 보러 가기</a></div></div>';
