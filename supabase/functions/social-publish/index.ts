@@ -26,10 +26,8 @@ type Manifest = { week: { mon: string; label: string }; slides: string[]; captio
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const clip = (s: string, n: number) => s.length > n ? s.slice(0, n - 1) + "…" : s;
 // 에러 문구에 토큰이 섞이지 않게
 const safe = (s: unknown) => String(s ?? "").replace(/access_token=[^&\s"]+/g, "access_token=***").slice(0, 480);
-
 
 // ---- 토큰 ----
 async function account(admin: SupabaseClient, p: Platform) {
