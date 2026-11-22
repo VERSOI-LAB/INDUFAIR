@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="robots" content="noindex, nofollow">
+<title>주간 카드 만들기 - 판다산다</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .wc-help{margin-top:14px;color:var(--sub);line-height:1.6;font-size:15px;}
+  .wc-canvas{display:block;width:100%;max-width:540px;margin:16px auto 0;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.08);}
+  .wc-acts{display:grid;gap:8px;margin-top:16px;}
+  .wc-acts .btn{height:52px;}
+  .wc-h{margin-top:28px;font-size:17px;font-weight:800;}
+  .wc-text{width:100%;min-height:200px;margin-top:8px;padding:12px;border:1.5px solid var(--line);border-radius:12px;font:14px/1.6 inherit;resize:vertical;}
+  .wc-row{display:flex;gap:8px;margin-top:8px;}
+  .wc-row .btn{flex:1;height:44px;font-size:15px;}
+</style>
+</head>
+<body>
+<div class="app no-tabbar">
+  <header class="topbar"><a class="back" href="/support/weekly" aria-label="이번 주 지원사업으로"><i data-icon="back" data-size="24"></i></a><h1>주간 카드 만들기</h1></header>
+  <main class="page">
+    <p class="wc-help">매주 월요일 아침, 이 화면에서 카드 이미지를 저장하고 글을 복사해 네이버 블로그·카카오톡 채널·카페에 올려 주세요. 링크마다 어디서 왔는지(UTM)가 붙어서 채널별 가입을 따로 셀 수 있어요.</p>
+    <canvas class="wc-canvas" id="cv" width="1080" height="1350" aria-label="주간 지원사업 카드 미리보기"></canvas>
+    <div class="wc-acts"><button class="btn" id="saveBtn" disabled>카드 이미지 저장 (PNG)</button></div>
+
+    <h2 class="wc-h">네이버 블로그·카페용 글</h2>
+    <textarea class="wc-text" id="blogText" readonly></textarea>
+    <div class="wc-row"><button class="btn white" data-copy="blogText" data-src="naver_blog">블로그용 복사</button><button class="btn white" data-copy="blogText" data-src="naver_cafe">카페용 복사</button></div>
+
+    <h2 class="wc-h">카카오톡 채널용 짧은 글</h2>
+    <textarea class="wc-text" id="kakaoText" readonly style="min-height:140px"></textarea>
+    <div class="wc-row"><button class="btn white" data-copy="kakaoText" data-src="kakao_channel">카톡 채널용 복사</button></div>
+    <div style="height:40px"></div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+// 데이터: /support/weekly.json (api/seo.js 의 weeklyData — /support/weekly 화면과 같은 목록)
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var SITE = 'https://www.pandasanda.com';
+  var FONT = '"NanumSquareRound", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
+  var data = null;
+  var label = function (r) { return r === '전남광주' ? '광주·전남' : (r || '전국'); };
+  function dday(p) {
+    if (!p.apply_end) return '상시';
+    var n = Math.round((Date.parse(p.apply_end) - Date.parse(data.today)) / 86400000);
+    return n === 0 ? '오늘 마감' : 'D-' + n;
+  }
+  function campaign() { return 'weekly_' + data.week.mon; }
+  function link(path, src) {
+    var medium = src === 'kakao_channel' ? 'social' : 'content';
+    return SITE + path + (path.indexOf('?') < 0 ? '?' : '&') + 'utm_source=' + src + '&utm_medium=' + medium + '&utm_campaign=' + campaign();
+  }
+
+  // ---- 카드 그리기 ----
+  function fit(ctx, text, max) {
+    if (ctx.measureText(text).width <= max) return text;
+    while (text.length && ctx.measureText(text + '…').width > max) text = text.slice(0, -1);
+    return text + '…';
+  }
+  function wrap2(ctx, text, max) { // 두 줄까지, 넘치면 둘째 줄 끝을 … 로
+    for (var i = 1; i <= text.length; i++) {
+      if (ctx.measureText(text.slice(0, i)).width > max) return [text.slice(0, i - 1), fit(ctx, text.slice(i - 1), max)];
+    }
+    return [text];
+  }
+  function pill(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+  function draw() {
+    var cv = $('cv'), ctx = cv.getContext('2d'), W = 1080, H = 1350, P = 72;
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
+    // 머리
+    ctx.fillStyle = '#FFB800'; ctx.fillRect(0, 0, W, 330);
+    ctx.fillStyle = '#191F28';
+    ctx.font = '800 36px ' + FONT; ctx.fillText('판다산다 지원사업 브리핑', P, 104);
+    ctx.font = '800 76px ' + FONT; ctx.fillText(data.week.label + ' 마감 임박', P, 200);
+    ctx.font = '600 34px ' + FONT; ctx.fillText(data.week.range + ' · 마감 ' + data.closing.length + '건 · 새 공고 ' + data.fresh.length + '건', P, 268);
+    // 목록
+    var list = data.closing.slice(0, 7), y = 390;
+    if (!list.length) { ctx.font = '700 40px ' + FONT; ctx.fillStyle = '#4E5968'; ctx.fillText('이번 주 마감 공고가 없어요', P, y + 60); }
+    list.forEach(function (p) {
+      var d = dday(p), soon = d === '오늘 마감' || (/^D-\d+$/.test(d) && Number(d.slice(2)) <= 3);
+      ctx.font = '800 30px ' + FONT;
+      var pw = Math.max(120, ctx.measureText(d).width + 36);
+      ctx.fillStyle = soon ? '#FFF0EF' : '#EAF2FE'; pill(ctx, P, y, pw, 52, 12); ctx.fill();
+      ctx.fillStyle = soon ? '#E5443A' : '#2F5BD3'; ctx.textAlign = 'center'; ctx.fillText(d, P + pw / 2, y + 37); ctx.textAlign = 'left';
+      ctx.fillStyle = '#191F28'; ctx.font = '700 36px ' + FONT;
+      var tx = P + pw + 24, tw = W - tx - P;
+      var lines = wrap2(ctx, p.title, tw);
+      lines.forEach(function (l, i) { ctx.fillText(l, tx, y + 38 + i * 46); });
+      ctx.fillStyle = '#8B95A1'; ctx.font = '600 27px ' + FONT;
+      ctx.fillText(fit(ctx, [p.category, label(p.region), p.agency].filter(Boolean).join(' · '), tw), tx, y + 38 + lines.length * 46 + 4);
+      y += 38 + lines.length * 46 + 48;
+    });
+    if (data.closing.length > list.length) { ctx.fillStyle = '#4E5968'; ctx.font = '700 30px ' + FONT; ctx.fillText('외 ' + (data.closing.length - list.length) + '건 더', P, Math.min(y + 10, 1150)); }
+    // 바닥
+    ctx.fillStyle = '#191F28'; ctx.fillRect(0, H - 150, W, 150);
+    ctx.fillStyle = '#FFFFFF'; ctx.font = '800 38px ' + FONT; ctx.fillText('우리 회사 맞춤 공고 30초 진단', P, H - 86);
+    ctx.fillStyle = '#FFB800'; ctx.font = '700 30px ' + FONT; ctx.fillText('pandasanda.com/support/weekly', P, H - 40);
+    $('saveBtn').disabled = false;
+  }
+
+  // ---- 글 ----
+  function blogText(src) {
+    var L = [];
+    L.push('[' + data.week.label + '] 이번 주 마감 정부지원사업 ' + data.closing.length + '건 정리');
+    L.push('');
+    L.push(data.week.range + '에 마감되는 정부·지자체 지원사업을 모았어요. 지난 일주일 동안 새로 올라온 공고는 ' + data.fresh.length + '건이에요.');
+    L.push('');
+    data.closing.slice(0, 15).forEach(function (p, i) {
+      L.push((i + 1) + '. [' + dday(p) + '] ' + p.title);
+      L.push('   ' + [p.category, label(p.region), p.agency].filter(Boolean).join(' · '));
+      L.push('   ' + link('/support/' + p.id, src));
+    });
+    if (data.closing.length > 15) L.push('… 외 ' + (data.closing.length - 15) + '건');
+    L.push('');
+    L.push('▶ 전체 목록: ' + link('/support/weekly', src));
+    L.push('▶ 우리 회사가 신청할 수 있는 공고만 보기 (30초 진단): ' + link('/diagnose', src));
+    L.push('');
+    L.push('※ 기업마당(bizinfo.go.kr) 공고를 정리한 것이에요. 신청 자격과 서류는 공고 원문에서 꼭 확인해 주세요.');
+    return L.join('\n');
+  }
+  function kakaoText() {
+    var top = data.closing.slice(0, 3).map(function (p) { return '· [' + dday(p) + '] ' + p.title; }).join('\n');
+    return '📢 ' + data.week.label + ' 마감 임박 지원사업 ' + data.closing.length + '건\n\n' + (top || '이번 주 마감 공고는 없어요.') +
+      (data.closing.length > 3 ? '\n외 ' + (data.closing.length - 3) + '건' : '') + '\n\n전체 보기 👉 ' + link('/support/weekly', 'kakao_channel') +
+      '\n우리 회사 맞춤 진단 👉 ' + link('/diagnose', 'kakao_channel');
+  }
+
+  document.addEventListener('click', async function (e) {
+    var b = e.target.closest('[data-copy]');
+    if (!b || !data) return;
+    var text = b.dataset.copy === 'blogText' ? blogText(b.dataset.src) : kakaoText();
+    $(b.dataset.copy).value = text;
+    try { await navigator.clipboard.writeText(text); PS.toast('복사했어요'); } catch (err) { $(b.dataset.copy).select(); PS.toast('글을 길게 눌러 복사해 주세요'); }
+    PS.track('weekly_card_copy', { src: b.dataset.src });
+  });
+  $('saveBtn').addEventListener('click', function () {
+    var a = document.createElement('a');
+    a.download = 'pandasanda-weekly-' + data.week.mon + '.png';
+    a.href = $('cv').toDataURL('image/png');
+    a.click();
+    PS.track('weekly_card_save', { week: data.week.mon });
+  });
+
+  (async function () {
+    try {
+      var r = await fetch('/support/weekly.json', { cache: 'no-store' });
+      if (!r.ok) throw new Error(r.status);
+      data = await r.json();
+    } catch (err) {
+      $('cv').replaceWith(Object.assign(document.createElement('p'), { className: 'wc-help', textContent: '데이터를 불러오지 못했어요. 배포된 사이트(www.pandasanda.com/weekly-card)에서 열어 주세요.' }));
+      return;
+    }
+    try { await document.fonts.load('800 40px "NanumSquareRound"'); await document.fonts.load('700 40px "NanumSquareRound"'); await document.fonts.load('600 40px "NanumSquareRound"'); } catch (err) {}
+    draw();
+    $('blogText').value = blogText('naver_blog');
+    $('kakaoText').value = kakaoText();
+  })();
+})();
+</script>
+</body>
+</html>
