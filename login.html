@@ -25,6 +25,9 @@
   /* 카카오 로그인 버튼 (카카오 디자인 가이드: 노란 바탕 #FEE500, 검정 85% 글씨) */
   .kakao-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:56px;margin-top:20px;border-radius:12px;background:#FEE500;color:rgba(0,0,0,.85);font-size:17px;font-weight:700;}
   .kakao-btn:disabled{opacity:.6;}
+  .ads-ok{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:15px;line-height:1.5;cursor:pointer;}
+  .ads-ok input{width:20px;height:20px;margin-top:2px;flex-shrink:0;accent-color:var(--primary);}
+  .ads-ok small{display:block;font-size:13px;color:var(--hint);}
   .or{display:flex;align-items:center;gap:12px;margin:20px 0 4px;color:var(--hint);font-size:14px;}
   .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line);}
 </style>
@@ -57,6 +60,7 @@
       <label class="field" id="pwField"><span>비밀번호</span>
         <input class="input" id="password" type="password" autocomplete="current-password" placeholder="6자 이상">
       </label>
+      <label class="ads-ok" id="adsField" hidden><input type="checkbox" id="adsOk"><span>(선택) 할인·새 기능·지원사업 소식을 푸시·이메일로 받을게요 <small>광고성 정보 · 언제든 설정에서 끌 수 있어요</small></span></label>
       <div class="err" id="err" hidden></div>
       <div class="info" id="info" hidden></div>
       <button class="btn" id="submit" type="submit" style="margin-top:24px">로그인</button>
@@ -95,6 +99,7 @@
     var signup = m === 'signup';
     var reset = m === 'reset';
     $('nameField').hidden = !signup;
+    $('adsField').hidden = !signup;
     $('pwField').hidden = reset;
     $('forgotBtn').hidden = m !== 'login';
     var stk = document.querySelector('#loginStk img');
@@ -185,7 +190,7 @@
     var su = await sb.auth.signUp({
       email: email,
       password: password,
-      options: { data: { name: name }, emailRedirectTo: location.origin + '/login?next=' + encodeURIComponent(nextUrl()) }
+      options: { data: { name: name, ads_ok: $('adsOk').checked }, emailRedirectTo: location.origin + '/login?next=' + encodeURIComponent(nextUrl()) }
     });
     btn.disabled = false;
     btn.textContent = label;
@@ -197,7 +202,7 @@
     if (su.data.session) { location.replace(nextUrl()); return; }
     $('info').textContent = email + ' 메일함에서 확인 버튼을 누르면 가입이 끝나요!';
     $('info').hidden = false;
-    setTimeout(function () { mode = 'login'; $('nameField').hidden = true; $('submit').textContent = '로그인'; $('switch').innerHTML = '처음이에요? <button type="button" data-m="signup">새로 가입하기</button>'; }, 0);
+    setTimeout(function () { mode = 'login'; $('nameField').hidden = true; $('adsField').hidden = true; $('submit').textContent = '로그인'; $('switch').innerHTML = '처음이에요? <button type="button" data-m="signup">새로 가입하기</button>'; }, 0);
   });
 
   setMode(mode);

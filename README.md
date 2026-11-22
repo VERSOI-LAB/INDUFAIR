@@ -15,6 +15,7 @@
 | `/support`, `/support/:id` | `support.html` | 정부 지원사업 공고 (기업마당에서 매일 2번 자동 수집, 마감 임박순·분야·지역 필터) |
 | `/community`, `/community/:id`, `/community/write` | `community.html` | 이야기: 당근 동네생활처럼 묻고 수다 떠는 곳 (주제 4개, 내 동네 글만 보기, 공감·댓글·신고, 댓글 달리면 웹 푸시) |
 | `/diagnose` | `diagnose.html` | 지원사업 30초 진단: 업종·지역·규모·업력 → 맞춤 공고 (익명은 3건만, 로그인하면 전부 + 답 저장 + 마감 알림 자동 설정). 홈·지원사업 목록·지역별 모아보기에서 띠로 연결 |
+| `/unsubscribe` | `unsubscribe.html` | 이메일 수신거부 (메일의 링크, 로그인 없이) |
 | `/events`, `/events/:id` | `support.html` | 교육·세미나·전시회·설명회 (기업마당 행사정보, 같은 함수가 같이 수집) |
 | `/pay-seller` | `pay-seller.html` | 안전결제 판매자 신청 (사업자 인증 + 통신판매업 신고 확인) |
 
@@ -113,3 +114,46 @@ select v.props->>'variant' as variant,
 3. 앱 키 > REST API 키 = Client ID, 보안 > Client Secret 발급·활성화 → Supabase > Authentication > Sign In / Providers > Kakao 에 넣고 켬
 4. Supabase > Authentication > URL Configuration 의 Redirect URLs 에 사이트의 `/login**` 주소 추가
 5. `js/app.js` 의 `PS.KAKAO_LOGIN = true` 로 바꾸면 로그인 화면에 노란 버튼이 나타난다
+
+## 행동별 자동 메시지 (웹 푸시 + 이메일)
+`supabase/migrations/20261122_journeys.sql` + Edge Function `journeys` (Verify JWT 끔). 매일 한국시간 10:30 에 cron 이 한 번 돌린다.
+
+| 메시지 | 받는 사람 | 종류 | 채널 |
+|---|---|---|---|
+| `consent_reconfirm` | 광고 수신 동의 후 23개월 (2년 재확인, 정보통신망법 제50조 제8항) | 법정 안내 | 푸시·이메일 |
+| `premium_expiring` | 프리미엄이 3일 안에 끝나는데 자동결제 없음 | 정보성 | 푸시·이메일 |
+| `product_stale_7` | 물건 올린 지 7일, 채팅 0건 | 정보성 | 푸시·이메일 |
+| `product_stale_3` | 물건 올린 지 3일, 채팅 0건 | 정보성 | 푸시 |
+| `welcome_diagnose` | 가입 다음 날, 진단·마감 알림 안 함 | 정보성 | 푸시·이메일 |
+| `biz_weekly` | 업체 주인, 월요일 (지난주 조회수) | 정보성 | 푸시·이메일 |
+| `biz_upsell` | 프리미엄 아닌 업체 조회 30회 이상, 30일에 한 번 | **광고성** | 동의한 채널만 |
+| `dormant_30` | 마지막 방문 30~37일 전 (그동안 새 지원사업 수) | **광고성** | 동의한 채널만 |
+
+규칙
+- 위 표 순서가 우선순위. 한 사람에게 **하루 1통, 7일 3통**까지 (법정 안내는 제외). 같은 메시지(사람·종류·대상)는 한 번만
+- 광고성: `marketing_consents` 에서 동의한 채널로만, 제목 앞 `(광고)`, 이메일 아래에 전송자 정보와 수신거부 링크
+- 실제 발송은 08~21시에만 (누가 다른 시각에 불러도 거절). 정보성 이메일도 설정이나 메일의 링크에서 끌 수 있음
+- 동의: 가입 화면 `(선택)` 체크박스(기본 꺼짐) 또는 설정 › 알림 받기. 바꾸면 날짜와 처리 결과를 화면에 알림
+- 수신거부 링크: `/unsubscribe?t=토큰` (로그인 없이). 토큰은 방문 기록에 남기지 않음
+
+설정
+1. 마이그레이션 실행, `supabase functions deploy journeys --no-verify-jwt`
+2. 이메일(선택): resend.com 가입 → 도메인(pandasanda.com) 인증 → Edge Function 비밀값 `RESEND_API_KEY`, `EMAIL_FROM`(예: `판다산다 <noreply@pandasanda.com>`). 없으면 푸시만 나감
+3. 웹 푸시는 채팅 알림과 같은 VAPID 비밀값을 씀
+
+운영
+- 미리보기 (보내지 않음, 운영자 키 필요):
+  `curl -X POST <함수 주소>/journeys -H "Authorization: Bearer <service_role 키>" -d '{"dry_run":true}'` · 하나만: `{"dry_run":true,"only":"biz_weekly"}`
+- 메시지별 성과 (보냄 → 눌러서 들어옴):
+```sql
+select s.props->>'journey' as journey, count(*) as sent,
+       count(distinct c.profile_id) as clicked,
+       round(100.0 * count(distinct c.profile_id) / nullif(count(*), 0), 1) as click_rate
+  from marketing_events s
+  left join marketing_events c on c.name = 'journey_click' and c.profile_id = s.profile_id
+   and c.props->>'journey' = s.props->>'journey' and c.created_at between s.created_at and s.created_at + interval '3 days'
+ where s.name = 'journey_sent' and s.created_at > now() - interval '30 days'
+ group by 1 order by 2 desc;
+```
+- 문구는 `supabase/functions/journeys/index.ts` 의 `JOURNEYS`, 대상 조건은 마이그레이션의 `journey_candidates`
+- 카카오 알림톡을 붙일 때는 `JOURNEYS` 에 채널을 하나 더 두고 정보성 메시지만 알림톡으로 (광고는 친구톡·브랜드 메시지)

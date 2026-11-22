@@ -1052,6 +1052,36 @@
     return PS.user;
   })();
 
+  // ---- 알림 받기 설정 (supabase/migrations/20261122_journeys.sql 의 marketing_consents) ----
+  //   ads_push / ads_email: 혜택·이벤트 (광고성, 동의한 사람만) · info_email: 내 물건·업체 소식 이메일 (정보성, 끌 수 있음)
+  PS.consent = {
+    get: async function () {
+      if (!PS.user) return null;
+      var r = await sb.from('marketing_consents').select('ads_push,ads_email,info_email,agreed_at').eq('profile_id', PS.user.id).maybeSingle();
+      if (r.error) return null;
+      return r.data || { ads_push: false, ads_email: false, info_email: true, agreed_at: null };
+    },
+    set: async function (patch) {
+      var r = await sb.from('marketing_consents').upsert(Object.assign({ profile_id: PS.user.id }, patch)).select('ads_push,ads_email,info_email').single();
+      return r.error ? null : r.data;
+    },
+    // 정보통신망법: 수신 동의·거부를 처리하면 전송자·날짜·결과를 알려야 함
+    notice: function (what, on) {
+      var d = new Date(Date.now() + 9 * 3600000);
+      return '판다산다 · ' + d.getUTCFullYear() + '년 ' + (d.getUTCMonth() + 1) + '월 ' + d.getUTCDate() + '일 ' + what + ' 수신 ' + (on ? '동의' : '거부') + '가 처리됐어요';
+    }
+  };
+  // 가입할 때 '(선택) 혜택 소식 받기'에 체크했으면 첫 로그인 때 저장 (이메일 확인 후 로그인이라 가입 순간엔 저장 못 함)
+  PS.ready.then(async function (user) {
+    if (!user || !user.user_metadata || user.user_metadata.ads_ok !== true) return;
+    var key = 'ps_consent_synced_' + user.id;
+    try { if (localStorage.getItem(key)) return; } catch (e) {}
+    var cur = await sb.from('marketing_consents').select('profile_id').eq('profile_id', user.id).maybeSingle();
+    if (cur.error) return; // 표가 아직 없으면 다음에
+    if (!cur.data) await sb.from('marketing_consents').insert({ profile_id: user.id, ads_push: true, ads_email: true });
+    try { localStorage.setItem(key, '1'); } catch (e) {}
+  });
+
   // supabase 요청은 결과를 받아야(then) 실제로 전송된다. 결과가 필요 없는 요청은 이걸로 보낸다.
   PS.fire = function (query) {
     return Promise.resolve(query).then(function (r) {
