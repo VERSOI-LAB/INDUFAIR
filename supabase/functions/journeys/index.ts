@@ -22,6 +22,7 @@ const clip = (s: unknown, n: number) => { const t = String(s ?? "").replace(/\s+
 const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 const won = (n: number) => !n ? "가격 협의" : n >= 10000 && n % 10000 === 0 ? (n / 10000).toLocaleString("ko-KR") + "만 원" : n.toLocaleString("ko-KR") + "원";
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const regionLabel = (r: string) => r === "전남광주" ? "광주·전남" : r;
 
 type Kind = "info" | "ads" | "legal";
 type Cand = { profile_id: string; ref: string; email: string | null; ads_push: boolean; ads_email: boolean; info_email: boolean; data: Record<string, any> };
@@ -69,6 +70,15 @@ const JOURNEYS: Journey[] = [
       body: "업종·지역만 고르면 우리 회사가 지금 신청할 수 있는 지원사업을 골라 드려요. 30초면 끝나요.",
       path: "/diagnose?from=journey", cta: "30초 진단하기", email: true,
     }),
+  },
+  {
+    // 매주 월요일 지원사업 브리핑: 마감 알림을 켰거나 진단을 한 사람 (supabase/migrations/20261123_weekly_briefing.sql)
+    key: "weekly_briefing", kind: "info", mondayOnly: true,
+    build: (d) => d.count > 0 ? ({
+      title: `이번 주 마감 ${d.region ? regionLabel(d.region) + " " : ""}지원사업 ${d.count}건`,
+      body: `${clip(d.top, 40)}${d.count > 1 ? ` 외 ${d.count - 1}건` : ""} · 마감 전에 확인해 보세요`,
+      path: d.region ? `/support/area/${encodeURIComponent(d.region)}` : "/support/weekly", cta: "이번 주 공고 보기", email: true,
+    }) : null,
   },
   {
     key: "biz_weekly", kind: "info", mondayOnly: true,
