@@ -297,7 +297,23 @@
       '</div></a>';
   };
 
-  PS.PRODUCT_LIST_COLUMNS = 'id,title,price,region,status,condition,usage_period,created_at,like_count,inquiry_count,view_count,product_images(url,sort_order)';
+  // 품목 시세 페이지(/price/:item)와 지역 매물 페이지(/buy/area/:area)로 가는 링크. api/seo.js 의 ITEMS 와 같은 목록 (바꿀 때 같이)
+  PS.PRICE_ITEMS = {
+    '에어콤프레샤': ['콤프레샤', '컴프레서', '콤프레서', '컴프레샤'], '집진기': ['집진기'], '서보모터': ['서보모터', '서보 모터'], '모터': ['모터'],
+    '감속기': ['감속기'], '인버터': ['인버터'], 'PLC': ['PLC'], '펌프': ['펌프'], '지게차': ['지게차'],
+    '핸드파레트': ['핸드파레트', '핸드자키', '핸드 파레트', '핸드파렛트'], '용접기': ['용접기'], '선반(공작기계)': ['범용선반', 'CNC선반', 'CNC 선반', '선반기'],
+    '밀링': ['밀링'], '호이스트': ['호이스트'], '그라인더': ['그라인더', '연삭기'], '레귤레이터': ['레귤레이터'], '에어실린더': ['실린더'],
+    '발전기': ['발전기'], '칠러': ['칠러', '냉각기'], '컨베이어': ['컨베이어', '콘베어', '컨베어']
+  };
+  PS.seoLinksHtml = function (p) {
+    var t = String(p.title || '').toLowerCase(), links = [];
+    var item = Object.keys(PS.PRICE_ITEMS).filter(function (k) { return PS.PRICE_ITEMS[k].some(function (w) { return t.indexOf(w.toLowerCase()) !== -1; }); })[0];
+    if (item) links.push('<a href="/price/' + encodeURIComponent(item) + '">' + PS.esc(item.replace(/\(.*\)/, '')) + ' 시세 보기 ›</a>');
+    var area = String(p.region || '').split(/\s+/).filter(function (w) { return /^[가-힣]{1,6}(시|군|구)$/.test(w); }).pop();
+    if (area) links.push('<a href="/buy/area/' + encodeURIComponent(area) + '">' + PS.esc(area) + ' 매물 더 보기 ›</a>');
+    return links.length ? '<p style="display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-size:15px;font-weight:700;color:var(--sub)">' + links.join('') + '</p>' : '';
+  };
+  PS.PRODUCT_LIST_COLUMNS ='id,title,price,region,status,condition,usage_period,created_at,like_count,inquiry_count,view_count,product_images(url,sort_order)';
 
   // ---- 동네 업체 ----
   PS.bizUrl = function (id) { return '/biz/' + encodeURIComponent(id); };

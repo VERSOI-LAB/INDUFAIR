@@ -15,6 +15,10 @@
 | `/support`, `/support/:id` | `support.html` | 정부 지원사업 공고 (기업마당에서 매일 2번 자동 수집, 마감 임박순·분야·지역 필터) |
 | `/community`, `/community/:id`, `/community/write` | `community.html` | 이야기: 당근 동네생활처럼 묻고 수다 떠는 곳 (주제 4개, 내 동네 글만 보기, 공감·댓글·신고, 댓글 달리면 웹 푸시) |
 | `/diagnose` | `diagnose.html` | 지원사업 30초 진단: 업종·지역·규모·업력 → 맞춤 공고 (익명은 3건만, 로그인하면 전부 + 답 저장 + 마감 알림 자동 설정). 홈·지원사업 목록·지역별 모아보기에서 띠로 연결 |
+| `/price/:item` | `api/seo.js` | 품목별 시세 (예: `/price/에어콤프레샤`): 등록 매물 가격의 가운데 50% 범위, 판매 중·판매 완료 매물 |
+| `/buy/c/:cat`, `/buy/area/:area[/:cat]` | `api/seo.js` | 카테고리·지역(시·군·구)별 매물 (예: `/buy/area/분당구/산업기계`) |
+| `/support/weekly` | `api/seo.js` | 이번 주(오늘~7일 뒤) 마감 지원사업 + 지난 일주일 새 공고. 데이터는 `/support/weekly.json` |
+| `/weekly-card` | `weekly-card.html` | 운영자용: 주간 카드 이미지(1080×1350) 저장 + 블로그·카페·카톡 채널용 글 복사 (채널별 UTM 자동) |
 | `/unsubscribe` | `unsubscribe.html` | 이메일 수신거부 (메일의 링크, 로그인 없이) |
 | `/events`, `/events/:id` | `support.html` | 교육·세미나·전시회·설명회 (기업마당 행사정보, 같은 함수가 같이 수집) |
 | `/pay-seller` | `pay-seller.html` | 안전결제 판매자 신청 (사업자 인증 + 통신판매업 신고 확인) |
@@ -157,3 +161,16 @@ select s.props->>'journey' as journey, count(*) as sent,
 ```
 - 문구는 `supabase/functions/journeys/index.ts` 의 `JOURNEYS`, 대상 조건은 마이그레이션의 `journey_candidates`
 - 카카오 알림톡을 붙일 때는 `JOURNEYS` 에 채널을 하나 더 두고 정보성 메시지만 알림톡으로 (광고는 친구톡·브랜드 메시지)
+
+## 검색 유입 자동 페이지 (시세 · 지역 매물 · 주간 지원사업)
+`api/seo.js` 가 서버에서 다 그려 내려준다 (Vercel 함수, 로컬 서버에서는 동작하지 않음). 30분 캐시.
+- **매물이 3개보다 적은 페이지는 `noindex`**, 사이트맵에도 넣지 않음 (빈 페이지로 검색 품질 점수가 깎이지 않게). 매물이 늘면 자동으로 사이트맵에 들어감
+- 시세 품목은 `api/seo.js` 의 `ITEMS` (주소 이름 → 제목에서 찾을 말). 같은 목록이 `js/app.js` 의 `PS.PRICE_ITEMS`(상품 화면 "○○ 시세 보기" 링크)와 `price.html` 칩에 있으니 바꿀 때 같이
+- 시세는 판매자가 올린 가격 기준이고, 화면에도 그렇게 적혀 있음 (실거래가 아님)
+- 상품 화면 아래 "○○ 시세 보기 · ○○구 매물 더 보기" 링크로 이어짐
+- 방문은 `seo_view` 이벤트로 기록 (`kind`: price / area / cat / weekly)
+
+### 매주 월요일 할 일 (5분)
+1. `/weekly-card` 열기 → **카드 이미지 저장**
+2. 네이버 블로그: 이미지 + "블로그용 복사" 글 / 카페: "카페용 복사" / 카카오톡 채널: 이미지 + "카톡 채널용 복사"
+3. 링크에 `utm_source=naver_blog|naver_cafe|kakao_channel`, `utm_campaign=weekly_<월요일 날짜>` 가 붙어 있어 채널별 가입은 `select * from marketing_signups_by_source(30);` 로 확인

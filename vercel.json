@@ -18,6 +18,30 @@
       "destination": "/api/page?type=product&id=:id"
     },
     {
+      "source": "/price/:v",
+      "destination": "/api/seo?kind=price&v=:v"
+    },
+    {
+      "source": "/buy/c/:c",
+      "destination": "/api/seo?kind=buy&c=:c"
+    },
+    {
+      "source": "/buy/area/:a/:c",
+      "destination": "/api/seo?kind=buy&area=:a&c=:c"
+    },
+    {
+      "source": "/buy/area/:a",
+      "destination": "/api/seo?kind=buy&area=:a"
+    },
+    {
+      "source": "/support/weekly",
+      "destination": "/api/seo?kind=weekly"
+    },
+    {
+      "source": "/support/weekly.json",
+      "destination": "/api/seo?kind=weekly_json"
+    },
+    {
       "source": "/support/area/:v/:f",
       "destination": "/api/landing?kind=area&v=:v&f=:f"
     },
