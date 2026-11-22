@@ -1,6 +1,7 @@
 // "이거 구해요" 알림. DB 트리거(on_rfq_push)가 JWT 없이 부르므로 'Verify JWT' 를 끈다
 //   { rfq_id }   새 요청 → 같은 분류·지역 업체 주인 30명까지 (rfq_targets)
 //   { quote_id } 새 견적 → 요청한 사람
+//   kind = sell(처분해요)이면 "설비 처분 · 매입 제안" 문구
 // 방금 생긴 것만(5분), 요청 알림은 한 번만(notified_count). 비밀값: VAPID_* (채팅 알림과 같음)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
@@ -40,7 +41,7 @@ Deno.serve(async (req) => {
   const UUID = /^[0-9a-f-]{36}$/i;
 
   if (typeof b.rfq_id === "string" && UUID.test(b.rfq_id)) {
-    const { data: r } = await admin.from("rfq_requests").select("id,title,region,category,budget,notified_count,created_at").eq("id", b.rfq_id).maybeSingle();
+    const { data: r } = await admin.from("rfq_requests").select("id,kind,title,region,category,budget,notified_count,created_at").eq("id", b.rfq_id).maybeSingle();
     if (!r || !fresh(r.created_at)) return json({ code: "skip" });
     // 한 번만: notified_count 를 0 → -1(보내는 중)로 먼저 바꾼 호출만 보냄. 끝나면 받은 업체 수로
     const { data: claimed } = await admin.from("rfq_requests").update({ notified_count: -1 }).eq("id", r.id).eq("notified_count", 0).select("id");
@@ -49,8 +50,9 @@ Deno.serve(async (req) => {
     const ids = ((targets || []) as { owner_id: string }[]).map((t) => t.owner_id);
     const where = String(r.region || "").split(/\s+/).filter((w) => /(시|군|구)$/.test(w)).pop();
     const sent = await pushTo(admin, ids, {
-      title: "새 견적 요청 · " + clip(r.title, 30),
-      body: [r.category, where, r.budget ? "예산 " + won(r.budget) : ""].filter(Boolean).join(" · ") + " — 견적을 보내 보세요",
+      title: (r.kind === "sell" ? "새 설비 처분 · " : "새 견적 요청 · ") + clip(r.title, 30),
+      body: [r.category, where, r.budget ? (r.kind === "sell" ? "희망 " : "예산 ") + won(r.budget) : ""].filter(Boolean).join(" · ") +
+        (r.kind === "sell" ? " — 매입 제안을 보내 보세요" : " — 견적을 보내 보세요"),
       url: "/rfq/" + r.id + "?jm=rfq_new",
       tag: "rfq-" + r.id,
     });
@@ -62,12 +64,12 @@ Deno.serve(async (req) => {
   if (typeof b.quote_id === "string" && UUID.test(b.quote_id)) {
     const { data: q } = await admin.from("rfq_quotes").select("id,rfq_id,price,created_at,businesses(name)").eq("id", b.quote_id).maybeSingle();
     if (!q || !fresh(q.created_at)) return json({ code: "skip" });
-    const { data: r } = await admin.from("rfq_requests").select("id,title,buyer_id").eq("id", q.rfq_id).maybeSingle();
+    const { data: r } = await admin.from("rfq_requests").select("id,kind,title,buyer_id").eq("id", q.rfq_id).maybeSingle();
     if (!r) return json({ code: "not_found" }, 404);
     // deno-lint-ignore no-explicit-any
     const biz = (q as any).businesses?.name || "업체";
     const sent = await pushTo(admin, [r.buyer_id], {
-      title: "견적이 도착했어요 · " + clip(r.title, 24),
+      title: (r.kind === "sell" ? "매입 제안이 도착했어요 · " : "견적이 도착했어요 · ") + clip(r.title, 24),
       body: clip(biz, 20) + (q.price != null ? " · " + won(q.price) : "") + " — 확인하고 채팅으로 이어 가세요",
       url: "/rfq/" + r.id + "?jm=rfq_quote",
       tag: "rfq-quote-" + r.id,
