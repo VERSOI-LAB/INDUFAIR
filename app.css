@@ -482,3 +482,12 @@ h1,h2{letter-spacing:-.03em;} /* 큰 제목은 조금 더 좁혀야 덩어리져
 .ps-lb-nav.prev{left:16px;}.ps-lb-nav.next{right:16px;}
 .ps-lb-nav[disabled]{opacity:.25;}
 @media (hover:hover){ .ps-lb-nav{display:block;} }
+
+/* 지원사업 진단(/diagnose)으로 가는 띠 (홈·지원사업 목록·지역별 모아보기) */
+.dg-banner{display:flex;align-items:center;gap:12px;margin-top:16px;padding:16px;border-radius:16px;background:linear-gradient(135deg,#EAF2FE,#F4F8FF);border:1.5px solid #D5E4FC;color:var(--text);}
+.dg-banner .dg-ico{flex-shrink:0;width:44px;height:44px;border-radius:12px;background:#2F5BD3;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.dg-banner .dg-tx{flex:1;min-width:0;}
+.dg-banner .dg-tx b{display:block;font-size:16px;font-weight:800;line-height:1.35;}
+.dg-banner .dg-tx span{display:block;margin-top:2px;font-size:13px;color:var(--sub);}
+.dg-banner .dg-arrow{flex-shrink:0;font-size:20px;color:#2F5BD3;font-weight:800;}
+.dg-banner:active{transform:scale(.99);}

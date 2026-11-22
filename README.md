@@ -14,6 +14,7 @@
 | `/login` | `login.html` | 이메일 로그인/가입 한 화면 |
 | `/support`, `/support/:id` | `support.html` | 정부 지원사업 공고 (기업마당에서 매일 2번 자동 수집, 마감 임박순·분야·지역 필터) |
 | `/community`, `/community/:id`, `/community/write` | `community.html` | 이야기: 당근 동네생활처럼 묻고 수다 떠는 곳 (주제 4개, 내 동네 글만 보기, 공감·댓글·신고, 댓글 달리면 웹 푸시) |
+| `/diagnose` | `diagnose.html` | 지원사업 30초 진단: 업종·지역·규모·업력 → 맞춤 공고 (익명은 3건만, 로그인하면 전부 + 답 저장 + 마감 알림 자동 설정). 홈·지원사업 목록·지역별 모아보기에서 띠로 연결 |
 | `/events`, `/events/:id` | `support.html` | 교육·세미나·전시회·설명회 (기업마당 행사정보, 같은 함수가 같이 수집) |
 | `/pay-seller` | `pay-seller.html` | 안전결제 판매자 신청 (사업자 인증 + 통신판매업 신고 확인) |
 
@@ -79,6 +80,10 @@ python3 dev-server.py   # http://localhost:8743 (vercel.json 의 clean URL 흉�
 | `share` | 공유 (물건·업체·지원사업·이야기·초대) |
 | `premium_view`, `premium_purchase` | 업체 프리미엄 화면 / 결제 |
 | `purchase` | 안전결제 완료 |
+| `diagnose_view`, `diagnose_complete` | 진단 화면 보기(어디서 왔는지 `from`) / 결과 보기 (고른 답) |
+| `diagnose_unlock_click`, `diagnose_saved` | 익명이 "무료로 전체 보기" 누름 / 로그인 후 답 저장 |
+
+진단 답은 `supabase/migrations/20261122_company_profiles.sql` 의 `company_profiles` 에 저장된다 (본인만 읽기). 진단 → 가입 전환: `select * from marketing_funnel(14) where step like 'diagnose%' or step = 'sign_up';`
 
 운영자 확인 (SQL Editor):
 - 단계별 사람 수: `select * from marketing_funnel(7);`
