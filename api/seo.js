@@ -187,8 +187,8 @@ async function weeklyData() {
   var until = new Date(Date.parse(today) + 7 * 86400000).toISOString().slice(0, 10);
   var weekAgo = new Date(Date.parse(today) - 7 * 86400000).toISOString();
   var got = await Promise.all([
-    L.rest('support_programs?select=id,title,agency,category,region,apply_end&apply_end=gte.' + today + '&apply_end=lte.' + until + '&order=apply_end.asc,posted_at.desc&limit=100'),
-    L.rest('support_programs?select=id,title,agency,category,region,apply_end&posted_at=gte.' + encodeURIComponent(weekAgo) + '&order=posted_at.desc&limit=100')
+    L.rest('support_programs?select=id,title,agency,category,region,apply_end&apply_end=gte.' + today + '&apply_end=lte.' + until + '&order=apply_end.asc,posted_at.desc&limit=1000'), // 건수를 그대로 세려고 넉넉하게 (줄이 작아 부담 없음)
+    L.rest('support_programs?select=id,title,agency,category,region,apply_end&posted_at=gte.' + encodeURIComponent(weekAgo) + '&order=posted_at.desc&limit=1000')
   ]);
   return { today: today, week: w, closing: got[0] || [], fresh: got[1] || [] };
 }

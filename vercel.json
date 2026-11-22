@@ -118,7 +118,7 @@
       "memory": 1024
     },
     "api/social.js": {
-      "includeFiles": "{fonts/NanumSquareRound*.woff2,이미지/stickers/*.webp}",
+      "includeFiles": "{fonts/NanumSquareRound*.woff2,이미지/stickers/*.webp,img/**}",
       "memory": 1024
     }
   },
