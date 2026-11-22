@@ -1,0 +1,8 @@
+{
+  "name": "pandasanda",
+  "private": true,
+  "description": "판다산다 — 정적 사이트 + Vercel 함수(api/). 빌드 단계 없음. 의존성은 api/weekly-image.js(카드 이미지)용",
+  "dependencies": {
+    "@napi-rs/canvas": "1.1.0"
+  }
+}

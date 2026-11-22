@@ -1,2 +1,3 @@
 .DS_Store
 이미지/*.png
+node_modules/
