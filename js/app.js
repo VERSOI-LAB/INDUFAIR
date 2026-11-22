@@ -1030,7 +1030,30 @@
         '사업장 주소 ' + b.address + '<br>' +
         '전화 <a href="tel:' + b.phone + '">' + b.phone + '</a> · 이메일 <a href="mailto:' + b.email + '">' + b.email + '</a></p>' +
       '<p>판다산다는 회사가 직접 판매하는 물건을 제외하고는 통신판매중개자로서 거래 당사자가 아니며, 회원이 올린 물건 정보와 거래에 대한 책임은 해당 판매자에게 있습니다.</p>' +
-      '<p class="links"><a href="/terms">이용약관</a><a href="/privacy"><strong>개인정보처리방침</strong></a><a href="/policy">배송·취소·환불 안내</a></p>';
+      '<p class="links"><a href="/terms">이용약관</a><a href="/privacy' + (PS.policyNoticeOn() ? '#notice' : '') + '"><strong>개인정보처리방침</strong>' +
+        (PS.policyNoticeOn() ? ' (11.29 변경)' : '') + '</a><a href="/policy">배송·취소·환불 안내</a></p>';
+    PS.renderPolicyNotice();
+  };
+
+  // ---- 개인정보처리방침 변경 공지 (방침 "적용일 7일 전부터 서비스 화면에 알립니다") ----
+  //   2026-11-22 공지 → 11-29 시행. 시행 1주 뒤(12-06)까지 홈 위쪽 띠 + 하단 링크 표시. 띠는 닫으면 그 브라우저에서 다시 안 보임
+  //   다음에 방침을 바꿀 때는 POLICY_NOTICE 의 날짜·문구만 바꾸면 됨
+  var POLICY_NOTICE = { id: '2026-11-29', until: '2026-12-06', text: '개인정보처리방침이 11월 29일부터 바뀌어요 (지원사업 진단·혜택 소식 받기 항목, 이메일 발송 위탁 추가)' };
+  PS.policyNoticeOn = function () { return PS.todayKST() <= POLICY_NOTICE.until; };
+  PS.renderPolicyNotice = function () {
+    if (location.pathname !== '/' || !PS.policyNoticeOn() || document.getElementById('policyNotice')) return;
+    var key = 'ps_policy_notice_' + POLICY_NOTICE.id;
+    try { if (localStorage.getItem(key)) return; } catch (e) {}
+    var page = document.querySelector('.page');
+    if (!page) return;
+    var bar = document.createElement('div');
+    bar.id = 'policyNotice';
+    bar.setAttribute('role', 'note');
+    bar.style.cssText = 'display:flex;align-items:flex-start;gap:8px;margin:12px 0 0;padding:12px 14px;border-radius:12px;background:#FFF6DD;border:1px solid #FBE3A6;font-size:14px;line-height:1.5;';
+    bar.innerHTML = '<a href="/privacy#notice" style="flex:1;color:var(--text)">📢 ' + PS.esc(POLICY_NOTICE.text) + ' <u>자세히</u></a>' +
+      '<button type="button" aria-label="공지 닫기" style="flex-shrink:0;color:var(--sub);font-size:18px;line-height:1;padding:2px 4px">✕</button>';
+    bar.querySelector('button').onclick = function () { try { localStorage.setItem(key, '1'); } catch (e) {} bar.remove(); };
+    page.insertBefore(bar, page.firstChild);
   };
 
   PS.signOut = async function () {
