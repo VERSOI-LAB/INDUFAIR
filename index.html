@@ -64,6 +64,7 @@
     .pick-card .go{height:64px;font-size:20px;}
     /* 방금 올라온 물건도 판다/산다 버튼과 같은 폭(70%)으로 가운데 */
     .info-home{width:70vw;max-width:100%;margin:44px auto 0;}
+    .home-dg{width:70vw;max-width:100%;margin:28px auto 0;}
     .info-tabs button{font-size:19px;height:56px;}
     .info-home .list{width:auto;grid-template-columns:repeat(3,minmax(0,1fr));}
     .info-home .sp-row{border-bottom:none;}
@@ -100,6 +101,7 @@
       </a>
     </div>
 
+    <a class="dg-banner home-dg" href="/diagnose?from=home"><span class="dg-ico" aria-hidden="true">✓</span><span class="dg-tx"><b>우리 회사가 받을 수 있는 지원사업은?</b><span>업종·지역·규모만 고르면 30초 진단 · 무료</span></span><span class="dg-arrow" aria-hidden="true">›</span></a>
     <!-- 지원사업 / 교육·행사: 한 칸에 탭으로 (둘 다 펼치면 너무 길어서) -->
     <section class="info-home" id="infoHome" hidden>
       <div class="info-tabs" role="tablist" aria-label="지원사업과 교육·행사">
@@ -147,7 +149,7 @@
     var a = e.target.closest('a[href]');
     if (!a) return;
     var h = a.getAttribute('href');
-    var cta = h === '/sell' ? 'sell' : h === '/buy' ? 'buy' : /^\/support/.test(h) ? 'support' : /^\/events/.test(h) ? 'event' : /^\/product\//.test(h) ? 'product' : null;
+    var cta = h === '/sell' ? 'sell' : h === '/buy' ? 'buy' : /^\/diagnose/.test(h) ? 'diagnose' : /^\/support/.test(h) ? 'support' : /^\/events/.test(h) ? 'event' : /^\/product\//.test(h) ? 'product' : null;
     if (cta) PS.track('home_cta_click', { variant: variant, cta: cta });
   });
   document.querySelector('.home-search').addEventListener('submit', function () { PS.track('home_cta_click', { variant: variant, cta: 'search' }); });

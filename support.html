@@ -126,6 +126,7 @@
       (isEvent ? '' : '<p class="sp-count" style="margin-top:8px;line-height:1.9">지역별 모아보기: ' + PS.SUPPORT_REGIONS.filter(function (r) { return r !== '전국'; }).map(function (r) {
         return '<a href="/support/area/' + encodeURIComponent(r) + '" style="text-decoration:underline;margin-right:8px">' + PS.esc(PS.supportRegionLabel(r)) + '</a>';
       }).join('') + '</p>') +
+      (isEvent ? '' : '<a class="dg-banner" href="/diagnose?from=support"><span class="dg-ico" aria-hidden="true">✓</span><span class="dg-tx"><b>우리 회사 맞춤 공고만 보기</b><span>업종·지역·규모만 고르면 30초 진단</span></span><span class="dg-arrow" aria-hidden="true">›</span></a>') +
       (isEvent ? '' : '<div id="spAlert"></div>') +
       '<div class="sp-filter">' +
         '<form class="search" id="spForm" role="search"><span aria-hidden="true" style="display:flex">' + PS.icon('search', 20) + '</span>' +

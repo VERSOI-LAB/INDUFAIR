@@ -74,6 +74,7 @@ module.exports = async function (req, res) {
     '<h1 style="font-size:24px;font-weight:800;margin-top:18px;line-height:1.35">' + L.esc(name) + ' 정부지원사업</h1>' +
     '<p class="lead">' + L.esc(who) + '이 지금 신청할 수 있는 공고 <b>' + rows.length + '건</b>' + (soon ? ', 그중 <b style="color:var(--danger)">일주일 안 마감 ' + soon + '건</b>' : '') +
       '이에요. 기업마당 공고를 매일 자동으로 모아요.</p>' +
+    '<a class="dg-banner" href="/diagnose?from=landing"><span class="dg-ico" aria-hidden="true">✓</span><span class="dg-tx"><b>이 중 우리 회사에 맞는 공고는?</b><span>업종·규모·업력만 고르면 30초 진단</span></span><span class="dg-arrow" aria-hidden="true">›</span></a>' +
     (kind === 'area'
       ? chips([['전체', areaUrl(region)]].concat(FIELDS.map(function (x) { return [x, areaUrl(region, x)]; })), field || '전체')
       : '') +

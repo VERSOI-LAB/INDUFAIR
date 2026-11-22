@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FFFFFF">
+<title>우리 회사 지원사업 30초 진단 - 판다산다</title>
+<meta name="description" content="업종·지역·규모·업력만 고르면 지금 신청할 수 있는 정부·지자체 지원사업을 마감 임박순으로 골라 드려요. 기업마당 공고를 매일 자동으로 모아요.">
+<link rel="canonical" href="https://www.pandasanda.com/diagnose">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="판다산다">
+<meta property="og:title" content="우리 회사가 받을 수 있는 지원사업, 30초 진단">
+<meta property="og:description" content="업종·지역·규모·업력만 고르면 지금 신청할 수 있는 지원사업을 골라 드려요.">
+<meta property="og:url" content="https://www.pandasanda.com/diagnose">
+<meta property="og:image" content="https://www.pandasanda.com/이미지/web/og-share.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .dg-hero{padding:20px 0 4px;}
+  .dg-hero h2{font-size:24px;font-weight:800;line-height:1.35;}
+  .dg-hero p{margin-top:8px;color:var(--sub);line-height:1.6;}
+  .q{margin-top:28px;}
+  .q h3{font-size:17px;font-weight:700;}
+  .q h3 small{font-size:14px;font-weight:500;color:var(--hint);margin-left:6px;}
+  .q .chips{flex-wrap:wrap;margin-top:10px;}
+  .q .chip{height:44px;}
+  .dg-go{margin-top:32px;}
+  .dg-err{margin-top:12px;color:var(--danger);font-weight:600;}
+  .dg-note{margin-top:14px;font-size:13px;color:var(--hint);line-height:1.6;}
+  /* 결과 */
+  .sum{margin-top:16px;padding:20px;border-radius:18px;background:var(--primary-light);}
+  .sum .big{font-size:15px;color:var(--sub);}
+  .sum .big b{display:block;margin-top:4px;font-size:30px;font-weight:800;color:var(--text);}
+  .sum .row2{display:flex;gap:16px;margin-top:12px;font-size:14px;color:var(--sub);}
+  .sum .row2 b{color:var(--danger);}
+  .sum .who{margin-top:10px;font-size:14px;color:var(--sub);}
+  .sum .who button{color:var(--text);text-decoration:underline;font-weight:600;margin-left:4px;}
+  .res-h{margin-top:28px;font-size:18px;font-weight:800;}
+  .lock{position:relative;margin-top:4px;min-height:300px;}
+  .lock .ghost{filter:blur(5px);opacity:.55;pointer-events:none;user-select:none;}
+  .lock .cta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;text-align:center;
+    background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.95) 40%);}
+  .lock .cta b{font-size:18px;line-height:1.4;}
+  .lock .cta span{font-size:14px;color:var(--sub);line-height:1.5;}
+  .lock .cta .btn{max-width:340px;}
+  .alert-box{margin-top:20px;padding:16px;border-radius:16px;border:1.5px solid var(--line);}
+  .alert-box b{display:block;font-size:16px;}
+  .alert-box span{display:block;margin-top:4px;font-size:14px;color:var(--sub);line-height:1.5;}
+  .alert-box .btn{margin-top:12px;height:48px;}
+  .dg-more{margin-top:16px;}
+  @media (min-width:1101px){ .dg-hero h2{font-size:30px;} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="back" href="/support" aria-label="지원사업으로 돌아가기"><i data-icon="back" data-size="24"></i></a>
+    <h1>지원사업 진단</h1>
+  </header>
+  <main class="page" id="main">
+    <section id="formView">
+      <div class="dg-hero">
+        <h2>우리 회사가 받을 수 있는<br>지원사업, 30초 진단</h2>
+        <p>4가지만 고르면 지금 신청할 수 있는 정부·지자체 지원사업을 골라 드려요.</p>
+      </div>
+      <div class="q"><h3>업종</h3><div class="chips" data-q="industry"></div></div>
+      <div class="q"><h3>지역 <small>사업장 주소 기준</small></h3><div class="chips" data-q="region"></div></div>
+      <div class="q"><h3>직원 수</h3><div class="chips" data-q="size"></div></div>
+      <div class="q"><h3>업력 <small>사업자 등록 후</small></h3><div class="chips" data-q="age"></div></div>
+      <div class="q"><h3>관심 분야 <small>여러 개 골라도 돼요 (안 고르면 전부)</small></h3><div class="chips" data-q="fields"></div></div>
+      <div class="dg-err" id="err" hidden></div>
+      <button type="button" class="btn dg-go" id="goBtn">결과 보기</button>
+      <p class="dg-note">기업마당(bizinfo.go.kr) 공고를 매일 2번 자동으로 모아 골라 드려요. 신청 자격은 공고 원문에서 꼭 확인해 주세요.</p>
+    </section>
+    <section id="resultView" hidden></section>
+    <footer class="site-foot" id="siteFoot"></footer>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var Q = {
+    industry: [['manufacturing', '제조업'], ['wholesale', '도소매·유통'], ['construction', '건설'], ['it', 'IT·소프트웨어'], ['service', '서비스'], ['etc', '기타']],
+    region: PS.SUPPORT_REGIONS.filter(function (r) { return r !== '전국'; }).map(function (r) { return [r, PS.supportRegionLabel(r)]; }),
+    size: [['pre', '아직 없음 (예비창업)'], ['micro', '1~4명'], ['small', '5~49명'], ['mid', '50명 이상']],
+    age: [['pre', '창업 전'], ['lt3', '3년 미만'], ['3to7', '3~7년'], ['gt7', '7년 이상']],
+    fields: [['금융', '자금·융자'], ['기술', '기술·R&D'], ['인력', '채용·인력'], ['수출', '수출'], ['내수', '판로·마케팅'], ['경영', '경영·컨설팅'], ['창업', '창업']]
+  };
+  var MULTI = { fields: true };
+  var KEY = 'ps_diag';
+  var ans = load() || { fields: [] };
+
+  function load() { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(ans)); } catch (e) {} }
+  function label(q, v) { var x = Q[q].filter(function (o) { return o[0] === v; })[0]; return x ? x[1] : ''; }
+
+  // ---- 질문 화면 ----
+  function drawForm() {
+    document.querySelectorAll('[data-q]').forEach(function (box) {
+      var q = box.dataset.q;
+      box.innerHTML = Q[q].map(function (o) {
+        var on = MULTI[q] ? ans[q].indexOf(o[0]) !== -1 : ans[q] === o[0];
+        return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-v="' + PS.esc(o[0]) + '" aria-pressed="' + on + '">' + PS.esc(o[1]) + '</button>';
+      }).join('');
+    });
+  }
+  $('formView').addEventListener('click', function (e) {
+    var c = e.target.closest('.chip');
+    if (!c) return;
+    var q = c.parentNode.dataset.q, v = c.dataset.v;
+    if (MULTI[q]) {
+      var i = ans[q].indexOf(v);
+      if (i === -1) ans[q].push(v); else ans[q].splice(i, 1);
+    } else ans[q] = v;
+    // 예비창업이면 업력도 '창업 전'으로 맞춰 줌
+    if (q === 'size' && v === 'pre') ans.age = 'pre';
+    if (q === 'age' && v === 'pre') ans.size = 'pre';
+    drawForm();
+  });
+  $('goBtn').addEventListener('click', function () {
+    var miss = ['industry', 'region', 'size', 'age'].filter(function (q) { return !ans[q]; });
+    if (miss.length) {
+      $('err').textContent = { industry: '업종을', region: '지역을', size: '직원 수를', age: '업력을' }[miss[0]] + ' 골라 주세요';
+      $('err').hidden = false;
+      return;
+    }
+    $('err').hidden = true;
+    save();
+    PS.track('diagnose_complete', { industry: ans.industry, region: ans.region, size: ans.size, age: ans.age, fields: ans.fields.join(',') });
+    history.pushState(null, '', '/diagnose?r=1');
+    showResult();
+  });
+  window.addEventListener('popstate', function () {
+    if (PS.param('r')) showResult(); else { $('resultView').hidden = true; $('formView').hidden = false; }
+  });
+
+  // ---- 맞춤 고르기 ----
+  // 업종별로 공고 제목·대상·해시태그에 자주 나오는 말
+  var INDUSTRY_WORDS = {
+    manufacturing: /제조|공장|스마트|소부장|뿌리|설비|생산|부품|소재|장비|기계|금형|용접|탄소|공정/,
+    wholesale: /유통|판로|온라인|쇼핑|라이브커머스|입점|소상공인|상점|도매|소매|전통시장/,
+    construction: /건설|건축|시공|인테리어|설비|안전/,
+    it: /SW|소프트웨어|ICT|AI|인공지능|디지털|데이터|플랫폼|클라우드|IT|정보통신|메타버스|콘텐츠/,
+    service: /서비스|관광|소상공인|외식|프랜차이즈|문화|교육|콘텐츠/,
+    etc: /$^/
+  };
+  var STARTUP_ONLY = /예비\s?창업|초기\s?창업|창업\s?[1-3]\s?년|창업\s?3년\s?이내|청년\s?창업/;
+  var BIG_ONLY = /중견기업/;
+  var SMALL_ONLY = /소상공인|1인\s?(창조)?기업|자영업/;
+
+  function score(p) {
+    var text = [p.title, p.target, p.hashtags].filter(Boolean).join(' ');
+    var cats = (p.category || '').split(/[·@,\s]+/);
+    // 맞지 않는 건 뺌
+    if (ans.fields.length && !ans.fields.some(function (f) { return cats.indexOf(f) !== -1; })) return -1;
+    if ((ans.age === '3to7' || ans.age === 'gt7') && (cats.indexOf('창업') !== -1 || STARTUP_ONLY.test(text))) return -1;
+    if (ans.size === 'mid' && SMALL_ONLY.test(text)) return -1;
+    if (ans.size !== 'mid' && BIG_ONLY.test(text) && !/중소/.test(text)) return -1;
+    var s = 0;
+    if (INDUSTRY_WORDS[ans.industry].test(text)) s += 3;
+    if (p.region === ans.region) s += 2;                 // 우리 지역 공고를 전국 공고보다 먼저
+    if ((ans.age === 'pre' || ans.age === 'lt3') && (cats.indexOf('창업') !== -1 || STARTUP_ONLY.test(text))) s += 2;
+    if (ans.size === 'micro' && SMALL_ONLY.test(text)) s += 1;
+    return s;
+  }
+
+  var matched = [];
+  async function fetchMatches() {
+    var today = PS.todayKST();
+    var res = await sb.from('support_programs').select(PS.SUPPORT_COLUMNS + ',hashtags')
+      .or('apply_end.gte.' + today + ',apply_end.is.null')
+      .in('region', [ans.region, '전국'])
+      .order('apply_end', { ascending: true, nullsFirst: false })
+      .limit(500);
+    var rows = res.error ? [] : res.data || [];
+    matched = rows.map(function (p) { return { p: p, s: score(p) }; })
+      .filter(function (x) { return x.s >= 0; })
+      .sort(function (a, b) {
+        if (b.s !== a.s) return b.s - a.s;
+        var ea = a.p.apply_end || '9999', eb = b.p.apply_end || '9999';
+        return ea < eb ? -1 : ea > eb ? 1 : 0;
+      })
+      .map(function (x) { return x.p; });
+  }
+
+  // ---- 결과 화면 ----
+  var FREE = 3;   // 로그인 없이 보이는 개수
+  var SHOW = 30;  // 로그인하면 보이는 개수 (나머지는 지원사업 화면에서)
+  async function showResult() {
+    if (!ans.region) { history.replaceState(null, '', '/diagnose'); return; }
+    $('formView').hidden = true;
+    var box = $('resultView');
+    box.hidden = false;
+    box.innerHTML = '<div class="sum"><div class="skeleton" style="height:22px;width:50%"></div><div class="skeleton" style="height:36px;width:40%;margin-top:10px"></div></div>' +
+      Array(4).join('<div class="sp-row"><div class="skeleton" style="width:62px;height:28px"></div><div style="flex:1"><div class="skeleton" style="height:18px"></div><div class="skeleton" style="height:14px;width:60%;margin-top:8px"></div></div></div>');
+    window.scrollTo(0, 0);
+    var user = await PS.ready;
+    await fetchMatches();
+    if (user) await saveForUser(user);
+
+    var today = PS.todayKST();
+    var week = new Date(Date.parse(today) + 7 * 86400000).toISOString().slice(0, 10);
+    var soon = matched.filter(function (p) { return p.apply_end && p.apply_end <= week; }).length;
+    var mine = matched.filter(function (p) { return p.region === ans.region; }).length;
+    var who = [label('region', ans.region), label('industry', ans.industry), label('size', ans.size), label('age', ans.age)].join(' · ');
+
+    var html = '<div class="sum"><div class="big">지금 신청할 수 있는 지원사업<b>' + matched.length + '건</b></div>' +
+      '<div class="row2"><span>이번 주 마감 <b>' + soon + '건</b></span><span>' + PS.esc(label('region', ans.region)) + ' 공고 ' + mine + '건</span></div>' +
+      '<div class="who">' + PS.esc(who) + '<button type="button" id="editBtn">다시 고르기</button></div></div>';
+
+    if (!matched.length) {
+      html += '<div class="empty" style="padding:40px 0">' + PS.sticker('curious', 100) + '<b>지금 딱 맞는 공고가 없어요</b>관심 분야를 비우거나 바꿔 보세요. 새 공고는 매일 들어와요</div>';
+    } else {
+      html += '<h3 class="res-h">' + (user ? '우리 회사 맞춤 공고' : '가장 잘 맞는 공고 ' + Math.min(FREE, matched.length) + '건') + '</h3>';
+      html += '<div class="list">' + matched.slice(0, user ? SHOW : FREE).map(function (p) { return PS.supportRowHtml(p); }).join('') + '</div>';
+      if (!user && matched.length > FREE) {
+        // 나머지는 가려서 보여 주고, 로그인하면 전부 + 마감 알림
+        html += '<div class="lock"><div class="ghost">' + matched.slice(FREE, FREE + 3).map(function (p) { return PS.supportRowHtml(p); }).join('') + '</div>' +
+          '<div class="cta"><b>나머지 ' + (matched.length - FREE) + '건과<br>마감 3일 전 알림까지 받아 보세요</b>' +
+          '<span>무료 · 진단한 조건이 그대로 저장돼요</span>' +
+          '<a class="btn" id="unlockBtn" href="/login?mode=signup&next=' + encodeURIComponent('/diagnose?r=1') + '">무료로 전체 보기</a></div></div>';
+      }
+      if (user && matched.length > SHOW) {
+        html += '<a class="btn white small dg-more" href="/support">지원사업 전체 보기 ›</a>';
+      }
+    }
+    if (user) html += alertBoxHtml();
+    html += '<button type="button" class="btn white small" id="shareDg" style="margin-top:20px">' + PS.icon('send', 18) + ' 다른 사장님께 진단 알려 주기</button>';
+    box.innerHTML = html;
+
+    $('editBtn').onclick = function () { history.pushState(null, '', '/diagnose'); box.hidden = true; $('formView').hidden = false; drawForm(); window.scrollTo(0, 0); };
+    if ($('unlockBtn')) $('unlockBtn').onclick = function () { PS.track('diagnose_unlock_click', { matched: matched.length }); };
+    PS.bindShare($('shareDg'), '우리 회사 지원사업 30초 진단 - 판다산다', '업종·지역만 고르면 지금 신청할 수 있는 지원사업을 골라 줘요', '/diagnose');
+    bindAlert();
+  }
+
+  // ---- 로그인한 사람: 답 저장 + 마감 알림 ----
+  var alertState = null; // 'created' | 'kept'
+  async function saveForUser(user) {
+    var row = { profile_id: user.id, industry: ans.industry, region: ans.region, size: ans.size, age: ans.age, fields: ans.fields, updated_at: new Date().toISOString() };
+    var wasNew = !ans.saved;
+    var r = await sb.from('company_profiles').upsert(row);
+    if (r.error) { console.warn('[진단] 저장 실패', r.error); return; }
+    // 마감 알림: 이미 설정해 둔 게 있으면 건드리지 않음
+    var cur = await sb.from('support_alerts').select('profile_id').eq('profile_id', user.id).maybeSingle();
+    if (!cur.error && !cur.data) {
+      var a = await sb.from('support_alerts').insert({ profile_id: user.id, regions: [ans.region], fields: ans.fields, days: 3 });
+      alertState = a.error ? null : 'created';
+      if (!a.error) PS.track('alert_subscribe', { kind: 'support', from: 'diagnose', regions: ans.region, fields: ans.fields.join(','), days: 3 });
+    } else if (cur.data) alertState = 'kept';
+    if (wasNew) { ans.saved = true; save(); PS.track('diagnose_saved', { matched: matched.length }); }
+  }
+
+  function alertBoxHtml() {
+    var st = PS.push.state();
+    var head = alertState === 'created' ? '마감 3일 전 알림을 설정했어요' : alertState === 'kept' ? '마감 알림을 받고 있어요' : '마감 알림 받기';
+    var body = alertState === 'created' ? '이 조건에 맞는 공고가 마감 3일 전이 되면 매일 아침 9시에 알려 드려요.' : '조건은 지원사업 화면의 "마감 알림"에서 바꿀 수 있어요.';
+    var btn = '';
+    if (st === 'default') btn = '<button type="button" class="btn" id="pushBtn">이 기기에서 알림 켜기</button>';
+    else if (st === 'ios_install') body += ' 아이폰은 Safari 아래 공유 버튼 → "홈 화면에 추가" 후, 홈 화면의 판다산다에서 알림을 켜 주세요.';
+    else if (st === 'denied') body += ' 브라우저 알림이 꺼져 있어요. 사이트 설정에서 허용해 주세요.';
+    return '<div class="alert-box"><b>🔔 ' + head + '</b><span>' + body + '</span>' + btn + '</div>';
+  }
+  function bindAlert() {
+    var b = $('pushBtn');
+    if (!b) return;
+    b.onclick = async function () {
+      b.disabled = true;
+      var r = await PS.push.enable();
+      if (r !== 'ok') { b.disabled = false; PS.toast(r === 'denied' ? '브라우저 알림이 꺼져 있어요. 사이트 설정에서 허용해 주세요' : '알림을 켜지 못했어요. 잠시 후 다시 해 주세요'); return; }
+      PS.toast('알림을 켰어요');
+      b.remove();
+    };
+  }
+
+  drawForm();
+  if (!PS.param('r')) PS.track('diagnose_view', { from: PS.param('from') || '' });
+  if (PS.param('r') && ans.region) showResult();
+  else if (PS.param('r')) history.replaceState(null, '', '/diagnose');
+})();
+</script>
+</body>
+</html>
