@@ -38,6 +38,10 @@
       "destination": "/api/seo?kind=buy&area=:a"
     },
     {
+      "source": "/support/weekly.jpg",
+      "destination": "/api/weekly-image"
+    },
+    {
       "source": "/support/weekly",
       "destination": "/api/seo?kind=weekly"
     },
@@ -100,6 +104,10 @@
     },
     "api/landing.js": {
       "includeFiles": "support.html"
+    },
+    "api/weekly-image.js": {
+      "includeFiles": "fonts/NanumSquareRound*.woff2",
+      "memory": 1024
     }
   },
   "headers": [

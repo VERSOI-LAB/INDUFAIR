@@ -170,6 +170,15 @@ select s.props->>'journey' as journey, count(*) as sent,
 - 상품 화면 아래 "○○ 시세 보기 · ○○구 매물 더 보기" 링크로 이어짐
 - 방문은 `seo_view` 이벤트로 기록 (`kind`: price / area / cat / weekly)
 
+### 인스타그램·스레드 자동 발행 (매주 월요일 10:00)
+- 이미지: `/support/weekly.jpg` (`api/weekly-image.js`, 1080×1350 JPEG, `@napi-rs/canvas` + 사이트 글꼴). `/weekly-card` 와 같은 그림
+- 발행: Edge Function `social-publish` (Verify JWT 끔) + `supabase/migrations/20261123_social_publish.sql` (토큰·발행 기록 표, 월요일 cron)
+- 같은 주·같은 곳은 한 번만 (`social_posts`), 실패한 주는 다음 호출 때 다시. 토큰은 30일마다 자동 갱신(`social_accounts`)
+- 비밀값: `INSTAGRAM_ACCESS_TOKEN`(인스타그램 로그인 방식 장기 토큰, 프로페셔널 계정 + `instagram_business_content_publish`), `THREADS_ACCESS_TOKEN`(스레드 장기 토큰 + `threads_content_publish`). 있는 쪽만 올림
+- 미리보기(운영자): `curl -X POST <함수 주소>/social-publish -H "Authorization: Bearer <service_role 키>" -d '{"dry_run":true}'` → 이미지 주소·캡션
+- 지금 바로 올리기(운영자): `-d '{"run":true,"force":true,"only":"threads"}'`
+- 결과: `select platform, week, status, media_id, error from social_posts order by week desc;`
+
 ### 매주 월요일 할 일 (5분)
 1. `/weekly-card` 열기 → **카드 이미지 저장**
 2. 네이버 블로그: 이미지 + "블로그용 복사" 글 / 카페: "카페용 복사" / 카카오톡 채널: 이미지 + "카톡 채널용 복사"

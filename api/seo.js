@@ -249,3 +249,4 @@ module.exports.catUrl = catUrl;
 module.exports.areaUrl = areaUrl;
 module.exports.areaTokens = areaTokens;
 module.exports.ilikeAny = ilikeAny;
+module.exports.weeklyData = weeklyData;
