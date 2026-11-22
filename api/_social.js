@@ -143,11 +143,34 @@ async function sticker(name) {
 }
 async function remote(url) {
   try {
+    // 매물 사진이 사이트 안 주소(/img/...)면: 함께 배포된 파일이 있으면 그걸, 없으면 사이트 전체 주소로
+    if (/^\/[^/]/.test(url)) {
+      try { return await canvas.loadImage(fs.readFileSync(path.join(process.cwd(), decodeURI(url.split('?')[0])))); } catch (e) {}
+      url = L.absUrl(url);
+    }
     var ctl = new AbortController(), t = setTimeout(function () { ctl.abort(); }, 6000);
     var r = await fetch(url, { signal: ctl.signal }); clearTimeout(t);
     if (!r.ok) return null;
     return await canvas.loadImage(Buffer.from(await r.arrayBuffer()));
   } catch (e) { return null; }
+}
+// 제품 사진의 흰 여백을 잘라 냄 (흰색·투명이 아닌 픽셀이 있는 범위만 남김)
+function trimWhite(img) {
+  var w = img.width, h = img.height;
+  if (!w || !h) return img;
+  var c = canvas.createCanvas(w, h), g = c.getContext('2d');
+  g.drawImage(img, 0, 0);
+  var px = g.getImageData(0, 0, w, h).data, x0 = w, y0 = h, x1 = -1, y1 = -1;
+  for (var y = 0; y < h; y += 2) for (var x = 0; x < w; x += 2) {
+    var i = (y * w + x) * 4;
+    if (px[i + 3] > 24 && (px[i] < 238 || px[i + 1] < 238 || px[i + 2] < 238)) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  }
+  if (x1 < 0 || (x1 - x0) * (y1 - y0) > w * h * 0.95) return img; // 다 흰색이거나 여백이 거의 없으면 그대로
+  var m = Math.round(Math.max(x1 - x0, y1 - y0) * 0.04); // 살짝 숨 쉴 여백
+  x0 = Math.max(0, x0 - m); y0 = Math.max(0, y0 - m); x1 = Math.min(w - 1, x1 + m); y1 = Math.min(h - 1, y1 + m);
+  var out = canvas.createCanvas(x1 - x0 + 1, y1 - y0 + 1);
+  out.getContext('2d').drawImage(c, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
+  return out;
 }
 function cover(x, img, a, b, w, h) { // 사진을 칸에 꽉 차게 (가운데 자르기)
   var k = Math.max(w / img.width, h / img.height), sw = w / k, sh = h / k;
@@ -261,10 +284,14 @@ var DRAW = {
     picks.forEach(function (p, i) {
       var cx = x0 + (i % 2) * (cw + gap), cy = y0 + Math.floor(i / 2) * (chh + 120);
       x.save(); rr(x, cx, cy, cw, chh, 24); x.clip();
-      x.fillStyle = C.card; x.fillRect(cx, cy, cw, chh);
-      if (imgs[i]) cover(x, imgs[i], cx, cy, cw, chh);
+      x.fillStyle = C.white; x.fillRect(cx, cy, cw, chh);
+      if (imgs[i]) { // 제품 사진은 흰 바탕이 많아서 잘리지 않게 칸 안에 맞춤
+        var im = trimWhite(imgs[i]), pad = 28, k = Math.min((cw - pad * 2) / im.width, (chh - pad * 2) / im.height);
+        x.drawImage(im, cx + (cw - im.width * k) / 2, cy + (chh - im.height * k) / 2, im.width * k, im.height * k);
+      }
       else { x.font = F(700, 28); x.fillStyle = C.hint; x.textAlign = 'center'; x.fillText('사진', cx + cw / 2, cy + chh / 2 + 10); x.textAlign = 'left'; }
       x.restore();
+      x.strokeStyle = C.line; x.lineWidth = 2; rr(x, cx, cy, cw, chh, 24); x.stroke();
       x.font = F(700, 30); x.fillStyle = C.text; x.fillText(fit(x, shortTitle(p.title), cw), cx, cy + chh + 44);
       x.font = F(800, 34); x.fillStyle = C.text; x.fillText(L.won(p.price), cx, cy + chh + 88);
     });
