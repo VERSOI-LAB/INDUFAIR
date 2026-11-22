@@ -85,6 +85,7 @@
   <div class="slider-wrap">
     <button class="float-btn back" id="backBtn" aria-label="뒤로"><i data-icon="back" data-size="24"></i></button>
     <button class="float-btn more" id="moreBtn" aria-label="더 보기" hidden>⋯</button>
+    <button type="button" class="float-btn" id="shareBtn" aria-label="공유하기" style="right:62px" hidden><i data-icon="send" data-size="22"></i></button>
     <div class="slider" id="slider"><div class="skeleton" style="flex:0 0 100%;border-radius:0"></div></div>
     <div class="dots" id="dots"></div>
   </div>
@@ -135,6 +136,7 @@
     if (res.error || !res.data || res.data.status === 'deleted') return notFound();
     biz = res.data;
     document.title = biz.name + ' - 판다산다';
+    PS.bindShare($('shareBtn'), biz.name + ' - 판다산다', biz.name + (biz.tagline ? ' · ' + biz.tagline : ''), PS.bizUrl(biz.id));
     await PS.ready;
     mine = !!(PS.user && PS.user.id === biz.owner_id);
 

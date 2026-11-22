@@ -3,6 +3,17 @@
 (function () {
   var sb = window.sb;
   var PS = window.PS = {};
+  // 마케팅 측정 (js/supabase-client.js 의 psTrack). 이벤트 이름 목록은 README '마케팅 측정' 참고
+  PS.track = function (name, props) { return window.psTrack ? window.psTrack(name, props) : Promise.resolve(); };
+  // 공유 버튼: 휴대폰은 공유 창(카톡 등), PC 는 주소 복사. 내 초대 코드가 붙어서 친구가 가입하면 초대로 기록 (psShare)
+  PS.bindShare = function (btn, title, text, path) {
+    if (!btn) return;
+    btn.hidden = false;
+    btn.onclick = async function () {
+      var how = await window.psShare(title, text, path);
+      if (how === 'copied') PS.toast('링크를 복사했어요. 카톡에 붙여 넣어 보내 주세요');
+    };
+  };
 
   PS.FUNCTIONS_URL = 'https://rqjfergjfhcrcuvfuhkm.supabase.co/functions/v1';
   // 사업자 정보 (전자상거래법 표시 사항). 홈·약관·개인정보처리방침 하단과 설정의 고객센터에 쓰인다
@@ -13,6 +24,8 @@
 
   // 카카오맵 JavaScript 키 (Kakao Developers > 앱 키). 비어 있으면 무료 지도(OpenStreetMap)로 보여준다.
   PS.KAKAO_JS_KEY = 'eed04d223c75e55f7d445b88ca168023';
+  // 카카오 로그인 버튼. Supabase > Authentication > Sign In / Providers 에서 Kakao 를 켠 뒤 true 로 (README '카카오 로그인')
+  PS.KAKAO_LOGIN = false;
   // 토스페이먼츠 클라이언트 키 (공개용). 비어 있으면 결제 버튼이 '준비 중'으로 안내
   //   test_gck_/live_gck_ : 결제위젯(주문서형) 연동 키 → 결제 화면에 토스 결제위젯을 그림
   //   test_ck_/live_ck_   : API 개별 연동 키 → 결제창을 띄움

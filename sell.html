@@ -817,6 +817,7 @@
       return;
     }
     var productId = res.data.id;
+    PS.track('product_create', { product_id: productId, price: payload.price || 0, photos: photos.length });
     var failed = 0;
     for (var i = 0; i < photos.length; i++) {
       try {

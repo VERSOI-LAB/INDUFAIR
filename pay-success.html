@@ -41,6 +41,7 @@
     });
     var d = await res.json().catch(function () { return {}; });
     if (res.ok && d.ok) {
+      PS.track('purchase', { order_id: PS.param('orderId'), amount: Number(PS.param('amount')) || 0 });
       // 장바구니에서 결제한 물건 빼기
       try { var keys = JSON.parse(sessionStorage.getItem('ps_paid_cart') || '[]'); if (keys.length) PS.cart.removeMany(keys); sessionStorage.removeItem('ps_paid_cart'); } catch (e) {}
     }
