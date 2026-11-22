@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FFFFFF">
+<title>구해요 - 업체에게 견적 받기 - 판다산다</title>
+<meta name="description" content="찾는 산업용품을 올리면 근처 업체가 견적을 보내요. 공구·부품부터 중고 기계까지, 판다산다 구해요.">
+<meta name="robots" content="noindex, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="판다산다">
+<meta property="og:title" content="구해요 - 찾는 물건, 업체가 견적을 보내요">
+<meta property="og:description" content="찾는 산업용품을 올리면 근처 업체가 견적을 보내요.">
+<meta property="og:image" content="https://www.pandasanda.com/이미지/web/og-share.jpg">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .rq-hero{margin-top:16px;padding:20px;border-radius:18px;background:linear-gradient(135deg,#EAF2FE,#F4F8FF);border:1.5px solid #D5E4FC;}
+  .rq-hero b{display:block;font-size:20px;font-weight:800;line-height:1.35;}
+  .rq-hero span{display:block;margin-top:6px;color:var(--sub);font-size:14px;line-height:1.5;}
+  .rq-hero .btn{margin-top:14px;height:52px;}
+  .rq-item{display:block;padding:16px 0;border-bottom:1px solid var(--line);color:inherit;}
+  .rq-item:last-child{border-bottom:none;}
+  .rq-item .t{font-size:17px;font-weight:700;line-height:1.4;}
+  .rq-item .m{margin-top:4px;font-size:13px;color:var(--hint);}
+  .rq-item .s{display:flex;gap:10px;margin-top:6px;font-size:14px;color:var(--sub);}
+  .rq-item .s b{color:#2F5BD3;}
+  .rq-tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:800;margin-right:6px;vertical-align:2px;background:#EAF2FE;color:#2F5BD3;}
+  .rq-tag.done{background:#F2F3F5;color:var(--hint);}
+  /* 작성 */
+  .f-l{display:block;margin-top:20px;font-size:15px;font-weight:700;}
+  .f-l small{font-weight:500;color:var(--hint);margin-left:4px;}
+  .f-l .input,.f-l textarea{margin-top:8px;}
+  textarea.input{height:auto;min-height:110px;padding:12px 14px;line-height:1.5;resize:vertical;}
+  .ph-pick{display:flex;align-items:center;gap:12px;margin-top:8px;}
+  .ph-pick img{width:72px;height:72px;border-radius:12px;object-fit:cover;}
+  /* 상세 */
+  .rq-ph{width:100%;max-height:360px;object-fit:cover;border-radius:16px;margin-top:16px;}
+  .rq-title{margin-top:16px;font-size:22px;font-weight:800;line-height:1.35;}
+  .rq-meta{margin-top:6px;font-size:14px;color:var(--hint);}
+  .rq-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;}
+  .rq-facts div{padding:12px;border-radius:12px;background:var(--bg);}
+  .rq-facts span{display:block;font-size:12px;color:var(--hint);}
+  .rq-facts b{display:block;margin-top:2px;font-size:15px;}
+  .rq-detail{margin-top:16px;line-height:1.65;white-space:pre-wrap;}
+  .box{margin-top:20px;padding:18px;border-radius:16px;border:1.5px solid var(--line);}
+  .box h3{font-size:17px;font-weight:800;}
+  .box p{margin-top:6px;color:var(--sub);font-size:14px;line-height:1.55;}
+  .box .btn{margin-top:14px;height:50px;}
+  .quote{padding:16px 0;border-bottom:1px solid var(--line);}
+  .quote:last-child{border-bottom:none;}
+  .quote .hd{display:flex;align-items:center;gap:8px;}
+  .quote .hd a{font-weight:800;font-size:16px;}
+  .quote .pr{margin-left:auto;font-size:17px;font-weight:800;}
+  .quote .msg{margin-top:8px;line-height:1.55;white-space:pre-wrap;}
+  .quote .lt{margin-top:4px;font-size:13px;color:var(--hint);}
+  .quote .btn{margin-top:10px;height:44px;font-size:15px;}
+  .prem-b{font-size:11px;font-weight:800;padding:2px 6px;border-radius:5px;background:var(--primary-light);color:#8A6400;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar"><a class="back" id="back" href="/buy" aria-label="뒤로"><i data-icon="back" data-size="24"></i></a><h1 id="barTitle">구해요</h1></header>
+  <main class="page" id="main"></main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+// 주소: /rfq (목록) · /rfq/new (올리기, ?q= 로 제목 미리 채움) · /rfq/:id (상세: 구매자는 받은 견적, 업체는 견적 보내기)
+// DB 규칙은 supabase/migrations/20261122_rfq.sql
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var main = $('main');
+  var seg = location.pathname.replace(/\/+$/, '').split('/')[2] || PS.param('id') || '';
+  var CATS = PS.CATEGORIES;
+  function left(r) {
+    if (r.status !== 'open') return r.status === 'closed' ? '마감' : '기간 끝남';
+    var d = Math.ceil((Date.parse(r.expires_at) - Date.now()) / 86400000);
+    return d <= 0 ? '오늘까지' : d + '일 남음';
+  }
+  function budget(n) { return n == null ? '협의' : PS.won(n); }
+
+  // ---- 목록 ----
+  async function list() {
+    $('barTitle').textContent = '구해요';
+    var cat = PS.param('c') || '';
+    main.innerHTML = '<div class="rq-hero"><b>찾는 물건이 없나요?</b><span>구하는 물건을 올리면 같은 분류·근처 업체에 알려서 견적을 받아 드려요. 무료예요.</span>' +
+      '<a class="btn" href="/rfq/new">구해요 올리기</a></div>' +
+      '<div class="chips" style="margin-top:16px">' + [''].concat(CATS).map(function (c) {
+        return '<a class="chip' + (c === cat ? ' on' : '') + '" href="/rfq' + (c ? '?c=' + encodeURIComponent(c) : '') + '">' + (c || '전체') + '</a>';
+      }).join('') + '</div>' +
+      '<div id="rqList"><div class="skeleton" style="height:70px;margin-top:12px"></div><div class="skeleton" style="height:70px;margin-top:12px"></div></div>' +
+      '<p style="margin-top:20px;font-size:13px;color:var(--hint);line-height:1.6">업체는 견적을 보낼 수 있어요 (무료 30일 3건, 프리미엄 무제한). 구매자 연락처는 공개되지 않고, 견적이 마음에 들면 구매자가 채팅을 시작해요.</p>' +
+      '<div style="height:24px"></div>';
+    var q = sb.from('rfq_requests').select('id,title,category,region,quantity,budget,status,quote_count,expires_at,created_at')
+      .eq('status', 'open').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(50);
+    if (cat) q = q.eq('category', cat);
+    var r = await q;
+    var rows = r.data || [];
+    $('rqList').innerHTML = rows.length ? rows.map(function (x) {
+      return '<a class="rq-item" href="/rfq/' + x.id + '"><div class="t"><span class="rq-tag">' + PS.esc(x.category) + '</span>' + PS.esc(x.title) + '</div>' +
+        '<div class="m">' + PS.esc([x.region, x.quantity, PS.ago(x.created_at)].filter(Boolean).join(' · ')) + '</div>' +
+        '<div class="s"><span>예산 ' + PS.esc(budget(x.budget)) + '</span><span>견적 <b>' + x.quote_count + '</b></span><span>' + left(x) + '</span></div></a>';
+    }).join('') : '<div class="empty" style="padding:40px 0">' + PS.sticker('curious', 100) + '<b>아직 올라온 요청이 없어요</b>찾는 물건을 처음으로 올려 보세요</div>';
+  }
+
+  // ---- 올리기 ----
+  var photo = null;
+  function resize(file, max, quality) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement('canvas');
+        c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+        var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) { b ? resolve(b) : reject(new Error('toBlob')); }, 'image/jpeg', quality);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('사진을 읽지 못했어요')); };
+      img.src = url;
+    });
+  }
+  async function form() {
+    $('barTitle').textContent = '구해요 올리기';
+    $('back').href = '/rfq';
+    var user = await PS.ready;
+    if (!user) return PS.goLogin();
+    var home = PS.getHome();
+    var cat = '';
+    main.innerHTML =
+      '<p style="margin-top:16px;color:var(--sub);line-height:1.6">구하는 물건을 자세히 쓸수록 정확한 견적이 와요. 연락처는 쓰지 마세요. 견적이 오면 채팅으로 이어 갈 수 있어요.</p>' +
+      '<label class="f-l">무엇을 구하나요?<input class="input" id="fTitle" maxlength="60" placeholder="예) 10마력 스크류 콤프레샤" value="' + PS.esc(PS.param('q') || '') + '"></label>' +
+      '<div class="f-l">분류</div><div class="chips" id="fCat" style="flex-wrap:wrap;margin-top:8px">' + CATS.map(function (c) { return '<button type="button" class="chip" data-v="' + PS.esc(c) + '">' + PS.esc(c) + '</button>'; }).join('') + '</div>' +
+      '<label class="f-l">자세한 내용 <small>(선택) 규격·제조사·상태·용도</small><textarea class="input" id="fDetail" maxlength="1000" placeholder="예) 중고 괜찮아요. 7.5~11kW, 탱크 포함이면 좋겠어요. 화성 공장 납품"></textarea></label>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+        '<label class="f-l">수량 <small>(선택)</small><input class="input" id="fQty" maxlength="30" placeholder="예) 1대"></label>' +
+        '<label class="f-l">예산 <small>(선택, 만 원)</small><input class="input" id="fBudget" inputmode="numeric" maxlength="7" placeholder="예) 150"></label></div>' +
+      '<label class="f-l">지역 <small>업체를 고르는 데 써요</small><input class="input" id="fRegion" maxlength="40" placeholder="예) 성남시 분당구" value="' + PS.esc(home && home.region || '') + '"></label>' +
+      '<div class="f-l">사진 <small>(선택) 비슷한 물건이나 기존 부품</small></div>' +
+      '<div class="ph-pick"><button type="button" class="btn white small" id="fPhotoBtn" style="width:auto;padding:0 16px">' + PS.icon('camera', 20) + ' 사진 고르기</button><span id="fPhotoPrev"></span>' +
+      '<input type="file" id="fPhoto" accept="image/*" hidden></div>' +
+      '<div class="err" id="fErr" hidden style="margin-top:16px;color:var(--danger);font-weight:600"></div>' +
+      '<button class="btn" id="fSubmit" style="margin-top:24px">올리고 견적 받기</button><div style="height:32px"></div>';
+    $('fCat').addEventListener('click', function (e) {
+      var c = e.target.closest('.chip'); if (!c) return;
+      cat = c.dataset.v;
+      $('fCat').querySelectorAll('.chip').forEach(function (x) { x.classList.toggle('on', x === c); });
+    });
+    $('fPhotoBtn').onclick = function () { $('fPhoto').click(); };
+    $('fPhoto').onchange = async function () {
+      var f = this.files[0]; if (!f) return;
+      try { photo = await resize(f, 1280, 0.85); $('fPhotoPrev').innerHTML = '<img src="' + URL.createObjectURL(photo) + '" alt="고른 사진">'; }
+      catch (err) { PS.toast(err.message); }
+    };
+    var err = function (m) { $('fErr').textContent = m; $('fErr').hidden = false; };
+    $('fSubmit').onclick = async function () {
+      $('fErr').hidden = true;
+      var title = $('fTitle').value.trim(), detail = $('fDetail').value.trim();
+      var b = $('fBudget').value.replace(/[^\d]/g, '');
+      if (title.length < 2) return err('무엇을 구하는지 써 주세요');
+      if (!cat) return err('분류를 골라 주세요');
+      if (/01[016789][-\s.]?\d{3,4}[-\s.]?\d{4}/.test(title + ' ' + detail)) return err('전화번호는 빼 주세요. 견적이 오면 채팅으로 이어 갈 수 있어요');
+      var btn = this; btn.disabled = true; btn.textContent = '올리는 중…';
+      var url = null;
+      if (photo) {
+        var path = PS.user.id + '/rfq/' + Date.now() + '.jpg';
+        var up = await sb.storage.from('product-images').upload(path, photo, { contentType: 'image/jpeg' });
+        if (!up.error) url = sb.storage.from('product-images').getPublicUrl(path).data.publicUrl;
+      }
+      var r = await sb.rpc('create_rfq', { p_title: title, p_detail: detail, p_category: cat, p_region: $('fRegion').value.trim(), p_quantity: $('fQty').value.trim(),
+        p_budget: b ? Number(b) * 10000 : null, p_photo_url: url });
+      var d = r.data || {};
+      if (r.error || d.error) {
+        btn.disabled = false; btn.textContent = '올리고 견적 받기';
+        return err({ too_many_open: '진행 중인 요청은 5개까지예요. 다 구한 요청은 마감해 주세요', too_many_today: '오늘은 더 올릴 수 없어요. 내일 다시 해 주세요', bad_input: '내용을 다시 확인해 주세요' }[d.error] || '올리지 못했어요. 잠시 후 다시 해 주세요');
+      }
+      await PS.track('rfq_create', { category: cat, budget: b ? Number(b) * 10000 : 0, photo: !!url });
+      try { sessionStorage.setItem('ps_rfq_new', d.id); } catch (e) {}
+      location.replace('/rfq/' + d.id);
+    };
+  }
+
+  // ---- 상세 ----
+  async function detail(id) {
+    $('back').href = '/rfq';
+    main.innerHTML = '<div class="skeleton" style="height:28px;margin-top:20px;width:70%"></div><div class="skeleton" style="height:80px;margin-top:16px"></div>';
+    await PS.ready;
+    var res = await sb.rpc('rfq_view', { p_id: id });
+    var v = res.data;
+    if (res.error || !v || v.error) {
+      main.innerHTML = '<div class="empty" style="padding:60px 0">' + PS.sticker('sorry', 110) + '<b>요청을 찾을 수 없어요</b><a class="btn" href="/rfq" style="margin-top:20px">다른 요청 보기</a></div>';
+      return;
+    }
+    var r = v.rfq;
+    document.title = r.title + ' 구해요 - 판다산다';
+    var justMade = false;
+    try { justMade = sessionStorage.getItem('ps_rfq_new') === id; sessionStorage.removeItem('ps_rfq_new'); } catch (e) {}
+    var html = (justMade ? '<div class="box" style="background:#E9F8EE;border-color:#BFE8CC"><h3>🎉 올렸어요!</h3><p>같은 분류·근처 업체에 알렸어요. 견적이 오면 알림으로 알려 드려요. 알림을 켜 두면 놓치지 않아요.</p></div>' : '') +
+      (r.photo_url ? '<img class="rq-ph" src="' + PS.esc(r.photo_url) + '" alt="">' : '') +
+      '<h2 class="rq-title"><span class="rq-tag' + (r.status === 'open' ? '' : ' done') + '">' + left(r) + '</span>' + PS.esc(r.title) + '</h2>' +
+      '<div class="rq-meta">' + PS.esc([r.category, r.region, PS.ago(r.created_at)].filter(Boolean).join(' · ')) + '</div>' +
+      '<div class="rq-facts"><div><span>수량</span><b>' + PS.esc(r.quantity || '-') + '</b></div><div><span>예산</span><b>' + PS.esc(budget(r.budget)) + '</b></div><div><span>받은 견적</span><b>' + r.quote_count + '건</b></div></div>' +
+      (r.detail ? '<div class="rq-detail">' + PS.esc(r.detail) + '</div>' : '');
+
+    if (v.role === 'buyer') {
+      html += '<h3 style="margin-top:28px;font-size:18px;font-weight:800">받은 견적 ' + v.quotes.length + '건</h3>';
+      html += v.quotes.length ? '<div>' + v.quotes.map(function (q, i) {
+        return '<div class="quote"><div class="hd">' + (q.business_id ? '<a href="' + PS.bizUrl(q.business_id) + '">' + PS.esc(q.business_name || '업체') + '</a>' : '<b>' + PS.esc(q.business_name || '업체') + '</b>') +
+          (q.premium ? '<span class="prem-b">프리미엄</span>' : '') + '<span class="pr">' + (q.price == null ? '가격 협의' : PS.esc(PS.won(q.price))) + '</span></div>' +
+          '<div class="msg">' + PS.esc(q.message) + '</div><div class="lt">' + PS.esc([q.lead_time ? '납기 ' + q.lead_time : '', PS.ago(q.created_at)].filter(Boolean).join(' · ')) + '</div>' +
+          '<button class="btn" data-chat="' + i + '">채팅으로 이어 가기</button></div>';
+      }).join('') + '</div>' : '<p style="margin-top:8px;color:var(--sub)">아직 견적이 없어요. 업체가 견적을 보내면 알림으로 알려 드려요.</p>';
+      if (r.status === 'open') html += '<button class="btn white small" id="closeBtn" style="margin-top:20px">다 구했어요 (요청 마감)</button>';
+    } else if (v.role === 'quoted') {
+      var m = v.my_quote;
+      html += '<div class="box"><h3>보낸 견적</h3><p>' + (m.price == null ? '가격 협의' : PS.esc(PS.won(m.price))) + (m.lead_time ? ' · 납기 ' + PS.esc(m.lead_time) : '') + '</p>' +
+        '<p style="color:var(--text);white-space:pre-wrap">' + PS.esc(m.message) + '</p><p>구매자가 채팅을 시작하면 채팅 알림으로 알려 드려요.</p></div>';
+    } else if (v.role === 'seller' && r.status === 'open') {
+      var qt = v.quota;
+      if (qt.left === 0) {
+        html += '<div class="box" style="background:var(--primary-light);border-color:var(--primary)"><h3>최근 30일 무료 견적 3건을 다 썼어요</h3>' +
+          '<p>업체 프리미엄(월 1만 원)이면 견적을 무제한으로 보내고, 동네 업체 맨 앞에 고정돼요.</p>' +
+          '<a class="btn" id="upsellBtn" href="/biz-premium?id=' + encodeURIComponent(qt.business_id) + '">프리미엄 알아보기</a></div>';
+      } else {
+        html += '<div class="box"><h3>' + PS.esc(qt.business_name) + '(으)로 견적 보내기</h3>' +
+          '<p>' + (qt.left < 0 ? '프리미엄: 견적 무제한' : '무료 견적 ' + qt.left + '건 남음 (30일 기준)') + ' · 구매자가 마음에 들면 채팅을 시작해요</p>' +
+          '<label class="f-l">가격 <small>(선택, 원) 비우면 가격 협의</small><input class="input" id="qPrice" inputmode="numeric" maxlength="12" placeholder="예) 1400000"></label>' +
+          '<label class="f-l">납기 <small>(선택)</small><input class="input" id="qLead" maxlength="30" placeholder="예) 3일 안에 배송 가능"></label>' +
+          '<label class="f-l">견적 내용<textarea class="input" id="qMsg" maxlength="500" placeholder="예) 같은 사양 중고 재고 있어요. 상태 좋고, 설치까지 해 드려요."></textarea></label>' +
+          '<button class="btn" id="qSend">견적 보내기</button></div>';
+      }
+    } else if (v.role === 'need_biz' && r.status === 'open') {
+      html += '<div class="box"><h3>업체라면 견적을 보내 보세요</h3><p>견적은 사업자 인증 후 업체 소개를 올린 분만 보낼 수 있어요. 업체 소개는 무료예요.</p><a class="btn" href="/biz/new">업체 소개 올리기</a></div>';
+    } else if (v.role === 'guest' && r.status === 'open') {
+      html += '<div class="box"><h3>이 물건을 갖고 있는 업체인가요?</h3><p>로그인하고 견적을 보내면 구매자와 바로 채팅으로 이어져요.</p><a class="btn" href="/login?next=' + encodeURIComponent(location.pathname) + '">로그인하고 견적 보내기</a>' +
+        '<a class="btn white" href="/rfq/new">나도 구해요 올리기</a></div>';
+    }
+    html += '<button type="button" class="btn white small" id="shareRq" style="margin-top:20px">' + PS.icon('send', 18) + ' 아는 업체에 이 요청 알려 주기</button><div style="height:32px"></div>';
+    main.innerHTML = html;
+    PS.bindShare($('shareRq'), r.title + ' 구해요 - 판다산다', r.title + ' 구하는 분이 있어요. 견적을 보내 보세요', '/rfq/' + r.id);
+    if (v.role === 'seller' && $('upsellBtn')) PS.track('rfq_quota_full', { rfq_id: r.id });
+
+    document.querySelectorAll('[data-chat]').forEach(function (b) {
+      b.onclick = async function () {
+        var q = v.quotes[Number(b.dataset.chat)];
+        b.disabled = true;
+        var c = await sb.rpc('start_direct_chat', { p_other: q.seller_id });
+        var cid = c.data && c.data.id;
+        if (!cid) { b.disabled = false; PS.toast(c.data && c.data.error === 'blocked' ? '차단한 사이에서는 채팅할 수 없어요' : '채팅을 열지 못했어요'); return; }
+        await PS.track('rfq_chat', { rfq_id: r.id });
+        // 무엇에 대한 대화인지 첫 메시지로 남김 (처음 여는 채팅방일 때만)
+        var had = await sb.from('messages').select('id').eq('chat_id', cid).limit(1);
+        if (!had.error && !(had.data || []).length) await sb.from('messages').insert({ chat_id: cid, sender_id: PS.user.id, message: '[구해요] ' + r.title + ' 견적 보고 연락드려요.' });
+        location.href = '/chat/' + cid;
+      };
+    });
+    if ($('closeBtn')) $('closeBtn').onclick = async function () {
+      if (!confirm('요청을 마감할까요? 더 이상 견적을 받지 않아요.')) return;
+      var c = await sb.rpc('close_rfq', { p_id: r.id });
+      if (c.data === 'ok') { PS.track('rfq_close', { rfq_id: r.id, quotes: v.quotes.length }); PS.toast('마감했어요'); detail(id); }
+    };
+    if ($('qSend')) $('qSend').onclick = async function () {
+      var msg = $('qMsg').value.trim(), price = $('qPrice').value.replace(/[^\d]/g, '');
+      if (!msg) { PS.toast('견적 내용을 써 주세요'); return; }
+      var btn = this; btn.disabled = true;
+      var s = await sb.rpc('submit_quote', { p_rfq: r.id, p_price: price ? Number(price) : null, p_message: msg, p_lead_time: $('qLead').value.trim() });
+      btn.disabled = false;
+      if (s.data === 'ok') { PS.track('rfq_quote', { rfq_id: r.id, price: price ? Number(price) : 0 }); PS.toast('견적을 보냈어요'); detail(id); return; }
+      PS.toast({ quota: '최근 30일 무료 견적을 다 썼어요', closed: '마감된 요청이에요', already: '이미 견적을 보냈어요', blocked: '이 구매자에게는 견적을 보낼 수 없어요', need_biz: '업체 소개를 먼저 올려 주세요', bad_input: '내용을 다시 확인해 주세요' }[s.data] || '보내지 못했어요. 잠시 후 다시 해 주세요');
+      if (s.data === 'quota' || s.data === 'closed' || s.data === 'already') detail(id);
+    };
+  }
+
+  // ---- 내 구해요 / 내가 보낸 견적 ----
+  async function mine() {
+    $('barTitle').textContent = '구해요 · 받은 견적';
+    $('back').href = '/mypage';
+    var user = await PS.ready;
+    if (!user) return PS.goLogin();
+    main.innerHTML = '<div class="skeleton" style="height:70px;margin-top:16px"></div>';
+    var r = await sb.rpc('my_rfqs');
+    var rows = r.data || [];
+    var req = rows.filter(function (x) { return x.kind === 'request'; }), quo = rows.filter(function (x) { return x.kind === 'quote'; });
+    var item = function (x) {
+      return '<a class="rq-item" href="/rfq/' + x.id + '"><div class="t"><span class="rq-tag' + (x.status === 'open' ? '' : ' done') + '">' + left(x) + '</span>' + PS.esc(x.title) + '</div>' +
+        '<div class="s"><span>견적 <b>' + x.quote_count + '</b></span><span>' + PS.ago(x.created_at) + '</span></div></a>';
+    };
+    main.innerHTML = '<a class="btn" href="/rfq/new" style="margin-top:16px">구해요 올리기</a>' +
+      '<h3 style="margin-top:24px;font-size:18px;font-weight:800">내가 올린 요청 ' + req.length + '</h3>' +
+      (req.length ? req.map(item).join('') : '<p style="margin-top:8px;color:var(--sub)">아직 올린 요청이 없어요.</p>') +
+      (quo.length ? '<h3 style="margin-top:28px;font-size:18px;font-weight:800">내가 보낸 견적 ' + quo.length + '</h3>' + quo.map(item).join('') : '') +
+      '<a class="btn white small" href="/rfq" style="margin-top:24px">다른 사람 요청 보기</a><div style="height:32px"></div>';
+  }
+
+  if (PS.param('mine')) mine();
+  else if (seg === 'new') form();
+  else if (/^[0-9a-f-]{36}$/i.test(seg)) detail(seg);
+  else list();
+})();
+</script>
+</body>
+</html>

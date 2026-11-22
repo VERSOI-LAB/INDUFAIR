@@ -18,6 +18,10 @@
       "destination": "/api/page?type=product&id=:id"
     },
     {
+      "source": "/rfq/:id",
+      "destination": "/rfq"
+    },
+    {
       "source": "/price/:v",
       "destination": "/api/seo?kind=price&v=:v"
     },

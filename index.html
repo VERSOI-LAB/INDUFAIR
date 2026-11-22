@@ -101,7 +101,8 @@
       </a>
     </div>
 
-    <a class="dg-banner home-dg" href="/diagnose?from=home"><span class="dg-ico" aria-hidden="true">✓</span><span class="dg-tx"><b>우리 회사가 받을 수 있는 지원사업은?</b><span>업종·지역·규모만 고르면 30초 진단 · 무료</span></span><span class="dg-arrow" aria-hidden="true">›</span></a>
+    <a class="dg-banner home-dg" href="/rfq/new" style="background:linear-gradient(135deg,#FFF6DD,#FFFBEF);border-color:#FBE3A6"><span class="dg-ico" aria-hidden="true" style="background:var(--primary);color:var(--text)">?</span><span class="dg-tx"><b>찾는 물건이 없나요? 구해요</b><span>올리면 근처 업체가 견적을 보내요 · 무료</span></span><span class="dg-arrow" aria-hidden="true" style="color:#B07A00">›</span></a>
+    <a class="dg-banner home-dg" href="/diagnose?from=home" style="margin-top:10px"><span class="dg-ico" aria-hidden="true">✓</span><span class="dg-tx"><b>우리 회사가 받을 수 있는 지원사업은?</b><span>업종·지역·규모만 고르면 30초 진단 · 무료</span></span><span class="dg-arrow" aria-hidden="true">›</span></a>
     <!-- 지원사업 / 교육·행사: 한 칸에 탭으로 (둘 다 펼치면 너무 길어서) -->
     <section class="info-home" id="infoHome" hidden>
       <div class="info-tabs" role="tablist" aria-label="지원사업과 교육·행사">
@@ -149,7 +150,7 @@
     var a = e.target.closest('a[href]');
     if (!a) return;
     var h = a.getAttribute('href');
-    var cta = h === '/sell' ? 'sell' : h === '/buy' ? 'buy' : /^\/diagnose/.test(h) ? 'diagnose' : /^\/support/.test(h) ? 'support' : /^\/events/.test(h) ? 'event' : /^\/product\//.test(h) ? 'product' : null;
+    var cta = h === '/sell' ? 'sell' : h === '/buy' ? 'buy' : /^\/diagnose/.test(h) ? 'diagnose' : /^\/rfq/.test(h) ? 'rfq' : /^\/support/.test(h) ? 'support' : /^\/events/.test(h) ? 'event' : /^\/product\//.test(h) ? 'product' : null;
     if (cta) PS.track('home_cta_click', { variant: variant, cta: cta });
   });
   document.querySelector('.home-search').addEventListener('submit', function () { PS.track('home_cta_click', { variant: variant, cta: 'search' }); });
