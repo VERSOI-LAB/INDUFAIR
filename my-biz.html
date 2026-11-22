@@ -79,6 +79,7 @@
       '<div class="vcard">' + PS.ntsBadge(v) + '<b>' + PS.esc(v.company_name) + '</b><span class="no">' + PS.esc(v.biz_reg_no) + '</span>' +
         (v.nts_status === 'suspended' || v.nts_status === 'closed' || v.nts_status === 'unregistered' ? '<span style="color:var(--danger);font-size:13px;font-weight:700">국세청 확인 결과 때문에 업체 소개가 숨겨졌어요. 다시 운영하면 자동으로 보여요.</span>' : '') + '</div>' +
       (hideInvite ? '' : PS.inviteBannerHtml()) +
+      '<a class="dg-banner" href="/rfq"><span class="dg-ico" aria-hidden="true">₩</span><span class="dg-tx"><b>견적 요청 보러 가기</b><span>물건을 찾는 구매자에게 견적을 보내 보세요 (무료 30일 3건)</span></span><span class="dg-arrow" aria-hidden="true">›</span></a>' +
       (list.length < 3 ? '<a class="btn" href="/biz/new" style="margin-top:12px">' + PS.icon3d('home', 30) + ' 새 업체 소개하기 (' + list.length + '/3)</a>' : '<p style="margin-top:12px;color:var(--sub);font-size:14px">업체는 3개까지 소개할 수 있어요</p>') +
       (list.length ? '<div class="bizgrid" style="margin-top:20px">' + list.map(function (b) {
           return '<div>' + PS.bizCardHtml(b, {}) +

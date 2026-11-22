@@ -174,3 +174,23 @@ select s.props->>'journey' as journey, count(*) as sent,
 1. `/weekly-card` 열기 → **카드 이미지 저장**
 2. 네이버 블로그: 이미지 + "블로그용 복사" 글 / 카페: "카페용 복사" / 카카오톡 채널: 이미지 + "카톡 채널용 복사"
 3. 링크에 `utm_source=naver_blog|naver_cafe|kakao_channel`, `utm_campaign=weekly_<월요일 날짜>` 가 붙어 있어 채널별 가입은 `select * from marketing_signups_by_source(30);` 로 확인
+
+## 구해요 (견적 요청)
+`rfq.html` (`/rfq` 목록 · `/rfq/new` 올리기 · `/rfq/:id` 상세 · `/rfq?mine=1` 내 요청·보낸 견적) + `supabase/migrations/20261122_rfq.sql` + Edge Function `rfq-push` (Verify JWT 끔).
+
+- 구매자: 찾는 물건을 올림 (14일 열림, 동시에 5건·하루 10건까지, 제목·내용에 전화번호 쓰면 막음)
+- 업체(운영 중인 업체 소개가 있는 사람): 견적 1건씩. **무료 30일 3건, 프리미엄 업체가 있으면 무제한** → 다 쓰면 프리미엄 안내
+- 구매자 정보는 공개되지 않음. 견적은 구매자와 낸 업체만 보고, **채팅은 구매자만 시작** (첫 메시지에 어떤 요청인지 자동으로 남김)
+- 알림: 새 요청 → 같은 분류·지역 업체 주인 30명까지(같은 분류+지역 → 같은 분류 → 같은 지역 순), 새 견적 → 구매자. 웹 푸시
+- 들어오는 곳: 홈 띠, 산다에서 검색 결과가 없을 때 "'○○' 구해요 올리고 견적 받기", 마이 › 구해요·받은 견적, 업체 소개 관리
+- 쓰기는 모두 함수(`create_rfq`, `submit_quote`, `close_rfq`)로만, 읽기는 `rfq_view`·`my_rfqs`
+- 측정: `rfq_create`, `rfq_quote`, `rfq_chat`, `rfq_close`, `rfq_quota_full`(무료 다 씀 → 프리미엄 안내 봄), `rfq_cta`, 서버 `rfq_notified`
+
+운영 확인:
+```sql
+-- 요청별 알린 업체 수·견적 수 (최근 30일)
+select title, category, region, notified_count, quote_count, status, created_at from rfq_requests where created_at > now() - interval '30 days' order by created_at desc;
+-- 견적 0건 요청 비율 (업체가 부족한 분류·지역 찾기)
+select category, count(*) as requests, count(*) filter (where quote_count = 0) as no_quote from rfq_requests group by 1 order by 2 desc;
+```
+설정: 마이그레이션 실행 → `supabase functions deploy rfq-push --no-verify-jwt`
