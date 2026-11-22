@@ -1,5 +1,7 @@
-// 인스타그램·스레드 자동 발행. cron 이 매주 월요일 한국시간 10:00 에 { run: true } 로 부른다 (Verify JWT 끔)
-//   { run: true }                         월요일이면 이번 주 카드를 올림 (같은 주·같은 곳은 한 번만, 실패한 주는 다시 시도)
+// 인스타그램·스레드 자동 발행 (여러 장 슬라이드). cron 이 매주 월요일 한국시간 10:00 에 { run: true } 로 부른다 (Verify JWT 끔)
+//   슬라이드 목록·캡션: https://www.pandasanda.com/social/weekly.json, 이미지: /social/weekly/1.jpg … (api/social.js, api/_social.js)
+//   2장 이상이면 캐러셀, 1장이면 한 장 게시. 올리는 데 시간이 걸려 요청은 바로 202 로 답하고 뒤에서 처리 (결과는 social_posts)
+//   { run: true }                         월요일이면 이번 주 게시물을 올림 (같은 주·같은 곳은 한 번만, 실패한 주는 다시 시도)
 //   { dry_run: true }                     올릴 이미지 주소·캡션만 돌려줌 (운영자만)
 //   { run: true, force: true, only? }     요일·중복 상관없이 지금 올림 (운영자만, only: "instagram" | "threads")
 //   운영자 = Authorization: Bearer <service_role 키>
@@ -9,7 +11,6 @@
 //       인스타 계정 id 는 INSTAGRAM_USER_ID 비밀값, 없으면 연결된 페이지에서 찾음
 //     · 인스타그램 로그인(IG…, 60일) → graph.instagram.com, 30일마다 자동 갱신
 //   스레드 토큰(60일)은 30일마다 자동 갱신. 갱신한 토큰은 social_accounts 에 저장
-// 이미지: https://www.pandasanda.com/support/weekly.jpg (api/weekly-image.js, 1080×1350 JPEG)
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 
@@ -18,40 +19,17 @@ const IG = "https://graph.instagram.com";
 const FB = "https://graph.facebook.com";
 const TH = "https://graph.threads.net/v1.0";
 const REFRESH_AFTER_DAYS = 30;  // 장기 토큰은 60일. 반쯤 지나면 갱신
-const HASHTAGS = "#정부지원사업 #지원사업 #중소기업 #소상공인 #제조업 #스마트공장 #창업지원 #판다산다";
 
 type Platform = "instagram" | "threads";
-type Weekly = { today: string; week: { mon: string; label: string; range: string }; closing: Prog[]; fresh: Prog[] };
-type Prog = { id: number; title: string; agency?: string; category?: string; region?: string; apply_end?: string | null };
+type Manifest = { week: { mon: string; label: string }; slides: string[]; captions: { instagram: string; threads: string } };
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const clip = (s: string, n: number) => s.length > n ? s.slice(0, n - 1) + "…" : s;
-const dday = (p: Prog, today: string) => {
-  if (!p.apply_end) return "상시";
-  const n = Math.round((Date.parse(p.apply_end) - Date.parse(today)) / 86400_000);
-  return n === 0 ? "오늘 마감" : "D-" + n;
-};
 // 에러 문구에 토큰이 섞이지 않게
 const safe = (s: unknown) => String(s ?? "").replace(/access_token=[^&\s"]+/g, "access_token=***").slice(0, 480);
 
-function captions(d: Weekly) {
-  const utm = (src: string) => `?utm_source=${src}&utm_medium=social&utm_campaign=weekly_${d.week.mon}`;
-  const lines = (n: number) => d.closing.slice(0, n).map((p) => `· [${dday(p, d.today)}] ${p.title}`);
-  const head = `📢 ${d.week.label} 마감 임박 정부지원사업 ${d.closing.length}건\n${d.week.range} 마감 공고를 모았어요.`;
-  // 인스타: 캡션 링크는 눌리지 않으므로 "프로필 링크" 안내 (2,200자까지)
-  const instagram = [head, "", ...lines(8), d.closing.length > 8 ? `외 ${d.closing.length - 8}건` : "",
-    "", "전체 목록과 우리 회사 맞춤 공고 30초 진단은 프로필 링크 👉 판다산다", "", HASHTAGS].filter((x, i, a) => x !== "" || a[i - 1] !== "").join("\n");
-  // 스레드: 500자까지, 링크가 눌림
-  const tail = `\n\n전체 보기 👉 ${SITE}/support/weekly${utm("threads")}`;
-  let body = head + "\n\n";
-  for (const l of lines(8)) { if ((body + l + "\n").length + tail.length + 12 > 500) break; body += l + "\n"; }
-  const shown = body.split("\n· ").length - 1;
-  if (d.closing.length > shown) body += `외 ${d.closing.length - shown}건`;
-  const threads = clip(body.trimEnd() + tail, 500);
-  return { instagram: clip(instagram, 2200), threads };
-}
 
 // ---- 토큰 ----
 async function account(admin: SupabaseClient, p: Platform) {
@@ -110,17 +88,60 @@ async function waitReady(base: string, id: string, token: string) {
   }
 }
 
-async function publish(p: Platform, acc: { token: string; userId: string; host: string }, imageUrl: string, caption: string) {
-  if (p === "instagram") { // graph.instagram.com 또는 graph.facebook.com — 경로는 같음
-    const c = await post(`${acc.host}/${acc.userId}/media`, { image_url: imageUrl, caption, access_token: acc.token });
-    await waitReady(acc.host, c.id, acc.token);
-    const m = await post(`${acc.host}/${acc.userId}/media_publish`, { creation_id: c.id, access_token: acc.token });
-    return m.id as string;
+// 미디어 컨테이너 하나 만들기 (준비될 때까지 기다림)
+async function container(base: string, userId: string, edge: string, params: Record<string, string>, token: string) {
+  const c = await post(`${base}/${userId}/${edge}`, { ...params, access_token: token });
+  await waitReady(base, c.id, token);
+  return c.id as string;
+}
+
+async function publish(p: Platform, acc: { token: string; userId: string; host: string }, images: string[], caption: string) {
+  const ig = p === "instagram";
+  const base = ig ? acc.host : TH, edge = ig ? "media" : "threads", text = ig ? "caption" : "text";
+  let id: string;
+  if (images.length === 1) {
+    id = await container(base, acc.userId, edge, { ...(ig ? {} : { media_type: "IMAGE" }), image_url: images[0], [text]: caption }, acc.token);
+  } else { // 캐러셀: 장마다 컨테이너 → 묶음 컨테이너
+    const children: string[] = [];
+    for (const url of images.slice(0, 10)) {
+      children.push(await container(base, acc.userId, edge, { ...(ig ? {} : { media_type: "IMAGE" }), image_url: url, is_carousel_item: "true" }, acc.token));
+    }
+    id = await container(base, acc.userId, edge, { media_type: "CAROUSEL", children: children.join(","), [text]: caption }, acc.token);
   }
-  const c = await post(`${TH}/${acc.userId}/threads`, { media_type: "IMAGE", image_url: imageUrl, text: caption, access_token: acc.token });
-  await waitReady(TH, c.id, acc.token);
-  const m = await post(`${TH}/${acc.userId}/threads_publish`, { creation_id: c.id, access_token: acc.token });
+  const m = await post(`${base}/${acc.userId}/${ig ? "media_publish" : "threads_publish"}`, { creation_id: id, access_token: acc.token });
   return m.id as string;
+}
+
+async function run(admin: SupabaseClient, m: Manifest, images: string[], only: string | null, force: boolean) {
+  const result: Record<string, unknown> = {};
+  for (const p of ["instagram", "threads"] as Platform[]) {
+    if (only && only !== p) continue;
+    let acc;
+    try { acc = await account(admin, p); } catch (e) { result[p] = { status: "failed", error: safe((e as Error).message) }; continue; }
+    if (!acc) { result[p] = { status: "not_configured" }; continue; }
+    // 같은 주 한 번만: 기록을 먼저 잡음 (실패했던 주는 다시)
+    const { error: dup } = await admin.from("social_posts").insert({ platform: p, week: m.week.mon });
+    if (dup) {
+      const { data: prev } = await admin.from("social_posts").select("status,updated_at").eq("platform", p).eq("week", m.week.mon).maybeSingle();
+      if (prev?.status === "published" && !force) { result[p] = { status: "already_posted" }; continue; }
+      // 진행 중 표시가 10분 넘게 남아 있으면 멈춘 것으로 보고 다시
+      if (prev?.status === "pending" && !force && Date.now() - Date.parse(prev.updated_at) < 10 * 60_000) { result[p] = { status: "in_progress" }; continue; }
+      await admin.from("social_posts").update({ status: "pending", error: null, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", m.week.mon);
+    }
+    try {
+      const id = await publish(p, acc, images, p === "instagram" ? m.captions.instagram : m.captions.threads);
+      await admin.from("social_posts").update({ status: "published", media_id: id, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", m.week.mon);
+      await admin.from("marketing_events").insert({ name: "social_published", path: "/social/weekly", props: { platform: p, week: m.week.mon, slides: images.length } });
+      result[p] = { status: "published", media_id: id };
+    } catch (e) {
+      const msg = safe((e as Error).message);
+      await admin.from("social_posts").update({ status: "failed", error: msg, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", m.week.mon);
+      console.error("publish", p, msg);
+      result[p] = { status: "failed", error: msg };
+    }
+  }
+  console.log("social-publish", m.week.mon, JSON.stringify(result));
+  return result;
 }
 
 Deno.serve(async (req) => {
@@ -135,43 +156,24 @@ Deno.serve(async (req) => {
   if (!dry && !force && kst.getUTCDay() !== 1) return json({ code: "not_monday" });
 
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-  const d: Weekly | null = await fetch(`${SITE}/support/weekly.json`, { cache: "no-store" }).then((r) => r.ok ? r.json() : null).catch(() => null);
-  if (!d) return json({ code: "weekly_data_failed" }, 502);
-  if (!d.closing.length) return json({ code: "nothing_closing" });
-  const imageUrl = `${SITE}/support/weekly.jpg?v=${d.week.mon}`;
-  const cap = captions(d);
-  if (dry) return json({ ok: true, dry_run: true, image_url: imageUrl, captions: cap, configured: { instagram: !!Deno.env.get("INSTAGRAM_ACCESS_TOKEN"), threads: !!Deno.env.get("THREADS_ACCESS_TOKEN") } });
+  // 목록과 이미지를 같은 v 로 맞춰서 (그사이 공고가 바뀌어도 장수·내용이 어긋나지 않게)
+  const v = Date.now().toString(36);
+  const m: Manifest | null = await fetch(`${SITE}/social/weekly.json?v=${v}`).then((r) => r.ok ? r.json() : null).catch(() => null);
+  if (!m || !m.slides?.length) return json({ code: "manifest_failed" }, 502);
+  const images = m.slides.map((_, i) => `${SITE}/social/weekly/${i + 1}.jpg?v=${v}`);
+  if (dry) return json({ ok: true, dry_run: true, week: m.week, slides: m.slides, images, captions: m.captions, configured: { instagram: !!Deno.env.get("INSTAGRAM_ACCESS_TOKEN"), threads: !!Deno.env.get("THREADS_ACCESS_TOKEN") } });
 
-  // 이미지가 실제로 열리는지 먼저 (인스타는 JPEG 만)
-  const head = await fetch(imageUrl).catch(() => null);
-  if (!head || !head.ok || !(head.headers.get("content-type") || "").includes("image/jpeg")) return json({ code: "image_failed", status: head?.status }, 502);
-  await head.arrayBuffer().catch(() => {});
+  // 첫 장이 실제로 열리는지 먼저 (인스타는 JPEG 만). 이때 그려 둔 것이 캐시돼서 Meta 가 빨리 가져감
+  const first = await fetch(images[0]).catch(() => null);
+  if (!first || !first.ok || !(first.headers.get("content-type") || "").includes("image/jpeg")) return json({ code: "image_failed", status: first?.status }, 502);
+  await first.arrayBuffer().catch(() => {});
+  await Promise.all(images.slice(1).map((u) => fetch(u).then((r) => r.arrayBuffer()).catch(() => null))); // 나머지도 미리 그려 둠
 
-  const result: Record<string, unknown> = {};
-  for (const p of ["instagram", "threads"] as Platform[]) {
-    if (typeof b.only === "string" && b.only !== p) continue;
-    let acc;
-    try { acc = await account(admin, p); } catch (e) { result[p] = { status: "failed", error: safe((e as Error).message) }; continue; }
-    if (!acc) { result[p] = { status: "not_configured" }; continue; }
-    // 같은 주 한 번만: 기록을 먼저 잡음 (실패했던 주는 다시)
-    const { error: dup } = await admin.from("social_posts").insert({ platform: p, week: d.week.mon });
-    if (dup) {
-      const { data: prev } = await admin.from("social_posts").select("status").eq("platform", p).eq("week", d.week.mon).maybeSingle();
-      if (prev?.status === "published" && !force) { result[p] = { status: "already_posted" }; continue; }
-      if (prev?.status === "pending" && !force) { result[p] = { status: "in_progress" }; continue; }
-      await admin.from("social_posts").update({ status: "pending", error: null, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", d.week.mon);
-    }
-    try {
-      const id = await publish(p, acc, imageUrl, p === "instagram" ? cap.instagram : cap.threads);
-      await admin.from("social_posts").update({ status: "published", media_id: id, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", d.week.mon);
-      await admin.from("marketing_events").insert({ name: "social_published", path: "/support/weekly", props: { platform: p, week: d.week.mon, closing: d.closing.length } });
-      result[p] = { status: "published", media_id: id };
-    } catch (e) {
-      const msg = safe((e as Error).message);
-      await admin.from("social_posts").update({ status: "failed", error: msg, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", d.week.mon);
-      console.error("publish", p, msg);
-      result[p] = { status: "failed", error: msg };
-    }
-  }
-  return json({ ok: true, week: d.week.mon, result });
+  const only = typeof b.only === "string" ? b.only : null;
+  // 여러 장 올리는 데 1~2분 걸릴 수 있어 바로 답하고 뒤에서 처리 (cron 의 요청 시간 제한에 걸리지 않게)
+  const job = run(admin, m, images, only, force);
+  // deno-lint-ignore no-explicit-any
+  const rt = (globalThis as any).EdgeRuntime;
+  if (rt?.waitUntil) { rt.waitUntil(job); return json({ ok: true, accepted: true, week: m.week.mon, slides: m.slides.length }, 202); }
+  return json({ ok: true, week: m.week.mon, result: await job });
 });
