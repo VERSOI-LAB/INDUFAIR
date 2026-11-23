@@ -40,6 +40,8 @@ async function account(admin: SupabaseClient, p: Platform) {
     if (!token) return null;
     refreshedAt = new Date().toISOString();
   }
+  // 붙여 넣을 때 섞이기 쉬운 공백·줄바꿈·따옴표·"Bearer " 를 걷어 냄 (앞글자로 토큰 종류를 판단하므로)
+  token = token.replace(/\s+/g, "").replace(/^Bearer/i, "").replace(/^["']+|["']+$/g, "");
   // 인스타 토큰 종류: IG… = 인스타그램 로그인(graph.instagram.com), 그 밖(EAA… 시스템 사용자 등) = 통합 로그인(graph.facebook.com, 만료 없음)
   const fb = p === "instagram" && !token.startsWith("IG");
   const host = p === "threads" ? TH : fb ? FB : IG;
@@ -63,7 +65,9 @@ async function account(admin: SupabaseClient, p: Platform) {
         .then((x) => x.json()).catch(() => null);
       userId = (p === "instagram" ? me?.user_id || me?.id : me?.id) || null;
     }
-    if (!userId) throw new Error("계정 확인 실패" + (fb ? " (INSTAGRAM_USER_ID 비밀값에 인스타 계정 id 를 넣어 주세요)" : "") + ": " + safe(JSON.stringify(me?.error || me)));
+    // 토큰 종류를 알 수 있게 앞 3글자와 길이만 남김 (토큰 자체는 남기지 않음)
+    const hint = ` [토큰 ${token!.slice(0, 3)}… ${token!.length}자, ${fb ? "통합 로그인" : p === "instagram" ? "인스타그램 로그인" : "스레드"} 방식으로 확인]`;
+    if (!userId) throw new Error("계정 확인 실패" + hint + ": " + safe(JSON.stringify(me?.error || me)));
   }
   await admin.from("social_accounts").upsert({ platform: p, user_id: userId, access_token: token, token_refreshed_at: refreshedAt, updated_at: new Date().toISOString() });
   return { token: token!, userId, host };
