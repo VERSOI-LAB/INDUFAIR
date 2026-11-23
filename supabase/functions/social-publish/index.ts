@@ -42,6 +42,8 @@ async function account(admin: SupabaseClient, p: Platform) {
   }
   // 붙여 넣을 때 섞이기 쉬운 공백·줄바꿈·따옴표·"Bearer " 를 걷어 냄 (앞글자로 토큰 종류를 판단하므로)
   token = token.replace(/\s+/g, "").replace(/^Bearer/i, "").replace(/^["']+|["']+$/g, "");
+  // 토큰 칸에 계정 id(숫자)를 넣은 경우 — 흔한 실수라 바로 알려 줌
+  if (/^\d+$/.test(token)) throw new Error(`${p === "instagram" ? "INSTAGRAM_ACCESS_TOKEN" : "THREADS_ACCESS_TOKEN"} 비밀값에 토큰이 아니라 숫자 id(${token.length}자리)가 들어 있어요. 토큰(EAA… 또는 IG…/TH…)을 넣고, 인스타 계정 id 는 INSTAGRAM_USER_ID 에 넣어 주세요`);
   // 인스타 토큰 종류: IG… = 인스타그램 로그인(graph.instagram.com), 그 밖(EAA… 시스템 사용자 등) = 통합 로그인(graph.facebook.com, 만료 없음)
   const fb = p === "instagram" && !token.startsWith("IG");
   const host = p === "threads" ? TH : fb ? FB : IG;
@@ -129,8 +131,9 @@ async function run(admin: SupabaseClient, m: Manifest, images: string[], only: s
     try { acc = await account(admin, p); } catch (e) {
       const msg = safe((e as Error).message);
       console.error("account", p, msg);
-      // 계정 문제도 기록에 남김 (같은 주 기록이 없을 때만)
-      await admin.from("social_posts").upsert({ platform: p, week: m.week.mon, status: "failed", error: msg, updated_at: new Date().toISOString() }, { onConflict: "platform,week", ignoreDuplicates: true });
+      // 계정 문제도 기록에 남김 (이미 올린 주는 건드리지 않음)
+      const { error: dupA } = await admin.from("social_posts").insert({ platform: p, week: m.week.mon, status: "failed", error: msg });
+      if (dupA) await admin.from("social_posts").update({ status: "failed", error: msg, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", m.week.mon).neq("status", "published");
       result[p] = { status: "failed", error: msg }; return;
     }
     if (!acc) { console.log("not configured", p); result[p] = { status: "not_configured" }; return; }
