@@ -40,6 +40,10 @@ async function account(admin: SupabaseClient, p: Platform) {
     if (!token) return null;
     refreshedAt = new Date().toISOString();
   }
+  // 붙여 넣을 때 섞이기 쉬운 공백·줄바꿈·따옴표·"Bearer " 를 걷어 냄 (앞글자로 토큰 종류를 판단하므로)
+  token = token.replace(/\s+/g, "").replace(/^Bearer/i, "").replace(/^["']+|["']+$/g, "");
+  // 토큰 칸에 계정 id(숫자)를 넣은 경우 — 흔한 실수라 바로 알려 줌
+  if (/^\d+$/.test(token)) throw new Error(`${p === "instagram" ? "INSTAGRAM_ACCESS_TOKEN" : "THREADS_ACCESS_TOKEN"} 비밀값에 토큰이 아니라 숫자 id(${token.length}자리)가 들어 있어요. 토큰(EAA… 또는 IG…/TH…)을 넣고, 인스타 계정 id 는 INSTAGRAM_USER_ID 에 넣어 주세요`);
   // 인스타 토큰 종류: IG… = 인스타그램 로그인(graph.instagram.com), 그 밖(EAA… 시스템 사용자 등) = 통합 로그인(graph.facebook.com, 만료 없음)
   const fb = p === "instagram" && !token.startsWith("IG");
   const host = p === "threads" ? TH : fb ? FB : IG;
@@ -63,7 +67,9 @@ async function account(admin: SupabaseClient, p: Platform) {
         .then((x) => x.json()).catch(() => null);
       userId = (p === "instagram" ? me?.user_id || me?.id : me?.id) || null;
     }
-    if (!userId) throw new Error("계정 확인 실패" + (fb ? " (INSTAGRAM_USER_ID 비밀값에 인스타 계정 id 를 넣어 주세요)" : "") + ": " + safe(JSON.stringify(me?.error || me)));
+    // 토큰 종류를 알 수 있게 앞 3글자와 길이만 남김 (토큰 자체는 남기지 않음)
+    const hint = ` [토큰 ${token!.slice(0, 3)}… ${token!.length}자, ${fb ? "통합 로그인" : p === "instagram" ? "인스타그램 로그인" : "스레드"} 방식으로 확인]`;
+    if (!userId) throw new Error("계정 확인 실패" + hint + ": " + safe(JSON.stringify(me?.error || me)));
   }
   await admin.from("social_accounts").upsert({ platform: p, user_id: userId, access_token: token, token_refreshed_at: refreshedAt, updated_at: new Date().toISOString() });
   return { token: token!, userId, host };
@@ -75,14 +81,14 @@ async function post(url: string, params: Record<string, string>) {
   if (!r.ok || d.error) throw new Error(safe(d.error?.message || JSON.stringify(d)));
   return d;
 }
-// 컨테이너가 준비될 때까지 (최대 ~40초)
+// 컨테이너가 준비될 때까지 (최대 ~45초)
 async function waitReady(base: string, id: string, token: string) {
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 15; i++) {
     const s = await fetch(`${base}/${id}?fields=status_code,status&access_token=${encodeURIComponent(token)}`).then((x) => x.json()).catch(() => ({}));
     const st = s.status_code || s.status;
     if (st === "FINISHED" || st === "PUBLISHED") return;
     if (st === "ERROR" || st === "EXPIRED") throw new Error("미디어 준비 실패: " + safe(JSON.stringify(s)));
-    await sleep(5000);
+    await sleep(3000);
   }
 }
 
@@ -100,34 +106,49 @@ async function publish(p: Platform, acc: { token: string; userId: string; host: 
   if (images.length === 1) {
     id = await container(base, acc.userId, edge, { ...(ig ? {} : { media_type: "IMAGE" }), image_url: images[0], [text]: caption }, acc.token);
   } else { // 캐러셀: 장마다 컨테이너 → 묶음 컨테이너
-    const children: string[] = [];
-    for (const url of images.slice(0, 10)) {
-      children.push(await container(base, acc.userId, edge, { ...(ig ? {} : { media_type: "IMAGE" }), image_url: url, is_carousel_item: "true" }, acc.token));
-    }
+    // 함수 실행 시간 제한(약 150초) 안에 끝나도록 장마다 컨테이너를 동시에 만든다 (순서는 children 순서로 유지)
+    const children = await Promise.all(images.slice(0, 10).map((url) =>
+      container(base, acc.userId, edge, { ...(ig ? {} : { media_type: "IMAGE" }), image_url: url, is_carousel_item: "true" }, acc.token)));
+    console.log("carousel items ready", p, children.length);
     id = await container(base, acc.userId, edge, { media_type: "CAROUSEL", children: children.join(","), [text]: caption }, acc.token);
   }
   const m = await post(`${base}/${acc.userId}/${ig ? "media_publish" : "threads_publish"}`, { creation_id: id, access_token: acc.token });
   return m.id as string;
 }
 
-async function run(admin: SupabaseClient, m: Manifest, images: string[], only: string | null, force: boolean) {
+// 시간 제한에 걸려 함수가 끝나 버리면 기록이 '진행 중'으로 남으므로, 그 전에 실패로 적어 둔다
+const DEADLINE_MS = 135_000;
+function withDeadline<T>(job: Promise<T>, started: number): Promise<T> {
+  const left = DEADLINE_MS - (Date.now() - started);
+  return Promise.race([job, new Promise<T>((_, rej) => setTimeout(() => rej(new Error("시간 초과: 함수 실행 시간 안에 끝내지 못했어요")), Math.max(left, 5000)))]);
+}
+
+async function run(admin: SupabaseClient, m: Manifest, images: string[], only: string | null, force: boolean, started: number) {
   const result: Record<string, unknown> = {};
-  for (const p of ["instagram", "threads"] as Platform[]) {
-    if (only && only !== p) continue;
+  // 인스타·스레드를 동시에 (한쪽이 오래 걸려도 다른 쪽이 시간 제한에 걸리지 않게)
+  await Promise.all((["instagram", "threads"] as Platform[]).filter((p) => !only || only === p).map(async (p) => {
     let acc;
-    try { acc = await account(admin, p); } catch (e) { result[p] = { status: "failed", error: safe((e as Error).message) }; continue; }
-    if (!acc) { result[p] = { status: "not_configured" }; continue; }
+    try { acc = await account(admin, p); } catch (e) {
+      const msg = safe((e as Error).message);
+      console.error("account", p, msg);
+      // 계정 문제도 기록에 남김 (이미 올린 주는 건드리지 않음)
+      const { error: dupA } = await admin.from("social_posts").insert({ platform: p, week: m.week.mon, status: "failed", error: msg });
+      if (dupA) await admin.from("social_posts").update({ status: "failed", error: msg, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", m.week.mon).neq("status", "published");
+      result[p] = { status: "failed", error: msg }; return;
+    }
+    if (!acc) { console.log("not configured", p); result[p] = { status: "not_configured" }; return; }
     // 같은 주 한 번만: 기록을 먼저 잡음 (실패했던 주는 다시)
     const { error: dup } = await admin.from("social_posts").insert({ platform: p, week: m.week.mon });
     if (dup) {
       const { data: prev } = await admin.from("social_posts").select("status,updated_at").eq("platform", p).eq("week", m.week.mon).maybeSingle();
-      if (prev?.status === "published" && !force) { result[p] = { status: "already_posted" }; continue; }
+      if (prev?.status === "published" && !force) { result[p] = { status: "already_posted" }; return; }
       // 진행 중 표시가 10분 넘게 남아 있으면 멈춘 것으로 보고 다시
-      if (prev?.status === "pending" && !force && Date.now() - Date.parse(prev.updated_at) < 10 * 60_000) { result[p] = { status: "in_progress" }; continue; }
+      if (prev?.status === "pending" && !force && Date.now() - Date.parse(prev.updated_at) < 10 * 60_000) { result[p] = { status: "in_progress" }; return; }
       await admin.from("social_posts").update({ status: "pending", error: null, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", m.week.mon);
     }
     try {
-      const id = await publish(p, acc, images, p === "instagram" ? m.captions.instagram : m.captions.threads);
+      console.log("publish start", p, images.length);
+      const id = await withDeadline(publish(p, acc, images, p === "instagram" ? m.captions.instagram : m.captions.threads), started);
       await admin.from("social_posts").update({ status: "published", media_id: id, updated_at: new Date().toISOString() }).eq("platform", p).eq("week", m.week.mon);
       await admin.from("marketing_events").insert({ name: "social_published", path: "/social/weekly", props: { platform: p, week: m.week.mon, slides: images.length } });
       result[p] = { status: "published", media_id: id };
@@ -137,7 +158,7 @@ async function run(admin: SupabaseClient, m: Manifest, images: string[], only: s
       console.error("publish", p, msg);
       result[p] = { status: "failed", error: msg };
     }
-  }
+  }));
   console.log("social-publish", m.week.mon, JSON.stringify(result));
   return result;
 }
@@ -150,6 +171,7 @@ Deno.serve(async (req) => {
   if (!dry && b.run !== true) return json({ code: "bad_request" }, 400);
   const isAdmin = (req.headers.get("Authorization") || "") === "Bearer " + Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   if ((dry || force || b.only) && !isAdmin) return json({ code: "forbidden" }, 403);
+  const started = Date.now();
   const kst = new Date(Date.now() + 9 * 3600_000);
   if (!dry && !force && kst.getUTCDay() !== 1) return json({ code: "not_monday" });
 
@@ -169,7 +191,7 @@ Deno.serve(async (req) => {
 
   const only = typeof b.only === "string" ? b.only : null;
   // 여러 장 올리는 데 1~2분 걸릴 수 있어 바로 답하고 뒤에서 처리 (cron 의 요청 시간 제한에 걸리지 않게)
-  const job = run(admin, m, images, only, force);
+  const job = run(admin, m, images, only, force, started);
   // deno-lint-ignore no-explicit-any
   const rt = (globalThis as any).EdgeRuntime;
   if (rt?.waitUntil) { rt.waitUntil(job); return json({ ok: true, accepted: true, week: m.week.mon, slides: m.slides.length }, 202); }
