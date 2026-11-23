@@ -11,10 +11,13 @@ var W = 1080, H = 1350;
 var FONT = 'NanumSquareRound';
 var C = { yellow: '#FFB800', yellowSoft: '#FFF6DD', navy: '#191F28', text: '#191F28', sub: '#4E5968', hint: '#8B95A1', line: '#E5E8EB', card: '#F7F8FA', red: '#E5443A', redSoft: '#FFF0EF', blue: '#2F5BD3', blueSoft: '#EAF2FE', white: '#FFFFFF' };
 // 공장·제조 사장님에게 맞는 공고 고르기 (전체 건수는 그대로, 슬라이드에 크게 보여 줄 것만 고름)
-var MFG = /제조|공장|스마트공장|소부장|뿌리|부품|소재|자동화|금형|용접|주조|도금|열처리|산업단지|생산성|공정\s*개선|설비\s*(투자|개선|교체)|기계|장비/;
-var OFF = /농업|농가|농기계|농산|농촌|귀농|어업|어로|어촌|수산|축산|임산|산림|양식|비료|음식점|외식|관광|숙박|문화예술|체육|반려|미용/;
-var FIT = /중소기업|중견기업|소상공인|수출|기업|창업|R&D|기술개발|인력|고용|판로|마케팅|컨설팅/;
-function score(p) { var t = p.title || ''; if (OFF.test(t)) return -1; return (MFG.test(t) ? 3 : 0) + (FIT.test(t) ? 1 : 0); }
+//   3 제조·설비  2 산업·기술(수출·R&D·인증·시설 등)  1.5 분류만 기술·수출  1 일반 기업 지원  0 그 밖(소상공인 생활 지원 등)  -1 농림수산·외식·관광 등 업종이 다른 것
+var MFG = /제조|공장|스마트공장|소부장|뿌리|부품|소재|자동화|금형|용접|주조|도금|열처리|산업단지|산단|생산성|공정\s*개선|설비|기계|장비|로봇|공작|가공|금속|화학|섬유|플라스틱|사출|전자부품|반도체|자동차부품|조선|기자재/;
+var IND = /산업|기술개발|기술|R&D|연구개발|시제품|인증|특허|지식재산|수출|해외|무역|물류|디지털\s*전환|DX|AI|스마트|에너지|탄소|안전|ESG|시설|생산|품질|판로|바이어|전시회|박람회|혁신|공급망/;
+var OFF = /농업|농가|농기계|농산|농촌|농식품|귀농|어업|어로|어촌|수산|축산|가축|임산|산림|양식|비료|퇴비|과수|감귤|원예|화훼|음식점|외식|모범음식|식품위생|관광|숙박|문화예술|공연|체육|반려|미용|전통시장|상점가|골목상권|청년몰|카드수수료|임대료/;
+var FIT = /중소기업|중견기업|기업|창업|인력|고용|마케팅|컨설팅|경영/;
+function score(p) { var t = p.title || ''; if (OFF.test(t)) return -1; return MFG.test(t) ? 3 : IND.test(t) ? 2 : /^(기술|수출)$/.test(p.category || '') ? 1.5 : FIT.test(t) ? 1 : 0; }
+var industrial = function (p) { return score(p) >= 1.5; }; // 제목에 산업 낱말이 있거나 분류가 기술·수출
 function pick(list, n, min) { // 맞는 것 먼저(점수 → 원래 순서). min 개보다 적으면 나머지에서 채움
   var good = list.map(function (p, i) { return { p: p, s: score(p), i: i }; }).filter(function (x) { return x.s >= 0; })
     .sort(function (a, b) { return b.s - a.s || a.i - b.i; }).map(function (x) { return x.p; }).slice(0, n);
@@ -51,11 +54,14 @@ async function collect() {
     .map(function (p) { return { p: p, k: rnd() }; }).sort(function (a, b) { return a.k - b.k; }).map(function (x) { return x.p; });
   var seen = {}, picks = [];
   prods.forEach(function (p) { var key = shortTitle(p.title).split(/\s+/)[0]; if (picks.length < 4 && !seen[key]) { seen[key] = 1; picks.push(p); } });
-  // 마감 임박 TOP3: 사흘 안 마감 중 맞는 것 먼저 (없으면 일주일 안)
-  var soon = w.closing.filter(function (p) { return p.apply_end && (Date.parse(p.apply_end) - Date.parse(w.today)) / 86400000 <= 3; });
-  var top = pick(soon.length >= 3 ? soon : w.closing, 3);
-  if (top.filter(function (p) { return score(p) >= 0; }).length < 3) top = pick(w.closing, 3);
+  // 마감 임박 TOP3: 이번 주 마감 중 산업·제조 관련을 마감 빠른 순으로 먼저, 모자라면 그다음으로 맞는 것
+  // 제목이 산업·제조인 것 먼저, 같은 수준이면 마감 빠른 순
+  var ind = w.closing.map(function (p, i) { return { p: p, s: score(p), i: i }; }).filter(function (x) { return x.s >= 1.5; })
+    .sort(function (a, b) { return b.s - a.s || a.i - b.i; }).map(function (x) { return x.p; });
+  var top = ind.slice(0, 3);
+  if (top.length < 3) top = top.concat(pick(w.closing.filter(function (p) { return top.indexOf(p) < 0; }), 3 - top.length));
   return { today: w.today, week: w.week, wk: wk, closing: w.closing, top: top, fresh: w.fresh, freshPick: pick(w.fresh, 5, 3),
+    closingInd: ind.length, freshInd: w.fresh.filter(industrial).length,
     freshMfg: w.fresh.filter(function (p) { return score(p) >= 3; }).length,
     picks: picks, productCount: (got[0] || []).length, rfq: got[1] || [] };
 }
@@ -63,10 +69,11 @@ async function collect() {
 // ---- 표지 문구 (매주 돌아가며, 숫자가 있을 때만) ----
 function hooks(d) {
   var list = [];
-  if (d.closing.length >= 3) list.push({ key: 'closing', lines: ['사장님, 이번 주', '지원금 ' + d.closing.length + '건이', '마감됩니다'], hi: 1, sub: '놓치기 전에 넘겨서 확인하세요', sticker: 'sell' });
-  if (d.fresh.length >= 5) list.push({ key: 'fresh', lines: ['이번 주 새로 나온', '지원사업만', d.fresh.length + '건'], hi: 2, sub: '우리 회사에 맞는 건 몇 개일까?', sticker: 'curious' });
+  // 숫자는 산업·제조 관련 공고 기준 (공장·제조 사장님이 볼 것만)
+  if (d.closingInd >= 3) list.push({ key: 'closing', lines: ['사장님, 이번 주', '산업 지원금 ' + d.closingInd + '건이', '마감됩니다'], hi: 1, sub: '놓치기 전에 넘겨서 확인하세요', sticker: 'sell' });
+  if (d.freshInd >= 5) list.push({ key: 'fresh', lines: ['이번 주 새로 나온', '제조·산업 지원사업', d.freshInd + '건'], hi: 2, sub: '우리 공장에 맞는 건 몇 개일까?', sticker: 'curious' });
   if (d.picks.length >= 2) list.push({ key: 'idle', lines: ['공장 구석', '안 쓰는 장비,', '돈이 됩니다'], hi: 2, sub: '사진 한 장이면 판매 등록 끝', sticker: 'carry' });
-  if (d.closing.length >= 3) list.push({ key: 'top3', lines: ['모르면 손해 보는', '이번 주 지원금', 'TOP 3'], hi: 2, sub: '마감 임박 순으로 골랐어요', sticker: 'checking' });
+  if (d.closingInd >= 1) list.push({ key: 'top3', lines: ['모르면 손해 보는', '이번 주 산업 지원금', 'TOP 3'], hi: 2, sub: '제조·산업 공고를 마감 순으로 골랐어요', sticker: 'checking' });
   if (!list.length) list.push({ key: 'basic', lines: ['팔 땐 판다,', '살 땐 산다'], hi: 1, sub: '공장 사장님을 위한 산업용품 직거래', sticker: 'hello' });
   return list[d.wk % list.length];
 }
@@ -91,7 +98,7 @@ function captions(d, h, slides) {
     '📢 ' + hookLine,
     '👉 넘겨서 보세요 (' + slides.length + '장)',
     '',
-    top.length ? '이번 주 마감 임박 지원금' : '', top.join('\n'),
+    top.length ? '이번 주 마감 임박 산업·제조 지원금' : '', top.join('\n'),
     top.length ? '' : '',
     d.picks.length >= 2 ? '🛒 이번 주 판다산다 픽: ' + d.picks.slice(0, 3).map(function (p) { return shortTitle(p.title).split(/\s+/).slice(0, 3).join(' '); }).join(', ') : '',
     '🏭 공장에 잠든 장비, 사진 한 장으로 판매 등록하세요 (등록 무료)',
@@ -222,7 +229,7 @@ var DRAW = {
   top3: async function (x, d, h, n, total) {
     x.fillStyle = C.white; x.fillRect(0, 0, W, H); header(x, n, total);
     chip(x, '마감 임박', 72, 140, C.redSoft, C.red);
-    x.font = F(800, 64); x.fillStyle = C.text; x.fillText('이번 주 꼭 볼 지원금 TOP 3', 72, 280);
+    x.font = F(800, 64); x.fillStyle = C.text; x.fillText('이번 주 꼭 볼 산업 지원금', 72, 280);
     await drawSticker(x, 'checking', W - 150, 190, 200, null);
     var y = 330;
     d.top.forEach(function (p, i) {
@@ -236,18 +243,18 @@ var DRAW = {
       x.font = F(400, 28); x.fillStyle = C.hint; x.fillText(fit(x, [p.category, label(p.region), p.agency].filter(Boolean).join(' · '), W - 330), 190, y + 246);
       y += 294;
     });
-    footer(x, '이번 주 마감 ' + d.closing.length + '건 전체는 프로필 링크에서');
+    footer(x, d.closingInd >= d.top.length ? '이번 주 마감 산업·제조 공고 ' + d.closingInd + '건 · 전체는 프로필 링크에서' : '이번 주 마감 공고 ' + d.closing.length + '건 전체는 프로필 링크에서');
   },
   fresh: async function (x, d, h, n, total) {
     x.fillStyle = C.white; x.fillRect(0, 0, W, H); header(x, n, total);
     chip(x, 'NEW', 72, 140, C.blueSoft, C.blue);
     x.font = F(800, 64); x.fillStyle = C.text; x.fillText('새로 나온 지원사업', 72, 280);
-    x.font = F(700, 38); x.fillStyle = C.sub; x.fillText('지난 일주일 ' + d.fresh.length + '건' + (d.freshMfg ? ' · 제조·설비 관련 ' + d.freshMfg + '건' : ''), 72, 340);
+    x.font = F(700, 38); x.fillStyle = C.sub; x.fillText('지난 일주일 산업·제조 관련 ' + d.freshInd + '건' + (d.freshMfg ? ' (제조·설비 ' + d.freshMfg + '건)' : ''), 72, 340);
     await drawSticker(x, 'searching', W - 160, 220, 230, null);
     var y = 400, COL = 200, tx = 72 + COL, tw = W - 72 - tx;
     d.freshPick.forEach(function (p, i) {
       if (y > 1060) return;
-      var mfg = score(p) >= 3, tag = mfg ? '제조·설비' : (p.category || '지원');
+      var sc = score(p), mfg = sc >= 3, tag = mfg ? '제조·설비' : sc >= 1.5 ? '산업·기술' : (p.category || '지원');
       if (i) { x.strokeStyle = C.line; x.lineWidth = 2; x.beginPath(); x.moveTo(72, y); x.lineTo(W - 72, y); x.stroke(); }
       x.font = F(800, 26); var cw = Math.min(COL - 24, x.measureText(tag).width + 32);
       x.fillStyle = mfg ? C.yellowSoft : C.card; rr(x, 72, y + 30, cw, 46, 23); x.fill();
