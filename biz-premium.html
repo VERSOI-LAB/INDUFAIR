@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="light">
-<title>업체 프리미엄 - 판다산다</title>
+<title>업체 플랜 - 판다산다</title>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -12,37 +12,84 @@
 <meta name="theme-color" content="#FFFFFF">
 <link rel="stylesheet" href="/app.css">
 <style>
-  .who{margin-top:20px;font-size:15px;color:var(--sub);}
-  .who b{display:block;font-size:22px;font-weight:800;color:var(--text);margin-top:2px;}
-  .plan{margin-top:16px;padding:22px 20px;border-radius:20px;background:var(--primary-light);}
-  .plan .price{font-size:30px;font-weight:800;line-height:1.2;}
-  .plan .price small{font-size:16px;font-weight:600;color:var(--sub);margin-left:4px;}
-  .plan ul{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:12px;}
-  .plan li{display:flex;gap:10px;align-items:flex-start;font-size:16px;line-height:1.45;}
-  .plan li b{display:block;font-weight:800;}
-  .plan li span{color:var(--sub);font-size:14px;}
-  .plan li .ck{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;margin-top:1px;}
-  .free{margin-top:12px;padding:14px 16px;border-radius:14px;background:var(--bg);font-size:14px;color:var(--sub);line-height:1.5;}
-  .notes{margin:20px 0 0;padding-left:18px;font-size:14px;color:var(--sub);line-height:1.7;}
-  .refund{margin-top:20px;padding:16px 18px;border-radius:14px;background:var(--bg);font-size:14px;color:var(--sub);line-height:1.7;}
+  .sec{margin-top:28px;}
+  .sec > h2{font-size:20px;font-weight:800;}
+  .sec > p.d{font-size:14px;color:var(--sub);margin-top:4px;line-height:1.5;}
+  .msg{margin-top:16px;padding:14px 16px;border-radius:14px;font-size:15px;font-weight:600;line-height:1.5;}
+  .msg.ok{background:#F4FBF6;border:1px solid #D4F0DC;}
+  .msg.err{background:#FFF0EF;color:var(--danger);}
+  /* 지금 상태 */
+  .now{margin-top:20px;padding:20px;border-radius:20px;background:var(--primary-light);}
+  .now .tag{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:14px;font-size:14px;font-weight:800;background:var(--text);color:#fff;}
+  .now .tag.free{background:#888;}
+  .now .who{font-size:22px;font-weight:800;margin-top:10px;line-height:1.35;word-break:keep-all;}
+  .now .until{font-size:15px;color:var(--sub);margin-top:4px;}
+  .meters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px;}
+  .meter{padding:12px 14px;border-radius:14px;background:var(--surface);}
+  .meter span{display:block;font-size:13px;color:var(--sub);}
+  .meter b{display:block;font-size:20px;font-weight:800;margin-top:2px;}
+  .meter b small{font-size:13px;font-weight:600;color:var(--hint);margin-left:2px;}
+  /* 입금 안내 */
+  .pay{margin-top:16px;padding:20px;border-radius:20px;border:2px solid var(--primary);}
+  .pay h3{font-size:18px;font-weight:800;}
+  .pay .sub{font-size:14px;color:var(--sub);margin-top:2px;}
+  .pay dl{margin:16px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 10px;align-items:center;font-size:16px;}
+  .pay dt{color:var(--sub);font-size:15px;}
+  .pay dd{margin:0;font-weight:800;word-break:break-all;}
+  .pay dd.big{font-size:20px;}
+  .pay .cp{height:32px;padding:0 10px;border-radius:10px;border:1.5px solid var(--line);font-size:13px;font-weight:700;background:var(--surface);white-space:nowrap;}
+  .pay .how{margin:14px 0 0;padding-left:18px;font-size:14px;color:var(--sub);line-height:1.7;}
+  .pay .how b{color:var(--text);}
+  .pay .row{display:flex;gap:8px;margin-top:14px;}
+  .pay .row .btn{flex:1;}
+  /* 플랜 */
+  .months{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:14px;padding:4px;border-radius:14px;background:#F2F2F2;}
+  .months button{height:44px;border-radius:10px;font-size:15px;font-weight:700;color:var(--sub);}
+  .months button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .months button em{font-style:normal;font-size:12px;color:#D97706;margin-left:2px;}
+  .plans{display:grid;gap:12px;margin-top:12px;}
+  .plan{padding:20px;border-radius:20px;border:1.5px solid var(--line);}
+  .plan.best{border:2px solid var(--primary);}
+  .plan .top{display:flex;align-items:center;gap:8px;}
+  .plan .top b{font-size:20px;font-weight:800;}
+  .plan .top .rec{font-size:12px;font-weight:800;padding:3px 8px;border-radius:8px;background:var(--primary);}
+  .plan .top .cur{font-size:12px;font-weight:800;padding:3px 8px;border-radius:8px;background:var(--text);color:#fff;}
+  .plan .price{margin-top:10px;font-size:26px;font-weight:800;line-height:1.2;}
+  .plan .price small{font-size:14px;font-weight:600;color:var(--sub);margin-left:4px;}
+  .plan .price s{font-size:15px;color:var(--hint);font-weight:600;margin-left:6px;}
+  .plan .vat{font-size:14px;color:var(--sub);margin-top:4px;}
+  .plan ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px;}
+  .plan li{display:flex;gap:8px;font-size:15px;line-height:1.45;}
+  .plan li::before{content:'✓';flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--primary-light);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .plan li.no{color:var(--hint);}
+  .plan li.no::before{content:'–';background:#F2F2F2;}
+  .plan .btn{margin-top:16px;}
+  /* 이용권 */
+  .packs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px;}
+  .pack{padding:16px;border-radius:16px;border:1.5px solid var(--line);display:flex;flex-direction:column;}
+  .pack b{font-size:17px;font-weight:800;}
+  .pack span{font-size:13px;color:var(--sub);margin-top:4px;line-height:1.45;flex:1;}
+  .pack .pr{font-size:18px;font-weight:800;margin-top:10px;}
+  .pack .pr small{display:block;font-size:12px;font-weight:600;color:var(--sub);}
+  .pack .btn{margin-top:10px;}
+  /* 주문 내역 */
+  .orders{margin-top:12px;display:grid;gap:8px;}
+  .order{display:flex;justify-content:space-between;gap:12px;padding:14px 16px;border-radius:14px;background:var(--bg);font-size:15px;}
+  .order .l{min-width:0;}
+  .order .l b{display:block;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .order .l span{font-size:13px;color:var(--sub);}
+  .order .r{text-align:right;flex-shrink:0;}
+  .order .r b{display:block;font-weight:800;}
+  .order .r span{font-size:13px;color:var(--sub);}
+  .st{display:inline-block;font-size:12px;font-weight:800;padding:2px 8px;border-radius:8px;background:#E8E8E8;}
+  .st.paid{background:#E6F7EC;color:#167A3A;}
+  .st.pending{background:var(--primary-light);color:#8A5A00;}
+  .refund{margin-top:28px;padding:16px 18px;border-radius:14px;background:var(--bg);font-size:14px;color:var(--sub);line-height:1.7;}
   .refund b{display:block;font-size:15px;color:var(--text);margin-bottom:4px;}
   .refund ul{margin:0;padding-left:18px;}
   .refund a{display:inline-block;margin-top:6px;text-decoration:underline;}
-  .agree{display:flex;gap:10px;align-items:flex-start;margin-top:20px;font-size:15px;font-weight:600;line-height:1.5;cursor:pointer;}
-  .agree input{width:22px;height:22px;flex-shrink:0;margin:1px 0 0;accent-color:var(--primary-press);}
-  .state{margin-top:16px;padding:20px;border-radius:20px;border:1.5px solid var(--line);}
-  .state .tag{display:inline-flex;align-items:center;height:26px;padding:0 10px;border-radius:13px;font-size:13px;font-weight:800;background:var(--success);color:#fff;}
-  .state .tag.off{background:#888;}
-  .state .tag.warn{background:var(--danger);}
-  .state dl{margin:14px 0 0;display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:16px;}
-  .state dt{color:var(--sub);}
-  .state dd{margin:0;font-weight:700;text-align:right;}
-  .acts{display:grid;gap:8px;margin-top:24px;}
-  /* 추천 물건 고르기 (프리미엄 이용 중일 때) */
-  .picks{margin-top:24px;}
-  .picks h2{font-size:19px;font-weight:800;display:flex;align-items:baseline;gap:8px;}
-  .picks h2 em{font-style:normal;font-size:15px;color:var(--hint);font-weight:700;}
-  .picks > p{font-size:14px;color:var(--sub);margin-top:4px;line-height:1.5;}
+  /* 추천 물건 고르기 (노출 혜택이 있을 때) */
+  .picks h2 em{font-style:normal;font-size:15px;color:var(--hint);font-weight:700;margin-left:6px;}
   .pick-list{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:12px;max-height:420px;overflow-y:auto;}
   .pick-item{display:flex;align-items:center;gap:12px;width:100%;padding:8px 12px 8px 8px;border:1.5px solid var(--line);border-radius:14px;text-align:left;background:var(--surface);}
   .pick-item .th{width:52px;height:52px;border-radius:10px;overflow:hidden;background:#F2F2F2;flex-shrink:0;}
@@ -54,16 +101,14 @@
   .pick-item.on{border-color:var(--primary);background:var(--primary-light);}
   .pick-item.on .ck{background:var(--primary);border-color:var(--primary);color:var(--text);}
   .pick-item:disabled{opacity:.6;}
-  .msg{margin-top:16px;padding:14px 16px;border-radius:14px;font-size:15px;font-weight:600;line-height:1.5;}
-  .msg.ok{background:#F4FBF6;border:1px solid #D4F0DC;}
-  .msg.err{background:#FFF0EF;color:var(--danger);}
+  @media (max-width:360px){ .packs{grid-template-columns:minmax(0,1fr);} .pay dl{grid-template-columns:auto minmax(0,1fr);} .pay .cp{grid-column:2;justify-self:start;} }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="topbar">
     <a class="back" href="/my-biz" aria-label="업체 소개 관리로 돌아가기"><i data-icon="back" data-size="24"></i></a>
-    <h1>업체 프리미엄</h1>
+    <h1>업체 플랜</h1>
   </header>
   <main class="page" id="main">
     <div class="skeleton" style="height:220px;margin-top:20px;border-radius:20px"></div>
@@ -79,64 +124,60 @@
   var $ = function (id) { return document.getElementById(id); };
   var main = $('main');
   var bizId = PS.param('id');
-  var PRICE = 10000;
-  var biz = null, sub = null, notice = null; // notice: { ok, text }
   var MAX_PICKS = 4;
-  var myProducts = [], picks = {}, picksReady = false; // 추천 물건: 내 판매중 물건과 고른 것 { productId: 1 }
+  var TIER = { free: '무료', pro: '프로', biz: '비즈' };
+  var me = null, products = [], settings = null, biz = null, notice = null, months = 1, busy = false;
+  var myProducts = [], picks = {}, picksReady = false;
 
-  function day(iso) {
-    var d = new Date(iso);
-    return d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate();
-  }
+  var money = function (n) { return Number(n || 0).toLocaleString('ko-KR') + '원'; };
+  var vat = function (n) { return n + Math.floor(n / 10); };
+  function day(iso) { var d = new Date(iso); return d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(); }
+  function prod(code) { return products.filter(function (p) { return p.code === code; })[0]; }
 
-  // 서버(Edge Function biz-billing) 호출
-  async function call(body) {
-    var token = await PS.accessToken();
-    var res = await fetch(PS.FUNCTIONS_URL + '/biz-billing', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify(body)
-    });
-    var d = await res.json().catch(function () { return {}; });
-    return { ok: res.ok && d.ok, data: d };
-  }
-
-  async function loadSub() {
-    var r = await sb.from('biz_subscriptions').select('status,amount,card_label,period_end,next_charge_at,canceled_at').eq('business_id', bizId).maybeSingle();
-    sub = r.error ? null : r.data; // 표가 아직 없으면(준비 전) 구독 없음으로
+  async function load() {
+    var r = await sb.rpc('my_billing');
+    if (r.error || !r.data || r.data.error) { me = null; return; }
+    me = r.data;
+    biz = (me.businesses || []).filter(function (b) { return b.id === bizId; })[0] || (me.businesses || [])[0] || null;
+    if (biz) bizId = biz.id;
   }
 
   PS.ready.then(async function (user) {
     if (!user) return PS.goLogin();
-    var r = bizId ? await sb.from('businesses').select('id,name,owner_id,status,premium_until').eq('id', bizId).maybeSingle() : { data: null };
-    biz = r.data;
-    if (!biz || biz.owner_id !== user.id || biz.status === 'deleted') {
-      main.innerHTML = '<div class="empty">' + PS.sticker('sorry', 120) + '<b>업체를 찾을 수 없어요</b><div style="margin-top:20px"><a class="btn" href="/my-biz">업체 소개 관리로</a></div></div>';
-      return;
-    }
-    if (!PS.param('authKey')) PS.track('premium_view', { business_id: bizId, is_premium: !!(biz.premium_until && Date.parse(biz.premium_until) > Date.now()) });
-
-    // 토스 카드 등록 창에서 돌아왔을 때
-    var authKey = PS.param('authKey'), customerKey = PS.param('customerKey');
-    if (PS.param('fail')) notice = { ok: false, text: PS.param('message') || '카드 등록을 마치지 못했어요. 돈은 빠져나가지 않았어요.' };
-    if (authKey && customerKey) {
-      main.innerHTML = '<div class="empty" style="padding-top:60px"><div class="skeleton" style="width:120px;height:120px;border-radius:50%;margin:0 auto 16px"></div><b>결제를 확인하고 있어요</b>창을 닫지 말고 잠시만 기다려 주세요</div>';
-      var res = await call({ action: 'subscribe', businessId: bizId, authKey: authKey, customerKey: customerKey });
-      if (res.ok) PS.track('premium_purchase', { business_id: bizId, amount: res.data.charged === false ? 0 : PRICE });
-      if (res.ok) notice = { ok: true, text: res.data.charged === false ? '프리미엄을 다시 시작했어요. 다음 결제일부터 청구돼요.' : '결제가 끝났어요! 지금부터 프리미엄이 적용돼요.' };
-      else notice = { ok: false, text: res.data.code === 'not_configured' ? '결제가 아직 준비 중이에요. 곧 열릴 거예요!' : (res.data.message || '결제를 마치지 못했어요. 돈이 빠져나갔다면 고객센터로 알려 주세요.') };
-    }
-    if (authKey || PS.param('fail')) history.replaceState(null, '', location.pathname + '?id=' + encodeURIComponent(bizId)); // 새로고침해도 다시 결제되지 않게
-
-    await loadSub();
-    await loadPicks();
+    var rs = await Promise.all([
+      sb.from('billing_products').select('*').eq('active', true).order('sort'),
+      sb.from('billing_settings').select('*').eq('id', 1).maybeSingle(),
+      load()
+    ]);
+    products = rs[0].data || []; settings = rs[1].data;
+    if (!me) { main.innerHTML = '<div class="empty">' + PS.sticker('working', 120) + '<b>업체 플랜을 준비하고 있어요</b>조금만 기다려 주세요</div>'; return; }
+    PS.track('premium_view', { business_id: bizId, tier: me.tier });
+    if (biz) await loadPicks();
     render();
+    watchPending();
   });
 
-  // 추천 물건: 산다 화면 '추천순' 맨 앞에 보일 내 물건 (업체당 최대 4개)
+  // 입금 기다리는 주문이 있으면 화면을 보는 동안 30초마다 확인 (자동 확인은 10분 간격)
+  var pollTimer = null;
+  function watchPending() {
+    clearInterval(pollTimer);
+    if (!pendingOrders().length) return;
+    pollTimer = setInterval(async function () {
+      if (document.hidden) return;
+      var before = pendingOrders().map(function (o) { return o.id; });
+      await load();
+      var paid = (me.orders || []).filter(function (o) { return before.indexOf(o.id) >= 0 && o.status === 'paid'; });
+      if (paid.length) { notice = { ok: true, text: '입금을 확인했어요! ' + paid[0].item_name + ' 적용을 시작했어요. 세금계산서는 메일로 보내 드려요.' }; render(); watchPending(); }
+    }, 30000);
+  }
+  function pendingOrders() {
+    return (me.orders || []).filter(function (o) { return o.status === 'pending' && Date.parse(o.expires_at) > Date.now(); });
+  }
+
+  // ---- 추천 물건 (노출 혜택이 있는 동안) ----
   async function loadPicks() {
     var fr = await sb.from('biz_featured').select('product_id').eq('business_id', bizId);
-    if (fr.error) { picksReady = false; return; } // 표가 아직 없으면(준비 전) 고르기 영역을 숨김
+    if (fr.error) { picksReady = false; return; }
     picks = {};
     (fr.data || []).forEach(function (x) { picks[x.product_id] = 1; });
     var pr = await sb.from('products').select('id,title,price,product_images(url,sort_order)')
@@ -146,17 +187,16 @@
   }
   function picksHtml() {
     var n = Object.keys(picks).length;
-    // 고른 물건을 위로
     var list = myProducts.slice().sort(function (a, b) { return (picks[b.id] ? 1 : 0) - (picks[a.id] ? 1 : 0); });
-    return '<h2>추천순에 올릴 물건 <em>' + n + ' / ' + MAX_PICKS + '</em></h2>' +
-      '<p>고른 물건은 산다 화면의 "추천순" 맨 앞에 보여요. 내가 올린 판매중 물건 중 최대 ' + MAX_PICKS + '개까지 고를 수 있어요.</p>' +
+    return '<h2>추천순에 올릴 물건<em>' + n + ' / ' + MAX_PICKS + '</em></h2>' +
+      '<p class="d">고른 물건은 산다 화면의 "추천순" 맨 앞에 보여요. 판매중 물건 중 최대 ' + MAX_PICKS + '개까지 고를 수 있어요.</p>' +
       (list.length ? '<div class="pick-list">' + list.map(function (p) {
         var img = PS.firstImage(p);
         return '<button type="button" class="pick-item' + (picks[p.id] ? ' on' : '') + '" data-pick="' + PS.esc(p.id) + '" aria-pressed="' + !!picks[p.id] + '">' +
           '<span class="th">' + (img ? '<img src="' + PS.esc(img) + '" alt="" loading="lazy">' : '') + '</span>' +
           '<span class="tx"><b>' + PS.esc(p.title) + '</b><span>' + PS.won(p.price) + '</span></span><span class="ck" aria-hidden="true">✓</span></button>';
       }).join('') + '</div>'
-        : '<p style="margin-top:12px">아직 판매중인 물건이 없어요. <a href="/sell" style="text-decoration:underline">물건 올리기</a></p>');
+        : '<p class="d" style="margin-top:12px">아직 판매중인 물건이 없어요. <a href="/sell" style="text-decoration:underline">물건 올리기</a></p>');
   }
   async function togglePick(btn) {
     var id = btn.dataset.pick, on = !picks[id];
@@ -166,122 +206,174 @@
     btn.disabled = false;
     if (r.error || r.data !== 'ok') {
       PS.toast(r.data === 'full' ? '추천 물건은 ' + MAX_PICKS + '개까지 고를 수 있어요'
-        : r.data === 'not_premium' ? '프리미엄 이용 중일 때만 고를 수 있어요' : '바꾸지 못했어요. 잠시 후 다시 해 주세요');
+        : r.data === 'not_premium' ? '프로·비즈 플랜일 때만 고를 수 있어요' : '바꾸지 못했어요. 잠시 후 다시 해 주세요');
       return;
     }
     if (on) picks[id] = 1; else delete picks[id];
     $('picks').innerHTML = picksHtml();
   }
 
+  // ---- 화면 ----
+  function meter(label, u, unit) {
+    if (!u) return '';
+    var v = u.left < 0 ? '무제한' : u.left + '<small>/ ' + u.limit + unit + '</small>';
+    return '<div class="meter"><span>' + label + '</span><b>' + v + '</b></div>';
+  }
+
+  function nowHtml() {
+    var t = me.tier, paidUntil = biz && biz.plan_until, prem = biz && biz.premium_until;
+    var until = t !== 'free' && paidUntil ? TIER[biz.plan_tier] + ' 플랜 ' + day(paidUntil) + '까지'
+      : t !== 'free' && me.trial_until ? '🎁 가입 첫 달 무료 · ' + day(me.trial_until) + '까지'
+      : t !== 'free' && prem ? '🎁 친구 초대 보상 · ' + day(prem) + '까지'
+      : '견적은 30일에 3건까지 무료예요';
+    return '<div class="now"><span class="tag' + (t === 'free' ? ' free' : '') + '">' + TIER[t] + ' 플랜 이용 중</span>' +
+      '<div class="who">' + (biz ? PS.esc(biz.name) : '업체 소개를 먼저 올려 주세요') + '</div>' +
+      '<div class="until">' + until + '</div>' +
+      (biz ? '<div class="meters">' +
+        meter('견적 (30일)', me.usage.buy, '건') + meter('매입 제안 (30일)', me.usage.sell, '건') +
+        '<div class="meter"><span>견적권</span><b>' + me.credits.quote + '<small>장</small></b></div>' +
+        '<div class="meter"><span>매입 제안권</span><b>' + me.credits.offer + '<small>장</small></b></div>' +
+      '</div>' : '<a class="btn" href="/biz/new" style="margin-top:16px">업체 소개 올리기 (무료)</a>') +
+      '</div>';
+  }
+
+  function payHtml(o) {
+    var s = settings || {};
+    var ready = s.bank_name && s.account_no;
+    return '<div class="pay" data-order="' + o.id + '"><h3>입금하면 바로 시작돼요</h3><div class="sub">' + PS.esc(o.item_name) + ' · ' + day(o.expires_at) + '까지 입금</div>' +
+      (ready ? '<dl>' +
+        '<dt>입금 계좌</dt><dd>' + PS.esc(s.bank_name) + ' ' + PS.esc(s.account_no) + '<br><span style="font-weight:600;color:var(--sub)">예금주 ' + PS.esc(s.account_holder) + '</span></dd><button class="cp" type="button" data-copy="' + PS.esc(s.account_no.replace(/[^0-9]/g, '')) + '">복사</button>' +
+        '<dt>입금액</dt><dd class="big">' + money(o.total_amount) + '</dd><button class="cp" type="button" data-copy="' + o.total_amount + '">복사</button>' +
+        '<dt>입금자명</dt><dd class="big">' + PS.esc(o.depositor_code) + '</dd><button class="cp" type="button" data-copy="' + PS.esc(o.depositor_code) + '">복사</button>' +
+      '</dl>' : '<p class="msg err">입금 계좌를 준비하고 있어요. 고객센터로 문의해 주세요.</p>') +
+      '<ul class="how">' +
+        '<li>입금자명을 <b>' + PS.esc(o.depositor_code) + '</b>(으)로 바꿔서 보내 주세요. 이름 그대로 보내도 상호(' + PS.esc(o.buyer_corp_name) + ')와 금액이 맞으면 확인돼요.</li>' +
+        '<li>입금하면 <b>10분 안에</b> 자동으로 확인하고 바로 적용해요 (밤 12시~아침 7시 입금은 아침에 확인).</li>' +
+        '<li>공급가액 ' + money(o.supply_amount) + ' + 부가세 ' + money(o.vat_amount) + '. 세금계산서는 <b>' + PS.esc(o.buyer_email || '이메일 없음') + '</b>(으)로 자동 발행돼요.</li>' +
+      '</ul>' +
+      '<div class="row"><button class="btn white small" type="button" data-email="' + o.id + '">계산서 받을 메일 바꾸기</button><button class="btn white small" type="button" data-cancel="' + o.id + '">주문 취소</button></div>' +
+      '</div>';
+  }
+
+  function planCard(tier) {
+    var cur = me.tier === tier && biz && biz.plan_tier === tier;
+    if (tier === 'free') {
+      return '<div class="plan"><div class="top"><b>무료</b>' + (me.tier === 'free' ? '<span class="cur">지금</span>' : '') + '</div>' +
+        '<div class="price">0원</div><ul>' +
+        '<li>업체 소개 올리기 · 하루 한 번 직접 끌어올리기</li><li>구해요 견적 30일에 3건</li><li class="no">설비 처분 매입 제안 (매입 제안권으로)</li><li class="no">맨 앞 고정 · 매일 자동 끌어올리기</li></ul></div>';
+    }
+    var p = prod(tier + '_' + months), p1 = prod(tier + '_1');
+    if (!p || !p1) return '';
+    var perMonth = Math.round(p.supply_amount / p.months);
+    var feats = tier === 'pro'
+      ? ['구해요 견적 30일에 <b>30건</b>', '설비 처분 매입 제안 30일에 <b>3건</b>', '동네 업체 맨 앞 고정 · 매일 자동 끌어올리기', '추천 물건 ' + MAX_PICKS + '개를 산다 화면 추천순 맨 앞에']
+      : ['구해요 견적 <b>무제한</b>', '설비 처분 매입 제안 30일에 <b>10건</b>', '동네 업체 맨 앞 고정 · 매일 자동 끌어올리기', '추천 물건 ' + MAX_PICKS + '개를 산다 화면 추천순 맨 앞에'];
+    var other = biz && biz.plan_tier && biz.plan_tier !== tier;
+    return '<div class="plan' + (tier === 'pro' ? ' best' : '') + '"><div class="top"><b>' + TIER[tier] + '</b>' +
+        (tier === 'pro' ? '<span class="rec">추천</span>' : '') + (cur ? '<span class="cur">이용 중</span>' : '') + '</div>' +
+      '<div class="price">월 ' + money(perMonth) + '<small>부가세 별도</small>' + (p.list_supply > p.supply_amount ? '<s>월 ' + money(p1.supply_amount) + '</s>' : '') + '</div>' +
+      '<div class="vat">' + (p.months > 1 ? p.months + '개월 ' : '') + '입금액 <b>' + money(vat(p.supply_amount)) + '</b> (부가세 포함)</div>' +
+      '<ul>' + feats.map(function (f) { return '<li><span>' + f + '</span></li>'; }).join('') + '</ul>' +
+      '<button class="btn' + (tier === 'pro' ? '' : ' white') + '" type="button" data-buy="' + p.code + '"' + (!biz || other ? ' disabled' : '') + '>' +
+        (other ? TIER[biz.plan_tier] + ' 플랜이 끝난 뒤 바꿀 수 있어요' : cur ? p.months + '개월 연장하기' : TIER[tier] + ' ' + p.months + '개월 신청하기') + '</button></div>';
+  }
+
+  function packCard(code, desc) {
+    var p = prod(code);
+    if (!p) return '';
+    return '<div class="pack"><b>' + PS.esc(p.name) + '</b><span>' + desc + '</span>' +
+      '<div class="pr">' + money(vat(p.supply_amount)) + '<small>공급가액 ' + money(p.supply_amount) + ' + 부가세</small></div>' +
+      '<button class="btn small white" type="button" data-buy="' + p.code + '"' + (biz ? '' : ' disabled') + '>사기</button></div>';
+  }
+
+  function ordersHtml() {
+    var list = (me.orders || []).filter(function (o) { return o.status !== 'pending' || Date.parse(o.expires_at) <= Date.now(); });
+    if (!list.length) return '';
+    var ST = { paid: ['결제 완료', 'paid'], refunded: ['환불', ''], canceled: ['취소', ''], expired: ['입금 기한 지남', ''], pending: ['입금 대기', 'pending'] };
+    var INV = { issued: '세금계산서 발행', pending: '세금계산서 발행 준비 중', failed: '세금계산서 확인 중', canceled: '' };
+    return '<section class="sec"><h2>결제 내역</h2><div class="orders">' + list.map(function (o) {
+      var st = ST[o.status] || [o.status, ''];
+      return '<div class="order"><div class="l"><b>' + PS.esc(o.item_name) + '</b><span>' + day(o.paid_at || o.created_at) + ' · ' + PS.esc(o.order_no) + '</span></div>' +
+        '<div class="r"><b>' + money(o.total_amount) + '</b><span class="st ' + st[1] + '">' + st[0] + '</span>' +
+        (o.status === 'paid' || o.status === 'refunded' ? '<span style="display:block;margin-top:2px">' + (INV[o.invoice_status] || '') + '</span>' : '') +
+        (o.refund_amount ? '<span style="display:block">환불 ' + money(o.refund_amount) + '</span>' : '') + '</div></div>';
+    }).join('') + '</div></section>';
+  }
+
   function render() {
-    var now = Date.now();
-    var live = sub && new Date(sub.period_end).getTime() > now && sub.status !== 'ended'; // 지금 프리미엄 이용 중
-    var html = '<p class="who">프리미엄을 적용할 업체<b>' + PS.esc(biz.name) + '</b></p>';
+    var html = '';
     if (notice) html += '<div class="msg ' + (notice.ok ? 'ok' : 'err') + '" role="status">' + PS.esc(notice.text) + '</div>';
+    html += nowHtml();
+    html += pendingOrders().map(payHtml).join('');
+    if (biz && biz.premium_until && picksReady) html += '<section class="sec picks" id="picks">' + picksHtml() + '</section>';
+    if (!me.verified) html += '<div class="msg err">세금계산서를 보내 드리려면 사업자 인증이 필요해요. <a href="/biz/verify" style="text-decoration:underline">사업자 인증하기</a></div>';
 
-    if (sub && (live || sub.status === 'past_due')) {
-      var tag = sub.status === 'active' ? '<span class="tag">이용 중</span>'
-        : sub.status === 'canceled' ? '<span class="tag off">해지함</span>' : '<span class="tag warn">결제 실패</span>';
-      html += '<div class="state">' + tag + '<dl>' +
-        '<dt>요금</dt><dd>월 ' + sub.amount.toLocaleString('ko-KR') + '원</dd>' +
-        (sub.card_label ? '<dt>결제 카드</dt><dd>' + PS.esc(sub.card_label) + '</dd>' : '') +
-        (sub.status === 'active' ? '<dt>다음 결제일</dt><dd>' + day(sub.next_charge_at || sub.period_end) + '</dd>'
-          : sub.status === 'canceled' ? '<dt>이용 기간</dt><dd>' + day(sub.period_end) + '까지</dd>'
-          : '<dt>다시 결제</dt><dd>' + (sub.next_charge_at ? day(sub.next_charge_at) + ' 자동으로 다시 시도' : '-') + '</dd>') +
-        '</dl></div>';
-      if (sub.status === 'past_due') html += '<div class="msg err">카드 결제가 되지 않았어요. 카드를 다시 등록하면 바로 결제하고 프리미엄을 이어가요.</div>';
-    }
+    html += '<section class="sec"><h2>플랜</h2><p class="d">표시된 월 요금은 부가세 별도예요. 입금은 부가세 10%를 더한 금액으로 해 주세요. 자동 결제는 없고, 기간이 끝나면 무료 플랜으로 돌아가요.</p>' +
+      '<div class="months" role="tablist" aria-label="기간">' + [1, 3, 12].map(function (m) {
+        return '<button type="button" role="tab" data-months="' + m + '" class="' + (m === months ? 'on' : '') + '" aria-selected="' + (m === months) + '">' + m + '개월' + (m === 12 ? '<em>2달 무료</em>' : '') + '</button>';
+      }).join('') + '</div>' +
+      '<div class="plans">' + planCard('pro') + planCard('biz') + planCard('free') + '</div></section>';
 
-    // 결제 없이 친구 초대 보상으로 프리미엄인 경우
-    var bonus = !live && biz.premium_until && new Date(biz.premium_until).getTime() > now;
-    if (bonus) html += '<div class="msg ok" role="status">🎁 친구 초대 보상으로 <b>' + day(biz.premium_until) + '까지</b> 프리미엄이 적용되고 있어요. 결제는 필요 없어요.</div>';
+    html += '<section class="sec"><h2>이용권</h2><p class="d">플랜 한도를 다 쓴 뒤에 1장씩 써요. 쓴 만큼만 줄고, 기간 제한이 없어요.</p><div class="packs">' +
+      packCard('quote_10', '구해요 요청에 견적을 보낼 때 1장') + packCard('offer_3', '설비 처분 요청에 매입 제안을 보낼 때 1장') + '</div></section>';
 
-    // 프리미엄이 적용되는 동안 추천 물건 고르기
-    if ((live || bonus) && picksReady) html += '<section class="picks" id="picks">' + picksHtml() + '</section>';
+    html += ordersHtml();
 
-    html += '<div class="plan"><div class="price">월 ' + PRICE.toLocaleString('ko-KR') + '원<small>부가세 포함</small></div><ul>' +
-      '<li><span class="ck">✓</span><div><b>매일 자동 끌어올리기</b><span>직접 누르지 않아도 매일 맨 위로 올라가요</span></div></li>' +
-      '<li><span class="ck">✓</span><div><b>동네 업체 맨 앞 고정</b><span>산다 화면의 "이웃들이 찾는 동네 업체"에서 항상 먼저 보여요</span></div></li>' +
-      '<li><span class="ck">✓</span><div><b>추천 물건 ' + MAX_PICKS + '개</b><span>내 물건 중 ' + MAX_PICKS + '개를 골라 산다 화면의 "추천순" 맨 앞에 올려요</span></div></li></ul></div>' +
-      '<p class="free">프리미엄이 아니어도 업체 소개 관리에서 <b>하루에 한 번</b> 직접 끌어올릴 수 있어요.</p>';
-
-    // 해지·환불 기준 (이용약관 제9조의2 와 같은 내용)
-    var refund = '<div class="refund"><b>해지·환불 안내</b><ul>' +
-      '<li>자동결제를 해지해도 결제한 날부터 1달 동안은 프리미엄이 그대로 유지돼요.</li>' +
-      '<li>그 1달이 지나면 프리미엄과 자동결제가 모두 끝나요.</li>' +
-      '<li>이미 결제한 이용 기간의 요금은 따로 환불되지 않아요.</li></ul>' +
-      '<a href="/terms">이용약관 보기</a></div>';
-
-    if (sub && sub.status === 'active' && live) {
-      html += '<ul class="notes"><li>해지해도 ' + day(sub.period_end) + '까지는 프리미엄이 그대로 적용돼요.</li><li>해지하면 다음 결제일부터 청구되지 않아요.</li></ul>' + refund +
-        '<div class="acts"><button class="btn white" id="cancelBtn">프리미엄 해지하기</button></div>';
-    } else {
-      var again = sub && sub.status === 'canceled' && live;
-      html += '<ul class="notes">' +
-        (again ? '<li>이미 결제한 ' + day(sub.period_end) + '까지는 추가 결제가 없고, 그날부터 매월 자동으로 결제돼요.</li>'
-          : '<li>카드를 등록하면 오늘 ' + PRICE.toLocaleString('ko-KR') + '원이 결제되고, 매월 같은 날 자동으로 결제돼요.</li>') +
-        '<li>언제든 이 화면이나 업체 소개 관리에서 바로 해지할 수 있어요.</li>' +
-        '</ul>' + refund +
-        '<label class="agree"><input type="checkbox" id="agree"><span>매월 ' + PRICE.toLocaleString('ko-KR') + '원이 등록한 카드로 자동 결제되는 것에 동의해요</span></label>' +
-        '<div class="acts"><button class="btn" id="startBtn" disabled>' + (again ? '카드 등록하고 다시 시작하기' : sub && sub.status === 'past_due' ? '카드 다시 등록하기' : '카드 등록하고 시작하기') + '</button></div>';
-    }
+    // 결제·환불 기준 (이용약관 제17조와 같은 내용)
+    html += '<div class="refund"><b>결제·환불 안내</b><ul>' +
+      '<li>계좌이체로만 받아요. 입금이 확인되면 바로 적용되고, 세금계산서(영수)는 사업자 인증 정보로 자동 발행돼요.</li>' +
+      '<li>결제 후 7일 안이고 견적·매입 제안을 하나도 보내지 않았다면 전액 환불해 드려요.</li>' +
+      '<li>그 뒤 플랜은 이미 시작한 달을 1개월 요금으로 빼고 남은 금액을, 이용권은 쓰지 않은 장수만큼 돌려드려요.</li>' +
+      '<li>환불은 고객센터로 요청해 주세요. 환불분은 수정세금계산서로 처리돼요.</li></ul>' +
+      '<a href="/terms#c6">이용약관 보기</a></div>';
     main.innerHTML = html;
-
-    var agree = $('agree'), start = $('startBtn'), cancel = $('cancelBtn');
-    if (agree) agree.addEventListener('change', function () { start.disabled = !agree.checked; });
-    if (start) start.addEventListener('click', registerCard);
-    if (cancel) cancel.addEventListener('click', cancelSub);
-    var pk = $('picks');
-    if (pk) pk.addEventListener('click', function (e) { var b = e.target.closest('[data-pick]'); if (b && !b.disabled) togglePick(b); });
   }
 
-  var tossLoaded = null;
-  function loadToss() {
-    if (window.TossPayments) return Promise.resolve();
-    if (tossLoaded) return tossLoaded;
-    tossLoaded = new Promise(function (resolve, reject) {
-      var s = document.createElement('script');
-      s.src = 'https://js.tosspayments.com/v2/standard';
-      s.onload = resolve;
-      s.onerror = function () { tossLoaded = null; reject(); };
-      document.head.appendChild(s);
-    });
-    return tossLoaded;
-  }
-
-  // 토스 카드 등록 창 → 성공하면 이 화면으로 authKey 를 들고 돌아옴
-  async function registerCard() {
-    // 자동결제는 API 개별 연동 키(ck)와 자동결제 계약이 있어야 함. 결제위젯 키만 있을 때는 아직 안내만
-    if (!PS.TOSS_CLIENT_KEY || PS.isWidgetPay()) { PS.toast('결제는 곧 열려요! 조금만 기다려 주세요'); return; }
-    var btn = $('startBtn');
-    btn.disabled = true;
-    try {
-      await loadToss();
-      var payment = window.TossPayments(PS.TOSS_CLIENT_KEY).payment({ customerKey: PS.user.id });
-      var here = location.origin + '/biz-premium?id=' + encodeURIComponent(bizId);
-      await payment.requestBillingAuth({
-        method: 'CARD',
-        successUrl: here,
-        failUrl: here + '&fail=1',
-        customerEmail: PS.user.email || undefined,
-        customerName: (PS.profile && PS.profile.name) || undefined
-      });
-    } catch (e) {
-      console.error(e);
-      btn.disabled = false;
-      if (!e || e.code !== 'USER_CANCEL') PS.toast('카드 등록 창을 열지 못했어요');
+  main.addEventListener('click', async function (e) {
+    var t;
+    if ((t = e.target.closest('[data-months]'))) { months = Number(t.dataset.months); render(); return; }
+    if ((t = e.target.closest('[data-pick]')) && !t.disabled) { togglePick(t); return; }
+    if ((t = e.target.closest('[data-copy]'))) {
+      try { await navigator.clipboard.writeText(t.dataset.copy); PS.toast('복사했어요'); } catch (_) { PS.toast(t.dataset.copy); }
+      return;
     }
-  }
+    if ((t = e.target.closest('[data-buy]')) && !t.disabled && !busy) { buy(t.dataset.buy, t); return; }
+    if ((t = e.target.closest('[data-cancel]'))) {
+      if (!confirm('이 주문을 취소할까요? 이미 입금했다면 취소하지 말고 기다려 주세요.')) return;
+      var r = await sb.rpc('cancel_billing_order', { p_id: t.dataset.cancel });
+      if (r.data === 'ok') { notice = { ok: true, text: '주문을 취소했어요.' }; await load(); render(); watchPending(); }
+      else PS.toast('취소하지 못했어요. 잠시 후 다시 해 주세요');
+      return;
+    }
+    if ((t = e.target.closest('[data-email]'))) {
+      var o = (me.orders || []).filter(function (x) { return x.id === t.dataset.email; })[0];
+      var v = prompt('세금계산서를 받을 이메일', (o && o.buyer_email) || '');
+      if (!v) return;
+      var r2 = await sb.rpc('set_order_email', { p_id: t.dataset.email, p_email: v.trim() });
+      if (r2.data === 'ok') { await load(); render(); PS.toast('바꿨어요'); }
+      else PS.toast(r2.data === 'bad_input' ? '이메일을 다시 확인해 주세요' : '바꾸지 못했어요');
+    }
+  });
 
-  async function cancelSub() {
-    if (!confirm('프리미엄을 해지할까요?\n' + day(sub.period_end) + '까지는 그대로 이용하고, 그 뒤로는 결제되지 않아요.')) return;
-    var btn = $('cancelBtn');
-    btn.disabled = true;
-    var res = await call({ action: 'cancel', businessId: bizId });
-    if (!res.ok) { btn.disabled = false; PS.toast('해지하지 못했어요. 잠시 후 다시 해 주세요'); return; }
-    notice = { ok: true, text: '해지했어요. ' + day(sub.period_end) + '까지는 프리미엄이 그대로 적용돼요.' };
-    await loadSub();
-    render();
+  async function buy(code, btn) {
+    var p = prod(code);
+    if (!p) return;
+    if (!me.verified) { PS.toast('사업자 인증을 먼저 해 주세요'); return; }
+    if (!confirm(p.name + '\n입금액 ' + money(vat(p.supply_amount)) + ' (부가세 포함)\n\n주문하면 입금 계좌와 입금자명을 알려 드려요.')) return;
+    busy = true; btn.disabled = true;
+    var r = await sb.rpc('create_billing_order', { p_product: code, p_business_id: p.kind === 'plan' ? bizId : null });
+    busy = false; btn.disabled = false;
+    var d = r.data || {};
+    if (r.error || d.error) {
+      PS.toast({ need_verify: '사업자 인증을 먼저 해 주세요', need_biz: '업체 소개를 먼저 올려 주세요', too_many: '입금 기다리는 주문이 3개예요. 먼저 입금하거나 취소해 주세요',
+        other_tier: '지금 쓰는 플랜이 끝난 뒤에 바꿀 수 있어요. 바로 바꾸려면 고객센터로 알려 주세요' }[d.error] || '주문하지 못했어요. 잠시 후 다시 해 주세요');
+      return;
+    }
+    PS.track('billing_order', { product: code, amount: d.order.total_amount, existing: !!d.existing });
+    notice = { ok: true, text: d.existing ? '이미 주문한 내용이 있어요. 아래 안내대로 입금해 주세요.' : '주문했어요. 아래 계좌로 입금하면 바로 시작돼요.' };
+    await load(); render(); watchPending();
+    var el = document.querySelector('[data-order="' + d.order.id + '"]');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 })();
 </script>

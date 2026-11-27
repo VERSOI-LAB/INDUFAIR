@@ -22,6 +22,9 @@
 | `/unsubscribe` | `unsubscribe.html` | 이메일 수신거부 (메일의 링크, 로그인 없이) |
 | `/events`, `/events/:id` | `support.html` | 교육·세미나·전시회·설명회 (기업마당 행사정보, 같은 함수가 같이 수집) |
 | `/pay-seller` | `pay-seller.html` | 안전결제 판매자 신청 (사업자 인증 + 통신판매업 신고 확인) |
+| `/biz-premium?id=` | `biz-premium.html` | 업체 플랜(무료·프로·비즈)·이용권 주문, 입금 안내, 결제 내역, 추천 물건 고르기 |
+| `/admin/billing` | `billing-admin.html` | 운영자: 입금 확인·연결, 세금계산서 재발행, 환불, 광고 등록·계약 주문, 광고 문의 |
+| `/ads` | `ads.html` | 광고 안내 + 문의 양식 |
 
 ### 지원사업·교육 행사 자동 수집
 1. 기업마당(bizinfo.go.kr) > 정책정보 개방 API 에서 인증키 발급 (지원사업·행사정보 같은 키로 동작)
@@ -43,6 +46,37 @@
 ```bash
 python3 dev-server.py   # http://localhost:8743 (vercel.json 의 clean URL 흉내)
 ```
+
+## 유료 서비스 (업체 플랜 · 이용권 · 광고) — 계좌이체 + 팝빌
+토스페이먼츠는 채팅이 있는 서비스를 받지 않아서 쓰지 않는다. 회원 간 거래 대금은 계속 다루지 않고, 회사 자신의 서비스 이용요금만 회사 통장으로 받는다.
+`supabase/migrations/20261127_billing.sql` + Edge Function `bank-sync` (Verify JWT 끔) + 화면 `/biz-premium`(업체 플랜), `/admin/billing`(운영자), `/ads`(광고 안내·문의).
+
+| 상품 | 공급가액 (부가세 별도) | 입금액 | 내용 |
+|---|---|---|---|
+| 프로 1·3·12개월 | 3만 / 9만 / 30만 원 | +10% | 노출 혜택(매일 자동 끌어올리기·동네 업체 맨 앞·추천 물건 4개) + 30일 견적 30건·매입 제안 3건 |
+| 비즈 1·3·12개월 | 9만 / 27만 / 90만 원 | +10% | 노출 혜택 + 견적 무제한·매입 제안 10건 |
+| 견적권 10장 | 2만 원 | 22,000원 | 플랜 한도를 다 쓴 뒤 견적 1건에 1장 |
+| 매입 제안권 3장 | 3만 원 | 33,000원 | 플랜 한도를 다 쓴 뒤 매입 제안 1건에 1장 |
+| 광고 | 계약마다 | +10% | 지원사업 목록·상세, 교육·행사 목록, 30초 진단 결과에 '광고' 표시로 1개 |
+
+- **무료**: 견적 30일 3건, 매입 제안 0건. **가입 후 30일은 프로 혜택 무료** (그 기간에 만든 업체는 노출 혜택도 자동)
+- 가격 바꾸기: `update billing_products set supply_amount = 35000, list_supply = 35000 where code = 'pro_1';` (화면은 바로 따라감. 이용약관 제17조·`/policy`·`/biz-premium` 안내 문구·`journeys` 문구의 숫자도 같이). 한도는 `plan_limit()` 함수
+- 흐름: 업체가 주문 → 화면에 계좌·입금액·입금자명 코드(`PS0000`) → `bank-sync` 가 한국시간 07~23시 10분마다 팝빌로 통장 입금 내역을 가져와 맞춤 → 플랜 기간·이용권 적용 + 웹 푸시 → 전자세금계산서(영수) 자동 발행
+- 자동으로 맞추는 기준: ① 입금자명에 코드가 있고 금액이 같음 (기한 지난 지 7일 안 된 주문도) ② 같은 금액으로 기다리는 주문이 하나뿐이고 입금자명이 그 주문의 상호와 같음. 나머지는 `/admin/billing` 의 '확인 필요'에서 주문을 골라 연결
+- 환불: `/admin/billing` › 결제·환불 › 환불 처리 → 기준 금액이 미리 채워짐 (약관 제17조 ⑦) → 고객 계좌로 **직접 이체한 뒤** 기록 → 혜택이 줄고 수정세금계산서(전액: 계약의 해제, 일부: 공급가액 변동) 자동 발행. 발행 전 전액 환불이면 계산서를 내지 않음
+- 다른 플랜으로 바꾸기는 지금 플랜이 끝난 뒤 (바로 바꾸려면 운영자가 환불 + 새 주문으로)
+- 광고: `/admin/billing` › 광고 › 새 광고 만들기 (draft) → 계약 주문 만들기 (광고주 사업자 정보) → 입금 안내가 복사됨 → 입금되면 광고가 자동으로 켜지고 계산서 발행. 기간이 끝나면 자동으로 꺼짐. 정책자금 대행·대출 중개 등은 받지 않음 (`/ads`)
+
+### 처음 설정 (한 번)
+1. 마이그레이션 실행 (토스 자동결제 cron 을 끄고, 남은 구독은 해지 처리. 이미 결제한 프리미엄 기간은 그대로)
+2. 입금 계좌: `update billing_settings set bank_name = '기업은행', account_no = '000-000000-00-000', account_holder = '베르소이' where id = 1;`
+3. 팝빌(popbill.com) 가입 → 연동 신청(LinkID·SecretKey 발급) → 공동인증서 등록(세금계산서) → 계좌조회에 회사 계좌 등록·정액제 신청. 함수 서버는 고정 IP 가 없으니 연동 IP 제한은 끈다
+4. Edge Function 비밀값: `POPBILL_LINK_ID`, `POPBILL_SECRET_KEY`, `POPBILL_IS_TEST`(처음엔 `true` = 테스트베드, 운영은 `false`), `POPBILL_CORP_NUM`(우리 사업자번호), `POPBILL_BANK_CODE`(기관코드 4자리: 기업 0003·국민 0004·농협 0011·우리 0020·신한 0088·하나 0081), `POPBILL_BANK_ACCOUNT`(숫자만), `COMPANY_NAME`, `COMPANY_CEO`, `COMPANY_ADDR`, `COMPANY_BIZ_TYPE`(업태), `COMPANY_BIZ_CLASS`(종목), `COMPANY_EMAIL`. 웹 푸시는 채팅 알림과 같은 VAPID 값
+5. `supabase functions deploy bank-sync --no-verify-jwt`
+6. 확인: 테스트베드 상태에서 `/admin/billing` › 테스트 입금 (주문의 입금액·코드) → 플랜 적용·계산서 발행까지 되는지. 팝빌 키 없이도 테스트 입금으로 주문 처리까지는 됨 (계산서만 '연동 전'으로 남음)
+7. 이용약관·개인정보처리방침은 **2026-12-04 시행**으로 적어 두었다. 시행 7일 전에 화면에 알리고, 시행일에 배포(또는 날짜를 실제 배포일 + 7일로 고쳐서)
+
+옛 `biz-billing`(토스 자동결제) 함수는 더 이상 부르지 않는다. 배포된 함수는 `supabase functions delete biz-billing` 으로 지워도 된다.
 
 ## 안전결제 판매자
 토스페이먼츠 정책상 비사업자 개인의 판매 대금 정산(C2C)은 안 되므로, 안전결제(구매하기·카드결제·정산)는 **승인된 사업자 판매자**만 쓸 수 있다.
@@ -83,7 +117,8 @@ python3 dev-server.py   # http://localhost:8743 (vercel.json 의 clean URL 흉�
 | `biz_create` | 업체 소개 처음 등록 |
 | `alert_subscribe` | 키워드 알림 / 지원사업 마감 알림 켬 |
 | `share` | 공유 (물건·업체·지원사업·이야기·초대) |
-| `premium_view`, `premium_purchase` | 업체 프리미엄 화면 / 결제 |
+| `premium_view`, `billing_order` | 업체 플랜 화면 보기 / 플랜·이용권 주문 (입금 확인은 서버가 `billing_paid`) |
+| `ads_view`, `ads_inquiry`, `ad_view`, `ad_click` | 광고 안내 화면 / 광고 문의 / 광고 노출 / 광고 클릭 |
 | `purchase` | 안전결제 완료 |
 | `diagnose_view`, `diagnose_complete` | 진단 화면 보기(어디서 왔는지 `from`) / 결과 보기 (고른 답) |
 | `diagnose_unlock_click`, `diagnose_saved` | 익명이 "무료로 전체 보기" 누름 / 로그인 후 답 저장 |
@@ -125,12 +160,12 @@ select v.props->>'variant' as variant,
 | 메시지 | 받는 사람 | 종류 | 채널 |
 |---|---|---|---|
 | `consent_reconfirm` | 광고 수신 동의 후 23개월 (2년 재확인, 정보통신망법 제50조 제8항) | 법정 안내 | 푸시·이메일 |
-| `premium_expiring` | 프리미엄이 3일 안에 끝나는데 자동결제 없음 | 정보성 | 푸시·이메일 |
+| `premium_expiring` | 플랜·첫 달 무료·초대 보상이 3일 안에 끝나는데 연장 주문 없음 | 정보성 | 푸시·이메일 |
 | `product_stale_7` | 물건 올린 지 7일, 채팅 0건 | 정보성 | 푸시·이메일 |
 | `product_stale_3` | 물건 올린 지 3일, 채팅 0건 | 정보성 | 푸시 |
 | `welcome_diagnose` | 가입 다음 날, 진단·마감 알림 안 함 | 정보성 | 푸시·이메일 |
 | `biz_weekly` | 업체 주인, 월요일 (지난주 조회수) | 정보성 | 푸시·이메일 |
-| `biz_upsell` | 프리미엄 아닌 업체 조회 30회 이상, 30일에 한 번 | **광고성** | 동의한 채널만 |
+| `biz_upsell` | 플랜 없는 업체 조회 30회 이상, 30일에 한 번 | **광고성** | 동의한 채널만 |
 | `dormant_30` | 마지막 방문 30~37일 전 (그동안 새 지원사업 수) | **광고성** | 동의한 채널만 |
 
 규칙
@@ -191,12 +226,12 @@ select s.props->>'journey' as journey, count(*) as sent,
 `rfq.html` (`/rfq` 목록 · `/rfq/new` 올리기 · `/rfq/:id` 상세 · `/rfq?mine=1` 내 요청·보낸 견적) + `supabase/migrations/20261122_rfq.sql` + Edge Function `rfq-push` (Verify JWT 끔).
 
 - 구매자: 찾는 물건을 올림 (14일 열림, 동시에 5건·하루 10건까지, 제목·내용에 전화번호 쓰면 막음)
-- 업체(운영 중인 업체 소개가 있는 사람): 견적 1건씩. **무료 30일 3건, 프리미엄 업체가 있으면 무제한** → 다 쓰면 프리미엄 안내
+- 업체(운영 중인 업체 소개가 있는 사람): 견적 1건씩. **30일 기준 무료 3건 · 프로 30건 · 비즈 무제한**, 다 쓰면 견적권 1장씩 → 그것도 없으면 플랜·이용권 안내 (아래 "유료 서비스")
 - 구매자 정보는 공개되지 않음. 견적은 구매자와 낸 업체만 보고, **채팅은 구매자만 시작** (첫 메시지에 어떤 요청인지 자동으로 남김)
 - 알림: 새 요청 → 같은 분류·지역 업체 주인 30명까지(같은 분류+지역 → 같은 분류 → 같은 지역 순), 새 견적 → 구매자. 웹 푸시
 - 들어오는 곳: 홈 띠, 산다에서 검색 결과가 없을 때 "'○○' 구해요 올리고 견적 받기", 마이 › 구해요·받은 견적, 업체 소개 관리
 - 쓰기는 모두 함수(`create_rfq`, `submit_quote`, `close_rfq`)로만, 읽기는 `rfq_view`·`my_rfqs`
-- 측정: `rfq_create`, `rfq_quote`, `rfq_chat`, `rfq_close`, `rfq_quota_full`(무료 다 씀 → 프리미엄 안내 봄), `rfq_cta`, 서버 `rfq_notified`
+- 측정: `rfq_create`, `rfq_quote`, `rfq_chat`, `rfq_close`, `rfq_quota_full`(한도·이용권 다 씀 → 플랜 안내 봄), `rfq_cta`, 서버 `rfq_notified`
 
 운영 확인:
 ```sql
@@ -208,7 +243,7 @@ select category, count(*) as requests, count(*) filter (where quote_count = 0) a
 설정: 마이그레이션 실행 → `supabase functions deploy rfq-push --no-verify-jwt`
 
 ### 설비 일괄 처분 (처분해요)
-구해요를 뒤집은 것: 공장이 설비 목록·사진(10장)·처분 사유·희망 시기를 올리면 매입 업체가 **매입 제안가**를 보냄. 같은 표(`rfq_requests.kind = 'sell'`)·견적·한도(무료 30일 3건, 프리미엄 무제한)·채팅·알림을 씀. 30일 동안 열림.
+구해요를 뒤집은 것: 공장이 설비 목록·사진(10장)·처분 사유·희망 시기를 올리면 매입 업체가 **매입 제안가**를 보냄. 같은 표(`rfq_requests.kind = 'sell'`)·견적·채팅·알림을 씀. 매입 제안 한도는 따로: **30일 기준 무료 0건 · 프로 3건 · 비즈 10건**, 그 밖에는 매입 제안권 1장씩. 30일 동안 열림.
 - 화면: `/rfq?k=sell`(목록 탭), `/rfq/new?kind=sell`(올리기), 상세는 같은 `/rfq/:id`. 안내 페이지 `/liquidation`(검색 유입용, FAQ 구조화 데이터)
 - 들어오는 곳: 판다(물건 올리기) 첫 화면 "공장 정리·이전으로 설비가 많나요?", 마이 › 구해요·처분, 구해요 목록 탭
 - SQL: `supabase/migrations/20261123_rfq_sell.sql` (열 추가 + `create_rfq`·`rfq_view`·`my_rfqs` 확장, 예전 호출도 그대로 동작). **SQL 실행 → `rfq-push` 다시 배포 → 사이트 배포** 순서

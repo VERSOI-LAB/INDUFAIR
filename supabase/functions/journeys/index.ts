@@ -41,10 +41,15 @@ const JOURNEYS: Journey[] = [
   },
   {
     key: "premium_expiring", kind: "info",
+    // 유료 플랜이 끝나 감 / 첫 달 무료·초대 보상이 끝나 감 (자동 결제가 없으니 연장하려면 다시 입금)
     build: (d) => ({
-      title: `${clip(d.name, 20)} 프리미엄이 ${d.until}에 끝나요`,
-      body: "끝나면 맨 앞 고정과 매일 자동 끌어올리기가 멈춰요. 이어서 쓰려면 자동결제를 켜 주세요.",
-      path: `/biz-premium?id=${d.business_id}`, cta: "프리미엄 이어서 쓰기", email: true,
+      title: d.paid
+        ? `${clip(d.name, 20)} ${d.tier === "biz" ? "비즈" : "프로"} 플랜이 ${d.until}에 끝나요`
+        : `${clip(d.name, 20)} 무료 혜택이 ${d.until}에 끝나요`,
+      body: d.paid
+        ? "끝나면 맨 앞 고정·매일 자동 끌어올리기가 멈추고 견적은 30일 3건으로 돌아가요. 연장 신청 후 입금하면 끊기지 않고 이어져요."
+        : "끝나면 맨 앞 고정·매일 자동 끌어올리기가 멈추고 견적은 30일 3건으로 돌아가요. 프로 플랜(월 3만 원, 부가세 별도)으로 이어서 쓸 수 있어요.",
+      path: `/biz-premium?id=${d.business_id}`, cta: d.paid ? "플랜 연장하기" : "플랜 보기", email: true,
     }),
   },
   {
@@ -92,8 +97,8 @@ const JOURNEYS: Journey[] = [
     key: "biz_upsell", kind: "ads",
     build: (d) => ({
       title: `${clip(d.name, 20)}, 조회 ${d.views_total}회를 넘었어요`,
-      body: "프리미엄(월 1만 원)이면 동네 업체 맨 앞에 고정되고 매일 자동으로 끌어올려져요. 언제든 해지할 수 있어요.",
-      path: `/biz-premium?id=${d.business_id}`, cta: "프리미엄 알아보기", email: true,
+      body: "프로 플랜(월 3만 원, 부가세 별도)이면 동네 업체 맨 앞에 고정되고 매일 자동으로 끌어올려지며, 견적을 30일에 30건까지 보낼 수 있어요. 자동 결제는 없어요.",
+      path: `/biz-premium?id=${d.business_id}`, cta: "플랜 알아보기", email: true,
     }),
   },
   {

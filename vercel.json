@@ -74,6 +74,10 @@
       "destination": "/api/page?type=support&id=:id"
     },
     {
+      "source": "/admin/billing",
+      "destination": "/billing-admin"
+    },
+    {
       "source": "/community/write",
       "destination": "/community"
     },

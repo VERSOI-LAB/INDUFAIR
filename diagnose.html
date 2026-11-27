@@ -234,8 +234,10 @@
       }
     }
     if (user) html += alertBoxHtml();
+    html += '<div id="dgAd"></div>';
     html += '<button type="button" class="btn white small" id="shareDg" style="margin-top:20px">' + PS.icon('send', 18) + ' 다른 사장님께 진단 알려 주기</button>';
     box.innerHTML = html;
+    PS.renderAd('diagnose', $('dgAd'));
 
     $('editBtn').onclick = function () { history.pushState(null, '', '/diagnose'); box.hidden = true; $('formView').hidden = false; drawForm(); window.scrollTo(0, 0); };
     if ($('unlockBtn')) $('unlockBtn').onclick = function () { PS.track('diagnose_unlock_click', { matched: matched.length }); };

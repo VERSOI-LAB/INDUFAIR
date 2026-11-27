@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<title>결제 관리 - 판다산다</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px;}
+  .sum div{padding:12px 14px;border-radius:14px;background:var(--bg);}
+  .sum span{display:block;font-size:13px;color:var(--sub);}
+  .sum b{font-size:18px;font-weight:800;}
+  .sync{margin-top:12px;font-size:13px;color:var(--sub);line-height:1.6;word-break:break-all;}
+  .tabs{margin-top:16px;}
+  .card{margin-top:10px;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);font-size:15px;line-height:1.5;}
+  .card .h{display:flex;justify-content:space-between;gap:10px;font-weight:800;}
+  .card .h span{flex-shrink:0;}
+  .card .m{font-size:13px;color:var(--sub);margin-top:2px;word-break:break-all;}
+  .card .err{font-size:13px;color:var(--danger);margin-top:4px;word-break:break-all;}
+  .card .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .card .acts button,.card .acts select{height:36px;padding:0 12px;border-radius:10px;border:1.5px solid var(--line);font-size:14px;font-weight:700;background:var(--surface);max-width:100%;}
+  .card .acts button.p{background:var(--primary);border-color:var(--primary);}
+  .none{padding:28px 0;text-align:center;color:var(--sub);font-size:15px;}
+  h2.t{font-size:17px;font-weight:800;margin-top:24px;}
+  form.ad{display:grid;gap:10px;margin-top:12px;padding:16px;border-radius:14px;background:var(--bg);}
+  form.ad label{font-size:14px;font-weight:700;display:grid;gap:4px;}
+  form.ad .input{height:46px;font-size:15px;}
+  form.ad .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .badge{display:inline-block;font-size:12px;font-weight:800;padding:2px 8px;border-radius:8px;background:#E8E8E8;margin-left:6px;}
+  .badge.on{background:#E6F7EC;color:#167A3A;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar"><a class="back" href="/mypage" aria-label="마이로"><i data-icon="back" data-size="24"></i></a><h1>결제 관리</h1></header>
+  <main class="page" id="main"><div class="skeleton" style="height:160px;margin-top:20px"></div></main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(function () {
+  var main = document.getElementById('main');
+  var data = null, tab = 'check';
+  var money = function (n) { return Number(n || 0).toLocaleString('ko-KR') + '원'; };
+  var dt = function (iso) { if (!iso) return '-'; var d = new Date(iso); return (d.getMonth() + 1) + '.' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  var E = PS.esc;
+  var PLACE = { support_list: '지원사업 목록', support_detail: '지원사업 상세', events: '교육·행사 목록', diagnose: '30초 진단 결과' };
+  var INV = { pending: '발행 대기', issued: '발행됨', failed: '발행 실패', canceled: '발행 안 함(전액 환불)' };
+
+  async function fn(body) {
+    var token = await PS.accessToken();
+    var res = await fetch(PS.FUNCTIONS_URL + '/bank-sync', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body) });
+    return res.json().catch(function () { return {}; });
+  }
+
+  PS.ready.then(async function (user) {
+    if (!user) return PS.goLogin();
+    var ok = await sb.rpc('is_app_admin');
+    if (ok.error || ok.data !== true) { main.innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>운영자만 볼 수 있어요</b></div>'; return; }
+    await load();
+  });
+
+  async function load() {
+    var r = await sb.rpc('admin_billing_overview');
+    data = r.data || {};
+    if (r.error || data.error) { main.innerHTML = '<div class="empty"><b>불러오지 못했어요</b>' + E(r.error ? r.error.message : data.error) + '</div>'; return; }
+    render();
+  }
+
+  function orderLine(o) {
+    return '<div class="h"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + E(o.buyer_corp_name) + ' · ' + E(o.item_name) + '</span><span>' + money(o.total_amount) + '</span></div>' +
+      '<div class="m">' + E(o.order_no) + ' · 입금자명 ' + E(o.depositor_code) + ' · ' + E(o.buyer_corp_num) + ' · ' + E(o.buyer_email || '메일 없음') + '</div>';
+  }
+
+  function render() {
+    var d = data, s = d.settings || {}, sy = d.sync || {};
+    var payable = (d.pending || []);
+    var html = '<div class="sum"><div><span>이번 달 매출 (공급가액)</span><b>' + money(d.month && d.month.supply) + '</b></div><div><span>이번 달 결제</span><b>' + ((d.month && d.month.count) || 0) + '건</b></div>' +
+      '<div><span>확인 필요 입금</span><b>' + (d.unmatched || []).length + '건</b></div><div><span>입금 대기 주문</span><b>' + payable.filter(function (o) { return o.status === 'pending'; }).length + '건</b></div></div>' +
+      '<p class="sync">입금 계좌: ' + (s.account_no ? E(s.bank_name + ' ' + s.account_no + ' (' + s.account_holder + ')') : '<b style="color:var(--danger)">아직 없음 — billing_settings 에 넣어 주세요</b>') +
+      '<br>마지막 입금 확인: ' + dt(sy.last_sync_at) + (sy.last_result ? ' · ' + E(JSON.stringify(sy.last_result)) : '') + '</p>' +
+      '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn small" id="syncBtn" type="button">지금 입금 확인</button><button class="btn small white" id="testBtn" type="button">테스트 입금</button></div>' +
+      '<div class="chips tabs" id="tabs">' + [['check', '입금 확인'], ['invoice', '세금계산서'], ['paid', '결제·환불'], ['ads', '광고']].map(function (t) {
+        return '<button type="button" class="chip' + (tab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '">' + t[1] + '</button>';
+      }).join('') + '</div><div id="tabBody">' + tabHtml() + '</div>';
+    main.innerHTML = html;
+  }
+
+  function tabHtml() {
+    var d = data;
+    if (tab === 'check') {
+      var opts = (d.pending || []).map(function (o) { return '<option value="' + o.id + '">' + E(o.buyer_corp_name + ' · ' + money(o.total_amount) + ' · ' + o.depositor_code + (o.status === 'expired' ? ' (기한 지남)' : '')) + '</option>'; }).join('');
+      return '<h2 class="t">확인 필요 입금</h2>' + ((d.unmatched || []).length ? d.unmatched.map(function (x) {
+          return '<div class="card"><div class="h"><span>' + E(x.depositor || '(입금자명 없음)') + '</span><span>' + money(x.amount) + '</span></div><div class="m">' + dt(x.traded_at) + '</div>' +
+            '<div class="acts"><select data-sel="' + x.id + '"><option value="">주문 고르기</option>' + opts + '</select><button class="p" type="button" data-match="' + x.id + '">연결</button>' +
+            '<button type="button" data-ignore="' + x.id + '">이용요금 아님</button></div></div>';
+        }).join('') : '<div class="none">확인할 입금이 없어요</div>') +
+        '<h2 class="t">입금 대기 주문</h2>' + ((d.pending || []).length ? d.pending.map(function (o) {
+          return '<div class="card">' + orderLine(o) + '<div class="m">' + (o.status === 'expired' ? '입금 기한 지남' : dt(o.expires_at) + '까지') + ' · 주문 ' + dt(o.created_at) + '</div>' +
+            '<div class="acts"><button type="button" data-mark="' + o.id + '">입금 확인됨으로 처리</button></div></div>';
+        }).join('') : '<div class="none">입금 기다리는 주문이 없어요</div>');
+    }
+    if (tab === 'invoice') {
+      return '<h2 class="t">발행할 세금계산서</h2>' + ((d.invoice_todo || []).length ? d.invoice_todo.map(function (o) {
+          return '<div class="card">' + orderLine(o) +
+            '<div class="m">계산서: ' + (INV[o.invoice_status] || o.invoice_status) + (o.refund_invoice_status ? ' · 환불 수정세금계산서: ' + (INV[o.refund_invoice_status] || o.refund_invoice_status) : '') + '</div>' +
+            (o.invoice_error ? '<div class="err">' + E(o.invoice_error) + '</div>' : '') + (o.refund_invoice_error ? '<div class="err">' + E(o.refund_invoice_error) + '</div>' : '') + '</div>';
+        }).join('') + '<div class="acts" style="margin-top:12px"><button class="btn small" type="button" id="invBtn">다시 발행하기</button></div>'
+        : '<div class="none">밀린 세금계산서가 없어요</div>');
+    }
+    if (tab === 'paid') {
+      return '<h2 class="t">최근 결제</h2>' + ((d.recent || []).length ? d.recent.map(function (o) {
+          return '<div class="card">' + orderLine(o) + '<div class="m">' + dt(o.paid_at) + ' 입금 · 계산서 ' + (INV[o.invoice_status] || '') + (o.invoice_nts_no ? ' (' + E(o.invoice_nts_no) + ')' : '') +
+            (o.status === 'refunded' ? ' · <b>환불 ' + money(o.refund_amount) + '</b> ' + dt(o.refunded_at) : '') + (o.note ? ' · ' + E(o.note) : '') + '</div>' +
+            (o.status === 'paid' ? '<div class="acts"><button type="button" data-refund="' + o.id + '">환불 처리</button></div>' : '') + '</div>';
+        }).join('') : '<div class="none">아직 결제가 없어요</div>');
+    }
+    // 광고
+    var st = d.ad_stats || {};
+    return '<h2 class="t">광고</h2><p class="m" style="font-size:13px;color:var(--sub);margin-top:4px">정책자금 대행·대출 중개처럼 지원사업 신청을 대신해 준다며 수수료를 받는 광고는 받지 않아요. 노출·클릭은 최근 90일.</p>' +
+      ((d.ads || []).length ? d.ads.map(function (a) {
+        var v = st[a.id] || { views: 0, clicks: 0 };
+        return '<div class="card"><div class="h"><span>' + E(a.advertiser) + ' · ' + E(a.title) + '<span class="badge' + (a.status === 'active' ? ' on' : '') + '">' + E(a.status) + '</span></span></div>' +
+          '<div class="m">' + E(PLACE[a.placement] || a.placement) + ' · ' + E(a.starts_on) + ' ~ ' + E(a.ends_on) + ' · 노출 ' + v.views + ' · 클릭 ' + v.clicks + (v.views ? ' (' + (100 * v.clicks / v.views).toFixed(1) + '%)' : '') + '</div>' +
+          '<div class="acts"><button type="button" data-edit="' + a.id + '">고치기</button><button type="button" data-adorder="' + a.id + '">계약 주문 만들기</button>' +
+          (a.status === 'active' ? '<button type="button" data-adst="paused" data-id="' + a.id + '">멈추기</button>' : '<button type="button" data-adst="active" data-id="' + a.id + '">켜기</button>') + '</div></div>';
+      }).join('') : '<div class="none">광고가 없어요</div>') +
+      '<div id="adForm"></div><button class="btn small white" type="button" id="newAd" style="margin-top:12px">새 광고 만들기</button>' +
+      '<h2 class="t">광고 문의</h2>' + ((d.inquiries || []).length ? d.inquiries.map(function (i) {
+        return '<div class="card"><div class="h"><span>' + E(i.company) + (i.status === 'done' ? '<span class="badge">처리함</span>' : '<span class="badge on">새 문의</span>') + '</span><span>' + dt(i.created_at) + '</span></div>' +
+          '<div class="m">' + E([i.contact_name, i.phone, i.email, PLACE[i.placement] || i.placement].filter(Boolean).join(' · ')) + '</div>' +
+          (i.message ? '<div style="margin-top:6px;white-space:pre-wrap;font-size:14px">' + E(i.message) + '</div>' : '') +
+          (i.status !== 'done' ? '<div class="acts"><button type="button" data-inq="' + i.id + '">처리함</button></div>' : '') + '</div>';
+      }).join('') : '<div class="none">문의가 없어요</div>');
+  }
+
+  function adFormHtml(a) {
+    a = a || { placement: 'support_list', cta: '자세히 보기', status: 'draft' };
+    var f = function (k, label, ph, type) { return '<label>' + label + '<input class="input" name="' + k + '" type="' + (type || 'text') + '" value="' + E(a[k] || '') + '" placeholder="' + E(ph || '') + '"></label>'; };
+    return '<form class="ad" id="adF"><input type="hidden" name="id" value="' + E(a.id || '') + '">' +
+      f('advertiser', '광고주', '예) ○○세무회계') +
+      '<label>자리<select class="input" name="placement">' + Object.keys(PLACE).map(function (k) { return '<option value="' + k + '"' + (a.placement === k ? ' selected' : '') + '>' + PLACE[k] + '</option>'; }).join('') + '</select></label>' +
+      f('title', '제목 (40자)', '예) 제조업 R&D 세액공제 무료 상담') + f('body', '설명 (80자)', '예) 연구소·전담부서 설립부터 공제 신청까지') +
+      f('link_url', '연결 주소 (https)', 'https://') + f('image_url', '이미지 주소 (선택, https)', 'https://') + f('cta', '버튼 글씨 (12자)', '자세히 보기') +
+      '<div class="two">' + f('starts_on', '시작일', '', 'date') + f('ends_on', '종료일', '', 'date') + '</div>' +
+      '<label>상태<select class="input" name="status">' + ['draft', 'active', 'paused', 'ended'].map(function (k) { return '<option' + (a.status === k ? ' selected' : '') + '>' + k + '</option>'; }).join('') + '</select></label>' +
+      f('note', '메모 (계약 금액 등, 안 보임)', '') +
+      '<button class="btn small" type="submit">저장</button></form>';
+  }
+
+  main.addEventListener('click', async function (e) {
+    var t;
+    if ((t = e.target.closest('[data-tab]'))) { tab = t.dataset.tab; render(); return; }
+    if (e.target.id === 'syncBtn') {
+      e.target.disabled = true; e.target.textContent = '확인하는 중…';
+      var r = await fn({ action: 'sync' });
+      PS.toast(r.ok ? '입금 ' + (r.matched || 0) + '건 처리, 계산서 ' + ((r.invoice && r.invoice.issued) || 0) + '건 발행' : '실패: ' + (r.code || r.message || ''));
+      return load();
+    }
+    if (e.target.id === 'testBtn') {
+      var amt = prompt('테스트 입금액 (원, 부가세 포함)'); if (!amt) return;
+      var who = prompt('입금자명 (예: PS1234)') || '';
+      var tr = await fn({ action: 'test_deposit', amount: Number(amt.replace(/\D/g, '')), depositor: who });
+      PS.toast(tr.ok ? '테스트 입금: ' + tr.matched + '건 처리' : tr.code === 'live_mode' ? '실제 운영 중에는 테스트 입금을 넣을 수 없어요' : '실패: ' + (tr.code || ''));
+      return load();
+    }
+    if (e.target.id === 'invBtn') { var ir = await fn({ action: 'invoice' }); PS.toast(ir.ok ? '발행 ' + ir.invoice.issued + '건, 실패 ' + ir.invoice.failed + '건' : '실패'); return load(); }
+    if ((t = e.target.closest('[data-match]'))) {
+      var sel = main.querySelector('[data-sel="' + t.dataset.match + '"]');
+      if (!sel || !sel.value) { PS.toast('연결할 주문을 골라 주세요'); return; }
+      if (!confirm('이 입금을 고른 주문의 결제로 처리할까요? 혜택이 바로 들어가고 세금계산서가 발행돼요.')) return;
+      var m = await sb.rpc('admin_match_deposit', { p_deposit: Number(t.dataset.match), p_order: sel.value });
+      PS.toast(m.data === 'ok' ? '처리했어요' : '실패: ' + (m.data || (m.error && m.error.message)));
+      if (m.data === 'ok') await fn({ action: 'invoice' });
+      return load();
+    }
+    if ((t = e.target.closest('[data-ignore]'))) {
+      if (!confirm('판다산다 이용요금이 아닌 입금으로 표시할까요?')) return;
+      await sb.rpc('admin_ignore_deposit', { p_deposit: Number(t.dataset.ignore) }); return load();
+    }
+    if ((t = e.target.closest('[data-mark]'))) {
+      var note = prompt('어떻게 입금을 확인했나요? (메모)'); if (note == null) return;
+      var mk = await sb.rpc('admin_mark_paid', { p_order: t.dataset.mark, p_note: note });
+      PS.toast(mk.data === 'ok' ? '처리했어요' : '실패: ' + mk.data);
+      if (mk.data === 'ok') await fn({ action: 'invoice' });
+      return load();
+    }
+    if ((t = e.target.closest('[data-refund]'))) {
+      var q = (await sb.rpc('admin_refund_quote', { p_order: t.dataset.refund })).data || {};
+      var o = (data.recent || []).filter(function (x) { return x.id === t.dataset.refund; })[0];
+      var hint = q.supply == null ? '광고는 금액을 직접 정해 주세요' : (q.full ? '7일 안·사용 없음 → 전액' : '기준 금액') + ' 공급가액 ' + money(q.supply) + ' (입금액 ' + money(q.total) + ')';
+      var v = prompt('돌려줄 공급가액(부가세 별도)을 넣어 주세요.\n' + hint + '\n결제 공급가액 ' + money(o.supply_amount) + '\n\n먼저 고객 계좌로 이체한 뒤 기록하세요.', q.supply == null ? '' : String(q.supply));
+      if (!v) return;
+      var sup = Number(v.replace(/\D/g, ''));
+      if (!confirm('공급가액 ' + money(sup) + ' + 부가세 = ' + money(sup + Math.floor(sup / 10)) + ' 환불로 기록할까요? 혜택이 줄고 수정세금계산서가 발행돼요.')) return;
+      var rf = await sb.rpc('admin_refund_order', { p_order: t.dataset.refund, p_supply: sup });
+      PS.toast(rf.data === 'ok' ? '환불을 기록했어요' : '실패: ' + rf.data);
+      if (rf.data === 'ok') await fn({ action: 'invoice' });
+      return load();
+    }
+    if (e.target.id === 'newAd') { document.getElementById('adForm').innerHTML = adFormHtml(); return; }
+    if ((t = e.target.closest('[data-edit]'))) {
+      document.getElementById('adForm').innerHTML = adFormHtml((data.ads || []).filter(function (a) { return a.id === t.dataset.edit; })[0]);
+      document.getElementById('adForm').scrollIntoView({ behavior: 'smooth' }); return;
+    }
+    if ((t = e.target.closest('[data-adst]'))) {
+      var a0 = (data.ads || []).filter(function (a) { return a.id === t.dataset.id; })[0];
+      var sv = await sb.rpc('admin_save_ad', { p: Object.assign({}, a0, { status: t.dataset.adst }) });
+      PS.toast(sv.data && sv.data.id ? '바꿨어요' : '실패'); return load();
+    }
+    if ((t = e.target.closest('[data-adorder]'))) {
+      var supply = prompt('계약 금액 공급가액(부가세 별도, 원)'); if (!supply) return;
+      var cn = prompt('광고주 사업자번호 (숫자 10자리)'); if (!cn) return;
+      var nm = prompt('광고주 상호'); if (!nm) return;
+      var ceo = prompt('대표자 이름') || '';
+      var em = prompt('세금계산서 받을 이메일') || '';
+      var ao = await sb.rpc('admin_create_ad_order', { p_campaign: t.dataset.adorder, p_supply: Number(supply.replace(/\D/g, '')), p_buyer: { corp_num: cn, corp_name: nm, ceo: ceo, email: em }, p_days: 7 });
+      var od = ao.data || {};
+      if (!od.order) { PS.toast('실패: ' + (od.error || '')); return; }
+      var s = data.settings || {};
+      var text = '[판다산다 광고 입금 안내]\n' + od.order.item_name + '\n입금 계좌: ' + s.bank_name + ' ' + s.account_no + ' (' + s.account_holder + ')\n입금액: ' + money(od.order.total_amount) +
+        ' (공급가액 ' + money(od.order.supply_amount) + ' + 부가세)\n입금자명: ' + od.order.depositor_code + '\n입금이 확인되면 광고가 시작되고 세금계산서가 발행됩니다.';
+      try { await navigator.clipboard.writeText(text); PS.toast('입금 안내를 복사했어요. 광고주에게 보내 주세요'); } catch (_) { alert(text); }
+      return load();
+    }
+    if ((t = e.target.closest('[data-inq]'))) { await sb.rpc('admin_inquiry_done', { p_id: Number(t.dataset.inq) }); return load(); }
+  });
+
+  main.addEventListener('submit', async function (e) {
+    if (e.target.id !== 'adF') return;
+    e.preventDefault();
+    var p = {}; new FormData(e.target).forEach(function (v, k) { p[k] = String(v).trim(); });
+    var r = await sb.rpc('admin_save_ad', { p: p });
+    if (r.data && r.data.id) { PS.toast('저장했어요'); load(); }
+    else PS.toast('저장하지 못했어요. 칸을 다시 확인해 주세요 (https 주소, 날짜)');
+  });
+})();
+</script>
+</body>
+</html>

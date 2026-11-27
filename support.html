@@ -141,12 +141,14 @@
           '<label><input type="checkbox" id="spOpen" checked> ' + K.openLabel + '</label>' +
         '</div>' +
       '</div>' +
+      '<div id="spAd"></div>' +
       '<p class="sp-count" id="spCount"></p>' +
       '<div class="list" id="spList"></div>' +
       '<div class="more" id="spMore" hidden><button class="btn white small" type="button">더 보기</button></div>';
 
     var $ = function (x) { return document.getElementById(x); };
     if (!isEvent) drawAlert();
+    PS.renderAd(isEvent ? 'events' : 'support_list', $('spAd'));
     function drawChips(list) {
       $('spCats').innerHTML = [''].concat(list).map(function (c) {
         return '<button type="button" class="chip' + (c === st.chip ? ' on' : '') + '" data-cat="' + PS.esc(c) + '" aria-pressed="' + (c === st.chip) + '">' + PS.esc(c || '전체') + '</button>';
@@ -323,9 +325,11 @@
       (p.summary ? '<h2 class="sd-h">사업 개요</h2><div class="sd-sum">' + PS.esc(p.summary) + '</div>' : '') +
       '<a class="btn sd-go" href="' + PS.esc(p.url) + '" target="_blank" rel="noopener">공고 원문 보고 신청하기</a>' +
       '<p class="sd-note">이 정보는 기업마당(bizinfo.go.kr) 공고를 자동으로 모은 거예요. 신청 자격·서류·기간은 꼭 원문에서 확인해 주세요.</p>' +
+      '<div id="sdAd"></div>' +
       '<button type="button" class="btn white small" id="sdShare" style="margin-top:16px">' + PS.icon('send', 18) + ' 동료에게 공유하기</button>' +
       '<a class="btn white small" href="/support" style="margin-top:10px">다른 지원사업 보기</a>';
     shareBtn(p.title, '/support/' + p.id);
+    PS.renderAd('support_detail', document.getElementById('sdAd'));
   }
 
   function shareBtn(title, path) {

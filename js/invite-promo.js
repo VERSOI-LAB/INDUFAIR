@@ -34,7 +34,7 @@
   PS.inviteBannerHtml = function () {
     return '<div class="push-prompt" data-invite-banner style="margin:14px 0 0;background:#FFF6DA">' +
       '<div><b>🎁 친구 초대하면 내 업체가 일주일 동안 맨 위에 떠요</b>' +
-      '<span>동료가 내 링크로 가입할 때마다 7일 프리미엄 (한 달 4명까지)</span>' +
+      '<span>동료가 내 링크로 가입할 때마다 7일 동안 프로 플랜 혜택 (한 달 4명까지)</span>' +
       '<button type="button" data-invite-off style="align-self:flex-start;font-size:12px;color:var(--hint);text-decoration:underline;padding:4px 0 0">다시 보지 않기</button></div>' +
       '<button type="button" class="btn small" data-invite-send>초대 링크 보내기</button></div>';
   };
