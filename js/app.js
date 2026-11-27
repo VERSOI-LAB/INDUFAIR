@@ -1329,6 +1329,78 @@
     }
   };
 
+  // ---- 앱으로 쓰기 안내 ----
+  //   아이폰 Safari: "홈 화면에 추가" 하는 법 (앱처럼 열리고 알림도 받음, 앱스토어 없이)
+  //   안드로이드 크롬: 플레이스토어 앱 설치 (PS.PLAY_STORE_URL 이 있을 때만)
+  //   안드로이드 앱(TWA, 시작 주소 ?app=android)·홈 화면에서 연 경우에는 안 보임. 두 번째 화면부터, 14일에 한 번, '다시 보지 않기' 가능
+  PS.PLAY_STORE_URL = null; // 출시 후: 'https://play.google.com/store/apps/details?id=com.pandasanda.app'
+  PS.inApp = (function () {
+    try {
+      if (/[?&]app=android\b/.test(location.search) || /^android-app:\/\/com\.pandasanda\.app/.test(document.referrer)) sessionStorage.setItem('ps_app', 'android');
+      return sessionStorage.getItem('ps_app');
+    } catch (e) { return null; }
+  })();
+  PS.isStandalone = function () {
+    return !!PS.inApp || window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  };
+  function installKind() {
+    var ua = navigator.userAgent;
+    var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (ios) return /CriOS|FxiOS|EdgiOS|KAKAOTALK|NAVER|Instagram|FBAN|Line\//.test(ua) ? 'ios_other' : 'ios';
+    if (/Android/.test(ua) && PS.PLAY_STORE_URL) return 'android';
+    return null;
+  }
+  var installSheet = null, installBg = null;
+  PS.installGuide = function (kind) {
+    kind = kind || installKind() || 'ios';
+    if (!installSheet) {
+      installBg = document.createElement('div'); installBg.className = 'sheet-bg';
+      installSheet = document.createElement('div'); installSheet.className = 'sheet'; installSheet.setAttribute('role', 'dialog'); installSheet.setAttribute('aria-label', '앱으로 쓰기');
+      document.body.appendChild(installBg); document.body.appendChild(installSheet);
+      installBg.addEventListener('click', closeInstall);
+    }
+    var step = function (n, html) { return '<li style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)"><b style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:14px">' + n + '</b><span style="font-size:16px;line-height:1.5">' + html + '</span></li>'; };
+    var shareIco = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px" aria-label="공유"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
+    var body = kind === 'android'
+      ? '<p style="color:var(--sub);font-size:15px;text-align:center;margin-top:8px;line-height:1.6">홈 화면에서 바로 열고, 채팅·견적 알림을 앱 알림으로 받아요. 무료예요.</p>' +
+        '<a class="btn" id="instGo" href="' + PS.esc(PS.PLAY_STORE_URL) + '" target="_blank" rel="noopener" style="margin-top:18px">플레이스토어에서 받기</a>'
+      : kind === 'ios_other'
+      ? '<p style="color:var(--sub);font-size:15px;text-align:center;margin-top:8px;line-height:1.6">아이폰은 <b>Safari</b>에서 판다산다를 열어야 홈 화면에 추가할 수 있어요. 주소 <b>pandasanda.com</b>을 Safari에 입력해 주세요.</p>'
+      : '<p style="color:var(--sub);font-size:15px;text-align:center;margin-top:8px;line-height:1.6">앱스토어 없이 앱처럼 쓸 수 있어요. 홈 화면에서 바로 열리고, 채팅·견적 알림도 받아요.</p>' +
+        '<ol style="list-style:none;margin:14px 0 0;padding:0">' +
+          step(1, '화면 아래 가운데 ' + shareIco + ' <b>공유</b> 버튼을 눌러요 <span style="color:var(--hint);font-size:13px">(아이패드는 위쪽)</span>') +
+          step(2, '목록을 올려서 <b>"홈 화면에 추가"</b>를 눌러요') +
+          step(3, '오른쪽 위 <b>"추가"</b>를 누르면 끝! 홈 화면의 판다산다로 열어 주세요') +
+        '</ol>';
+    installSheet.innerHTML = '<div class="handle"></div>' +
+      '<div style="text-align:center">' + PS.sticker('hello', 72) + '</div>' +
+      '<h3 style="font-size:20px;font-weight:800;text-align:center;margin-top:6px;line-height:1.4">판다산다를 앱으로 쓰세요</h3>' + body +
+      '<button type="button" class="btn white" id="instLater" style="margin-top:14px">' + (kind === 'ios' ? '알겠어요' : '다음에 할게요') + '</button>' +
+      '<button type="button" id="instOff" style="display:block;margin:12px auto 0;font-size:13px;color:var(--hint);text-decoration:underline">다시 보지 않기</button>';
+    installBg.classList.add('show'); installSheet.classList.add('show');
+    document.getElementById('instLater').onclick = closeInstall;
+    document.getElementById('instOff').onclick = function () { try { localStorage.setItem('ps_install_off', '1'); } catch (e) {} closeInstall(); };
+    var go = document.getElementById('instGo'); if (go) go.onclick = function () { PS.track('install_click', { kind: kind }); closeInstall(); };
+    PS.track('install_hint', { kind: kind });
+  };
+  function closeInstall() { if (installSheet) { installSheet.classList.remove('show'); installBg.classList.remove('show'); } }
+  function maybeInstallHint() {
+    if (PS.isStandalone()) return;
+    if (/^\/(login|reset-password|admin|billing-admin|unsubscribe|weekly-card|pay-)/.test(location.pathname)) return;
+    var kind = installKind(); if (!kind || kind === 'ios_other') return;
+    try {
+      if (localStorage.getItem('ps_install_off')) return;
+      var views = Number(localStorage.getItem('ps_install_views') || 0) + 1;
+      localStorage.setItem('ps_install_views', String(views));
+      if (views < 2) return; // 처음 들어온 화면에서는 띄우지 않음
+      var last = Number(localStorage.getItem('ps_install_last') || 0);
+      if (Date.now() - last < 14 * 86400000) return;
+      localStorage.setItem('ps_install_last', String(Date.now()));
+    } catch (e) { return; }
+    setTimeout(function () { if (!document.querySelector('.sheet.show')) PS.installGuide(kind); }, 2500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeInstallHint); else maybeInstallHint();
+
   // ---- 광고 자리 (supabase/migrations/20261127_billing.sql 의 ad_campaigns) ----
   // placement: support_list | support_detail | events | diagnose. 켜진 광고가 없으면 아무것도 그리지 않음
   // 노출·클릭은 marketing_events 의 ad_view / ad_click (운영자 결제 관리 화면에서 봄)

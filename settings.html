@@ -42,6 +42,7 @@
     </section>
     <section class="mcard" id="consentCard">
       <h3 style="padding:14px 20px 2px">알림 받기</h3>
+      <button class="mrow" id="appRow" hidden><span>앱으로 쓰기<small style="display:block;font-size:13px;color:var(--hint)">홈 화면에서 바로 열고 알림 받기</small></span><span class="go" style="color:var(--sub);font-size:15px">방법 보기</span></button>
       <button class="mrow" id="pushRow"><span>이 기기 알림<small style="display:block;font-size:13px;color:var(--hint)">채팅·지원사업 마감·내 물건 소식</small></span><span class="go" id="pushState" style="color:var(--sub);font-size:15px"></span></button>
       <label class="sw-row"><span class="sw-tx"><b>내 물건·업체 소식 이메일</b><span>문의 없는 물건, 업체 주간 조회수, 플랜 만료·입금 안내</span></span>
         <span class="sw"><input type="checkbox" id="cInfoEmail" disabled><i></i></span></label>
@@ -111,9 +112,14 @@
     return on;
   }
   pushLabel();
+  // 앱으로 쓰기: 아이폰 Safari(홈 화면에 추가) 또는 안드로이드(플레이스토어 앱이 있을 때)에서만
+  if (!PS.isStandalone() && (/iPhone|iPad|iPod/.test(navigator.userAgent) || (/Android/.test(navigator.userAgent) && PS.PLAY_STORE_URL))) {
+    $('appRow').hidden = false;
+    $('appRow').addEventListener('click', function () { PS.installGuide(); });
+  }
   $('pushRow').addEventListener('click', async function () {
     var st = PS.push.state();
-    if (st === 'ios_install') { alert('아이폰은 Safari 아래 공유 버튼 → "홈 화면에 추가"를 한 뒤, 홈 화면의 판다산다에서 알림을 켤 수 있어요.'); return; }
+    if (st === 'ios_install') { PS.installGuide('ios'); return; }
     if (st === 'unsupported') { PS.toast('이 브라우저에서는 알림을 받을 수 없어요'); return; }
     if (st === 'denied') { alert('브라우저에서 알림이 막혀 있어요. 주소창 옆 사이트 설정에서 알림을 허용한 뒤 다시 눌러 주세요.'); return; }
     if (await pushLabel()) {

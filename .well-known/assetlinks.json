@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.pandasanda.app",
+      "sha256_cert_fingerprints": [
+        "AC:86:A6:F6:2D:47:9C:F8:07:DC:C7:91:E8:D8:ED:8F:6D:69:99:42:3C:BC:82:28:D1:9F:C0:5A:4D:44:95:D5"
+      ]
+    }
+  }
+]
