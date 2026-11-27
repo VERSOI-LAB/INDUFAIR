@@ -47,6 +47,15 @@
 python3 dev-server.py   # http://localhost:8743 (vercel.json 의 clean URL 흉내)
 ```
 
+## 앱 (안드로이드 플레이스토어 · 아이폰 홈 화면에 추가)
+- **안드로이드**: `android/` = Trusted Web Activity. 크롬으로 https://www.pandasanda.com 을 주소창 없이 띄우는 앱 (패키지 `com.pandasanda.app`). 사이트를 고치면 앱에도 바로 반영되고, 웹 푸시가 앱 알림으로 옴. 다시 올려야 하는 건 아이콘·이름·주소·권한을 바꿀 때뿐
+  - 빌드: GitHub Actions `android` (android/ 가 바뀌면 자동, 또는 Actions 탭 › android › Run workflow). 실행 화면 아래 Artifacts 의 `pandasanda-apk`(휴대폰 설치용), `pandasanda-aab`(플레이 콘솔 업로드용)
+  - 서명: 저장소 Settings › Secrets and variables › Actions 에 `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. 없으면 테스트용 APK 만 나오고 주소창이 보일 수 있음. **키 파일(.jks)은 저장소에 절대 넣지 말 것**
+  - 사이트와 앱 연결: `/.well-known/assetlinks.json` 에 서명 키 SHA-256. 플레이 콘솔에서 "Play 앱 서명"을 쓰면 콘솔 › 앱 무결성 › 앱 서명 키 인증서의 SHA-256 도 이 파일에 **추가**해야 스토어에서 받은 앱에 주소창이 안 보임
+  - 출시 후 `js/app.js` 의 `PS.PLAY_STORE_URL` 을 채우면 안드로이드 크롬 방문자에게 설치 안내가 뜸
+- **아이폰**: 앱스토어 없이 Safari "홈 화면에 추가"(PWA). 두 번째 화면부터 14일에 한 번 안내 시트(`PS.installGuide`), 설정 › 앱으로 쓰기. 홈 화면에서 연 판다산다는 웹 푸시도 받음 (iOS 16.4+)
+- 측정: `install_hint`(안내 봄), `install_click`(플레이스토어로 이동)
+
 ## 유료 서비스 (업체 플랜 · 이용권 · 광고) — 계좌이체 + 팝빌
 토스페이먼츠는 채팅이 있는 서비스를 받지 않아서 쓰지 않는다. 회원 간 거래 대금은 계속 다루지 않고, 회사 자신의 서비스 이용요금만 회사 통장으로 받는다.
 `supabase/migrations/20261127_billing.sql` + Edge Function `bank-sync` (Verify JWT 끔) + 화면 `/biz-premium`(업체 플랜), `/admin/billing`(운영자), `/ads`(광고 안내·문의).
@@ -119,6 +128,7 @@ python3 dev-server.py   # http://localhost:8743 (vercel.json 의 clean URL 흉�
 | `share` | 공유 (물건·업체·지원사업·이야기·초대) |
 | `premium_view`, `billing_order` | 업체 플랜 화면 보기 / 플랜·이용권 주문 (입금 확인은 서버가 `billing_paid`) |
 | `ads_view`, `ads_inquiry`, `ad_view`, `ad_click` | 광고 안내 화면 / 광고 문의 / 광고 노출 / 광고 클릭 |
+| `install_hint`, `install_click` | 앱으로 쓰기 안내 봄 (아이폰 홈 화면에 추가 / 안드로이드 설치) / 플레이스토어로 이동 |
 | `purchase` | 안전결제 완료 |
 | `diagnose_view`, `diagnose_complete` | 진단 화면 보기(어디서 왔는지 `from`) / 결과 보기 (고른 답) |
 | `diagnose_unlock_click`, `diagnose_saved` | 익명이 "무료로 전체 보기" 누름 / 로그인 후 답 저장 |
