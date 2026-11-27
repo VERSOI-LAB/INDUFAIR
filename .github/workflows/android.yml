@@ -60,7 +60,8 @@ jobs:
         if: env.HAS_KEY != 'true'
         run: |
           chmod +x gradlew
-          ./gradlew --no-daemon assembleDebug
+          # bundleRelease: 서명 키를 넣었을 때 도는 배포용 빌드(검사 포함)가 깨지지 않았는지 미리 확인 (결과물은 안 올림)
+          ./gradlew --no-daemon assembleDebug bundleRelease
           mkdir -p out
           cp app/build/outputs/apk/debug/app-debug.apk "out/pandasanda-${VERSION_CODE}-test.apk"
 
