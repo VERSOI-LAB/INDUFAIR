@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">판다산다</string>
+    <string name="host">www.pandasanda.com</string>
+    <!-- ?app=android : 사이트가 앱에서 열린 것을 알아보게 (앱 설치 안내를 숨김) -->
+    <string name="launch_url">https://www.pandasanda.com/?app=android</string>
+    <string name="provider_authority">com.pandasanda.app.fileprovider</string>
+    <string name="asset_statements" translatable="false">[{\"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://www.pandasanda.com\"}}]</string>
+</resources>

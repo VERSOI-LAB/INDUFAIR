@@ -1,0 +1,48 @@
+// 판다산다 안드로이드 앱 (Trusted Web Activity: https://www.pandasanda.com 을 크롬으로 주소창 없이 띄움)
+//   사이트를 고치면 앱에도 바로 반영돼요. 앱을 다시 올려야 하는 건 아이콘·이름·주소·권한을 바꿀 때뿐
+//   빌드: GitHub Actions (.github/workflows/android.yml). 서명 키는 저장소에 넣지 않고 Secrets 로
+plugins { id 'com.android.application' }
+
+def env = { String k -> System.getenv(k) }
+def signed = env('KEYSTORE_FILE') != null
+
+android {
+    namespace 'com.pandasanda.app'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.pandasanda.app'
+        minSdk 23
+        targetSdk 36
+        // 스토어에 올릴 때마다 커져야 함: 빌드 번호를 씀
+        versionCode((env('VERSION_CODE') ?: '1').toInteger())
+        versionName '1.0.' + (env('VERSION_CODE') ?: '0')
+    }
+
+    signingConfigs {
+        if (signed) {
+            release {
+                storeFile file(env('KEYSTORE_FILE'))
+                storePassword env('KEYSTORE_PASSWORD')
+                keyAlias env('KEY_ALIAS')
+                keyPassword env('KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (signed) signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}
