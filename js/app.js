@@ -61,8 +61,8 @@
   PS.canPay = async function (sellerId) { return !!(await PS.paySellers([sellerId]))[sellerId]; };
   PS.isTestPay = function () { return /^test_/.test(PS.TOSS_CLIENT_KEY); };
   PS.isWidgetPay = function () { return /^(test|live)_gck_/.test(PS.TOSS_CLIENT_KEY); };
-  // 결제 심사용 계정. 오픈 전까지 로그인 화면 아래에 보여 준다 (없으면 null)
-  PS.REVIEW_ACCOUNT = { id: 'pandasanda@gmail.com', pw: '000000' };
+  // 결제 심사용 계정. 값을 넣으면 로그인 화면 아래에 보여 준다 (null 이면 안 보임)
+  PS.REVIEW_ACCOUNT = null;
 
   // 대분류 5개 (중·소분류는 나중에 categories.parent_id 로 추가)
   PS.CATEGORIES = ['중고장터', '산업기계', '공구·부품', '자동화·전기', '물류·창고'];
@@ -1038,11 +1038,9 @@
     if (!el) return;
     var b = PS.BIZ;
     el.innerHTML =
-      '<b>판다산다 고객센터 <a href="tel:' + b.phone + '">' + b.phone + '</a></b>' +
       '<p>상호 ' + b.name + ' · 대표자 ' + b.ceo + '<br>' +
         '사업자등록번호 ' + b.regNo + ' · 통신판매업 신고번호 ' + b.mailOrderNo + '<br>' +
-        '사업장 주소 ' + b.address + '<br>' +
-        '전화 <a href="tel:' + b.phone + '">' + b.phone + '</a> · 이메일 <a href="mailto:' + b.email + '">' + b.email + '</a></p>' +
+        '사업장 주소 ' + b.address + '</p>' +
       '<p>판다산다는 회사가 직접 판매하는 유료 서비스를 제외하고는 통신판매중개자로서 거래 당사자가 아니며, 회원이 올린 물건 정보와 거래에 대한 책임은 해당 판매자에게 있습니다. 판다산다는 회원 간 거래의 대금을 받거나 보관하지 않습니다.</p>' +
       '<p class="links"><a href="/terms">' + (PS.policyNoticeOn() ? '<strong>이용약관</strong> (11.29 변경)' : '이용약관') + '</a><a href="/privacy' + (PS.policyNoticeOn() ? '#notice' : '') + '"><strong>개인정보처리방침</strong>' +
         (PS.policyNoticeOn() ? ' (11.29 변경)' : '') + '</a><a href="/policy">직거래·환불 안내</a></p>';
