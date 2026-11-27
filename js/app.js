@@ -36,7 +36,7 @@
   // 개인(비사업자) 판매자 물건은 채팅으로 직접 거래. 판매 대금은 토스페이먼츠 지급대행으로 지급한다.
   // 서버(주문 생성·결제 승인)에서도 같은 조건으로 막으므로 여기는 화면 표시용
   // 회원 간 안전결제(구매하기·장바구니·주문·정산) 켜기/끄기. 2026-11: 끔 → 회원 간 거래는 채팅 후 당사자끼리 직접.
-  //   토스페이먼츠 결제는 회사가 직접 파는 유료 서비스(업체 프리미엄)에만 쓴다. 서버도 20261124_safe_pay_off.sql 로 막혀 있음
+  //   서버도 20261124_safe_pay_off.sql 로 막혀 있음. 회사 유료 서비스(업체 플랜·이용권·광고)는 계좌이체 + 팝빌 (20261127_billing.sql)
   PS.SAFE_PAY = false;
   var paySellerCache = {};
   PS.paySellers = async function (ids) {
@@ -1328,6 +1328,24 @@
         }
       });
     }
+  };
+
+  // ---- 광고 자리 (supabase/migrations/20261127_billing.sql 의 ad_campaigns) ----
+  // placement: support_list | support_detail | events | diagnose. 켜진 광고가 없으면 아무것도 그리지 않음
+  // 노출·클릭은 marketing_events 의 ad_view / ad_click (운영자 결제 관리 화면에서 봄)
+  PS.renderAd = async function (placement, el) {
+    if (!el || !window.sb) return;
+    var r;
+    try { r = await sb.rpc('active_ad', { p_placement: placement }); } catch (_) { return; }
+    var a = r && !r.error && r.data && r.data[0];
+    if (!a) { el.innerHTML = ''; return; }
+    el.innerHTML = '<div class="ad-slot"><div class="ad-top"><span class="ad-tag">광고</span><span class="ad-by">' + PS.esc(a.advertiser) + '</span><a class="ad-ask" href="/ads">광고 문의</a></div>' +
+      '<a class="ad-body" href="' + PS.esc(a.link_url) + '" target="_blank" rel="noopener sponsored">' +
+        (a.image_url ? '<img src="' + PS.esc(a.image_url) + '" alt="" loading="lazy">' : '') +
+        '<span class="ad-tx"><b>' + PS.esc(a.title) + '</b>' + (a.body ? '<span>' + PS.esc(a.body) + '</span>' : '') + '</span>' +
+        '<span class="ad-cta">' + PS.esc(a.cta) + '</span></a></div>';
+    PS.track('ad_view', { ad_id: a.id, placement: placement });
+    el.querySelector('.ad-body').addEventListener('click', function () { PS.track('ad_click', { ad_id: a.id, placement: placement }); });
   };
 
   // 하단 탭바는 모든 페이지에 항상 고정 (페이지가 직접 그리지 않으면 주소로 판단해 자동으로)

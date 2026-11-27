@@ -512,3 +512,17 @@ h1,h2{letter-spacing:-.03em;} /* 큰 제목은 조금 더 좁혀야 덩어리져
 .sw input:checked + i::after{transform:translateX(20px);}
 .sw input:focus-visible + i{outline:2px solid var(--text);outline-offset:2px;}
 .sw input:disabled + i{opacity:.5;}
+
+/* 광고 자리 (PS.renderAd): '광고' 표시를 항상 위에 */
+.ad-slot{margin-top:16px;padding:12px 14px 14px;border-radius:16px;border:1.5px solid var(--line);background:var(--surface);}
+.ad-top{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--hint);}
+.ad-tag{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:6px;background:#F2F2F2;color:var(--sub);font-weight:800;}
+.ad-by{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ad-ask{margin-left:auto;flex-shrink:0;text-decoration:underline;}
+.ad-body{display:flex;align-items:center;gap:12px;margin-top:8px;color:var(--text);}
+.ad-body img{width:56px;height:56px;border-radius:12px;object-fit:cover;flex-shrink:0;background:#F2F2F2;}
+.ad-tx{flex:1;min-width:0;}
+.ad-tx b{display:block;font-size:16px;font-weight:800;line-height:1.35;word-break:keep-all;}
+.ad-tx span{display:block;font-size:14px;color:var(--sub);margin-top:2px;line-height:1.4;}
+.ad-cta{flex-shrink:0;height:36px;padding:0 12px;border-radius:10px;background:var(--primary-light);font-size:14px;font-weight:800;display:inline-flex;align-items:center;}
+@media (max-width:360px){ .ad-body{flex-wrap:wrap;} .ad-cta{width:100%;justify-content:center;} }

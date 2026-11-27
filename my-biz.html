@@ -23,8 +23,6 @@
   .acts a,.acts button{height:36px;border-radius:10px;border:1px solid var(--line);font-size:14px;font-weight:800;display:flex;align-items:center;justify-content:center;background:#fff;}
   .acts .prem{grid-column:1 / -1;height:auto;min-height:36px;padding:6px 8px;text-align:center;line-height:1.3;background:var(--primary-light);border-color:var(--primary);} /* 좁은 화면에서는 두 줄 */
   .acts .prem.on{background:var(--primary);}
-  .acts .unsub{grid-column:1 / -1;background:#F2F2F2;border-color:#F2F2F2;color:var(--sub);}
-  .acts .ended{grid-column:1 / -1;font-size:13px;color:var(--sub);text-align:center;margin:2px 0 0;}
 </style>
 </head>
 <body>
@@ -57,65 +55,35 @@
     }
     var res = await sb.from('businesses').select(PS.BIZ_COLUMNS + ',hidden_reason').eq('owner_id', user.id).neq('status', 'deleted').order('created_at', { ascending: false });
     var list = res.data || [];
-    // 프리미엄(월 정기결제) 이용 중인 업체. 컬럼이 아직 없으면(준비 전) 없는 것으로
-    var premium = {};
-    var pr = await sb.from('businesses').select('id,premium_until').eq('owner_id', user.id).gt('premium_until', new Date().toISOString());
-    if (!pr.error) (pr.data || []).forEach(function (x) { premium[x.id] = x.premium_until; });
-    // 자동결제 상태 (해지 버튼 표시용). 표가 아직 없으면 없는 것으로
-    var subs = {};
-    var sr = await sb.from('biz_subscriptions').select('business_id,status,period_end').eq('owner_id', user.id);
-    if (!sr.error) (sr.data || []).forEach(function (x) { subs[x.business_id] = x; });
-    var day = function (iso) { var d = new Date(iso); return d.getFullYear() + '.' + (d.getMonth() + 1) + '.' + d.getDate(); };
-    // 자동결제가 걸려 있으면 해지 버튼, 이미 해지했으면 언제까지 쓰는지 안내
-    var subHtml = function (id) {
-      var s = subs[id];
-      if (!s) return '';
-      if (s.status === 'active' || s.status === 'past_due') return '<button type="button" class="unsub" data-unsub="' + id + '">자동결제 해지하기</button>';
-      if (s.status === 'canceled' && new Date(s.period_end) > new Date()) return '<p class="ended">자동결제를 해지했어요 · ' + day(s.period_end) + '까지 이용</p>';
-      return '';
+    // 플랜·무료 혜택(첫 달 무료·초대 보상) 이용 중인 업체. 컬럼이 아직 없으면(준비 전) 없는 것으로
+    var premium = {}, plan = {}, now = new Date().toISOString();
+    var pr = await sb.from('businesses').select('id,premium_until,plan_tier,plan_until').eq('owner_id', user.id);
+    if (!pr.error) (pr.data || []).forEach(function (x) {
+      if (x.premium_until && x.premium_until > now) premium[x.id] = x.premium_until;
+      if (x.plan_until && x.plan_until > now) plan[x.id] = x;
+    });
+    var day = function (iso) { var d = new Date(iso); return (d.getMonth() + 1) + '.' + d.getDate(); };
+    var planLabel = function (id) {
+      var p = plan[id];
+      if (p) return (p.plan_tier === 'biz' ? '비즈' : '프로') + ' 플랜 · ' + day(p.plan_until) + '까지 · 연장하기';
+      if (premium[id]) return '무료 혜택 이용 중 · ' + day(premium[id]) + '까지 · 플랜 보기';
+      return '업체 플랜 · 매일 자동 끌어올리기 · 견적 더 보내기';
     };
     var hideInvite = await PS.inviteHidden();
     main.innerHTML =
       '<div class="vcard">' + PS.ntsBadge(v) + '<b>' + PS.esc(v.company_name) + '</b><span class="no">' + PS.esc(v.biz_reg_no) + '</span>' +
         (v.nts_status === 'suspended' || v.nts_status === 'closed' || v.nts_status === 'unregistered' ? '<span style="color:var(--danger);font-size:13px;font-weight:700">국세청 확인 결과 때문에 업체 소개가 숨겨졌어요. 다시 운영하면 자동으로 보여요.</span>' : '') + '</div>' +
       (hideInvite ? '' : PS.inviteBannerHtml()) +
-      '<a class="dg-banner" href="/rfq"><span class="dg-ico" aria-hidden="true">₩</span><span class="dg-tx"><b>견적 요청 보러 가기</b><span>물건을 찾는 구매자에게 견적을 보내 보세요 (무료 30일 3건)</span></span><span class="dg-arrow" aria-hidden="true">›</span></a>' +
+      '<a class="dg-banner" href="/rfq"><span class="dg-ico" aria-hidden="true">₩</span><span class="dg-tx"><b>견적 요청 보러 가기</b><span>물건을 찾는 구매자에게 견적을 보내 보세요 (무료 30일 3건, 프로 30건)</span></span><span class="dg-arrow" aria-hidden="true">›</span></a>' +
       (list.length < 3 ? '<a class="btn" href="/biz/new" style="margin-top:12px">' + PS.icon3d('home', 30) + ' 새 업체 소개하기 (' + list.length + '/3)</a>' : '<p style="margin-top:12px;color:var(--sub);font-size:14px">업체는 3개까지 소개할 수 있어요</p>') +
       (list.length ? '<div class="bizgrid" style="margin-top:20px">' + list.map(function (b) {
           return '<div>' + PS.bizCardHtml(b, {}) +
             (b.status === 'hidden' ? '<p style="color:var(--danger);font-size:13px;font-weight:700;margin-top:4px">' + (b.hidden_reason === 'nts' ? '국세청 확인으로 숨겨졌어요' : '신고로 숨겨졌어요') + '</p>' : '') +
             '<div class="acts"><a href="/biz/new?id=' + b.id + '">수정</a><button type="button" data-bump="' + b.id + '">끌어올리기</button>' +
-              '<a class="prem' + (premium[b.id] ? ' on' : '') + '" href="/biz-premium?id=' + b.id + '">' +
-                (premium[b.id] ? '프리미엄 이용 중 · 관리' : '매일 자동 끌어올리기 · 월 1만원') + '</a>' + subHtml(b.id) + '</div></div>';
+              '<a class="prem' + (premium[b.id] ? ' on' : '') + '" href="/biz-premium?id=' + b.id + '">' + planLabel(b.id) + '</a></div></div>';
         }).join('') + '</div>'
         : '<div class="empty" style="padding:32px 0">' + PS.icon3d('home', 72) + '<b>아직 소개한 업체가 없어요</b></div>');
     main.addEventListener('click', async function (e) {
-      // 자동결제 해지: 결제한 기간 끝까지는 그대로 이용, 다음 청구만 없앰
-      var u = e.target.closest('[data-unsub]');
-      if (u) {
-        var s = subs[u.dataset.unsub];
-        if (!confirm('자동결제를 해지할까요?\n' + day(s.period_end) + '까지는 그대로 이용하고, 그 뒤로는 결제되지 않아요.')) return;
-        u.disabled = true;
-        try {
-          var token = await PS.accessToken();
-          var res = await fetch(PS.FUNCTIONS_URL + '/biz-billing', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify({ action: 'cancel', businessId: u.dataset.unsub })
-          });
-          var d = await res.json().catch(function () { return {}; });
-          if (!res.ok || !d.ok) throw new Error(d.code || 'cancel failed');
-        } catch (err) {
-          console.error(err);
-          u.disabled = false;
-          PS.toast('해지하지 못했어요. 잠시 후 다시 해 주세요');
-          return;
-        }
-        s.status = 'canceled';
-        u.outerHTML = subHtml(u.dataset.unsub);
-        PS.toast('자동결제를 해지했어요');
-        return;
-      }
       var b = e.target.closest('[data-bump]');
       if (!b) return;
       var r = await sb.rpc('bump_business', { p_business_id: b.dataset.bump });

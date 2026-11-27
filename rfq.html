@@ -113,7 +113,7 @@
         return '<a class="chip' + (c === cat ? ' on' : '') + '" href="' + qs(kind, c) + '">' + (c || '전체') + '</a>';
       }).join('') + '</div>' +
       '<div id="rqList"><div class="skeleton" style="height:70px;margin-top:12px"></div><div class="skeleton" style="height:70px;margin-top:12px"></div></div>' +
-      '<p style="margin-top:20px;font-size:13px;color:var(--hint);line-height:1.6">업체는 ' + (sell ? '매입 제안' : '견적') + '을 보낼 수 있어요 (무료 30일 3건, 프리미엄 무제한). 올린 분의 연락처는 공개되지 않고, 마음에 드는 ' + (sell ? '제안' : '견적') + '이 있으면 올린 분이 채팅을 시작해요.</p>' +
+      '<p style="margin-top:20px;font-size:13px;color:var(--hint);line-height:1.6">업체는 ' + (sell ? '매입 제안을 보낼 수 있어요 (프로 플랜 30일 3건, 비즈 10건, 그 밖에는 매입 제안권)' : '견적을 보낼 수 있어요 (무료 30일 3건, 프로 30건, 비즈 무제한)') + '. 올린 분의 연락처는 공개되지 않고, 마음에 드는 ' + (sell ? '제안' : '견적') + '이 있으면 올린 분이 채팅을 시작해요.</p>' +
       '<div style="height:24px"></div>';
     var q = sb.from('rfq_requests').select('id,kind,title,category,region,quantity,budget,reason,status,quote_count,expires_at,created_at')
       .eq('kind', kind).eq('status', 'open').gt('expires_at', new Date().toISOString()).order('created_at', { ascending: false }).limit(50);
@@ -287,14 +287,18 @@
       html += '<div class="box"><h3>보낸 ' + W.quote + '</h3><p>' + (m.price == null ? '가격 협의' : PS.esc(PS.won(m.price))) + (m.lead_time ? ' · ' + W.leadL + ' ' + PS.esc(m.lead_time) : '') + '</p>' +
         '<p style="color:var(--text);white-space:pre-wrap">' + PS.esc(m.message) + '</p><p>' + W.who + ' 채팅을 시작하면 채팅 알림으로 알려 드려요.</p></div>';
     } else if (v.role === 'seller' && r.status === 'open') {
-      var qt = v.quota;
-      if (qt.left === 0) {
-        html += '<div class="box" style="background:var(--primary-light);border-color:var(--primary)"><h3>최근 30일 무료 견적·제안 3건을 다 썼어요</h3>' +
-          '<p>업체 프리미엄(월 1만 원)이면 견적·매입 제안을 무제한으로 보내고, 동네 업체 맨 앞에 고정돼요.</p>' +
-          '<a class="btn" id="upsellBtn" href="/biz-premium?id=' + encodeURIComponent(qt.business_id) + '">프리미엄 알아보기</a></div>';
+      var qt = v.quota, TN = { free: '무료', pro: '프로', biz: '비즈' }, ticket = S ? '매입 제안권' : '견적권';
+      var planHref = '/biz-premium?id=' + encodeURIComponent(qt.business_id);
+      if (qt.left === 0 && !qt.credits) {
+        html += '<div class="box" style="background:var(--primary-light);border-color:var(--primary)"><h3>' +
+            (qt.limit ? '최근 30일 ' + TN[qt.tier] + ' 플랜 ' + W.quote + ' ' + qt.limit + '건을 다 썼어요' : W.quote + '은 프로·비즈 플랜이나 ' + ticket + '으로 보낼 수 있어요') + '</h3>' +
+          '<p>' + (S ? '프로 플랜(월 3만 원, 부가세 별도)은 매입 제안 30일 3건, 비즈는 10건이에요. 플랜 없이 매입 제안권 3장(3만 원, 부가세 별도)으로도 보낼 수 있어요.'
+                     : '프로 플랜(월 3만 원, 부가세 별도)은 견적 30일 30건, 비즈는 무제한이에요. 플랜 없이 견적권 10장(2만 원, 부가세 별도)으로도 보낼 수 있어요.') + '</p>' +
+          '<a class="btn" id="upsellBtn" href="' + planHref + '">플랜·' + ticket + ' 보기</a></div>';
       } else {
         html += '<div class="box"><h3>' + PS.esc(qt.business_name) + '(으)로 ' + W.send + '</h3>' +
-          '<p>' + (qt.left < 0 ? '프리미엄: 무제한' : '무료 ' + qt.left + '건 남음 (30일 기준)') + ' · ' + W.who + ' 마음에 들면 채팅을 시작해요</p>' +
+          '<p>' + (qt.left < 0 ? TN[qt.tier] + ' 플랜: 무제한' : qt.left > 0 ? TN[qt.tier] + ' 플랜 ' + qt.left + '건 남음 (30일 기준)' : ticket + ' 1장을 써요 (' + qt.credits + '장 남음)') +
+            ' · ' + W.who + ' 마음에 들면 채팅을 시작해요</p>' +
           '<label class="f-l">' + W.price + ' <small>(선택, 원) 비우면 가격 협의</small><input class="input" id="qPrice" inputmode="numeric" maxlength="12" placeholder="' + (S ? '예) 25000000' : '예) 1400000') + '"></label>' +
           '<label class="f-l">' + W.leadL + ' <small>(선택)</small><input class="input" id="qLead" maxlength="30" placeholder="' + W.leadPh + '"></label>' +
           '<label class="f-l">' + W.quote + ' 내용<textarea class="input" id="qMsg" maxlength="500" placeholder="' + W.msgPh + '"></textarea></label>' +
@@ -337,7 +341,7 @@
       var s = await sb.rpc('submit_quote', { p_rfq: r.id, p_price: price ? Number(price) : null, p_message: msg, p_lead_time: $('qLead').value.trim() });
       btn.disabled = false;
       if (s.data === 'ok') { PS.track('rfq_quote', { rfq_id: r.id, kind: r.kind, price: price ? Number(price) : 0 }); PS.toast(W.quote + '을 보냈어요'); detail(id); return; }
-      PS.toast({ quota: '최근 30일 무료 견적을 다 썼어요', closed: '마감된 요청이에요', already: '이미 견적을 보냈어요', blocked: '이 구매자에게는 견적을 보낼 수 없어요', need_biz: '업체 소개를 먼저 올려 주세요', bad_input: '내용을 다시 확인해 주세요' }[s.data] || '보내지 못했어요. 잠시 후 다시 해 주세요');
+      PS.toast({ quota: '보낼 수 있는 ' + W.quote + '을 다 썼어요', closed: '마감된 요청이에요', already: '이미 견적을 보냈어요', blocked: '이 구매자에게는 견적을 보낼 수 없어요', need_biz: '업체 소개를 먼저 올려 주세요', bad_input: '내용을 다시 확인해 주세요' }[s.data] || '보내지 못했어요. 잠시 후 다시 해 주세요');
       if (s.data === 'quota' || s.data === 'closed' || s.data === 'already') detail(id);
     };
   }

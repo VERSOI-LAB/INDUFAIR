@@ -3,7 +3,7 @@ var L = require('./_lib');
 var G = require('./landing');
 var S = require('./seo');
 
-var STATIC = ['/', '/buy', '/business', '/community', '/support', '/support/weekly', '/diagnose', '/price', '/liquidation', '/events', '/terms', '/privacy', '/policy'];
+var STATIC = ['/', '/buy', '/business', '/community', '/support', '/support/weekly', '/diagnose', '/price', '/liquidation', '/events', '/ads', '/terms', '/privacy', '/policy'];
 var PAGE = 1000;     // Supabase REST 한 번에 받는 최대 행 수
 var MAX = 40000;     // 사이트맵 하나에 넣을 수 있는 주소는 50,000개까지
 
