@@ -78,6 +78,10 @@
       "destination": "/billing-admin"
     },
     {
+      "source": "/admin/blog",
+      "destination": "/blog-admin"
+    },
+    {
       "source": "/community/write",
       "destination": "/community"
     },

@@ -181,7 +181,8 @@
     var cnt = n.error ? 0 : (n.data || 0);
     main.insertAdjacentHTML('beforeend', '<section class="mcard"><h3>운영</h3>' +
       row('/community/admin', 'chat', '이야기 신고 검토', cnt ? '<span class="badge-n">' + (cnt > 99 ? '99+' : cnt) + '</span>' : '') +
-      row('/admin/billing', 'chat', '결제 관리 (입금·세금계산서·광고)', '') + '</section>');
+      row('/admin/billing', 'chat', '결제 관리 (입금·세금계산서·광고)', '') +
+      row('/admin/blog', 'chat', '네이버 블로그 글 (자동 준비)', '') + '</section>');
   }
 
   // 키워드 알림: 마지막으로 본 뒤 새로 올라온, 키워드가 들어간 물건 수

@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex, nofollow">
+<title>블로그 글 - 판다산다</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="stylesheet" href="/app.css">
+<style>
+  .help{margin-top:14px;color:var(--sub);line-height:1.6;font-size:14px;}
+  .tabs{margin-top:16px;}
+  .card{display:block;margin-top:10px;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);font-size:15px;line-height:1.5;color:inherit;text-decoration:none;}
+  .card .h{display:flex;justify-content:space-between;gap:10px;font-weight:800;}
+  .card .h span{flex-shrink:0;}
+  .card .m{font-size:13px;color:var(--sub);margin-top:2px;word-break:break-all;}
+  .err{font-size:13px;color:var(--danger);margin-top:6px;word-break:break-all;line-height:1.5;}
+  .badge{display:inline-block;font-size:12px;font-weight:800;padding:2px 8px;border-radius:8px;background:#E8E8E8;}
+  .badge.ready{background:#E6F7EC;color:#167A3A;} .badge.failed{background:#FFF0EF;color:#E5443A;}
+  .badge.published{background:#EAF2FE;color:#2F5BD3;} .badge.work{background:#FFF6DB;color:#8A6200;}
+  .none{padding:28px 0;text-align:center;color:var(--sub);font-size:15px;}
+  h2.t{font-size:17px;font-weight:800;margin-top:24px;}
+  .titles label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;margin-top:6px;border:1.5px solid var(--line);border-radius:12px;font-size:15px;line-height:1.45;font-weight:700;}
+  .titles label.on{border-color:var(--primary);background:var(--primary-light);}
+  .titles input{margin-top:3px;flex-shrink:0;}
+  .titles small{display:block;font-weight:600;color:var(--sub);font-size:12px;}
+  .acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;}
+  .acts .btn{height:46px;font-size:15px;}
+  .acts .wide{grid-column:1/-1;}
+  .preview{margin-top:12px;padding:20px 18px;border:1.5px solid var(--line);border-radius:14px;font-size:16px;line-height:1.8;word-break:keep-all;overflow-wrap:anywhere;}
+  .preview h3{font-size:19px;font-weight:800;margin:26px 0 8px;}
+  .preview p{margin:0 0 14px;}
+  .preview img{display:block;width:100%;height:auto;border-radius:10px;}
+  .preview .cap{font-size:13px;color:var(--sub);text-align:center;margin-top:-8px;}
+  .stats{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:13px;}
+  .stats span{padding:4px 10px;border-radius:10px;background:var(--bg);}
+  details{margin-top:12px;font-size:14px;line-height:1.6;}
+  details summary{font-weight:800;cursor:pointer;}
+  details pre{white-space:pre-wrap;word-break:break-all;font:13px/1.6 inherit;background:var(--bg);padding:12px;border-radius:10px;max-height:360px;overflow:auto;}
+  form.f{display:grid;gap:10px;margin-top:12px;padding:16px;border-radius:14px;background:var(--bg);}
+  form.f label{font-size:14px;font-weight:700;display:grid;gap:4px;}
+  form.f .input{height:46px;font-size:15px;}
+  form.f textarea.input{height:80px;padding:10px 14px;resize:vertical;font:15px/1.5 inherit;}
+  .row2{display:flex;gap:8px;margin-top:8px;}
+  .row2 .input{height:46px;font-size:14px;flex:1;min-width:0;}
+  .row2 .btn{width:auto;padding:0 16px;height:46px;font-size:15px;flex-shrink:0;}
+  .topic{display:flex;gap:10px;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.5;}
+  .topic b{display:block;font-size:15px;}
+  .topic small{color:var(--sub);}
+  .topic button{flex-shrink:0;height:34px;padding:0 10px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-size:13px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="app no-tabbar">
+  <header class="topbar"><a class="back" href="/mypage" aria-label="마이로" id="backBtn"><i data-icon="back" data-size="24"></i></a><h1>블로그 글</h1></header>
+  <main class="page" id="main"><div class="skeleton" style="height:160px;margin-top:20px"></div></main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/app.js"></script>
+<script>
+// 네이버 블로그 글 (supabase/migrations/20261128_blog_drafts.sql, Edge Function blog-draft)
+//   목록 → 글 하나: 제목 고르기 → [본문 복사] → 네이버 글쓰기에 붙여 넣기 → 태그 붙여 넣기 → 예약발행 → 발행 주소 저장
+(function () {
+  var main = document.getElementById('main');
+  var E = PS.esc;
+  var SITE = 'https://www.pandasanda.com';
+  var RED = '#FF0000';
+  var PILLAR = { support: '지원사업', buying: '중고 구매 체크', maintenance: '고장·정비', disposal: '처분·폐업', safety: '안전·법규', qna: '현장 Q&A' };
+  var STATUS = { queued: ['대기', 'work'], writing: ['쓰는 중', 'work'], imaging: ['이미지 만드는 중', 'work'], ready: ['준비됨', 'ready'], failed: ['실패', 'failed'], published: ['발행함', 'published'], skipped: ['건너뜀', ''] };
+  // 글 끝 안내 링크 (UTM 으로 블로그 유입을 따로 셈)
+  var CTA = {
+    support: [['/diagnose', '우리 회사가 받을 수 있는 지원사업만 골라 보기 (30초 진단)'], ['/support/weekly', '이번 주 마감 지원사업 전체 보기']],
+    buying: [['/buy', '판다산다에서 중고 산업용품 둘러보기']],
+    maintenance: [['/community', '현장 고민은 판다산다 이야기 게시판에 물어보세요']],
+    disposal: [['/sell', '안 쓰는 장비, 사진 한 장으로 판다산다에 올리기']],
+    safety: [['/support', '안전·설비 관련 정부 지원사업 보기']],
+    qna: [['/community', '궁금한 건 판다산다 이야기 게시판에 물어보세요']]
+  };
+  var WEEK = ['일', '월', '화', '수', '목', '금', '토'];
+  var day = function (d) { var x = new Date(d + 'T00:00:00'); return (x.getMonth() + 1) + '/' + x.getDate() + ' (' + WEEK[x.getDay()] + ')'; };
+  var params = new URLSearchParams(location.search);
+  var tab = params.get('tab') || 'drafts', timer = null;
+
+  async function fn(body) {
+    var token = await PS.accessToken();
+    var res = await fetch(PS.FUNCTIONS_URL + '/blog-draft', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify(body) });
+    return res.json().catch(function () { return {}; });
+  }
+  function go(q) { history.pushState(null, '', '/admin/blog' + (q ? '?' + q : '')); params = new URLSearchParams(q || ''); tab = params.get('tab') || 'drafts'; route(); }
+  window.addEventListener('popstate', function () { params = new URLSearchParams(location.search); tab = params.get('tab') || 'drafts'; route(); });
+
+  PS.ready.then(async function (user) {
+    if (!user) return PS.goLogin();
+    var ok = await sb.rpc('is_app_admin');
+    if (ok.error || ok.data !== true) { main.innerHTML = '<div class="empty">' + PS.sticker('sorry', 100) + '<b>운영자만 볼 수 있어요</b></div>'; return; }
+    route();
+  });
+
+  function route() {
+    clearTimeout(timer);
+    if (params.get('id')) return detail(Number(params.get('id')));
+    if (tab === 'topics') return topics();
+    return list();
+  }
+  function tabsHtml() {
+    return '<div class="chips tabs">' + [['drafts', '글'], ['topics', '주제 창고']].map(function (t) {
+      return '<button class="chip' + (tab === t[0] ? ' on' : '') + '" data-tab="' + t[0] + '">' + t[1] + '</button>';
+    }).join('') + '</div>';
+  }
+  function badge(s) { var x = STATUS[s] || [s, '']; return '<span class="badge ' + x[1] + '">' + x[0] + '</span>'; }
+  var pickedTitle = function (d) { return ((d.titles || [])[d.title_pick || 0] || {}).text || d.topic || '(제목 준비 중)'; };
+
+  // ---- 목록 ----
+  async function list() {
+    var r = await sb.from('blog_drafts').select('id,slot_date,pillar,status,topic,titles,title_pick,error,naver_url').order('slot_date', { ascending: false }).limit(40);
+    if (r.error) { main.innerHTML = '<div class="empty"><b>불러오지 못했어요</b>' + E(r.error.message) + '</div>'; return; }
+    var rows = r.data || [];
+    main.innerHTML = tabsHtml() +
+      '<p class="help">월(지원사업)·수(구매 체크·정비·처분)·금(안전·법규·Q&A) 글을 전날 밤 9시에 자동으로 만들어요. 준비되면 푸시가 와요. 글을 열어 <b>본문 복사</b> → 네이버 글쓰기에 붙여 넣기 → 예약발행 하면 돼요.</p>' +
+      '<div class="acts"><button class="btn wide" id="makeNext">다음 발행일 글 지금 만들기</button></div>' +
+      (rows.length ? rows.map(function (d) {
+        return '<a class="card" href="/admin/blog?id=' + d.id + '" data-id="' + d.id + '"><div class="h"><div>' + day(d.slot_date) + ' · ' + E(PILLAR[d.pillar] || d.pillar) + '</div><span>' + badge(d.status) + '</span></div>' +
+          '<div style="margin-top:4px">' + E(pickedTitle(d)) + '</div>' +
+          (d.status === 'failed' && d.error ? '<div class="err">' + E(d.error) + '</div>' : '') + '</a>';
+      }).join('') : '<div class="none">아직 만든 글이 없어요</div>');
+    if (rows.some(function (d) { return /queued|writing|imaging/.test(d.status); })) timer = setTimeout(route, 15000);
+  }
+
+  // ---- 본문 HTML (미리보기·복사 같은 것) ----
+  function inline(s) { // **핵심 문장** → 빨간 굵은 글씨
+    return E(s).replace(/\*\*([^*\n]+?)\*\*/g, '<b><span style="color:' + RED + '">$1</span></b>');
+  }
+  function link(d, path) { return SITE + path + (path.indexOf('?') < 0 ? '?' : '&') + 'utm_source=naver_blog&utm_medium=content&utm_campaign=blog_' + d.slot_date + '_' + d.pillar; }
+  function bodyHtml(d) {
+    var imgs = d.images || [], n = 0, H = [];
+    H.push('<p>' + inline(d.hook || '') + '</p>');
+    (d.blocks || []).forEach(function (b) {
+      if (b.type === 'heading') H.push('<h3><b>' + E(String(b.text || '').replace(/\*\*/g, '')) + '</b></h3>');
+      else if (b.type === 'paragraph') H.push('<p>' + inline(b.text) + '</p>');
+      else if (b.type === 'list') {
+        if (b.text) H.push('<p>' + inline(b.text) + '</p>');
+        H.push('<p>' + (b.items || []).map(function (i) { return '✔ ' + inline(i); }).join('<br>') + '</p>');
+      } else if (b.type === 'image') {
+        var im = imgs[n++];
+        if (im) H.push('<p><img src="' + E(im.url) + '" alt="' + E(im.alt || b.text || '') + '"></p><p class="cap" style="text-align:center;color:#8B95A1;font-size:13px">' + E(im.alt || b.text || '') + '</p>');
+        else H.push('<p style="color:#8B95A1">[이미지 ' + n + ' 자리: ' + E(b.text) + ']</p>');
+      }
+    });
+    H.push('<p>' + (CTA[d.pillar] || []).map(function (c) { return '👉 <a href="' + E(link(d, c[0])) + '">' + E(c[1]) + '</a>'; }).join('<br>') + '</p>');
+    var src = (d.sources || []).filter(function (s) { return /^https?:\/\//.test(s.url || ''); }).slice(0, 5);
+    if (src.length) H.push('<p style="font-size:13px;color:#8B95A1">참고: ' + src.map(function (s) { return E(s.title || s.url) + ' (' + E(s.url) + ')'; }).join('<br>') + '</p>');
+    return H.join('\n');
+  }
+  function bodyPlain(d) {
+    var tmp = document.createElement('div'); tmp.innerHTML = bodyHtml(d).replace(/<br>/g, '\n').replace(/<\/(p|h3)>/g, '\n\n');
+    tmp.querySelectorAll('img').forEach(function (im, i) { im.replaceWith('[이미지 ' + (i + 1) + ']'); });
+    return tmp.textContent.replace(/\n{3,}/g, '\n\n').trim();
+  }
+  async function copyHtml(html, plain, el) {
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([plain], { type: 'text/plain' }) })]);
+      return true;
+    } catch (err) { // 오래된 브라우저: 미리보기를 선택해서 복사
+      var range = document.createRange(); range.selectNodeContents(el);
+      var sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e2) {}
+      sel.removeAllRanges(); return ok;
+    }
+  }
+  async function copyText(t) { try { await navigator.clipboard.writeText(t); return true; } catch (e) { return false; } }
+
+  // ---- 글 하나 ----
+  var cur = null;
+  async function detail(id) {
+    var r = await sb.from('blog_drafts').select('*').eq('id', id).maybeSingle();
+    if (r.error || !r.data) { main.innerHTML = '<div class="empty"><b>글을 찾지 못했어요</b></div>'; return; }
+    var d = cur = r.data, c = d.checks || {}, rule = c.rule || {}, working = /queued|writing|imaging/.test(d.status);
+    var step = { research: '자료 찾는 중', write: '글 쓰는 중', review: '검수 중', image: '이미지 만드는 중' }[c.step] || '';
+    var ready = (d.blocks || []).length > 0;
+    main.innerHTML =
+      '<div class="card" style="margin-top:16px"><div class="h"><div>' + day(d.slot_date) + ' · ' + E(PILLAR[d.pillar] || d.pillar) + '</div><span>' + badge(d.status) + '</span></div>' +
+      '<div class="m">주제: ' + E(d.topic || '-') + '</div>' +
+      (working ? '<div class="m">' + E(step) + '… 보통 3~6분 걸려요. 화면은 자동으로 새로 고쳐져요.</div>' : '') +
+      (d.error ? '<div class="err">' + E(d.error) + '</div>' : '') +
+      (d.naver_url ? '<div class="m"><a href="' + E(d.naver_url) + '" target="_blank" rel="noopener">' + E(d.naver_url) + '</a></div>' : '') + '</div>' +
+      (ready ?
+        '<h2 class="t">제목 고르기</h2><div class="titles">' + (d.titles || []).map(function (t, i) {
+          return '<label class="' + (i === (d.title_pick || 0) ? 'on' : '') + '"><input type="radio" name="tp" value="' + i + '"' + (i === (d.title_pick || 0) ? ' checked' : '') + '><span>' + E(t.text) + '<small>' + t.text.length + '자 · AI 점수 ' + (t.score || '-') + '</small></span></label>';
+        }).join('') + '</div>' +
+        '<div class="acts">' +
+          '<button class="btn white" data-act="copyTitle">제목 복사</button>' +
+          '<button class="btn" data-act="copyBody">본문 복사 (서식 포함)</button>' +
+          '<button class="btn white" data-act="copyTags">태그 복사</button>' +
+          '<button class="btn white" data-act="saveImgs">이미지 저장 (' + (d.images || []).length + '장)</button>' +
+          '<button class="btn gray wide" data-act="copyPlain">글자만 복사 (서식이 안 붙을 때)</button>' +
+        '</div>' +
+        '<p class="help">네이버 글쓰기에 붙여 넣은 뒤 이미지가 빠졌으면, 저장한 이미지를 [이미지 자리]에 끌어다 넣어 주세요. 빨간 굵은 글씨가 핵심 문장이에요. 태그는 글쓰기 아래 태그 칸에 붙여 넣으세요.</p>' +
+        '<div class="stats"><span>공백 빼고 ' + (d.char_count || rule.chars || '-') + '자</span><span>핵심 문장 ' + (rule.keys != null ? rule.keys : '-') + '개</span><span>이미지 ' + (d.images || []).length + '장</span>' +
+          (c.review ? '<span>검수 ' + (c.review.pass ? '통과' : '고쳐 씀') + '</span>' : '') + '</div>' +
+        '<h2 class="t">미리보기</h2><div class="preview" id="preview">' + bodyHtml(d) + '</div>' +
+        '<p class="help">태그: ' + E((d.tags || []).map(function (t) { return '#' + t; }).join(' ')) + '</p>' +
+        (c.review && (c.review.problems || []).length ? '<details><summary>검수에서 고친 점</summary><pre>' + E(c.review.problems.join('\n')) + '</pre></details>' : '') +
+        (d.facts ? '<details><summary>글에 쓴 자료 (사실 확인용)</summary><pre>' + E(d.facts) + '</pre></details>' : '')
+        : '') +
+      '<h2 class="t">발행</h2>' +
+      '<div class="row2"><input class="input" id="naverUrl" placeholder="발행한 글 주소 (https://blog.naver.com/…)" value="' + E(d.naver_url || '') + '"><button class="btn" data-act="published">발행 완료</button></div>' +
+      '<h2 class="t">다시 만들기</h2><div class="acts">' +
+        '<button class="btn white" data-act="rewrite">같은 주제로 다시 쓰기</button>' +
+        '<button class="btn white" data-act="reimage">이미지만 다시</button>' +
+        '<button class="btn white" data-act="newtopic">다른 주제로 바꾸기</button>' +
+        '<button class="btn danger" data-act="skip">이번 글 건너뛰기</button>' +
+      '</div><div style="height:40px"></div>';
+    document.getElementById('backBtn').setAttribute('href', '/admin/blog');
+    if (working) timer = setTimeout(route, 12000);
+  }
+
+  // ---- 주제 창고 ----
+  async function topics() {
+    var r = await sb.from('blog_topics').select('*').is('used_at', null).order('pillar').order('priority', { ascending: false }).order('id').limit(300);
+    var rows = r.data || [];
+    var count = {}; rows.forEach(function (t) { count[t.pillar] = (count[t.pillar] || 0) + 1; });
+    main.innerHTML = tabsHtml() +
+      '<p class="help">아직 안 쓴 주제예요. 우선순위가 높은 것부터 써요. 다 떨어지면 AI 가 겹치지 않는 새 주제를 정해요. 지원사업(월요일)은 그 주 공고로 자동이라 주제가 필요 없어요. 이야기 게시판에서 댓글 2개 이상 달린 질문은 Q&A 주제로 자동으로 들어와요.</p>' +
+      '<form class="f" id="addTopic"><label>종류<select class="input" name="pillar">' + ['buying', 'maintenance', 'disposal', 'safety', 'qna'].map(function (p) { return '<option value="' + p + '">' + PILLAR[p] + ' (' + (count[p] || 0) + '개 남음)</option>'; }).join('') + '</select></label>' +
+      '<label>주제 (질문 형태가 좋아요)<input class="input" name="idea" maxlength="190" required placeholder="예: 중고 프레스 살 때 클러치 상태 보는 법"></label>' +
+      '<label>꼭 담을 내용 (선택)<textarea class="input" name="angle" maxlength="480" placeholder="예: 소음, 브레이크 각도, 안전장치 유무"></textarea></label>' +
+      '<button class="btn small">주제 넣기 (먼저 써요)</button></form>' +
+      ['buying', 'maintenance', 'disposal', 'safety', 'qna'].map(function (p) {
+        var ts = rows.filter(function (t) { return t.pillar === p; });
+        return '<h2 class="t">' + PILLAR[p] + ' · ' + ts.length + '개</h2>' + (ts.length ? ts.map(function (t) {
+          return '<div class="topic"><div><b>' + E(t.idea) + '</b><small>' + E(t.angle || '') + ' · ' + ({ seed: '기본', manual: '직접', community: '게시판 질문', ai: 'AI' }[t.source] || t.source) + ' · 우선 ' + t.priority + '</small></div><button data-del="' + t.id + '">지우기</button></div>';
+        }).join('') : '<div class="none">남은 주제가 없어요 (AI 가 정해요)</div>');
+      }).join('') + '<div style="height:40px"></div>';
+  }
+
+  // ---- 동작 ----
+  document.addEventListener('click', async function (e) {
+    var t;
+    if ((t = e.target.closest('[data-tab]'))) return go(t.dataset.tab === 'drafts' ? '' : 'tab=' + t.dataset.tab);
+    if ((t = e.target.closest('a.card[data-id]'))) { e.preventDefault(); return go('id=' + t.dataset.id); }
+    if (e.target.id === 'makeNext') {
+      e.target.disabled = true;
+      var m = await fn({ make: true });
+      var made = m.made || {};
+      if (made.id && !made.skipped) { PS.toast(day(m.date) + ' 글을 만들기 시작했어요'); return go('id=' + made.id); }
+      PS.toast({ exists: '그날 글이 이미 있어요', published: '그날 글은 이미 발행했어요', no_support_programs: '이번 주 지원사업 공고가 없어요', no_topic: '주제가 없어요' }[made.skipped] || m.message || '만들지 못했어요');
+      e.target.disabled = false; return;
+    }
+    if ((t = e.target.closest('[data-del]'))) {
+      if (!confirm('이 주제를 지울까요?')) return;
+      await sb.from('blog_topics').delete().eq('id', Number(t.dataset.del)); return topics();
+    }
+    if (!(t = e.target.closest('[data-act]')) || !cur) return;
+    var d = cur, act = t.dataset.act;
+    if (act === 'copyTitle') { PS.toast(await copyText(pickedTitle(d)) ? '제목을 복사했어요' : '복사하지 못했어요'); return; }
+    if (act === 'copyTags') { PS.toast(await copyText((d.tags || []).join(',')) ? '태그를 복사했어요 (태그 칸에 붙여 넣기)' : '복사하지 못했어요'); return; }
+    if (act === 'copyBody') { PS.toast(await copyHtml(bodyHtml(d), bodyPlain(d), document.getElementById('preview')) ? '본문을 복사했어요. 네이버 글쓰기 본문에 붙여 넣으세요' : '복사하지 못했어요. 미리보기를 길게 눌러 복사해 주세요'); return; }
+    if (act === 'copyPlain') { PS.toast(await copyText(bodyPlain(d)) ? '글자만 복사했어요' : '복사하지 못했어요'); return; }
+    if (act === 'saveImgs') {
+      for (var i = 0; i < (d.images || []).length; i++) {
+        var im = d.images[i], name = 'pandasanda-blog-' + d.slot_date + '-' + (i + 1) + (/\.png(\?|$)/.test(im.url) ? '.png' : '.jpg');
+        try {
+          var blob = await (await fetch(im.url)).blob();
+          var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
+          setTimeout(function (u) { URL.revokeObjectURL(u); }.bind(null, a.href), 4000);
+        } catch (err) { window.open(im.url, '_blank'); }
+      }
+      return;
+    }
+    if (act === 'published') {
+      var url = document.getElementById('naverUrl').value.trim();
+      if (url && !/^https:\/\/(m\.)?blog\.naver\.com\//.test(url)) { PS.toast('네이버 블로그 주소(https://blog.naver.com/…)를 넣어 주세요'); return; }
+      var u = await sb.from('blog_drafts').update({ status: 'published', naver_url: url || null, published_at: new Date().toISOString() }).eq('id', d.id);
+      PS.toast(u.error ? '저장하지 못했어요' : '발행 완료로 표시했어요'); return detail(d.id);
+    }
+    if (act === 'skip') {
+      if (!confirm('이번 글을 건너뛸까요?')) return;
+      await sb.from('blog_drafts').update({ status: 'skipped' }).eq('id', d.id); return detail(d.id);
+    }
+    if (act === 'rewrite' || act === 'reimage') {
+      if (act === 'reimage' && !(d.image_prompts || []).length) { PS.toast('먼저 글을 써야 해요'); return; }
+      t.disabled = true;
+      await fn({ continue: d.id, step: act === 'rewrite' ? (d.pillar === 'safety' && !d.facts ? 'research' : 'write') : 'image' });
+      PS.toast('다시 만들기 시작했어요'); setTimeout(function () { detail(d.id); }, 1500); return;
+    }
+    if (act === 'newtopic') {
+      if (!confirm('다른 주제로 새로 만들까요? 지금 글은 지워져요.')) return;
+      t.disabled = true;
+      var n = await fn({ make: true, date: d.slot_date, pillar: d.pillar });
+      PS.toast(n.made && n.made.id ? '새 주제로 만들기 시작했어요' : '만들지 못했어요'); setTimeout(function () { detail(d.id); }, 1500); return;
+    }
+  });
+  document.addEventListener('change', async function (e) {
+    if (e.target.name !== 'tp' || !cur) return;
+    var i = Number(e.target.value);
+    var u = await sb.from('blog_drafts').update({ title_pick: i }).eq('id', cur.id);
+    if (u.error) { PS.toast('저장하지 못했어요'); return; }
+    cur.title_pick = i;
+    document.querySelectorAll('.titles label').forEach(function (l, j) { l.classList.toggle('on', j === i); });
+  });
+  document.addEventListener('submit', async function (e) {
+    if (e.target.id !== 'addTopic') return;
+    e.preventDefault();
+    var f = new FormData(e.target);
+    var r = await sb.from('blog_topics').insert({ pillar: f.get('pillar'), idea: String(f.get('idea')).trim(), angle: String(f.get('angle') || '').trim() || null, priority: 10, source: 'manual' });
+    PS.toast(r.error ? '넣지 못했어요' : '주제를 넣었어요'); if (!r.error) topics();
+  });
+})();
+</script>
+</body>
+</html>
